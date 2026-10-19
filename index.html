@@ -3,8 +3,8 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Cañerías - Calculadora de obra</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CAÑERÍAS - Calculadora de obra</title>
 <style>
 *{box-sizing:border-box}
 body{font-family:Arial,sans-serif;background:#eef3f6;color:#203348;margin:0}
@@ -16,7 +16,6 @@ h2{color:#087e6a;margin-top:0}
 label{display:block;font-weight:bold;margin:14px 0 7px}
 input,select{width:100%;padding:12px;font-size:16px;border:1px solid #b5c6d5;border-radius:8px}
 button{background:#087e6a;color:white;border:0;border-radius:8px;padding:12px;margin:5px 4px 5px 0;font-size:15px;cursor:pointer}
-button:disabled{background:#a4b4bb;cursor:default}
 button.activo{background:#164f91}
 button.secundario{background:#536579}
 .resultado{background:#e2f4ed;padding:15px;border-radius:8px;margin-top:15px;line-height:1.7}
@@ -24,7 +23,6 @@ button.secundario{background:#536579}
 .oculto{display:none}
 .menu{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
 .menu button{margin:0;min-height:60px}
-.fila{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 canvas{display:block;width:100%;height:350px;background:white;border:2px solid #a9bccb;border-radius:8px;touch-action:none}
 #vista{display:none;max-width:100%;max-height:450px;margin-top:15px;border-radius:8px}
 table{width:100%;border-collapse:collapse;margin-top:12px}
@@ -32,7 +30,7 @@ td,th{border:1px solid #ccd8e1;padding:9px;text-align:left;font-size:14px}
 th{background:#dceaf5}
 .tabla-scroll{overflow-x:auto}
 .aviso{background:#fff4dc;padding:12px;border-radius:8px;font-size:14px;line-height:1.5}
-@media(max-width:480px){.fila{grid-template-columns:1fr}.menu button{font-size:14px;padding:10px 4px}}
+@media(max-width:480px){.menu button{font-size:14px;padding:10px 4px}}
 </style>
 </head>
 <body>
@@ -68,7 +66,7 @@ th{background:#dceaf5}
 </select>
 
 <label>Consumo del artefacto (kcal/h)</label>
-<input id="potencia" type="number" min="0" placeholder="Ejemplo: 10000">
+<input id="potencia" type="number" min="0" placeholder="Ej: 15000">
 
 <label>Cantidad</label>
 <input id="cantidad" type="number" min="1" step="1" value="1">
@@ -77,17 +75,19 @@ th{background:#dceaf5}
 
 <div class="tabla-scroll">
 <table>
-<thead><tr><th>Artefacto</th><th>Cantidad</th><th>kcal/h</th><th></th></tr></thead>
+<thead>
+<tr><th>Artefacto</th><th>Cantidad</th><th>kcal/h</th><th></th></tr>
+</thead>
 <tbody id="listaArtefactos"></tbody>
 </table>
 </div>
 
 <label>Consumo total (kcal/h)</label>
-<input id="consumo" type="number" value="10000" min="0">
+<input id="consumo" type="number" value="0" min="0" placeholder="Ej: 15000">
 <p class="nota">Podés escribir el consumo total directamente o calcularlo sumando artefactos.</p>
 
 <label>Longitud de cañería (metros)</label>
-<input id="longitud" type="number" value="10" min="0" step="0.01">
+<input id="longitud" type="number" value="0" min="0" step="0.01" placeholder="Ej: 5">
 
 <label>Tipo de gas</label>
 <select id="gas">
@@ -138,66 +138,72 @@ El diámetro de cañería todavía no se calcula. Para dimensionar una instalaci
 <input type="file" accept="image/*" id="foto">
 <img id="vista" alt="Croquis cargado">
 <button onclick="quitarFoto()">Quitar foto</button>
-<p class="nota">La foto se muestra localmente en el dispositivo. Todavía no se interpreta automáticamente con inteligencia artificial ni se guarda en un servidor.</p>
+<p class="nota">La foto se muestra localmente. Todavía no se interpreta automáticamente ni se envía a un servidor.</p>
 </section>
 
 <section>
 <h2>✏️ Dibujar croquis</h2>
-<p>Dibujá con el dedo. Podés trazar líneas, escribir a mano y colocar medidas.</p>
+<p>Marcá las direcciones y longitudes de los caños. Las herramientas de accesorios permiten registrar elementos para un listado preliminar.</p>
+<div id="herramientas">
 <button id="btnLinea" onclick="elegirHerramienta('linea')">Línea</button>
 <button id="btnLapiz" onclick="elegirHerramienta('lapiz')">Lápiz</button>
 <button id="btnMedida" onclick="elegirHerramienta('medida')">Medida</button>
+<button id="btnTee" onclick="elegirHerramienta('tee')">Tee</button>
+<button id="btnCodo90" onclick="elegirHerramienta('codo90')">Codo 90°</button>
+<button id="btnCodo45" onclick="elegirHerramienta('codo45')">Codo 45°</button>
+<button id="btnLlave" onclick="elegirHerramienta('llave')">Llave X</button>
+<button id="btnReduccion" onclick="elegirHerramienta('reduccion')">Reducción</button>
+</div>
 <button class="secundario" onclick="deshacer()">Deshacer</button>
 <button class="secundario" onclick="borrar()">Borrar todo</button>
 
 <label>Longitud del tramo (metros)</label>
-<input id="metros" type="number" value="1" min="0.01" step="0.01">
+<input id="metros" type="number" value="0" min="0" step="0.01" placeholder="Ej: 5">
 
-<canvas id="plano"></canvas>
+<label>Largo comercial del caño (metros)</label>
+<input id="largoComercial" type="number" value="6" min="0.01" step="0.01">
+
+<canvas id="plano" aria-label="Área para dibujar el croquis"></canvas>
+
 <button onclick="guardar()">Guardar dibujo como imagen</button>
-<p class="nota">El croquis es orientativo y no está a escala. La herramienta Medida dibuja una línea y muestra el valor que ingresaste; no mide automáticamente distancias reales.</p>
+<button onclick="mostrarMateriales()">Ver materiales preliminares</button>
+<div id="materiales" class="resultado" aria-live="polite"></div>
+<p class="nota">El croquis no está a escala. Los accesorios se registran al colocarlos con sus botones; las líneas a mano no se interpretan automáticamente. Las cuplas se estiman por cada tramo medido según el largo comercial, sin considerar cortes ni sobrantes. Verificá conexiones, diámetros y materiales antes de utilizar el listado.</p>
 </section>
 
 </main>
-
 <script>
-const $=id=>document.getElementById(id);
-const artefactos=[];
+const $=id=>document.getElementById(id),artefactos=[];
 
-function abrirModulo(modulo){
- ['gas','agua','cloacas'].forEach(nombre=>{
-  $('modulo'+nombre.charAt(0).toUpperCase()+nombre.slice(1))
-   .classList.toggle('oculto',nombre!==modulo);
- });
+function abrirModulo(m){
+ ['gas','agua','cloacas'].forEach(n=>
+  $('modulo'+n[0].toUpperCase()+n.slice(1))
+  .classList.toggle('oculto',n!==m)
+ );
 }
-
 function numeroFormato(n){
  return n.toLocaleString('es-AR',{maximumFractionDigits:3});
 }
-
 function agregarArtefacto(){
  const nombre=$('artefacto').value;
  const potencia=Number($('potencia').value);
  const cantidad=Number($('cantidad').value);
- if(!$('potencia').value||!Number.isFinite(potencia)||potencia<=0||
- !Number.isSafeInteger(cantidad)||cantidad<=0){
+ if(!$('potencia').value||!Number.isFinite(potencia)||
+ potencia<=0||!Number.isSafeInteger(cantidad)||cantidad<=0){
   alert('Ingresá un consumo positivo y una cantidad entera válida.');
   return;
  }
  artefactos.push({nombre,potencia,cantidad});
  actualizarArtefactos();
 }
-
-function quitarArtefacto(indice){
- artefactos.splice(indice,1);
+function quitarArtefacto(i){
+ artefactos.splice(i,1);
  actualizarArtefactos();
 }
-
 function limpiarArtefactos(){
  artefactos.length=0;
  actualizarArtefactos();
 }
-
 function actualizarArtefactos(){
  const cuerpo=$('listaArtefactos');
  cuerpo.replaceChildren();
@@ -205,41 +211,41 @@ function actualizarArtefactos(){
  artefactos.forEach((a,i)=>{
   total+=a.potencia*a.cantidad;
   const fila=document.createElement('tr');
-  [a.nombre,String(a.cantidad),numeroFormato(a.potencia*a.cantidad)].forEach(valor=>{
-   const celda=document.createElement('td');
-   celda.textContent=valor;
-   fila.appendChild(celda);
-  });
-  const celda=document.createElement('td');
-  const boton=document.createElement('button');
-  boton.textContent='Quitar';
-  boton.onclick=()=>quitarArtefacto(i);
-  celda.appendChild(boton);
-  fila.appendChild(celda);
+  [a.nombre,String(a.cantidad),
+   numeroFormato(a.potencia*a.cantidad)].forEach(v=>{
+    const td=document.createElement('td');
+    td.textContent=v;
+    fila.appendChild(td);
+   });
+  const td=document.createElement('td');
+  const b=document.createElement('button');
+  b.textContent='Quitar';
+  b.onclick=()=>quitarArtefacto(i);
+  td.appendChild(b);
+  fila.appendChild(td);
   cuerpo.appendChild(fila);
  });
- $('consumo').value=total||'';
- if(total>0)calcular();
- else $('resultado').textContent='Ingresá el consumo total o agregá artefactos.';
+ $('consumo').value=total;
+ calcular();
 }
-
 function calcular(){
- const c=Number($('consumo').value);
- const l=Number($('longitud').value);
+ const c=Number($('consumo').value||0);
+ const l=Number($('longitud').value||0);
  const g=Number($('gas').value);
  const r=$('resultado');
- if(!$('consumo').value||!$('longitud').value||
- !Number.isFinite(c)||!Number.isFinite(l)||c<=0||l<0){
-  r.textContent='Ingresá valores válidos de consumo y longitud.';
+ if(!Number.isFinite(c)||!Number.isFinite(l)||c<0||l<0){
+  r.textContent='Ingresá valores no negativos de consumo y longitud.';
   return;
  }
  r.innerHTML='<b>Consumo total:</b> '+numeroFormato(c)+
  ' kcal/h<br><b>Caudal estimado:</b> '+
  numeroFormato(c/g)+' m³/h<br><b>Longitud:</b> '+
- numeroFormato(l)+' m<br><b>Diámetro:</b> Pendiente de dimensionamiento técnico.';
+ numeroFormato(l)+
+ ' m<br><b>Diámetro:</b> Pendiente de dimensionamiento técnico.';
 }
-$('consumo').addEventListener('input',calcular);
-$('longitud').addEventListener('input',calcular);
+['consumo','longitud'].forEach(id=>
+ $(id).addEventListener('input',calcular)
+);
 $('gas').addEventListener('change',calcular);
 calcular();
 
@@ -248,9 +254,12 @@ $('foto').addEventListener('change',function(){
  const archivo=this.files[0];
  if(fotoURL)URL.revokeObjectURL(fotoURL);
  fotoURL=null;
- if(!archivo)return;
+ if(!archivo){
+  $('vista').style.display='none';
+  return;
+ }
  if(!archivo.type.startsWith('image/')){
-  alert('Seleccioná un archivo de imagen.');
+  alert('Seleccioná una imagen válida.');
   this.value='';
   return;
  }
@@ -258,7 +267,6 @@ $('foto').addEventListener('change',function(){
  $('vista').src=fotoURL;
  $('vista').style.display='block';
 });
-
 function quitarFoto(){
  if(fotoURL)URL.revokeObjectURL(fotoURL);
  fotoURL=null;
@@ -273,207 +281,195 @@ let herramienta='linea';
 let dibujando=false;
 let inicio=null;
 let ultimo=null;
-let historial=[];
-let base=null;
+let trazoActual=null;
+const trazos=[],historial=[];
+const simbolos={
+ tee:'T',codo90:'90°',codo45:'45°',
+ llave:'X',reduccion:'R'
+};
 
+function tamano(){
+ return {w:canvas.clientWidth,h:350};
+}
 function prepararCanvas(){
- const ancho=canvas.clientWidth;
- const alto=350;
- const escala=window.devicePixelRatio||1;
- canvas.width=Math.round(ancho*escala);
- canvas.height=Math.round(alto*escala);
- ctx.setTransform(escala,0,0,escala,0,0);
- ctx.fillStyle='white';
- ctx.fillRect(0,0,ancho,alto);
+ const {w,h}=tamano();
+ const d=window.devicePixelRatio||1;
+ canvas.width=Math.round(w*d);
+ canvas.height=Math.round(h*d);
+ ctx.setTransform(d,0,0,d,0,0);
+ redibujar();
+}
+function linea(a,b){
+ ctx.beginPath();
+ ctx.moveTo(a.x,a.y);
+ ctx.lineTo(b.x,b.y);
+ ctx.stroke();
+}
+function pintar(t){
  ctx.strokeStyle='#203348';
  ctx.fillStyle='#203348';
  ctx.lineWidth=2.5;
  ctx.lineCap='round';
  ctx.lineJoin='round';
- ctx.font='16px Arial';
+ ctx.font='bold 16px Arial';
+ if(t.tipo in simbolos){
+  ctx.fillText(simbolos[t.tipo],t.x-8,t.y+6);
+  return;
+ }
+ if(t.tipo==='lapiz'){
+  for(let i=1;i<t.puntos.length;i++)
+   linea(t.puntos[i-1],t.puntos[i]);
+  return;
+ }
+ linea(t.a,t.b);
+ if(t.tipo==='medida'){
+  ctx.fillText(numeroFormato(t.metros)+' m',
+   (t.a.x+t.b.x)/2,(t.a.y+t.b.y)/2-10);
+ }
 }
-
-function guardarEstado(){
- historial.push(canvas.toDataURL('image/png'));
- if(historial.length>30)historial.shift();
+function elegirHerramienta(t){
+ herramienta=t;
+ Object.keys({
+  linea:1,lapiz:1,medida:1,...simbolos
+ }).forEach(n=>
+  $('btn'+n[0].toUpperCase()+n.slice(1))
+  .classList.toggle('activo',n===t)
+ );
 }
-
-function restaurarImagen(datos){
- const img=new Image();
- img.onload=()=>{
-  ctx.clearRect(0,0,canvas.clientWidth,350);
-  ctx.drawImage(img,0,0,canvas.clientWidth,350);
- };
- img.src=datos;
-}
-
-function elegirHerramienta(tipo){
- herramienta=tipo;
- ['linea','lapiz','medida'].forEach(t=>{
-  $('btn'+t.charAt(0).toUpperCase()+t.slice(1))
-  .classList.toggle('activo',t===tipo);
- });
-}
-
 function posicion(e){
- const rect=canvas.getBoundingClientRect();
- return {x:e.clientX-rect.left,y:e.clientY-rect.top};
+ const r=canvas.getBoundingClientRect();
+ return {
+  x:Math.max(0,Math.min(1,(e.clientX-r.left)/r.width)),
+  y:Math.max(0,Math.min(1,(e.clientY-r.top)/r.height))
+ };
 }
-
-function trazar(desde,hasta){
- ctx.beginPath();
- ctx.moveTo(desde.x,desde.y);
- ctx.lineTo(hasta.x,hasta.y);
- ctx.stroke();
+function aPix(p){
+ const {w,h}=tamano();
+ return {x:p.x*w,y:p.y*h};
 }
-
+function normalizarTrazo(t){
+ if(t.tipo in simbolos)
+  return {...t,x:t.x*tamano().w,y:t.y*350};
+ if(t.tipo==='lapiz')
+  return {...t,puntos:t.puntos.map(aPix)};
+ return {...t,a:aPix(t.a),b:aPix(t.b)};
+}
+function snapshot(){
+ historial.push(JSON.stringify(trazos));
+ if(historial.length>40)historial.shift();
+}
+function redibujar(){
+ const {w,h}=tamano();
+ ctx.fillStyle='white';
+ ctx.fillRect(0,0,w,h);
+ trazos.forEach(t=>pintar(normalizarTrazo(t)));
+ if(trazoActual)pintar(normalizarTrazo(trazoActual));
+}
 canvas.addEventListener('pointerdown',e=>{
- if(e.button!==0)return;
+ if(e.pointerType==='mouse'&&e.button!==0)return;
+ const p=posicion(e);
  if(herramienta==='medida'&&
- (!Number.isFinite(Number($('metros').value))||Number($('metros').value)<=0)){
-  alert('Ingresá una longitud válida.');
+ (!(Number($('metros').value)>0)||
+ !Number.isFinite(Number($('metros').value)))){
+  alert('Ingresá una longitud positiva para este tramo.');
+  return;
+ }
+ snapshot();
+ if(herramienta in simbolos){
+  trazos.push({tipo:herramienta,x:p.x,y:p.y});
+  redibujar();
+  mostrarMateriales();
   return;
  }
  dibujando=true;
  canvas.setPointerCapture(e.pointerId);
- guardarEstado();
- inicio=posicion(e);
- ultimo=inicio;
- base=canvas.toDataURL('image/png');
+ inicio=p;
+ ultimo=p;
+ trazoActual=herramienta==='lapiz'
+  ?{tipo:'lapiz',puntos:[p]}
+  :{tipo:herramienta,a:p,b:p,
+    metros:Number($('metros').value)};
+ redibujar();
 });
-
 canvas.addEventListener('pointermove',e=>{
  if(!dibujando)return;
- const actual=posicion(e);
- if(herramienta==='lapiz'){
-  trazar(ultimo,actual);
-  ultimo=actual;
- }else{
-  const img=new Image();
-  const fotoBase=base;
-  img.onload=()=>{
-   if(!dibujando||base!==fotoBase)return;
-   ctx.clearRect(0,0,canvas.clientWidth,350);
-   ctx.drawImage(img,0,0,canvas.clientWidth,350);
-   trazar(inicio,actual);
-  };
-  img.src=fotoBase;
- }
+ const p=posicion(e);
+ if(herramienta==='lapiz')
+  trazoActual.puntos.push(p);
+ else trazoActual.b=p;
+ ultimo=p;
+ redibujar();
 });
-
-canvas.addEventListener('pointerup',e=>{
+function finalizar(e,guardarTrazo){
  if(!dibujando)return;
- const final=posicion(e);
+ if(guardarTrazo){
+  const p=posicion(e);
+  if(herramienta==='lapiz')
+   trazoActual.puntos.push(p);
+  else trazoActual.b=p;
+  trazos.push(trazoActual);
+ }else historial.pop();
+ trazoActual=null;
  dibujando=false;
- if(herramienta!=='lapiz'){
-  const img=new Image();
-  img.onload=()=>{
-   ctx.clearRect(0,0,canvas.clientWidth,350);
-   ctx.drawImage(img,0,0,canvas.clientWidth,350);
-   trazar(inicio,final);
-   if(herramienta==='medida'){
-    const valor=numeroFormato(Number($('metros').value))+' m';
-    ctx.font='16px Arial';
-    ctx.fillStyle='#203348';
-    ctx.fillText(valor,(inicio.x+final.x)/2,(inicio.y+final.y)/2-10);
-   }
-  };
-  img.src=base;
- }
-});
-
-canvas.addEventListener('pointercancel',()=>{dibujando=false});
+ redibujar();
+ mostrarMateriales();
+}
+canvas.addEventListener('pointerup',e=>finalizar(e,true));
+canvas.addEventListener('pointercancel',e=>finalizar(e,false));
 
 function deshacer(){
  if(!historial.length)return;
- restaurarImagen(historial.pop());
+ trazos.splice(0,trazos.length,...JSON.parse(historial.pop()));
+ redibujar();
+ mostrarMateriales();
 }
-
 function borrar(){
- guardarEstado();
- ctx.fillStyle='white';
- ctx.fillRect(0,0,canvas.clientWidth,350);
- ctx.fillStyle='#203348';
+ snapshot();
+ trazos.length=0;
+ trazoActual=null;
+ redibujar();
+ mostrarMateriales();
 }
-
 function guardar(){
- const enlace=document.createElement('a');
- enlace.download='croquis-canierias.png';
- enlace.href=canvas.toDataURL('image/png');
- document.body.appendChild(enlace);
- enlace.click();
- enlace.remove();
+ const a=document.createElement('a');
+ a.download='croquis-canierias.png';
+ a.href=canvas.toDataURL('image/png');
+ document.body.appendChild(a);
+ a.click();
+ a.remove();
 }
-
+function mostrarMateriales(){
+ const c={tee:0,codo90:0,codo45:0,llave:0,reduccion:0};
+ let longitud=0,cuplas=0,tramos=0;
+ const comercial=Number($('largoComercial').value);
+ trazos.forEach(t=>{
+  if(t.tipo in c)c[t.tipo]++;
+  if(t.tipo==='medida'&&t.metros>0){
+   tramos++;
+   longitud+=t.metros;
+   if(Number.isFinite(comercial)&&comercial>0)
+    cuplas+=Math.max(0,Math.ceil(t.metros/comercial-1e-9)-1);
+  }
+ });
+ $('materiales').innerHTML=
+ '<b>Listado preliminar (elementos registrados):</b><br>'+
+ 'Tramos medidos: '+tramos+
+ '<br>Longitud total: '+numeroFormato(longitud)+' m'+
+ '<br>Tees: '+c.tee+
+ '<br>Codos 90°: '+c.codo90+
+ '<br>Codos 45°: '+c.codo45+
+ '<br>Llaves: '+c.llave+
+ '<br>Reducciones: '+c.reduccion+
+ '<br>Cuplas estimadas: '+
+ (Number.isFinite(comercial)&&comercial>0
+  ?cuplas:'Ingresá un largo comercial válido')+
+ '<br><small>No incluye accesorios deducidos automáticamente de las líneas, ni conexiones de artefactos.</small>';
+}
+$('largoComercial').addEventListener('input',mostrarMateriales);
 prepararCanvas();
 elegirHerramienta('linea');
-window.addEventListener('resize',()=>{
- const imagen=canvas.toDataURL('image/png');
- prepararCanvas();
- restaurarImagen(imagen);
-});
-</script>
- 
-<!-- MEJORA 1: CARGAR FOTO DEL CROQUIS -->
-<section id="foto-croquis" style="background:white;padding:18px;margin:18px auto;max-width:800px;border-radius:12px">
-  <h2>📷 Fotografía del croquis</h2>
-  <p>Elegí una foto de tu instalación para utilizarla como referencia al dibujar el plano.</p>
-
-  <input type="file" id="cargarFotoCroquis"
-         accept="image/*"
-         style="width:100%;margin-bottom:12px">
-
-  <img id="vistaFotoCroquis"
-       alt="Fotografía del croquis"
-       style="display:none;width:100%;max-height:450px;object-fit:contain;border:1px solid #ccc;border-radius:8px">
-
-  <button type="button" id="quitarFotoCroquis">
-    Quitar fotografía
-  </button>
-
-  <p id="estadoFotoCroquis" aria-live="polite"></p>
-</section>
-
-<script>
-(function(){
-  const entrada = document.getElementById("cargarFotoCroquis");
-  const imagen = document.getElementById("vistaFotoCroquis");
-  const estado = document.getElementById("estadoFotoCroquis");
-
-  let urlFoto = null;
-
-  function quitarFoto(){
-    if(urlFoto){
-      URL.revokeObjectURL(urlFoto);
-      urlFoto = null;
-    }
-    entrada.value = "";
-    imagen.removeAttribute("src");
-    imagen.style.display = "none";
-    estado.textContent = "";
-  }
-
-  entrada.addEventListener("change", function(){
-    const archivo = entrada.files[0];
-    if(!archivo) return;
-
-    if(!archivo.type.startsWith("image/")){
-      quitarFoto();
-      estado.textContent = "Seleccioná una imagen válida.";
-      return;
-    }
-
-    if(urlFoto) URL.revokeObjectURL(urlFoto);
-
-    urlFoto = URL.createObjectURL(archivo);
-    imagen.src = urlFoto;
-    imagen.style.display = "block";
-    estado.textContent = "Fotografía cargada correctamente.";
-  });
-
-  document.getElementById("quitarFotoCroquis")
-    .addEventListener("click", quitarFoto);
-})();
+mostrarMateriales();
+window.addEventListener('resize',prepararCanvas);
 </script>
 </body>
 </html>
