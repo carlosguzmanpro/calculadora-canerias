@@ -1,74 +1,113 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Cañerías</title>
+<title>Cañerías - Calculadora de obra</title>
 <style>
+*{box-sizing:border-box}
 body{font-family:Arial,sans-serif;background:#eef3f6;color:#203348;margin:0}
 header{background:#087e6a;color:white;padding:20px;text-align:center}
-main{max-width:800px;margin:auto;padding:15px}
-section{background:white;padding:18px;margin-bottom:18px;border-radius:12px}
+header h1{margin:0 0 8px}
+main{max-width:850px;margin:auto;padding:15px}
+section{background:white;padding:18px;margin-bottom:18px;border-radius:12px;box-shadow:0 2px 6px #0000000a}
+h2{color:#087e6a;margin-top:0}
 label{display:block;font-weight:bold;margin:14px 0 7px}
-input,select{box-sizing:border-box;width:100%;padding:13px;font-size:17px;border:1px solid #b5c6d5;border-radius:8px}
-button{background:#087e6a;color:white;border:0;border-radius:8px;padding:13px;margin:7px 4px 7px 0;font-size:16px}
-.resultado{background:#e2f4ed;padding:15px;border-radius:8px;margin-top:15px}
+input,select{width:100%;padding:12px;font-size:16px;border:1px solid #b5c6d5;border-radius:8px}
+button{background:#087e6a;color:white;border:0;border-radius:8px;padding:12px;margin:5px 4px 5px 0;font-size:15px;cursor:pointer}
+button:disabled{background:#a4b4bb;cursor:default}
+button.activo{background:#164f91}
+button.secundario{background:#536579}
+.resultado{background:#e2f4ed;padding:15px;border-radius:8px;margin-top:15px;line-height:1.7}
 .nota{color:#536579;font-size:14px;line-height:1.5}
-canvas{width:100%;height:350px;background:white;border:2px solid #a9bccb;box-sizing:border-box;touch-action:none}
-#vista{display:none;max-width:100%;margin-top:15px}
-table{width:100%;border-collapse:collapse}
-td,th{border:1px solid #ccd8e1;padding:10px;text-align:left}
+.oculto{display:none}
+.menu{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.menu button{margin:0;min-height:60px}
+.fila{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+canvas{display:block;width:100%;height:350px;background:white;border:2px solid #a9bccb;border-radius:8px;touch-action:none}
+#vista{display:none;max-width:100%;max-height:450px;margin-top:15px;border-radius:8px}
+table{width:100%;border-collapse:collapse;margin-top:12px}
+td,th{border:1px solid #ccd8e1;padding:9px;text-align:left;font-size:14px}
 th{background:#dceaf5}
+.tabla-scroll{overflow-x:auto}
+.aviso{background:#fff4dc;padding:12px;border-radius:8px;font-size:14px;line-height:1.5}
+@media(max-width:480px){.fila{grid-template-columns:1fr}.menu button{font-size:14px;padding:10px 4px}}
 </style>
 </head>
 <body>
 <header>
 <h1>CAÑERÍAS</h1>
-<p>Gas · Croquis · Cálculos de obra</p>
+<p>Calculadora y croquis de instalaciones</p>
 </header>
 <main>
+
 <section>
-<h2>Calculadora de gas</h2>
+<h2>Especialidades</h2>
+<div class="menu">
+<button onclick="abrirModulo('gas')">🔥 GAS</button>
+<button onclick="abrirModulo('agua')">💧 AGUA</button>
+<button onclick="abrirModulo('cloacas')">🚽 CLOACAS</button>
+</div>
+</section>
+
+<div id="moduloGas">
+<section>
+<h2>🔥 Calculadora de GAS</h2>
+<p class="nota">Sumá los consumos de los artefactos y calculá el caudal estimado.</p>
+
+<label>Artefacto</label>
+<select id="artefacto">
+<option>Cocina</option>
+<option>Horno</option>
+<option>Calefón</option>
+<option>Termotanque</option>
+<option>Calefactor</option>
+<option>Caldera</option>
+<option>Otro artefacto</option>
+</select>
+
+<label>Consumo del artefacto (kcal/h)</label>
+<input id="potencia" type="number" min="0" placeholder="Ejemplo: 10000">
+
+<label>Cantidad</label>
+<input id="cantidad" type="number" min="1" step="1" value="1">
+<button onclick="agregarArtefacto()">Agregar artefacto</button>
+<button class="secundario" onclick="limpiarArtefactos()">Vaciar lista</button>
+
+<div class="tabla-scroll">
+<table>
+<thead><tr><th>Artefacto</th><th>Cantidad</th><th>kcal/h</th><th></th></tr></thead>
+<tbody id="listaArtefactos"></tbody>
+</table>
+</div>
+
 <label>Consumo total (kcal/h)</label>
 <input id="consumo" type="number" value="10000" min="0">
+<p class="nota">Podés escribir el consumo total directamente o calcularlo sumando artefactos.</p>
+
 <label>Longitud de cañería (metros)</label>
-<input id="longitud" type="number" value="10" min="0">
+<input id="longitud" type="number" value="10" min="0" step="0.01">
+
 <label>Tipo de gas</label>
 <select id="gas">
 <option value="9300">Gas natural (9300 kcal/m³)</option>
 <option value="22300">Gas envasado (22300 kcal/m³)</option>
 </select>
+
 <button onclick="calcular()">Calcular consumo</button>
-<div id="resultado" class="resultado"></div>
-<p class="nota">El diámetro todavía no se calcula. Para dimensionar según NAG-200 se necesitan tablas verificadas, caudal por tramo, material, longitud equivalente y condiciones de presión. Requiere validación de un gasista matriculado.</p>
+<div id="resultado" class="resultado" aria-live="polite"></div>
 </section>
 
 <section>
-<h2>📷 Foto del croquis</h2>
-<p>Podés sacar una foto o elegir una imagen de tu celular.</p>
-<input type="file" accept="image/*" id="foto">
-<img id="vista" alt="Croquis cargado">
-<p class="nota">La foto se muestra en pantalla. La interpretación automática con IA se agregará más adelante.</p>
-</section>
-
-<section>
-<h2>✏️ Dibujar croquis</h2>
-<p>Dibujá los tramos con el dedo.</p>
-<button onclick="herramienta='linea'">Línea</button>
-<button onclick="herramienta='lapiz'">Lápiz</button>
-<button onclick="herramienta='medida'">Medida</button>
-<button onclick="borrar()">Borrar</button>
-<label>Longitud del tramo (metros)</label>
-<input id="metros" type="number" value="1" min="0.01" step="0.01">
-<canvas id="plano"></canvas>
-<button onclick="guardar()">Guardar dibujo</button>
-<p class="nota">El croquis no está a escala. Guardalo antes de salir de la página.</p>
-</section>
-
-<section>
-<h2>Tabla de diámetros nominales</h2>
+<h2>Dimensionamiento NAG-200</h2>
+<div class="aviso">
+El diámetro de cañería todavía no se calcula. Para dimensionar una instalación se necesitan tablas oficiales verificadas, caudal por tramo, material, longitudes equivalentes, pérdidas de carga y condiciones de presión. El resultado debe ser verificado por un gasista matriculado.
+</div>
+<h3>Equivalencias nominales</h3>
+<div class="tabla-scroll">
 <table>
-<tr><th>Pulgadas</th><th>Equivalencia</th></tr>
+<tr><th>Pulgadas</th><th>Designación nominal</th></tr>
 <tr><td>1/2"</td><td>DN 15</td></tr>
 <tr><td>3/4"</td><td>DN 20</td></tr>
 <tr><td>1"</td><td>DN 25</td></tr>
@@ -76,29 +115,303 @@ th{background:#dceaf5}
 <tr><td>1 1/2"</td><td>DN 40</td></tr>
 <tr><td>2"</td><td>DN 50</td></tr>
 </table>
-<p class="nota">Son equivalencias nominales, no diámetros recomendados para una instalación.</p>
+</div>
+<p class="nota">Estas equivalencias no son recomendaciones de diámetro ni reemplazan las tablas de dimensionamiento.</p>
 </section>
+</div>
+
+<section id="moduloAgua" class="oculto">
+<h2>💧 AGUA</h2>
+<p>Este módulo se desarrollará después de terminar GAS.</p>
+<p class="nota">Se organizará en agua fría, agua caliente, cálculo de materiales y croquis.</p>
+</section>
+
+<section id="moduloCloacas" class="oculto">
+<h2>🚽 CLOACAS Y DESAGÜES</h2>
+<p>Este módulo se desarrollará después de AGUA.</p>
+<p class="nota">Incluirá tramos, pendientes, materiales y croquis de desagües.</p>
+</section>
+
+<section>
+<h2>📷 Foto del croquis</h2>
+<p>Podés sacar una foto o elegir una imagen del celular.</p>
+<input type="file" accept="image/*" id="foto">
+<img id="vista" alt="Croquis cargado">
+<button onclick="quitarFoto()">Quitar foto</button>
+<p class="nota">La foto se muestra localmente en el dispositivo. Todavía no se interpreta automáticamente con inteligencia artificial ni se guarda en un servidor.</p>
+</section>
+
+<section>
+<h2>✏️ Dibujar croquis</h2>
+<p>Dibujá con el dedo. Podés trazar líneas, escribir a mano y colocar medidas.</p>
+<button id="btnLinea" onclick="elegirHerramienta('linea')">Línea</button>
+<button id="btnLapiz" onclick="elegirHerramienta('lapiz')">Lápiz</button>
+<button id="btnMedida" onclick="elegirHerramienta('medida')">Medida</button>
+<button class="secundario" onclick="deshacer()">Deshacer</button>
+<button class="secundario" onclick="borrar()">Borrar todo</button>
+
+<label>Longitud del tramo (metros)</label>
+<input id="metros" type="number" value="1" min="0.01" step="0.01">
+
+<canvas id="plano"></canvas>
+<button onclick="guardar()">Guardar dibujo como imagen</button>
+<p class="nota">El croquis es orientativo y no está a escala. La herramienta Medida dibuja una línea y muestra el valor que ingresaste; no mide automáticamente distancias reales.</p>
+</section>
+
 </main>
 
 <script>
-function calcular(){
- const c=Number(document.getElementById('consumo').value);
- const l=Number(document.getElementById('longitud').value);
- const g=Number(document.getElementById('gas').value);
- const r=document.getElementById('resultado');
- if(c<=0||l<0||!Number.isFinite(c)||!Number.isFinite(l)){
-  r.textContent='Ingresá valores válidos.';
+const $=id=>document.getElementById(id);
+const artefactos=[];
+
+function abrirModulo(modulo){
+ ['gas','agua','cloacas'].forEach(nombre=>{
+  $('modulo'+nombre.charAt(0).toUpperCase()+nombre.slice(1))
+   .classList.toggle('oculto',nombre!==modulo);
+ });
+}
+
+function numeroFormato(n){
+ return n.toLocaleString('es-AR',{maximumFractionDigits:3});
+}
+
+function agregarArtefacto(){
+ const nombre=$('artefacto').value;
+ const potencia=Number($('potencia').value);
+ const cantidad=Number($('cantidad').value);
+ if(!$('potencia').value||!Number.isFinite(potencia)||potencia<=0||
+ !Number.isSafeInteger(cantidad)||cantidad<=0){
+  alert('Ingresá un consumo positivo y una cantidad entera válida.');
   return;
  }
- r.innerHTML='<b>Consumo estimado:</b> '+
- (c/g).toLocaleString('es-AR',{maximumFractionDigits:3})+
- ' m³/h<br><br><b>Longitud:</b> '+l+' m';
+ artefactos.push({nombre,potencia,cantidad});
+ actualizarArtefactos();
 }
+
+function quitarArtefacto(indice){
+ artefactos.splice(indice,1);
+ actualizarArtefactos();
+}
+
+function limpiarArtefactos(){
+ artefactos.length=0;
+ actualizarArtefactos();
+}
+
+function actualizarArtefactos(){
+ const cuerpo=$('listaArtefactos');
+ cuerpo.replaceChildren();
+ let total=0;
+ artefactos.forEach((a,i)=>{
+  total+=a.potencia*a.cantidad;
+  const fila=document.createElement('tr');
+  [a.nombre,String(a.cantidad),numeroFormato(a.potencia*a.cantidad)].forEach(valor=>{
+   const celda=document.createElement('td');
+   celda.textContent=valor;
+   fila.appendChild(celda);
+  });
+  const celda=document.createElement('td');
+  const boton=document.createElement('button');
+  boton.textContent='Quitar';
+  boton.onclick=()=>quitarArtefacto(i);
+  celda.appendChild(boton);
+  fila.appendChild(celda);
+  cuerpo.appendChild(fila);
+ });
+ $('consumo').value=total||'';
+ if(total>0)calcular();
+ else $('resultado').textContent='Ingresá el consumo total o agregá artefactos.';
+}
+
+function calcular(){
+ const c=Number($('consumo').value);
+ const l=Number($('longitud').value);
+ const g=Number($('gas').value);
+ const r=$('resultado');
+ if(!$('consumo').value||!$('longitud').value||
+ !Number.isFinite(c)||!Number.isFinite(l)||c<=0||l<0){
+  r.textContent='Ingresá valores válidos de consumo y longitud.';
+  return;
+ }
+ r.innerHTML='<b>Consumo total:</b> '+numeroFormato(c)+
+ ' kcal/h<br><b>Caudal estimado:</b> '+
+ numeroFormato(c/g)+' m³/h<br><b>Longitud:</b> '+
+ numeroFormato(l)+' m<br><b>Diámetro:</b> Pendiente de dimensionamiento técnico.';
+}
+$('consumo').addEventListener('input',calcular);
+$('longitud').addEventListener('input',calcular);
+$('gas').addEventListener('change',calcular);
 calcular();
 
-let fotoURL;
-document.getElementById('foto').addEventListener('change',function(){
+let fotoURL=null;
+$('foto').addEventListener('change',function(){
  const archivo=this.files[0];
  if(fotoURL)URL.revokeObjectURL(fotoURL);
+ fotoURL=null;
  if(!archivo)return;
- fotoURL=U
+ if(!archivo.type.startsWith('image/')){
+  alert('Seleccioná un archivo de imagen.');
+  this.value='';
+  return;
+ }
+ fotoURL=URL.createObjectURL(archivo);
+ $('vista').src=fotoURL;
+ $('vista').style.display='block';
+});
+
+function quitarFoto(){
+ if(fotoURL)URL.revokeObjectURL(fotoURL);
+ fotoURL=null;
+ $('foto').value='';
+ $('vista').removeAttribute('src');
+ $('vista').style.display='none';
+}
+
+const canvas=$('plano');
+const ctx=canvas.getContext('2d');
+let herramienta='linea';
+let dibujando=false;
+let inicio=null;
+let ultimo=null;
+let historial=[];
+let base=null;
+
+function prepararCanvas(){
+ const ancho=canvas.clientWidth;
+ const alto=350;
+ const escala=window.devicePixelRatio||1;
+ canvas.width=Math.round(ancho*escala);
+ canvas.height=Math.round(alto*escala);
+ ctx.setTransform(escala,0,0,escala,0,0);
+ ctx.fillStyle='white';
+ ctx.fillRect(0,0,ancho,alto);
+ ctx.strokeStyle='#203348';
+ ctx.fillStyle='#203348';
+ ctx.lineWidth=2.5;
+ ctx.lineCap='round';
+ ctx.lineJoin='round';
+ ctx.font='16px Arial';
+}
+
+function guardarEstado(){
+ historial.push(canvas.toDataURL('image/png'));
+ if(historial.length>30)historial.shift();
+}
+
+function restaurarImagen(datos){
+ const img=new Image();
+ img.onload=()=>{
+  ctx.clearRect(0,0,canvas.clientWidth,350);
+  ctx.drawImage(img,0,0,canvas.clientWidth,350);
+ };
+ img.src=datos;
+}
+
+function elegirHerramienta(tipo){
+ herramienta=tipo;
+ ['linea','lapiz','medida'].forEach(t=>{
+  $('btn'+t.charAt(0).toUpperCase()+t.slice(1))
+  .classList.toggle('activo',t===tipo);
+ });
+}
+
+function posicion(e){
+ const rect=canvas.getBoundingClientRect();
+ return {x:e.clientX-rect.left,y:e.clientY-rect.top};
+}
+
+function trazar(desde,hasta){
+ ctx.beginPath();
+ ctx.moveTo(desde.x,desde.y);
+ ctx.lineTo(hasta.x,hasta.y);
+ ctx.stroke();
+}
+
+canvas.addEventListener('pointerdown',e=>{
+ if(e.button!==0)return;
+ if(herramienta==='medida'&&
+ (!Number.isFinite(Number($('metros').value))||Number($('metros').value)<=0)){
+  alert('Ingresá una longitud válida.');
+  return;
+ }
+ dibujando=true;
+ canvas.setPointerCapture(e.pointerId);
+ guardarEstado();
+ inicio=posicion(e);
+ ultimo=inicio;
+ base=canvas.toDataURL('image/png');
+});
+
+canvas.addEventListener('pointermove',e=>{
+ if(!dibujando)return;
+ const actual=posicion(e);
+ if(herramienta==='lapiz'){
+  trazar(ultimo,actual);
+  ultimo=actual;
+ }else{
+  const img=new Image();
+  const fotoBase=base;
+  img.onload=()=>{
+   if(!dibujando||base!==fotoBase)return;
+   ctx.clearRect(0,0,canvas.clientWidth,350);
+   ctx.drawImage(img,0,0,canvas.clientWidth,350);
+   trazar(inicio,actual);
+  };
+  img.src=fotoBase;
+ }
+});
+
+canvas.addEventListener('pointerup',e=>{
+ if(!dibujando)return;
+ const final=posicion(e);
+ dibujando=false;
+ if(herramienta!=='lapiz'){
+  const img=new Image();
+  img.onload=()=>{
+   ctx.clearRect(0,0,canvas.clientWidth,350);
+   ctx.drawImage(img,0,0,canvas.clientWidth,350);
+   trazar(inicio,final);
+   if(herramienta==='medida'){
+    const valor=numeroFormato(Number($('metros').value))+' m';
+    ctx.font='16px Arial';
+    ctx.fillStyle='#203348';
+    ctx.fillText(valor,(inicio.x+final.x)/2,(inicio.y+final.y)/2-10);
+   }
+  };
+  img.src=base;
+ }
+});
+
+canvas.addEventListener('pointercancel',()=>{dibujando=false});
+
+function deshacer(){
+ if(!historial.length)return;
+ restaurarImagen(historial.pop());
+}
+
+function borrar(){
+ guardarEstado();
+ ctx.fillStyle='white';
+ ctx.fillRect(0,0,canvas.clientWidth,350);
+ ctx.fillStyle='#203348';
+}
+
+function guardar(){
+ const enlace=document.createElement('a');
+ enlace.download='croquis-canierias.png';
+ enlace.href=canvas.toDataURL('image/png');
+ document.body.appendChild(enlace);
+ enlace.click();
+ enlace.remove();
+}
+
+prepararCanvas();
+elegirHerramienta('linea');
+window.addEventListener('resize',()=>{
+ const imagen=canvas.toDataURL('image/png');
+ prepararCanvas();
+ restaurarImagen(imagen);
+});
+</script>
+</body>
+</html>
