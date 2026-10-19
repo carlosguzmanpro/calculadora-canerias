@@ -471,5 +471,185 @@ elegirHerramienta('linea');
 mostrarMateriales();
 window.addEventListener('resize',prepararCanvas);
 </script>
+ 
+<!-- MEJORA: CÁLCULO AUTOMÁTICO DEL CROQUIS -->
+<section id="calculoAutomatico" style="background:white;padding:18px;margin:18px auto;max-width:850px;border-radius:12px">
+<h2 style="color:#087e6a">🔧 Cálculo automático de materiales</h2>
+
+<p>Analizá las conexiones de los tramos dibujados y obtené un listado estimado de materiales.</p>
+
+<button type="button" onclick="calcularAutomatico()" style="width:100%;background:#087e6a;font-size:18px">
+CALCULAR MATERIALES
+</button>
+
+<div id="resultadoAutomatico" class="resultado" aria-live="polite">
+Dibujá los tramos y presioná CALCULAR MATERIALES.
+</div>
+
+<p class="nota">
+Los tramos deben unirse por sus extremos. Las líneas sin medidas no aportan metros al cálculo. Los accesorios se estiman geométricamente y deben verificarse antes de preparar la instalación.
+</p>
+</section>
+
+<script>
+function calcularAutomatico(){
+ const salida=document.getElementById('resultadoAutomatico');
+ const segmentos=trazos.filter(t=>
+  t.tipo==='linea'||t.tipo==='medida'
+ );
+
+ if(!segmentos.length){
+  salida.textContent='Primero dibujá los tramos de cañería.';
+  return;
+ }
+
+ const ancho=canvas.clientWidth;
+ const alto=350;
+ const tolerancia=12;
+ const nodos=[];
+
+ function distancia(a,b){
+  return Math.hypot(a.x-b.x,a.y-b.y);
+ }
+
+ function punto(p){
+  return {x:p.x*ancho,y:p.y*alto};
+ }
+
+ function nodo(p){
+  let encontrado=nodos.find(n=>
+   distancia(n.p,p)<=tolerancia
+  );
+  if(!encontrado){
+   encontrado={p,conexiones:[]};
+   nodos.push(encontrado);
+  }
+  return encontrado;
+ }
+
+ const conexiones=[];
+
+ segmentos.forEach((s,i)=>{
+  const a=nodo(punto(s.a));
+  const b=nodo(punto(s.b));
+
+  if(a===b)return;
+
+  const conexion={a,b,id:i};
+  a.conexiones.push(conexion);
+  b.conexiones.push(conexion);
+  conexiones.push(conexion);
+ });
+
+ let codos90=0;
+ let codos45=0;
+ let tees=0;
+ let cruces=0;
+ let unionesRectas=0;
+ let sinClasificar=0;
+
+ function vector(n,c){
+  const otro=c.a===n?c.b:c.a;
+  return {
+   x:otro.p.x-n.p.x,
+   y:otro.p.y-n.p.y
+  };
+ }
+
+ function angulo(v1,v2){
+  const producto=v1.x*v2.x+v1.y*v2.y;
+  const m1=Math.hypot(v1.x,v1.y);
+  const m2=Math.hypot(v2.x,v2.y);
+
+  if(!m1||!m2)return null;
+
+  const cos=Math.max(-1,Math.min(1,producto/(m1*m2)));
+  return Math.acos(cos)*180/Math.PI;
+ }
+
+ nodos.forEach(n=>{
+  const cantidad=n.conexiones.length;
+
+  if(cantidad===3){
+   tees++;
+  }else if(cantidad===4){
+   cruces++;
+  }else if(cantidad>4){
+   sinClasificar++;
+  }else if(cantidad===2){
+   const v1=vector(n,n.conexiones[0]);
+   const v2=vector(n,n.conexiones[1]);
+   const a=angulo(v1,v2);
+
+   if(a===null)return;
+
+   const giro=180-a;
+
+   if(giro<=12){
+    unionesRectas++;
+   }else if(Math.abs(giro-90)<=12){
+    codos90++;
+   }else if(Math.abs(giro-45)<=12){
+    codos45++;
+   }else{
+    sinClasificar++;
+   }
+  }
+ });
+
+ let metros=0;
+ let tramosMedidos=0;
+ let cuplas=0;
+ const largo=Number(document.getElementById('largoComercial').value);
+
+ segmentos.forEach(s=>{
+  if(s.tipo!=='medida')return;
+  const m=Number(s.metros);
+  if(!Number.isFinite(m)||m<=0)return;
+
+  metros+=m;
+  tramosMedidos++;
+
+  if(Number.isFinite(largo)&&largo>0){
+   cuplas+=Math.max(0,Math.ceil(m/largo-1e-9)-1);
+  }
+ });
+
+ const manuales={
+  tee:0,codo90:0,codo45:0,llave:0,reduccion:0
+ };
+
+ trazos.forEach(t=>{
+  if(Object.prototype.hasOwnProperty.call(manuales,t.tipo)){
+   manuales[t.tipo]++;
+  }
+ });
+
+ salida.innerHTML=
+ '<h3>Resultado del croquis</h3>'+
+ '<b>Tramos dibujados:</b> '+segmentos.length+'<br>'+
+ '<b>Tramos con medida:</b> '+tramosMedidos+'<br>'+
+ '<b>Metros registrados:</b> '+numeroFormato(metros)+' m<br>'+
+ '<hr>'+
+ '<b>Accesorios detectados por geometría</b><br>'+
+ 'Codos 90°: '+codos90+'<br>'+
+ 'Codos 45°: '+codos45+'<br>'+
+ 'Tees: '+tees+'<br>'+
+ 'Cruces de cuatro ramales: '+cruces+'<br>'+
+ 'Uniones rectas: '+unionesRectas+'<br>'+
+ 'Uniones sin clasificar: '+sinClasificar+'<br>'+
+ '<hr>'+
+ '<b>Accesorios marcados manualmente</b><br>'+
+ 'Codos 90°: '+manuales.codo90+'<br>'+
+ 'Codos 45°: '+manuales.codo45+'<br>'+
+ 'Tees: '+manuales.tee+'<br>'+
+ 'Llaves X: '+manuales.llave+'<br>'+
+ 'Reducciones: '+manuales.reduccion+'<br>'+
+ '<hr>'+
+ '<b>Cuplas estimadas:</b> '+
+ (Number.isFinite(largo)&&largo>0?cuplas:'Revisar largo comercial')+
+ '<br><br><small>Los accesorios detectados y los marcados se muestran separados para evitar contarlos dos veces. Las uniones rectas no equivalen necesariamente a cuplas. No se calculan reducciones automáticas sin diámetros ni llaves por artefacto sin conexiones identificadas. Revisar cada resultado antes de utilizarlo.</small>';
+}
+</script>
 </body>
 </html>
