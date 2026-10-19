@@ -7,11 +7,11 @@
 <title>CAÑERÍAS | Croquis de obra</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;background:#eef3f5;color:#193449;font:16px Arial,sans-serif}
+body{margin:0;background:#edf3f5;color:#193449;font:16px Arial,sans-serif}
 header{background:#087e6a;color:white;text-align:center;padding:22px 12px}
 h1{margin:0}
 header p{margin:7px 0 0}
-main{max-width:680px;margin:auto;padding:14px}
+main{max-width:720px;margin:auto;padding:14px}
 section{background:white;padding:18px;border-radius:14px;margin-bottom:14px;box-shadow:0 2px 8px #0001}
 h2{margin:0 0 12px;color:#087e6a;font-size:21px}
 h3{margin:16px 0 8px}
@@ -19,24 +19,26 @@ p{line-height:1.5}
 button{display:block;width:100%;background:#087e6a;color:white;border:0;border-radius:10px;padding:14px;margin:8px 0;font-size:16px;cursor:pointer}
 button.alt{background:#e8f1f0;color:#126458}
 button.peq{width:auto;display:inline-block;padding:8px 12px;font-size:14px}
-input,select{width:100%;padding:12px;border:1px solid #bdccd4;border-radius:8px;font-size:16px;background:white}
+input,select,textarea{width:100%;padding:12px;border:1px solid #bdccd4;border-radius:8px;font-size:16px;background:white}
 label{display:block;font-weight:bold;margin:12px 0 5px}
 .oculto{display:none!important}
 .nota{color:#526675;font-size:14px}
 .resultado{background:#e9f6f0;padding:13px;border-radius:10px;line-height:1.65;margin-top:12px}
 .aviso{background:#fff4dd;padding:12px;border-radius:9px;font-size:14px;line-height:1.5}
-img{display:block;width:100%;max-height:420px;object-fit:contain;border-radius:10px;background:#f3f6f7;margin:10px 0}
-table{width:100%;border-collapse:collapse;font-size:14px}
-th,td{padding:8px;border-bottom:1px solid #d7e0e5;text-align:left}
-th{background:#eef4f5}
-.scroll{overflow:auto}
-.fila{display:flex;gap:8px;align-items:center;justify-content:space-between}
+img{display:block;width:100%;max-height:70vh;object-fit:contain;border-radius:10px;background:#f3f6f7;margin:10px 0}
+.fila{display:flex;gap:8px;align-items:center;justify-content:space-between;border-bottom:1px solid #e1e8ec}
 .fila button{width:auto;flex-shrink:0}
 small{color:#526675}
-input[type=file]{padding:10px}
 .marca{font-size:12px;color:#526675;text-align:center}
+.opciones{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.opciones button{margin:0}
+.detalle{border:1px solid #dce7e9;border-radius:10px;padding:12px;margin-top:12px}
+#imagen{cursor:zoom-in}
+dialog{border:0;border-radius:12px;max-width:95vw;max-height:95vh;padding:12px}
+dialog img{max-height:78vh;max-width:90vw}
+dialog button{margin-bottom:0}
 @media print{
-button,input,select,.aviso,#inicio{display:none!important}
+button,input,select,textarea,.aviso,#inicio,.nota{display:none!important}
 body{background:white}
 section{box-shadow:none}
 }
@@ -49,26 +51,56 @@ section{box-shadow:none}
 </header>
 <main>
 <section id="inicio">
-<h2>¿Qué instalación querés calcular?</h2>
+<h2>¿Qué instalación querés trabajar?</h2>
 <button onclick="abrir('gas')">🔥 Gas</button>
 <button onclick="abrir('agua')">💧 Agua</button>
 <button onclick="abrir('cloacas')">🚽 Cloacas</button>
-<p class="nota">Elegí una especialidad para empezar. Cada una tiene sus propias reglas.</p>
+<p class="nota">Cada especialidad tiene sus propias reglas. Empezamos mejorando GAS.</p>
 </section>
 
 <section id="trabajo" class="oculto">
 <button class="alt" onclick="volver()">← Cambiar especialidad</button>
 <h2 id="titulo"></h2>
-<h3>1. Foto del croquis</h3>
-<p class="nota">Sacá una foto o elegí una del teléfono.</p>
-<input id="foto" type="file" accept="image/*" capture="environment">
-<img id="imagen" class="oculto" alt="Croquis cargado">
-<button class="alt" onclick="quitarFoto()">Quitar foto</button>
-<div class="aviso">La fotografía todavía no se interpreta automáticamente. Esta versión permite registrar los datos sin dibujar con el dedo.</div>
 
-<div id="gas" class="oculto">
-<h3>2. Artefactos y consumos</h3>
-<label>Artefacto</label>
+<div id="menuGas" class="oculto">
+<button onclick="mostrarVista('croquis')">📷 Trabajar con croquis</button>
+<button class="alt" onclick="mostrarVista('consumos')">🧮 Consulta de consumos de gas</button>
+</div>
+
+<div id="croquis" class="oculto">
+<h3>1. Cargar croquis</h3>
+<p class="nota">Sacá una foto o elegí una imagen guardada en tu teléfono.</p>
+<div class="opciones">
+<button onclick="document.getElementById('camara').click()">📷 Sacar foto</button>
+<button class="alt" onclick="document.getElementById('galeria').click()">🖼️ Galería</button>
+</div>
+<input class="oculto" id="camara" type="file" accept="image/*" capture="environment">
+<input class="oculto" id="galeria" type="file" accept="image/*">
+<img id="imagen" class="oculto" alt="Croquis cargado" onclick="ampliar()">
+<div id="accionesFoto" class="oculto">
+<button class="alt" onclick="ampliar()">🔎 Ampliar croquis</button>
+<button class="alt" onclick="quitarFoto()">Quitar foto</button>
+</div>
+<div class="aviso">
+<b>Estado actual:</b> la foto se puede cargar y revisar, pero todavía no se interpreta automáticamente. No se calculan caños, codos ni tees a partir de la imagen. Nunca se inventan resultados.
+</div>
+
+<h3>2. Revisar croquis</h3>
+<p class="nota">La futura lectura automática marcará aquí los números o símbolos que no pueda reconocer. Mientras tanto, podés registrar una aclaración sin volver a dibujar todo.</p>
+<label for="duda">Dato dudoso o aclaración (opcional)</label>
+<textarea id="duda" rows="3" placeholder="Ej.: En el tramo A-B dice 15 m; el calefactor consume 2.000 kcal/h"></textarea>
+<button class="alt" onclick="guardarRevision()">Guardar aclaración</button>
+<div id="revision" class="resultado" aria-live="polite">Todavía no hay una revisión registrada.</div>
+
+<h3>3. Plano y materiales</h3>
+<div class="aviso">Pendiente: reconocimiento real del croquis, cálculo de materiales y generación del plano. No se muestra un resultado técnico sin datos verificados.</div>
+<button class="alt" onclick="window.print()">Imprimir o guardar esta revisión</button>
+</div>
+
+<div id="consumos" class="oculto">
+<h3>Consulta de consumos de gas</h3>
+<p class="nota">Podés sumar los consumos indicados en las placas de los artefactos. No reemplaza la verificación del dimensionamiento de una instalación.</p>
+<label for="ga">Artefacto</label>
 <select id="ga">
 <option>Cocina</option>
 <option>Horno</option>
@@ -78,137 +110,129 @@ section{box-shadow:none}
 <option>Caldera</option>
 <option>Otro</option>
 </select>
-<label>Consumo (kcal/h)</label>
-<input id="gp" type="number" min="0" step="any" placeholder="Ej: 15000">
-<label>Ubicación en croquis</label>
-<input id="gu" placeholder="Ej: B">
+<label for="gp">Consumo de placa (kcal/h)</label>
+<input id="gp" type="number" min="0" step="any" placeholder="Ej: 16000">
 <button onclick="agregarArtefacto()">Agregar artefacto</button>
 <div id="listaGas"></div>
-<label>Tipo de gas</label>
+<label for="gt">Tipo de gas (referencia orientativa)</label>
 <select id="gt">
-<option value="9300">Gas natural (9300 kcal/m³, referencia)</option>
-<option value="22300">Gas envasado (22300 kcal/m³, referencia)</option>
+<option value="9300">Gas natural: 9.300 kcal/m³ (valor de referencia)</option>
+<option value="22300">Gas envasado: 22.300 kcal/m³ (valor de referencia)</option>
 </select>
-<h3>3. Tramos del croquis</h3>
-<p class="nota">Por ahora ingresá los tramos M-A, A-B, etc. y sus longitudes.</p>
-<div id="tramosGas"></div>
-<button class="alt" onclick="agregarTramo('gas')">+ Agregar tramo</button>
+<button onclick="calcularConsumos()">CALCULAR CONSUMO TOTAL</button>
+<div id="resultadoGas" class="resultado" aria-live="polite">Agregá los artefactos para calcular.</div>
 </div>
 
-<div id="agua" class="oculto">
-<h3>2. Alimentación de agua</h3>
-<label>¿Cómo se alimenta?</label>
-<select id="alimentacion">
-<option value="">Elegí una opción</option>
-<option value="gravedad">Tanque por gravedad</option>
-<option value="bomba">Con presurizadora</option>
-<option value="red">Red directa</option>
-<option value="indefinido">A definir</option>
-</select>
-<label>Altura entre nivel de agua y punto de consumo (m, opcional)</label>
-<input id="altura" type="number" min="0" step="any" placeholder="Ej: 3">
-<label>Puntos de consumo</label>
-<input id="puntos" type="number" min="0" step="1" placeholder="Ej: 3">
-<h3>3. Tramos del croquis</h3>
-<div id="tramosAgua"></div>
-<button class="alt" onclick="agregarTramo('agua')">+ Agregar tramo</button>
-<p class="nota">La bajada se dimensiona según caudal, presión disponible, pérdidas y material.</p>
+<div id="pendiente" class="oculto">
+<div class="aviso">Este módulo se conserva para la siguiente etapa. Todavía no ofrece cálculos técnicos ni materiales definitivos. Primero completaremos y probaremos GAS.</div>
+<button onclick="mostrarVista('croquis')">Cargar croquis de referencia</button>
 </div>
-
-<div id="cloacas" class="oculto">
-<h3>2. Artefactos de desagüe</h3>
-<label>Artefacto</label>
-<select id="ca">
-<option>Inodoro</option>
-<option>Lavamanos</option>
-<option>Pileta de cocina</option>
-<option>Lavarropas</option>
-<option>Ducha</option>
-<option>Rejilla</option>
-<option>Otro</option>
-</select>
-<label>Destino en el croquis</label>
-<input id="cd" placeholder="Ej: Cámara C1">
-<button onclick="agregarDesague()">Agregar artefacto</button>
-<div id="listaCloacas"></div>
-<h3>3. Tramos del croquis</h3>
-<div id="tramosCloacas"></div>
-<button class="alt" onclick="agregarTramo('cloacas')">+ Agregar tramo</button>
-<p class="nota">Las pendientes y diámetros definitivos requieren verificación. No se proponen sobrepasos en desagües por gravedad.</p>
-</div>
-
-<button onclick="calcular()">CALCULAR RESUMEN</button>
-<div id="resultado" class="resultado" aria-live="polite">Cargá los datos y tocá Calcular resumen.</div>
-<button class="alt" onclick="window.print()">Guardar resultado / imprimir</button>
 </section>
-<p class="marca">Versión de prueba. Los cálculos técnicos pendientes se indican expresamente.</p>
+<p class="marca">Versión de prueba: no certifica instalaciones ni reemplaza la revisión profesional y normativa.</p>
 </main>
+
+<dialog id="visor">
+<img id="imagenGrande" alt="Croquis ampliado">
+<button onclick="document.getElementById('visor').close()">Cerrar imagen</button>
+</dialog>
+
 <script>
 'use strict';
 const $=id=>document.getElementById(id);
-let modulo='',fotoURL=null;
-let artefactos=[],desagues=[];
-let tramos={gas:[],agua:[],cloacas:[]};
+let modulo='',fotoURL=null,artefactos=[];
 const fmt=n=>Number(n).toLocaleString('es-AR',{maximumFractionDigits:2});
-const positivo=v=>v!==''&&Number.isFinite(Number(v))&&Number(v)>0;
 
 function abrir(m){
  modulo=m;
  $('inicio').classList.add('oculto');
  $('trabajo').classList.remove('oculto');
- ['gas','agua','cloacas'].forEach(x=>$(x).classList.toggle('oculto',x!==m));
  $('titulo').textContent={gas:'🔥 GAS',agua:'💧 AGUA',cloacas:'🚽 CLOACAS'}[m];
- $('resultado').textContent='Cargá los datos del croquis y tocá Calcular resumen.';
+ $('menuGas').classList.toggle('oculto',m!=='gas');
+ $('pendiente').classList.toggle('oculto',m==='gas');
+ mostrarVista(m==='gas'?'croquis':'pendiente');
  window.scrollTo(0,0);
 }
+
 function volver(){
  $('trabajo').classList.add('oculto');
  $('inicio').classList.remove('oculto');
  window.scrollTo(0,0);
 }
-$('foto').addEventListener('change',e=>{
- const f=e.target.files[0];
- if(fotoURL)URL.revokeObjectURL(fotoURL);
- fotoURL=null;
+
+function mostrarVista(v){
+ $('croquis').classList.toggle('oculto',v!=='croquis');
+ $('consumos').classList.toggle('oculto',v!=='consumos');
+ if(v==='pendiente'){
+  $('croquis').classList.add('oculto');
+  $('consumos').classList.add('oculto');
+ }
+ if(v!=='pendiente'&&modulo!=='gas')
+  $('pendiente').classList.add('oculto');
+ window.scrollTo(0,0);
+}
+
+function cargarFoto(e){
+ const f=e.target.files&&e.target.files[0];
  if(!f)return;
  if(!f.type.startsWith('image/')){
-  alert('Elegí una imagen.');
-  e.target.value='';
+  alert('Elegí una imagen válida.');
   return;
  }
+ if(fotoURL)URL.revokeObjectURL(fotoURL);
  fotoURL=URL.createObjectURL(f);
  $('imagen').src=fotoURL;
  $('imagen').classList.remove('oculto');
-});
+ $('accionesFoto').classList.remove('oculto');
+ $('camara').value='';
+ $('galeria').value='';
+}
+
+$('camara').addEventListener('change',cargarFoto);
+$('galeria').addEventListener('change',cargarFoto);
+
 function quitarFoto(){
  if(fotoURL)URL.revokeObjectURL(fotoURL);
  fotoURL=null;
- $('foto').value='';
  $('imagen').removeAttribute('src');
  $('imagen').classList.add('oculto');
+ $('accionesFoto').classList.add('oculto');
 }
+
+function ampliar(){
+ if(!fotoURL)return;
+ $('imagenGrande').src=fotoURL;
+ $('visor').showModal();
+}
+
+function guardarRevision(){
+ const t=$('duda').value.trim();
+ $('revision').textContent=t?
+  'Aclaración registrada (sin análisis automático): '+t:
+  'No ingresaste ninguna aclaración.';
+}
+
 function agregarArtefacto(){
- let v=$('gp').value;
- if(!positivo(v)){
+ const v=$('gp').value;
+ if(v===''||!Number.isFinite(Number(v))||Number(v)<=0){
   alert('Ingresá un consumo mayor a cero.');
   return;
  }
  artefactos.push({
   nombre:$('ga').value,
-  consumo:Number(v),
-  ubicacion:$('gu').value.trim()
+  consumo:Number(v)
  });
  $('gp').value='';
- $('gu').value='';
  renderGas();
 }
+
 function renderGas(){
- $('listaGas').replaceChildren();
+ const cont=$('listaGas');
+ cont.replaceChildren();
  artefactos.forEach((a,i)=>{
   const d=document.createElement('div');
   d.className='fila';
   const s=document.createElement('span');
-  s.textContent=`${a.nombre} ${a.ubicacion?'('+a.ubicacion+')':''}: ${fmt(a.consumo)} kcal/h`;
+  s.textContent=a.nombre+': '+fmt(a.consumo)+' kcal/h';
   const b=document.createElement('button');
   b.className='peq alt';
   b.textContent='Quitar';
@@ -217,135 +241,25 @@ function renderGas(){
    renderGas();
   };
   d.append(s,b);
-  $('listaGas').append(d);
- });
-}
-function agregarDesague(){
- desagues.push({
-  nombre:$('ca').value,
-  destino:$('cd').value.trim()
- });
- $('cd').value='';
- renderCloacas();
-}
-function renderCloacas(){
- $('listaCloacas').replaceChildren();
- desagues.forEach((a,i)=>{
-  const d=document.createElement('div');
-  d.className='fila';
-  const s=document.createElement('span');
-  s.textContent=a.nombre+(a.destino?' → '+a.destino:'');
-  const b=document.createElement('button');
-  b.className='peq alt';
-  b.textContent='Quitar';
-  b.onclick=()=>{
-   desagues.splice(i,1);
-   renderCloacas();
-  };
-  d.append(s,b);
-  $('listaCloacas').append(d);
- });
-}
-function agregarTramo(m){
- tramos[m].push({desde:'',hasta:'',metros:''});
- renderTramos(m);
-}
-function renderTramos(m){
- const cont=$('tramos'+m[0].toUpperCase()+m.slice(1));
- cont.replaceChildren();
- tramos[m].forEach((t,i)=>{
-  const d=document.createElement('div');
-  d.style.cssText='border:1px solid #d7e0e5;border-radius:9px;padding:10px;margin:8px 0';
-  const titulo=document.createElement('strong');
-  titulo.textContent='Tramo '+(i+1);
-  d.append(titulo);
-  [
-   ['Desde','desde','Ej: M'],
-   ['Hasta','hasta','Ej: A'],
-   ['Metros','metros','Ej: 5']
-  ].forEach(([label,key,placeholder])=>{
-   const l=document.createElement('label');
-   l.textContent=label;
-   const inp=document.createElement('input');
-   inp.placeholder=placeholder;
-   inp.value=t[key];
-   if(key==='metros'){
-    inp.type='number';
-    inp.min='0';
-    inp.step='any';
-   }
-   inp.addEventListener('input',()=>{t[key]=inp.value});
-   d.append(l,inp);
-  });
-  const b=document.createElement('button');
-  b.className='peq alt';
-  b.textContent='Quitar tramo';
-  b.onclick=()=>{
-   tramos[m].splice(i,1);
-   renderTramos(m);
-  };
-  d.append(b);
   cont.append(d);
  });
 }
-function calcular(){
- let total=0,invalidos=0;
- const filas=tramos[modulo];
- filas.forEach(t=>{
-  if(positivo(t.metros))total+=Number(t.metros);
-  else invalidos++;
- });
- let html='<b>Resumen preliminar</b><br>Tramos registrados: '+filas.length+
- '<br>Longitud con medida: '+fmt(total)+' m';
- if(invalidos)html+='<br>Tramos sin longitud válida: '+invalidos;
 
- if(modulo==='gas'){
-  const consumo=artefactos.reduce((s,a)=>s+a.consumo,0);
-  html+='<br>Artefactos: '+artefactos.length+
-  '<br>Consumo total: '+fmt(consumo)+' kcal/h'+
-  '<br>Caudal total estimado: '+fmt(consumo/Number($('gt').value))+' m³/h'+
-  '<br><b>Diámetros y accesorios:</b> pendientes de dimensionamiento por recorrido y NAG-200.';
+function calcularConsumos(){
+ if(!artefactos.length){
+  $('resultadoGas').textContent='Agregá al menos un artefacto.';
+  return;
  }
- if(modulo==='agua'){
-  const a=$('alimentacion').value;
-  const h=$('altura').value;
-  const p=$('puntos').value;
-  const nombres={gravedad:'Tanque por gravedad',bomba:'Con presurizadora',red:'Red directa',indefinido:'A definir'};
-  html+='<br>Alimentación: '+(nombres[a]||'Sin definir');
-  if(positivo(h)){
-   html+='<br>Desnivel declarado: '+fmt(Number(h))+
-   ' m (presión estática ideal aproximada '+fmt(Number(h)*0.0981)+' bar, antes de pérdidas)';
-  }
-  if(p!==''&&Number.isSafeInteger(Number(p))&&Number(p)>=0)
-   html+='<br>Puntos declarados: '+p;
-  html+='<br><b>Diámetros, caudal y ruptor de vacío:</b> requieren verificación.';
- }
- if(modulo==='cloacas'){
-  html+='<br>Artefactos registrados: '+desagues.length;
-  const referencias={
-   'Inodoro':'habitualmente DN 100/110',
-   'Lavamanos':'orientativo 40–50 mm',
-   'Pileta de cocina':'orientativo 50–63 mm',
-   'Lavarropas':'orientativo 40 mm',
-   'Ducha':'a verificar',
-   'Rejilla':'a verificar',
-   'Otro':'a verificar'
-  };
-  desagues.forEach(a=>{
-   html+='<br>'+esc(a.nombre)+(a.destino?' → '+esc(a.destino):'')+
-   ': '+referencias[a.nombre];
-  });
-  html+='<br><b>Pendientes y diámetros definitivos:</b> pendientes de revisión técnica.';
- }
- html+='<br><small>Este resumen no interpreta automáticamente la fotografía ni calcula codos, tees, reducciones o caños por diámetro. No es un listado de compra definitivo.</small>';
- $('resultado').innerHTML=html;
+ const total=artefactos.reduce((s,a)=>s+a.consumo,0);
+ const poder=Number($('gt').value);
+ $('resultadoGas').textContent=
+  'Artefactos: '+artefactos.length+
+  ' | Consumo total: '+fmt(total)+' kcal/h'+
+  ' | Caudal orientativo: '+fmt(total/poder)+' m³/h.'+
+  ' Valor estimado con poder calorífico de referencia.'+
+  ' No determina si una cañería existente es suficiente:'+
+  ' faltan longitud, material, presión, simultaneidad y otras verificaciones.';
 }
-function esc(s){
- return String(s).replace(/[&<>"']/g,c=>({
-  '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
- }[c]));
-}
-['gas','agua','cloacas'].forEach(agregarTramo);
 </script>
 </body>
 </html>
