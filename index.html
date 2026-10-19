@@ -413,5 +413,67 @@ window.addEventListener('resize',()=>{
  restaurarImagen(imagen);
 });
 </script>
+ 
+<!-- MEJORA 1: CARGAR FOTO DEL CROQUIS -->
+<section id="foto-croquis" style="background:white;padding:18px;margin:18px auto;max-width:800px;border-radius:12px">
+  <h2>📷 Fotografía del croquis</h2>
+  <p>Elegí una foto de tu instalación para utilizarla como referencia al dibujar el plano.</p>
+
+  <input type="file" id="cargarFotoCroquis"
+         accept="image/*"
+         style="width:100%;margin-bottom:12px">
+
+  <img id="vistaFotoCroquis"
+       alt="Fotografía del croquis"
+       style="display:none;width:100%;max-height:450px;object-fit:contain;border:1px solid #ccc;border-radius:8px">
+
+  <button type="button" id="quitarFotoCroquis">
+    Quitar fotografía
+  </button>
+
+  <p id="estadoFotoCroquis" aria-live="polite"></p>
+</section>
+
+<script>
+(function(){
+  const entrada = document.getElementById("cargarFotoCroquis");
+  const imagen = document.getElementById("vistaFotoCroquis");
+  const estado = document.getElementById("estadoFotoCroquis");
+
+  let urlFoto = null;
+
+  function quitarFoto(){
+    if(urlFoto){
+      URL.revokeObjectURL(urlFoto);
+      urlFoto = null;
+    }
+    entrada.value = "";
+    imagen.removeAttribute("src");
+    imagen.style.display = "none";
+    estado.textContent = "";
+  }
+
+  entrada.addEventListener("change", function(){
+    const archivo = entrada.files[0];
+    if(!archivo) return;
+
+    if(!archivo.type.startsWith("image/")){
+      quitarFoto();
+      estado.textContent = "Seleccioná una imagen válida.";
+      return;
+    }
+
+    if(urlFoto) URL.revokeObjectURL(urlFoto);
+
+    urlFoto = URL.createObjectURL(archivo);
+    imagen.src = urlFoto;
+    imagen.style.display = "block";
+    estado.textContent = "Fotografía cargada correctamente.";
+  });
+
+  document.getElementById("quitarFotoCroquis")
+    .addEventListener("click", quitarFoto);
+})();
+</script>
 </body>
 </html>
