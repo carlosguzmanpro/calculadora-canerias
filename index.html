@@ -36,7 +36,10 @@ small{color:#526675}
 #imagen{cursor:zoom-in}
 dialog{border:0;border-radius:12px;max-width:95vw;max-height:95vh;padding:12px}
 dialog img{max-height:78vh;max-width:90vw}
-dialog button{margin-bottom:0}
+.tabla{width:100%;border-collapse:collapse;font-size:14px}
+.tabla th,.tabla td{border-bottom:1px solid #dce7e9;padding:8px 5px;text-align:left}
+.tabla-wrap{overflow-x:auto}
+.resumen{font-weight:bold;margin-top:10px}
 @media print{
 button,input,select,textarea,.aviso,#inicio,.nota{display:none!important}
 body{background:white}
@@ -63,7 +66,7 @@ section{box-shadow:none}
 <h2 id="titulo"></h2>
 
 <div id="menuGas" class="oculto">
-<button onclick="mostrarVista('croquis')">📷 Trabajar con croquis</button>
+<button onclick="mostrarVista('croquis')">📷 Trabajar con croquis y tramos</button>
 <button class="alt" onclick="mostrarVista('consumos')">🧮 Consulta de consumos de gas</button>
 </div>
 
@@ -82,18 +85,59 @@ section{box-shadow:none}
 <button class="alt" onclick="quitarFoto()">Quitar foto</button>
 </div>
 <div class="aviso">
-<b>Estado actual:</b> la foto se puede cargar y revisar, pero todavía no se interpreta automáticamente. No se calculan caños, codos ni tees a partir de la imagen. Nunca se inventan resultados.
+<b>Foto de referencia:</b> podés verla y ampliarla. Los tramos se ingresan manualmente; la app no interpreta la imagen ni inventa longitudes.
 </div>
 
 <h3>2. Revisar croquis</h3>
-<p class="nota">La futura lectura automática marcará aquí los números o símbolos que no pueda reconocer. Mientras tanto, podés registrar una aclaración sin volver a dibujar todo.</p>
+<p class="nota">Anotá cualquier aclaración sobre las medidas o los símbolos.</p>
 <label for="duda">Dato dudoso o aclaración (opcional)</label>
-<textarea id="duda" rows="3" placeholder="Ej.: En el tramo A-B dice 15 m; el calefactor consume 2.000 kcal/h"></textarea>
+<textarea id="duda" rows="3" placeholder="Ej.: En el tramo A-B dice 15 m"></textarea>
 <button class="alt" onclick="guardarRevision()">Guardar aclaración</button>
 <div id="revision" class="resultado" aria-live="polite">Todavía no hay una revisión registrada.</div>
 
-<h3>3. Plano y materiales</h3>
-<div class="aviso">Pendiente: reconocimiento real del croquis, cálculo de materiales y generación del plano. No se muestra un resultado técnico sin datos verificados.</div>
+<h3>3. Registrar tramos de GAS</h3>
+<p class="nota">Copiá cada tramo del croquis. El diámetro se ingresa como dato del proyecto, no se determina automáticamente.</p>
+<label for="desde">Desde</label>
+<input id="desde" placeholder="Ej.: M" maxlength="35">
+<label for="hasta">Hasta</label>
+<input id="hasta" placeholder="Ej.: A o TERMO" maxlength="35">
+<label for="metros">Metros del tramo</label>
+<input id="metros" type="number" min="0" step="any" placeholder="Ej.: 15">
+<label for="consumoTramo">Consumo que transporta (kcal/h)</label>
+<input id="consumoTramo" type="number" min="0" step="any" placeholder="Ej.: 29200">
+<label for="diametro">Diámetro indicado en el proyecto</label>
+<select id="diametro">
+<option value="">Elegí diámetro</option>
+<option>1/2"</option>
+<option>3/4"</option>
+<option>1"</option>
+<option>1 1/4"</option>
+<option>1 1/2"</option>
+<option>2"</option>
+<option>Otro (especificar)</option>
+</select>
+<input id="otroDiametro" class="oculto" placeholder="Diámetro indicado" maxlength="25">
+<label for="destinoArtefacto">Artefacto de destino (opcional)</label>
+<select id="destinoArtefacto">
+<option value="">No corresponde / tramo principal</option>
+<option>Termotanque</option>
+<option>Calefactor</option>
+<option>Cocina</option>
+<option>Calefón</option>
+<option>Horno</option>
+<option>Caldera</option>
+<option>Otro artefacto</option>
+</select>
+<label><input id="llave" type="checkbox" style="width:auto"> Contar una llave de paso en este tramo</label>
+<button onclick="agregarTramo()">+ AGREGAR TRAMO</button>
+<div id="listaTramos"></div>
+<button onclick="calcularMateriales()">🧮 CALCULAR MATERIALES</button>
+<div id="resultadoMateriales" class="resultado" aria-live="polite">Agregá tramos y tocá CALCULAR MATERIALES.</div>
+<div class="aviso">
+Estimación de compra: se cuentan tiras completas de 6 m por tramo, sin reutilizar sobrantes. Las cuplas se estiman para unir esas tiras dentro de cada tramo. No incluye codos, tees, reducciones ni verificación de diámetros. Antes de construir, un profesional habilitado debe comprobar el diseño y la normativa de gas.
+</div>
+<h3>4. Plano</h3>
+<div class="aviso">Pendiente: generación del plano y reconocimiento automático del croquis. Los cálculos actuales utilizan únicamente los datos ingresados.</div>
 <button class="alt" onclick="window.print()">Imprimir o guardar esta revisión</button>
 </div>
 
@@ -139,7 +183,7 @@ section{box-shadow:none}
 <script>
 'use strict';
 const $=id=>document.getElementById(id);
-let modulo='',fotoURL=null,artefactos=[];
+let modulo='',fotoURL=null,artefactos=[],tramos=[];
 const fmt=n=>Number(n).toLocaleString('es-AR',{maximumFractionDigits:2});
 
 function abrir(m){
@@ -186,7 +230,6 @@ function cargarFoto(e){
  $('camara').value='';
  $('galeria').value='';
 }
-
 $('camara').addEventListener('change',cargarFoto);
 $('galeria').addEventListener('change',cargarFoto);
 
@@ -259,6 +302,135 @@ function calcularConsumos(){
   ' Valor estimado con poder calorífico de referencia.'+
   ' No determina si una cañería existente es suficiente:'+
   ' faltan longitud, material, presión, simultaneidad y otras verificaciones.';
+}
+
+$('diametro').addEventListener('change',()=>{
+ $('otroDiametro').classList.toggle('oculto',
+ $('diametro').value!=='Otro (especificar)');
+});
+
+function agregarTramo(){
+ const desde=$('desde').value.trim();
+ const hasta=$('hasta').value.trim();
+ const m=$('metros').value;
+ const c=$('consumoTramo').value;
+ const di=$('diametro').value==='Otro (especificar)'?
+  $('otroDiametro').value.trim():$('diametro').value;
+
+ if(!desde||!hasta||m===''||!Number.isFinite(Number(m))||
+ Number(m)<=0||c===''||!Number.isFinite(Number(c))||
+ Number(c)<0||!di){
+  alert('Completá Desde, Hasta, metros mayores a cero, consumo y diámetro.');
+  return;
+ }
+ tramos.push({
+  desde,hasta,metros:Number(m),consumo:Number(c),
+  diametro:di,artefacto:$('destinoArtefacto').value,
+  llave:$('llave').checked
+ });
+ $('desde').value='';
+ $('hasta').value='';
+ $('metros').value='';
+ $('consumoTramo').value='';
+ $('llave').checked=false;
+ renderTramos();
+ $('resultadoMateriales').textContent=
+  'Tramos actualizados. Tocá CALCULAR MATERIALES.';
+}
+
+function renderTramos(){
+ const cont=$('listaTramos');
+ cont.replaceChildren();
+ tramos.forEach((t,i)=>{
+  const d=document.createElement('div');
+  d.className='detalle';
+  const s=document.createElement('div');
+  s.textContent=t.desde+'–'+t.hasta+' | '+
+   fmt(t.metros)+' m | '+fmt(t.consumo)+' kcal/h | '+
+   t.diametro+(t.artefacto?' | '+t.artefacto:'')+
+   (t.llave?' | 1 llave':'');
+  const b=document.createElement('button');
+  b.className='peq alt';
+  b.textContent='Quitar tramo';
+  b.onclick=()=>{
+   tramos.splice(i,1);
+   renderTramos();
+   $('resultadoMateriales').textContent=
+    'Tramos actualizados. Tocá CALCULAR MATERIALES.';
+  };
+  d.append(s,b);
+  cont.append(d);
+ });
+}
+
+function calcularMateriales(){
+ const out=$('resultadoMateriales');
+ out.replaceChildren();
+ if(!tramos.length){
+  out.textContent='Agregá al menos un tramo.';
+  return;
+ }
+ const tabla=document.createElement('table');
+ tabla.className='tabla';
+ const head=document.createElement('thead');
+ const hr=document.createElement('tr');
+ ['Tramo','Metros','Caño','Tiras','Compra','Cuplas','Llaves'].forEach(x=>{
+  const th=document.createElement('th');
+  th.textContent=x;
+  hr.append(th);
+ });
+ head.append(hr);
+ tabla.append(head);
+ const body=document.createElement('tbody');
+ let metros=0,tiras=0,cuplas=0,llaves=0;
+ const grupos={};
+ tramos.forEach(t=>{
+  const n=Math.ceil(t.metros/6-1e-10);
+  const uniones=Math.max(0,n-1);
+  const compra=n*6;
+  metros+=t.metros;
+  tiras+=n;
+  cuplas+=uniones;
+  llaves+=t.llave?1:0;
+  if(!grupos[t.diametro])
+   grupos[t.diametro]={metros:0,tiras:0};
+  grupos[t.diametro].metros+=t.metros;
+  grupos[t.diametro].tiras+=n;
+  const r=document.createElement('tr');
+  [t.desde+'–'+t.hasta,fmt(t.metros),t.diametro,
+   String(n),fmt(compra)+' m',String(uniones),
+   t.llave?'1':'0'].forEach(x=>{
+   const td=document.createElement('td');
+   td.textContent=x;
+   r.append(td);
+  });
+  body.append(r);
+ });
+ tabla.append(body);
+ const wrap=document.createElement('div');
+ wrap.className='tabla-wrap';
+ wrap.append(tabla);
+ out.append(wrap);
+ const p=document.createElement('p');
+ p.className='resumen';
+ p.textContent='Total: '+fmt(metros)+' m | '+
+  tiras+' tiras | '+fmt(tiras*6)+' m a comprar | '+
+  cuplas+' cuplas estimadas | '+llaves+' llaves indicadas.';
+ out.append(p);
+ const extra=document.createElement('p');
+ extra.textContent='Referencia +10% sobre longitud: '+
+  fmt(metros*1.1)+' m. No equivale automáticamente a la cantidad de tiras a comprar.';
+ out.append(extra);
+ const titulo=document.createElement('h3');
+ titulo.textContent='Resumen por diámetro';
+ out.append(titulo);
+ Object.entries(grupos).forEach(([d,g])=>{
+  const x=document.createElement('p');
+  x.textContent=d+': '+fmt(g.metros)+
+   ' m de recorrido, '+g.tiras+' tiras ('+
+   fmt(g.tiras*6)+' m)';
+  out.append(x);
+ });
 }
 </script>
 </body>
