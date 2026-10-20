@@ -341,7 +341,7 @@ test('editar un tramo conserva su asociación de red y su identificador',()=>{
 test('crear, editar y quitar puntos conserva los tramos y detecta referencias pendientes',()=>{
  const a=app();a.run("abrir('gas')");a.elements.get('redNombreNodo').value='M';a.elements.get('redTipoNodo').value='medidor';a.run('guardarNodoGas()');assert.equal(a.run('instalacionGas.nodos.length'),1);
  a.elements.get('redNombreNodo').value='Otro medidor';a.run('guardarNodoGas()');assert.equal(a.run('instalacionGas.nodos.length'),1);assert.match(a.text('redMensaje'),/Ya existe/);
- redEjemplo(a);a.run('renderRedGas()');a.elements.get('redNodos').children[1].children[2].onclick();assert.equal(a.run('tramos.length'),3);assert.equal(a.run('analizarRedGas().total'),null);
+ redEjemplo(a);a.run('renderRedGas()');a.elements.get('redNodos').children[1].children.find(n=>n.textContent==='Quitar punto').onclick();assert.equal(a.run('tramos.length'),3);assert.equal(a.run('analizarRedGas().total'),null);
 });
 test('la vista de red está separada de agua y cloacas y produce resumen imprimible',()=>{
  const a=app();redEjemplo(a);a.run("mostrarVista('redGas');renderRedGas()");assert.equal(a.elements.get('redGas').classList.hidden,false);
@@ -365,4 +365,91 @@ test('el perfil incompleto no se rellena con presiones o normas supuestas',()=>{
 });
 test('red corrupta guardada avisa y conserva tramos y artefactos',()=>{
  const a=app();redEjemplo(a);a.run('guardarDatos()');const datos=JSON.parse(a.saved());datos.gas.instalacion.nodos=[null];const b=app(JSON.stringify(datos));assert.equal(b.run('tramos.length'),3);assert.equal(b.run('artefactos.length'),2);assert.match(b.run('avisoRestauracionRedGas'),/No se pudo recuperar/);
+});
+
+function fixtureMotor(a){
+ redEjemplo(a);
+ a.run("instalacionGas.perfil.poderCalorifico='1000';instalacionGas.perfil.densidadRelativa='1';instalacionGas.perfil.fuenteGas='FICTICIO SOLO TEST';instalacionGas.nodos[1].unionDimensionamiento='tee';tramos[1].red.via='principal';tramos[2].red.via='ramal';tramos.forEach(t=>t.diametro=null)");
+ const candidatos=[{id:'D-test-pequeno',interiorMm:1,filas:[{caudal:10,perdidaPaM:1},{caudal:20,perdidaPaM:3}]},
+  {id:'D-test-grande',interiorMm:2,filas:[{caudal:10,perdidaPaM:0.1},{caudal:20,perdidaPaM:0.3}]}];
+ const piezas={};const ids=candidatos.map(c=>c.id);
+ for(const x of ids)for(const y of ids){for(const tipo of ['codo45','codo90','llave','cupla','reduccion'])piezas[[tipo,x,y].join('|')]={equivalentes:{principal:0.5}};
+  for(const z of ids)piezas[['tee',x,y,z].join('|')]={equivalentes:{principal:1,ramal:2}};
+ }
+ a.ctx.packMotor={soloPruebas:true,verificado:true,fuente:'DATOS FICTICIOS DEL ALGORITMO, NO USAR EN GAS',edicion:'test',material:'Material declarado',sistema:'Sistema declarado',gas:'GN',metodo:'perdida-lineal-tabular',redondeoSuperiorVerificado:true,
+  condiciones:{presionMinPa:1,presionMaxPa:200,densidadRelativa:1},candidatos,piezas};
+}
+test('tramo se agrega y recupera sin diámetro ni consumo manual',()=>{
+ const a=app();a.run("abrir('gas')");for(const [id,v]of Object.entries({desde:'M',hasta:'A',metros:'15',consumoTramo:'',diametro:''}))a.elements.get(id).value=v;
+ a.run('agregarTramo()');assert.equal(a.run('tramos.length'),1);assert.equal(a.run('tramos[0].diametro'),null);
+ const b=app(a.saved());assert.equal(b.run('tramos[0].diametro'),null);b.run('calcularMateriales()');assert.match(b.elements.get('resultadoMateriales').children.map(x=>x.textContent).join(' '),/Diámetro pendiente|provisorio/);
+});
+test('accesorios se registran por tipo y posición sin medidas',()=>{
+ const a=app();a.run("abrir('gas');tramos=[{desde:'M',hasta:'A',metros:12,consumo:null,diametro:null}];abrirAccesorios(0)");
+ a.elements.get('estadoAccesorios').value='completo';a.elements.get('metrosFinal').value='6';a.run("borradorAccesorios=[{tipo:'codo90',metrosAntes:6,salida:'',ramal:'',nodo:''}];guardarAccesorios()");
+ assert.equal(a.run('tramos[0].detalle.estado'),'completo');assert.equal(a.run('tramos[0].diametro'),null);
+});
+test('motor sin tablas no inventa medidas ni usa el valor manual como resultado',()=>{
+ const a=app();fixtureMotor(a);const r=a.run('motorDimensionarGas(tramos,artefactos,instalacionGas)');assert.equal(r.estado,'bloqueado');assert.equal(r.diametros,null);assert.match(r.faltantes.join(' '),/Tabla de capacidad/);assert.equal(a.run('CATALOGOS_GAS_VERIFICADOS.length'),0);
+});
+test('tablas ficticias se bloquean en modo de producción',()=>{
+ const a=app();fixtureMotor(a);const r=a.run('motorDimensionarGas(tramos,artefactos,instalacionGas,packMotor)');assert.equal(r.diametros,null);assert.match(r.faltantes.join(' '),/ficticio/);
+});
+test('motor evalúa candidatos y cumple presión en recorridos completos sin duplicar tee',()=>{
+ const a=app();fixtureMotor(a);const r=a.run('motorDimensionarGas(tramos,artefactos,instalacionGas,packMotor,{modoPrueba:true})');
+ assert.equal(r.estado,'calculado');assert.equal(r.prueba,true);assert.equal(r.diametros.t0,'D-test-grande');assert.equal(r.diametros.t1,'D-test-pequeno');assert.equal(r.diametros.t2,'D-test-pequeno');
+ assert.equal(r.accesorios.filter(x=>x.tipo==='tee-reductora').length,1);assert.equal(r.accesorios.filter(x=>x.tipo==='reduccion').length,0);
+ assert.equal(r.recorridos.length,2);assert.equal(r.recorridos.find(x=>x.artefacto==='Calefactor').longitudReal,10);
+ assert.ok(r.recorridos.every(x=>x.perdidaPa<=20));assert.equal(a.run('tramos[0].diametro'),null);
+});
+test('longitudes equivalentes de tee dependen de principal y ramal',()=>{
+ const a=app();fixtureMotor(a);const r=a.run('motorDimensionarGas(tramos,artefactos,instalacionGas,packMotor,{modoPrueba:true})');
+ assert.equal(r.porTramo.t1.longitudEquivalente,4);assert.equal(r.porTramo.t2.longitudEquivalente,6);
+});
+test('falta de catálogo de accesorios o material incompatible bloquea en vez de extrapolar',()=>{
+ const a=app();fixtureMotor(a);a.run("packMotor.material='Otro material'");assert.match(a.run('motorDimensionarGas(tramos,artefactos,instalacionGas,packMotor,{modoPrueba:true}).faltantes.join(" ")'),/exactamente/);
+ a.run("packMotor.material='Material declarado';packMotor.piezas={}");const r=a.run('motorDimensionarGas(tramos,artefactos,instalacionGas,packMotor,{modoPrueba:true})');assert.equal(r.diametros,null);assert.match(r.faltantes.join(' '),/Falta pieza/);
+});
+test('límite de búsqueda no se presenta como solución final',()=>{
+ const a=app();fixtureMotor(a);const r=a.run('motorDimensionarGas(tramos,artefactos,instalacionGas,packMotor,{modoPrueba:true,maxCombinaciones:1})');assert.equal(r.diametros,null);assert.match(r.faltantes.join(' '),/límite de combinaciones/);
+});
+test('capacidad tabulada usa longitud completa del recorrido y caudal acumulado',()=>{
+ const a=app();fixtureMotor(a);a.run("packMotor.metodo='longitud-maxima-tabular';packMotor.reglaLongitud='maxima-ruta-completa-que-contiene-tramo';packMotor.condiciones.caidaPa=10;packMotor.candidatos[0].filas=[{longitud:10,caudal:10},{longitud:20,caudal:5}];packMotor.candidatos[1].filas=[{longitud:10,caudal:30},{longitud:20,caudal:20}]");
+ const r=a.run('motorDimensionarGas(tramos,artefactos,instalacionGas,packMotor,{modoPrueba:true})');assert.equal(r.estado,'calculado');assert.equal(r.diametros.t0,'D-test-grande');assert.equal(r.recorridos[0].perdidaPa,null);
+});
+test('ejercicio aportado acumula 29200 y reconstruye 24, 29 y 36 m sin ingresar diámetros',()=>{
+ const a=app();a.run("abrir('gas')");const r=a.run('probarEjercicioGas()');assert.equal(r.red.total,29200);
+ assert.equal(r.red.porTramo['A-B'],13200);assert.equal(r.red.porTramo['A-Termotanque'],16000);
+ assert.deepEqual(Array.from(r.rutas.map(x=>x.tramos.reduce((n,id)=>n+r.caso.tramos.find(t=>t.id===id).metros,0))).sort((x,y)=>x-y),[24,29,36]);
+ assert.ok(r.caso.tramos.every(t=>t.diametro===null));assert.equal(r.resultado.diametros,null);assert.match(r.resultado.faltantes.join(' '),/Confirmar/);
+ assert.equal(a.run('tramos.length'),0);assert.equal(a.run('artefactos.length'),0);
+});
+test('resultados anotados del ejercicio no alimentan la selección de candidatos',()=>{
+ const a=app();a.run("abrir('gas')");a.elements.get('dimConfirmarLongitudes').checked=true;const r=a.run('probarEjercicioGas()');assert.equal(r.caso.referencias['M-A'],'1"');assert.equal(r.resultado.diametros,null);assert.match(a.elements.get('resultadoEjercicioGas').children.map(x=>x.textContent).join(' '),/resultado del motor PENDIENTE/);
+});
+test('revisión de croquis admite diámetros ausentes sin inventarlos',()=>{
+ const a=app();ejemploRevisado(a);a.run("borradorCroquis.tramos[0].campos.diametro.valor=null;borradorCroquis.tramos[0].campos.diametro.confirmado=false;borradorCroquis.tramos[0].accesorios.forEach(a=>{for(const k of ['entrada','salida','ramal']){a[k].valor=null;a[k].confirmado=false;}});incorporarCroquis()");
+ assert.equal(a.run('tramos.length'),1);assert.equal(a.run('tramos[0].diametro'),null);assert.equal(a.run('tramos[0].detalle.accesorios[0].ramal'),null);
+});
+test('una unión recta de distinto diámetro agrega una sola reducción independiente',()=>{
+ const a=app();fixtureMotor(a);a.run("instalacionGas.nodos=instalacionGas.nodos.filter(n=>n.id!=='b');instalacionGas.nodos[1].unionDimensionamiento='union';artefactos=artefactos.filter(a=>a.id==='a1');tramos=tramos.filter(t=>t.id!=='t2');tramos[0].detalle={estado:'ninguno'}");
+ const r=a.run('motorDimensionarGas(tramos,artefactos,instalacionGas,packMotor,{modoPrueba:true})');assert.equal(r.estado,'calculado');
+ // A smaller budget forces the shared/main run to grow while the final run stays small.
+ a.run("instalacionGas.perfil.perdidaMaxima='8'");const ajustado=a.run('motorDimensionarGas(tramos,artefactos,instalacionGas,packMotor,{modoPrueba:true})');assert.equal(ajustado.estado,'calculado');assert.equal(ajustado.accesorios.filter(x=>x.tipo==='reduccion').length,1);
+});
+test('codos y llaves reciben las medidas del candidato seleccionado y suman equivalentes',()=>{
+ const a=app();fixtureMotor(a);a.run("tramos[1].llave=true;tramos[1].detalle={estado:'completo',metrosFinal:2,accesorios:[{tipo:'codo45',metrosAntes:1,salida:null}]}");const r=a.run('motorDimensionarGas(tramos,artefactos,instalacionGas,packMotor,{modoPrueba:true})');
+ assert.equal(r.estado,'calculado');const llave=r.accesorios.find(x=>x.tipo==='llave');assert.equal(llave.medidas[0],r.diametros.t1);assert.equal(r.porTramo.t1.longitudEquivalente,5);
+});
+test('la falta de fila para un candidato bloquea aun si otro candidato tiene una solución',()=>{
+ const a=app();fixtureMotor(a);a.run('packMotor.candidatos[0].filas=[{caudal:1,perdidaPaM:1}]');const r=a.run('motorDimensionarGas(tramos,artefactos,instalacionGas,packMotor,{modoPrueba:true})');assert.equal(r.diametros,null);assert.match(r.faltantes.join(' '),/extrapolar/);
+});
+test('varias llaves registradas por posición se cuentan por cantidad y no por diámetro ingresado',()=>{
+ const a=app();fixtureMotor(a);a.run("tramos[1].detalle={estado:'completo',metrosFinal:1,accesorios:[{tipo:'llave',metrosAntes:1,salida:null},{tipo:'llave',metrosAntes:1,salida:null}]}" );
+ const r=a.run('motorDimensionarGas(tramos,artefactos,instalacionGas,packMotor,{modoPrueba:true})');assert.equal(r.estado,'calculado');assert.equal(r.accesorios.filter(x=>x.tipo==='llave').reduce((n,a)=>n+a.cantidad,0),2);
+});
+test('cuplas y codos se cuantifican por segmentos aun sin diámetros',()=>{
+ const a=app();a.ctx.tramo={metros:12,diametro:null,detalle:{estado:'completo',metrosFinal:6,accesorios:[{tipo:'codo90',metrosAntes:6,salida:null}]}};
+ const r=a.run('evaluarTramo(tramo)');assert.equal(r.cuplas,0);assert.equal(r.tiras,2);assert.equal(r.accesorios.length,1);assert.equal(r.soloMedidasPendientes,true);
+ assert.match(a.run('nombreAccesorio(evaluarTramo(tramo).accesorios[0])'),/medidas pendientes/);
 });

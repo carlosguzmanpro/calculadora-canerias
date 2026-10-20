@@ -4,7 +4,7 @@ const nullableString={type:['string','null'],maxLength:80};
 const nullableNumber={type:['number','null'],minimum:0,maximum:1000000000};
 const campos={desde:nullableString,hasta:nullableString,metros:nullableNumber,diametro:nullableString,
  consumo:nullableNumber,artefacto:nullableString,consumoArtefacto:nullableNumber,llave:{type:['boolean','null']},metrosFinal:nullableNumber};
-const acc={tipo:{type:['string','null'],enum:['tee','codo45','codo90','reduccion',null]},metrosAntes:nullableNumber,
+const acc={tipo:{type:['string','null'],enum:['tee','codo45','codo90','reduccion','llave',null]},metrosAntes:nullableNumber,
  entrada:nullableString,salida:nullableString,ramal:nullableString,nodo:nullableString};
 export const RESPONSE_SCHEMA={type:'object',additionalProperties:false,required:['version','tramos'],properties:{
  version:{type:'integer',enum:[1]},tramos:{type:'array',minItems:1,maxItems:30,items:{type:'object',additionalProperties:false,
@@ -64,7 +64,7 @@ export function validateModelResult(result){
    accesorios:t.accesorios==null?null:t.accesorios.map(a=>{
     if(!a || typeof a!=='object')throw new ProxyError('RESPUESTA_INVALIDA',502);
     const limpio=Object.fromEntries(Object.entries(acc).map(([k,s])=>[k,field(a[k],s)]));
-    if(!['tee','codo45','codo90','reduccion'].includes(limpio.tipo))limpio.tipo=null;
+    if(!['tee','codo45','codo90','reduccion','llave'].includes(limpio.tipo))limpio.tipo=null;
     return limpio;
    })};
  })};

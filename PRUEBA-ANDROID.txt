@@ -1,13 +1,13 @@
-CAÑERÍAS · RED DOMICILIARIA DE GAS · SIN DIMENSIONAMIENTO
+CAÑERÍAS · MOTOR DE GAS SIN DIÁMETROS OBLIGATORIOS
 
-### Prueba en Android
+### Probar desde Android
 
-1. Descomprimí `canerias-red-gas.zip` y abrí `index.html` con el método que ya usaste para las versiones anteriores. No se publicó una dirección web.
-2. Entrá en **Gas → Consulta de consumos de gas**. Para un ejercicio ficticio podés cargar Cocina con **9000 kcal/h** y Calefactor con **4000 kcal/h**. Son datos de prueba, no consumos recomendados. Si ya hay artefactos, todos deberán conectarse una vez; no los borres para hacer la prueba sin conservar antes tu información.
-3. En **Trabajar con croquis y tramos**, registrá tres tramos con las longitudes y diámetros ya indicados en tu proyecto: M–T1, T1–Cocina y T1–Calefactor. El consumo manual puede quedar vacío; la red lo calculará. No se elige un diámetro a partir del consumo o la foto en esta etapa.
-4. Tocá **Instalación: datos y conexiones de GAS**. Completá únicamente los datos generales que conozcas y guardalos. Si faltan presiones o normativa, dejalos pendientes: la suma de una red bien conectada puede probarse igual.
-5. Agregá los puntos **M (Medidor)**, **T1 (Derivación/unión)**, **Cocina (Artefacto, seleccionando Cocina de la lista)** y **Calefactor (Artefacto, seleccionando Calefactor)**.
-6. En cada tramo elegí sus conexiones: **M → T1**, **T1 → Cocina**, **T1 → Calefactor**. El resultado debe mostrar **13000**, **9000** y **4000 kcal/h**, respectivamente, si esos son los únicos artefactos. Los accesorios que no revisaste seguirán pendientes. Una tee del croquis debe quedar en el extremo del tramo que llega a T1 o sale de T1, nunca dentro de un tramo que atraviesa la derivación sin dividirse.
-7. Dejá un destino sin seleccionar: los acumulados deben dejar de mostrarse y aparecer el dato faltante. Volvé a conectarlo: se recalculan automáticamente.
-8. Recargá, volvé a GAS y a datos/conexiones: la red y el perfil deben conservarse si el navegador permite almacenamiento local. Probá también editar un punto y **Imprimir datos y conexiones**.
-9. Aunque se completen los datos, el aviso **Dimensionamiento NO habilitado** debe permanecer. Todavía no existe un método normativo implementado. No uses la suma de placas para elegir diámetros por cuenta de la aplicación.
+1. Descomprimí `canerias-motor-gas.zip` y abrí `index.html` como en las pruebas anteriores.
+2. En **Gas → Trabajar con croquis y tramos**, agregá un tramo dejando cerrada la opción **Opcional: cargar un diámetro manual conocido**. Se debe guardar sin medida.
+3. En **Revisar accesorios**, podés agregar codos y tees indicando tipo y metros antes/después, dejando vacías las medidas de conexión. Si es una tee, indicá su nombre. En **Instalación: datos y conexiones**, confirmá la pieza real del punto y distinguí paso principal y ramal de cada tee.
+4. Entrá en **Calcular diámetros · diagnóstico** y tocá **Calcular diámetros de mi red**. Debe informar lo que falta, sin producir una medida ni usar el diámetro manual como resultado automático.
+5. Tocá **Ejecutar prueba M–A–B sin ingresar diámetros**. La prueba está separada de tu proyecto; no agrega ni borra tramos. Las medidas y consumos son los que aportaste. Marcá la casilla de verificación de longitudes solo si ya las cotejaste con el croquis.
+6. Verificá demanda total **29200 kcal/h**, A–B **13200 kcal/h** y recorridos **24, 29 y 36 m** si las medidas aportadas son individuales. Las equivalencias todavía no están disponibles, por lo que estos son metros reales, no longitudes de cálculo normativas.
+7. Los diámetros del ejercicio aparecen como **referencias de comparación** y el resultado calculado queda **PENDIENTE** hasta que se verifiquen tablas y condiciones. No es una coincidencia numérica ya demostrada.
+
+Se conservan fotografía de referencia, carga manual, revisión de croquis, guardado, impresión y AGUA/CLOACAS. Gemini sigue desactivado y no se agregaron servicios ni claves. La comprobación visual de esta entrega en Android queda pendiente; las pruebas de lógica no certifican una instalación.

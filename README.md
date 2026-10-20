@@ -12,6 +12,26 @@ Aplicación gratuita, estática y en español para registrar croquis y estimar m
 
 No interpreta fotografías, genera planos ni verifica diámetros, presiones o normativa. Gemini queda para una etapa futura; esta versión no llama a APIs ni activa servicios pagos.
 
+## Motor experimental de dimensionamiento de GAS
+
+El diámetro ya NO es obligatorio para crear, editar, recuperar o revisar tramos. La medida manual se conserva como opción secundaria. Los accesorios se registran por tipo y posición sin medidas de conexión; deben completarse las longitudes entre piezas para contar cuplas y equivalencias. Las tees se vinculan a puntos de derivación y se identifican las salidas principal y ramal.
+
+En **GAS → Calcular diámetros · diagnóstico** se ejecuta el motor de candidatos. No hay tablas técnicas de producción habilitadas todavía: faltan el material/sistema del ejercicio, los documentos completos y verificación de aplicabilidad de Tablas N.º 3 y N.º 18, datos de accesorios y condiciones de suministro. El resultado actual será **SIN DIÁMETROS CALCULADOS**, con una lista específica de pendientes. No se suplanta esa ausencia usando la respuesta anotada del ejercicio o una tabla de otro material. Los detalles técnicos y fuentes están en `FUENTES-DIMENSIONAMIENTO.md`.
+
+Los ensayos automáticos verifican ambos adaptadores de tablas (pérdida unitaria y capacidad por longitud) usando datos ficticios solo en pruebas. Se evalúan longitudes reales, equivalentes dependientes de las medidas y paso de tees, consumos acumulados y rutas completas. Si un catálogo verificado se incorpora en otra revisión, los resultados incluirán medidas de piezas compatibles y referencia de fuente/edición. Esta entrega NO habilita resultados técnicos reales ni reemplaza las medidas manuales de tu proyecto.
+
+### Probar desde Android
+
+1. Descomprimí `canerias-motor-gas.zip` y abrí `index.html` como en las pruebas anteriores.
+2. En **Gas → Trabajar con croquis y tramos**, agregá un tramo dejando cerrada la opción **Opcional: cargar un diámetro manual conocido**. Se debe guardar sin medida.
+3. En **Revisar accesorios**, podés agregar codos y tees indicando tipo y metros antes/después, dejando vacías las medidas de conexión. Si es una tee, indicá su nombre. En **Instalación: datos y conexiones**, confirmá la pieza real del punto y distinguí paso principal y ramal de cada tee.
+4. Entrá en **Calcular diámetros · diagnóstico** y tocá **Calcular diámetros de mi red**. Debe informar lo que falta, sin producir una medida ni usar el diámetro manual como resultado automático.
+5. Tocá **Ejecutar prueba M–A–B sin ingresar diámetros**. La prueba está separada de tu proyecto; no agrega ni borra tramos. Las medidas y consumos son los que aportaste. Marcá la casilla de verificación de longitudes solo si ya las cotejaste con el croquis.
+6. Verificá demanda total **29200 kcal/h**, A–B **13200 kcal/h** y recorridos **24, 29 y 36 m** si las medidas aportadas son individuales. Las equivalencias todavía no están disponibles, por lo que estos son metros reales, no longitudes de cálculo normativas.
+7. Los diámetros del ejercicio aparecen como **referencias de comparación** y el resultado calculado queda **PENDIENTE** hasta que se verifiquen tablas y condiciones. No es una coincidencia numérica ya demostrada.
+
+Se conservan fotografía de referencia, carga manual, revisión de croquis, guardado, impresión y AGUA/CLOACAS. Gemini sigue desactivado y no se agregaron servicios ni claves. La comprobación visual de esta entrega en Android queda pendiente; las pruebas de lógica no certifican una instalación.
+
 ## Datos de instalación y red domiciliaria de GAS
 
 En GAS, **Instalación: datos y conexiones de GAS** prepara el perfil Argentina / domiciliario / gas natural. El perfil versionado conserva provincia, localidad, distribuidora, material, sistema de unión, presiones y unidad común, pérdida máxima admisible y sus fuentes, referencia normativa aportada y confirmación de suma total de placas sin simultaneidad. No se precargan presiones, normas ni límites de diseño. Queda preparado para agregar perfiles de otras distribuidoras, localidades y gases, pero GLP y otros perfiles todavía no están habilitados para dimensionar.
@@ -22,7 +42,7 @@ Esta etapa admite una red ramificada: un medidor, un tramo saliente del medidor,
 
 La suma se hace desde los artefactos aguas abajo hasta el medidor, independientemente del orden de carga. Es **consumo instalado acumulado en kcal/h, sin simultaneidad**, no caudal normativo de diseño. Ante errores de conexión o consumos inválidos no se presentan totales parciales que puedan subestimar la instalación. Los datos generales o accesorios pendientes permiten ver una suma topológica válida, pero impiden marcar los datos como completos.
 
-El dato manual de consumo por tramo sigue disponible, ahora opcional: vacío significa pendiente, no cero. El cálculo de red no lo sobrescribe; muestra diferencias respecto al acumulado. No calcula ni sustituye diámetros. Tampoco calcula pérdidas de carga, presión final, longitudes equivalentes ni aplica tablas o métodos normativos. Se mantienen los cálculos de inventario de materiales existentes.
+El dato manual de consumo por tramo sigue disponible, ahora opcional: vacío significa pendiente, no cero. El cálculo de red no lo sobrescribe; muestra diferencias respecto al acumulado. La vista de red no sustituye diámetros. El motor experimental tiene esos cálculos preparados, pero no emite resultados técnicos reales mientras falten catálogos y métodos verificados. Se mantienen los cálculos de inventario de materiales existentes.
 
 Hay dos estados separados:
 
@@ -137,6 +157,6 @@ Prueba opcional de navegador: `npm install`, `npx playwright install chromium` y
 
 ## Rama y conservación de la versión
 
-La mejora inicial se preparó en la rama local `prueba/mejoras-locales`; el registro de accesorios continúa en `prueba/accesorios-gas` y la revisión simulada en `prueba/revision-croquis-gas` y la preparación desconectada en `prueba/preparacion-gemini` y los datos/red en `prueba/red-gas-domiciliaria`, partiendo de los archivos del commit de GitHub `9c94db1af8167012af764ebaf95151e928aed8b7`. La conexión Git del entorno falló y se recuperaron los archivos mediante la conexión de lectura de GitHub. Por eso el historial Git de esta copia es una instantánea local, no un clon del historial remoto. No se subió ninguna rama ni se modificó `main` en GitHub.
+La mejora inicial se preparó en la rama local `prueba/mejoras-locales`; el registro de accesorios continúa en `prueba/accesorios-gas` y la revisión simulada en `prueba/revision-croquis-gas` y la preparación desconectada en `prueba/preparacion-gemini` y los datos/red en `prueba/red-gas-domiciliaria` y el motor en `prueba/motor-dimensionamiento-gas`, partiendo de los archivos del commit de GitHub `9c94db1af8167012af764ebaf95151e928aed8b7`. La conexión Git del entorno falló y se recuperaron los archivos mediante la conexión de lectura de GitHub. Por eso el historial Git de esta copia es una instantánea local, no un clon del historial remoto. No se subió ninguna rama ni se modificó `main` en GitHub.
 
 Para incorporar el parche en un clon normal, primero conservá tus cambios locales, creá la rama con `git switch -c prueba/mejoras-locales` y ejecutá `git apply --check /ruta/canerias-mejoras.patch`. Si pasa, aplicá `git apply /ruta/canerias-mejoras.patch`. El parche está preparado sobre la versión indicada; si el repositorio avanzó, revisá las diferencias antes de aplicarlo. No hagas push ni fusiones con `main` hasta decidir publicar esos cambios.
