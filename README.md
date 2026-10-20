@@ -6,11 +6,27 @@ Aplicación gratuita, estática y en español para registrar croquis y estimar m
 
 - **GAS:** carga de foto desde cámara o galería, ampliación, aclaraciones, registro y eliminación de tramos, estimación de materiales, consulta y suma de consumos de artefactos.
 - **AGUA y CLOACAS:** cada especialidad tiene su propia foto y aclaración. Sus cálculos técnicos y formularios de materiales están pendientes; no se muestra el formulario de GAS.
-- **Materiales de GAS:** para cada tramo, tiras completas de 6 m sin reutilizar sobrantes; cuplas para unir las tiras y llaves indicadas. Resumen por diámetro y referencia adicional del 10% de longitud. No incluye codos, tees, reducciones ni dimensionamiento.
+- **Materiales de GAS:** tiras completas de 6 m por segmento continuo entre accesorios, sin reutilizar sobrantes; cuplas solo para unir tiras dentro de cada segmento y llaves indicadas. Resumen por diámetro y referencia adicional del 10% de longitud. Incluye los codos, tees y reducciones registrados y revisados. No dimensiona la instalación ni agrega conexiones desconocidas.
 - **Consumos:** suma de kcal/h de placa y caudal orientativo con poder calorífico de referencia. Agregar o quitar artefactos y cambiar el gas invalida el resultado hasta recalcular.
 - **Impresión:** desde el botón de revisión o la opción Imprimir del navegador. Incluye el contenido de la vista actual, la aclaración actual, resultados y advertencias. Los resultados de GAS se recalculan al preparar la impresión. Puede guardarse como PDF cuando el dispositivo lo permita.
 
 No interpreta fotografías, genera planos ni verifica diámetros, presiones o normativa. Gemini queda para una etapa futura; esta versión no llama a APIs ni activa servicios pagos.
+
+## Registro guiado de accesorios de GAS
+
+Después de agregar un tramo, tocá **Revisar accesorios**. Elegí uno de tres estados:
+
+- **Pendiente:** faltan datos. Se mantiene la estimación anterior por longitud, marcada como provisoria. No se inventan accesorios ni se interpreta la falta de datos como cero.
+- **Revisado: sin tees, codos ni reducciones:** confirma cero de esas piezas y un único segmento recto. Las cuplas se calculan igualmente por longitud. Esta elección descarta la lista de accesorios del tramo al guardar.
+- **Revisado: registrar todos los accesorios:** agregá cada pieza en orden desde Desde hasta Hasta y completá los metros antes de cada accesorio y después del último. Deben sumar la longitud del tramo.
+
+Para una tee, el diámetro de entrada se toma del segmento anterior. Indicá el de salida, el del ramal y un nombre único de derivación (por ejemplo T1). Registrala una sola vez en el tramo principal y usá ese nombre como origen del tramo del ramal, que comienza después de la tee. La app detecta nombres de tee repetidos, pero no reconoce automáticamente el croquis ni verifica que las conexiones entre tramos coincidan: el usuario debe identificarlas y revisarlas.
+
+Un codo permite seleccionar 45° o 90°. Si su salida cambia de diámetro, se cuenta **un codo reductor**. Una tee con conexiones de distinto diámetro se cuenta como **una tee reductora**. Una **reducción independiente** es una pieza adicional con diámetros distintos. No se suma otra reducción por un cambio ya resuelto por un accesorio reductor. Es un inventario del proyecto indicado, no una comprobación de disponibilidad comercial o compatibilidad de las piezas.
+
+Por segmento continuo de longitud L se compran `ceil(L / 6)` tiras y se cuentan `max(0, tiras - 1)` cuplas. Por ejemplo, 12 m rectos necesitan 2 tiras y 1 cupla; 6 m + codo + 6 m necesitan 2 tiras y 0 cuplas. Se permiten segmentos de 0 m en conexiones directas o extremos, sin sumar caños ni cuplas. No se reutilizan sobrantes entre segmentos. No se descuentan longitudes de accesorios ni roscas sin sus medidas reales; indicá longitudes de caño verificadas.
+
+Podés corregir tipos, medidas, diámetros y longitudes, agregar o quitar accesorios y cancelar antes de guardar. **Editar tramo** permite corregir sus datos originales; cambiar longitud o diámetro inicial marca los accesorios como pendientes, conservando el detalle para revisarlo. Los tramos antiguos se recuperan como pendientes. Los resultados incluyen el inventario revisado, diámetros de cada segmento y avisos de datos faltantes, también al imprimir.
 
 ## Guardado local y privacidad
 
@@ -43,6 +59,6 @@ Prueba opcional de navegador: `npm install`, `npx playwright install chromium` y
 
 ## Rama y conservación de la versión
 
-La copia de trabajo se preparó en la rama local `prueba/mejoras-locales`, partiendo de los archivos del commit de GitHub `9c94db1af8167012af764ebaf95151e928aed8b7`. La conexión Git del entorno falló y se recuperaron los archivos mediante la conexión de lectura de GitHub. Por eso el historial Git de esta copia es una instantánea local, no un clon del historial remoto. No se subió ninguna rama ni se modificó `main` en GitHub.
+La mejora inicial se preparó en la rama local `prueba/mejoras-locales`; el registro de accesorios continúa en `prueba/accesorios-gas`, partiendo de los archivos del commit de GitHub `9c94db1af8167012af764ebaf95151e928aed8b7`. La conexión Git del entorno falló y se recuperaron los archivos mediante la conexión de lectura de GitHub. Por eso el historial Git de esta copia es una instantánea local, no un clon del historial remoto. No se subió ninguna rama ni se modificó `main` en GitHub.
 
 Para incorporar el parche en un clon normal, primero conservá tus cambios locales, creá la rama con `git switch -c prueba/mejoras-locales` y ejecutá `git apply --check /ruta/canerias-mejoras.patch`. Si pasa, aplicá `git apply /ruta/canerias-mejoras.patch`. El parche está preparado sobre la versión indicada; si el repositorio avanzó, revisá las diferencias antes de aplicarlo. No hagas push ni fusiones con `main` hasta decidir publicar esos cambios.

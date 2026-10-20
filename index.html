@@ -106,7 +106,7 @@ section{box-shadow:none}
 
 <div id="formularioGas">
 <h3>3. Registrar tramos de GAS</h3>
-<p class="nota">Copiá cada tramo del croquis. El diámetro se ingresa como dato del proyecto, no se determina automáticamente.</p>
+<p class="nota">Copiá cada tramo del croquis. El diámetro inicial se ingresa como dato del proyecto, no se determina automáticamente. Después de agregar el tramo, tocá «Revisar accesorios».</p>
 <label for="desde">Desde</label>
 <input id="desde" placeholder="Ej.: M" maxlength="35">
 <label for="hasta">Hasta</label>
@@ -139,12 +139,36 @@ section{box-shadow:none}
 <option>Otro artefacto</option>
 </select>
 <label><input id="llave" type="checkbox" style="width:auto"> Contar una llave de paso en este tramo</label>
-<button onclick="agregarTramo()">+ AGREGAR TRAMO</button>
+<button id="guardarTramo" onclick="agregarTramo()">+ AGREGAR TRAMO</button>
+<button id="cancelarTramo" class="alt oculto" onclick="cancelarEdicionTramo()">Cancelar edición del tramo</button>
 <div id="listaTramos"></div>
+<section id="editorAccesorios" class="oculto solo-pantalla" aria-label="Accesorios del tramo">
+<h3 id="tituloAccesorios"></h3>
+<p>Recorré el tramo desde su inicio hasta su final. Cada accesorio separa dos segmentos de caño. Indicá las longitudes reales entre accesorios, sin descontar medidas de accesorios que no conozcas.</p>
+<label for="estadoAccesorios">1. ¿Ya revisaste todos los accesorios de este tramo?</label>
+<select id="estadoAccesorios" onchange="cambiarEstadoAccesorios()">
+<option value="pendiente">Pendiente: todavía faltan datos</option>
+<option value="ninguno">Revisado: sin tees, codos ni reducciones</option>
+<option value="completo">Revisado: registrar todos los accesorios</option>
+</select>
+<div id="detalleAccesorios">
+<p>Usá el mismo formato para cada diámetro, por ejemplo 1/2&quot;, 3/4&quot; o 1&quot;. Un cambio de texto no verifica un cambio real de medida.</p>
+<p>2. Agregá los accesorios en orden. El diámetro de entrada se toma del segmento anterior. Si cambia el de salida en un codo o tee, se cuenta como accesorio reductor, sin sumar otra reducción.</p>
+<p>Registrá cada tee una sola vez en el tramo principal, con un nombre único de derivación. El tramo del ramal comienza después de esa tee; identificá su origen con ese nombre.</p>
+<div id="filasAccesorios"></div>
+<button class="alt" onclick="nuevoAccesorio()">+ Agregar accesorio</button>
+<label for="metrosFinal">Metros desde el último accesorio hasta el final</label>
+<input id="metrosFinal" type="number" min="0" step="any">
+<p>Un segmento puede medir 0 m si dos accesorios están conectados directamente o el accesorio está en un extremo. No se cuentan cuplas en ese espacio. Las longitudes deben sumar los metros del tramo.</p>
+</div>
+<p id="errorAccesorios" role="status" class="aviso"></p>
+<button onclick="guardarAccesorios()">Guardar accesorios del tramo</button>
+<button class="alt" onclick="cerrarAccesorios()">Cancelar</button>
+</section>
 <button onclick="calcularMateriales()">🧮 CALCULAR MATERIALES</button>
 <div id="resultadoMateriales" class="resultado" aria-live="polite">Agregá tramos y tocá CALCULAR MATERIALES.</div>
 <div class="aviso">
-Estimación de compra: se cuentan tiras completas de 6 m por tramo, sin reutilizar sobrantes. Las cuplas se estiman para unir esas tiras dentro de cada tramo. No incluye codos, tees, reducciones ni verificación de diámetros. Antes de construir, un profesional habilitado debe comprobar el diseño y la normativa de gas.
+Estimación de compra sin reutilizar sobrantes: tiras de 6 m por segmento continuo y cuplas solo entre tiras del mismo segmento. Tees, codos y reducciones se cuentan según los datos revisados. Los tramos pendientes conservan la estimación anterior por longitud, marcada como provisoria; no confirman ausencia de accesorios. No verifica diámetros ni incluye conexiones adicionales exigidas por el sistema constructivo. Antes de construir, un profesional habilitado debe comprobar el diseño y la normativa de gas.
 </div>
 </div>
 <h3>Plano</h3>
@@ -195,6 +219,7 @@ Estimación de compra: se cuentan tiras completas de 6 m por tramo, sin reutiliz
 'use strict';
 const $=id=>document.getElementById(id);
 let modulo='',fotoURL=null,artefactos=[],tramos=[];
+let editandoTramo=-1,editandoAccesorios=-1,borradorAccesorios=[];
 const fotosSesion={};
 const CLAVE='canerias-proyectos-v1';
 const especialidades=['gas','agua','cloacas'];
@@ -420,6 +445,147 @@ $('diametro').addEventListener('change',()=>{
  $('diametro').value!=='Otro (especificar)');
 });
 
+function tirasPara(metros){return metros===0?0:Math.ceil(metros/6);}
+function nombreAccesorio(a){
+ const reductor=a.entrada!==a.salida || (a.tipo==='tee' && a.ramal!==a.entrada);
+ if(a.tipo==='tee')return 'Tee'+(reductor?' reductora':'')+' '+a.entrada+' / '+a.salida+' / '+a.ramal;
+ if(a.tipo==='reduccion')return 'Reducción independiente '+a.entrada+' → '+a.salida;
+ return 'Codo '+(a.tipo==='codo45'?'45°':'90°')+(reductor?' reductor':'')+' '+a.entrada+' → '+a.salida;
+}
+function evaluarTramo(t){
+ const provisional=motivo=>({pendiente:true,motivo,segmentos:[{metros:t.metros,diametro:t.diametro}],
+  tiras:tirasPara(t.metros),cuplas:Math.max(0,tirasPara(t.metros)-1),accesorios:[]});
+ const d=t.detalle;
+ if(!d || d.estado==='pendiente')return provisional('Indicá si no hay accesorios o completá tipos, diámetros y longitudes entre accesorios.');
+ if(d.estado==='ninguno')return {pendiente:false,motivo:'',segmentos:[{metros:t.metros,diametro:t.diametro}],
+  tiras:tirasPara(t.metros),cuplas:Math.max(0,tirasPara(t.metros)-1),accesorios:[]};
+ if(d.estado!=='completo' || !Array.isArray(d.accesorios) || !d.accesorios.length)
+  return provisional('Agregá los accesorios o seleccioná «sin tees, codos ni reducciones».');
+ const segmentos=[],accesorios=[];
+ let diametro=t.diametro;
+ const nodos=new Set();
+ for(const a of d.accesorios){
+  if(!a || !['tee','codo45','codo90','reduccion'].includes(a.tipo) ||
+   typeof a.salida!=='string' || !a.salida.trim() || !Number.isFinite(a.metrosAntes) || a.metrosAntes<0)
+   return provisional('Completá el tipo, el diámetro de salida y los metros antes de cada accesorio.');
+  if(a.tipo==='reduccion' && a.salida.trim()===diametro)
+   return provisional('Una reducción independiente necesita dos diámetros diferentes.');
+  if(a.tipo==='tee'){
+   if(typeof a.ramal!=='string' || !a.ramal.trim() || typeof a.nodo!=='string' || !a.nodo.trim())
+    return provisional('La tee necesita diámetro del ramal y un nombre único de derivación.');
+   const nodo=a.nodo.trim().toLocaleLowerCase('es');
+   if(nodos.has(nodo) || tramos.some(otro=>otro!==t && Array.isArray(otro.detalle?.accesorios) &&
+    otro.detalle.accesorios.some(b=>b?.tipo==='tee' && typeof b.nodo==='string' && b.nodo.trim().toLocaleLowerCase('es')===nodo)))
+    return provisional('Derivación «'+a.nodo+'» repetida. Registrá esa tee una sola vez en el tramo principal.');
+   nodos.add(nodo);
+  }
+  segmentos.push({metros:a.metrosAntes,diametro});
+  accesorios.push({...a,entrada:diametro,salida:a.salida.trim(),ramal:typeof a.ramal==='string'?a.ramal.trim():''});
+  diametro=a.salida.trim();
+ }
+ if(!Number.isFinite(d.metrosFinal) || d.metrosFinal<0)return provisional('Indicá los metros desde el último accesorio hasta el final.');
+ segmentos.push({metros:d.metrosFinal,diametro});
+ const suma=segmentos.reduce((n,s)=>n+s.metros,0);
+ if(Math.abs(suma-t.metros)>1e-9*Math.max(1,t.metros))
+  return provisional('Las longitudes entre accesorios suman '+fmt(suma)+' m y deben sumar '+fmt(t.metros)+' m.');
+ return {pendiente:false,motivo:'',segmentos,accesorios,
+  tiras:segmentos.reduce((n,s)=>n+tirasPara(s.metros),0),
+  cuplas:segmentos.reduce((n,s)=>n+Math.max(0,tirasPara(s.metros)-1),0)};
+}
+function actualizarTramos(){
+ renderTramos();
+ $('resultadoMateriales').textContent='Tramos actualizados. Tocá CALCULAR MATERIALES.';
+ guardarDatos();
+}
+function cancelarEdicionTramo(){
+ editandoTramo=-1;
+ $('guardarTramo').textContent='+ AGREGAR TRAMO';
+ $('cancelarTramo').classList.add('oculto');
+ ['desde','hasta','metros','consumoTramo','otroDiametro'].forEach(id=>$(id).value='');
+ $('diametro').value='';$('otroDiametro').classList.add('oculto');
+ $('destinoArtefacto').value='';$('llave').checked=false;
+}
+function editarTramo(i){
+ cerrarAccesorios();
+ editandoTramo=i;const t=tramos[i];
+ $('desde').value=t.desde;$('hasta').value=t.hasta;
+ $('metros').value=t.metros;$('consumoTramo').value=t.consumo;
+ const comunes=['1/2"','3/4"','1"','1 1/4"','1 1/2"','2"'];
+ $('diametro').value=comunes.includes(t.diametro)?t.diametro:'Otro (especificar)';
+ $('otroDiametro').value=t.diametro;$('otroDiametro').classList.toggle('oculto',comunes.includes(t.diametro));
+ $('destinoArtefacto').value=t.artefacto||'';$('llave').checked=!!t.llave;
+ $('guardarTramo').textContent='Guardar cambios del tramo';$('cancelarTramo').classList.remove('oculto');
+ $('desde').focus();
+}
+function abrirAccesorios(i){
+ cancelarEdicionTramo();editandoAccesorios=i;
+ const t=tramos[i],d=t.detalle||{estado:'pendiente'};
+ borradorAccesorios=Array.isArray(d.accesorios)?JSON.parse(JSON.stringify(d.accesorios)):[];
+ $('tituloAccesorios').textContent='Accesorios: '+t.desde+'–'+t.hasta+' ('+fmt(t.metros)+' m)';
+ $('estadoAccesorios').value=d.estado||'pendiente';
+ $('metrosFinal').value=d.metrosFinal??'';
+ $('editorAccesorios').classList.remove('oculto');
+ $('errorAccesorios').textContent='Si faltan datos, guardá como pendiente. «Sin tees, codos ni reducciones» confirma cero de esas piezas y descarta la lista de este tramo. Las cuplas se calculan por longitud.';
+ cambiarEstadoAccesorios();
+}
+function cerrarAccesorios(){editandoAccesorios=-1;borradorAccesorios=[];$('editorAccesorios').classList.add('oculto');}
+function cambiarEstadoAccesorios(){
+ $('detalleAccesorios').classList.toggle('oculto',$('estadoAccesorios').value==='ninguno');
+ renderAccesorios();
+}
+function nuevoAccesorio(){
+ if(editandoAccesorios<0)return;
+ const salida=borradorAccesorios.at(-1)?.salida||tramos[editandoAccesorios].diametro;
+ borradorAccesorios.push({tipo:'codo90',metrosAntes:'',salida,ramal:'',nodo:''});
+ renderAccesorios();
+}
+function renderAccesorios(){
+ const cont=$('filasAccesorios');cont.replaceChildren();
+ if(editandoAccesorios<0)return;
+ let entrada=tramos[editandoAccesorios].diametro;
+ borradorAccesorios.forEach((a,i)=>{
+  const fila=document.createElement('div');fila.className='detalle';
+  const titulo=document.createElement('p');titulo.textContent='Accesorio '+(i+1)+' · entrada: '+(entrada||'pendiente');fila.append(titulo);
+  function campo(texto,clave,tipo='text'){
+   const label=document.createElement('label');label.textContent=texto;
+   const input=document.createElement('input');input.type=tipo;input.value=a[clave]??'';
+   if(tipo==='number'){input.min='0';input.step='any';}
+   else input.maxLength=35;
+   input.oninput=()=>{a[clave]=tipo==='number'?(input.value===''?'':Number(input.value)):input.value;};
+   if(clave==='salida')input.onchange=renderAccesorios;
+   label.append(input);fila.append(label);
+  }
+  campo('Metros desde el inicio o desde el accesorio anterior','metrosAntes','number');
+  const label=document.createElement('label');label.textContent='Tipo de accesorio';
+  const select=document.createElement('select');
+  [['codo90','Codo de 90°'],['codo45','Codo de 45°'],['tee','Tee de derivación'],['reduccion','Reducción independiente']].forEach(([valor,texto])=>{
+   const option=document.createElement('option');option.value=valor;option.textContent=texto;select.append(option);
+  });
+  select.value=a.tipo;select.onchange=()=>{a.tipo=select.value;renderAccesorios();};label.append(select);fila.append(label);
+  campo('Diámetro de salida (ej.: 3/4")','salida');
+  if(a.tipo==='tee'){campo('Diámetro de la tercera conexión: ramal','ramal');campo('Nombre único de derivación (ej.: T1)','nodo');}
+  const quitar=document.createElement('button');quitar.textContent='Quitar accesorio '+(i+1);quitar.className='peq alt';
+  quitar.onclick=()=>{borradorAccesorios.splice(i,1);renderAccesorios();};fila.append(quitar);
+  cont.append(fila);entrada=a.salida;
+ });
+}
+function guardarAccesorios(){
+ if(editandoAccesorios<0)return;
+ const original=tramos[editandoAccesorios];
+ const estado=$('estadoAccesorios').value;
+ const detalle=estado==='ninguno'?{estado,accesorios:[]}:{estado,accesorios:borradorAccesorios,
+  metrosFinal:$('metrosFinal').value===''?'':Number($('metrosFinal').value)};
+ const candidato={...original,detalle};
+ // Sustituir temporalmente evita interpretar su propia tee como duplicada.
+ tramos[editandoAccesorios]=candidato;
+ const evaluado=evaluarTramo(candidato);
+ if(estado==='completo' && evaluado.pendiente){
+  tramos[editandoAccesorios]=original;
+  $('errorAccesorios').textContent=evaluado.motivo+' Podés corregirlo o guardar como pendiente.';return;
+ }
+ cerrarAccesorios();actualizarTramos();
+}
+
 function agregarTramo(){
  const desde=$('desde').value.trim();
  const hasta=$('hasta').value.trim();
@@ -434,11 +600,18 @@ function agregarTramo(){
   alert('Completá Desde, Hasta, metros mayores a cero, consumo y diámetro.');
   return;
  }
- tramos.push({
-  desde,hasta,metros:Number(m),consumo:Number(c),
-  diametro:di,artefacto:$('destinoArtefacto').value,
-  llave:$('llave').checked
- });
+ const datos={desde,hasta,metros:Number(m),consumo:Number(c),diametro:di,
+  artefacto:$('destinoArtefacto').value,llave:$('llave').checked};
+ if(editandoTramo>=0){
+  const anterior=tramos[editandoTramo];
+  datos.detalle=anterior.detalle;
+  if(anterior.metros!==datos.metros || anterior.diametro!==datos.diametro){
+   datos.detalle={...anterior.detalle,estado:'pendiente'};
+  }
+  tramos[editandoTramo]=datos;
+ }else tramos.push(datos);
+ cancelarEdicionTramo();
+ cerrarAccesorios();
  $('desde').value='';
  $('hasta').value='';
  $('metros').value='';
@@ -461,17 +634,27 @@ function renderTramos(){
    fmt(t.metros)+' m | '+fmt(t.consumo)+' kcal/h | '+
    t.diametro+(t.artefacto?' | '+t.artefacto:'')+
    (t.llave?' | 1 llave':'');
+  const estado=document.createElement('p');
+  const evaluado=evaluarTramo(t);
+  estado.textContent=evaluado.pendiente?'Accesorios pendientes: '+evaluado.motivo:
+   (evaluado.accesorios.length?'Accesorios revisados: '+evaluado.accesorios.length:'Revisado: sin tees, codos ni reducciones. Las cuplas se calculan por longitud.');
+  const editar=document.createElement('button');editar.className='peq alt';
+  editar.textContent='Editar tramo';editar.onclick=()=>editarTramo(i);
+  const accesorios=document.createElement('button');accesorios.className='peq alt';
+  accesorios.textContent='Revisar accesorios';accesorios.onclick=()=>abrirAccesorios(i);
+  d.append(s,estado,editar,accesorios);
   const b=document.createElement('button');
   b.className='peq alt';
   b.textContent='Quitar tramo';
   b.onclick=()=>{
+   cancelarEdicionTramo();cerrarAccesorios();
    tramos.splice(i,1);
    renderTramos();
    $('resultadoMateriales').textContent=
     'Tramos actualizados. Tocá CALCULAR MATERIALES.';
  guardarDatos();
   };
-  d.append(s,b);
+  d.append(b);
   cont.append(d);
  });
 }
@@ -495,22 +678,32 @@ function calcularMateriales(){
  head.append(hr);
  tabla.append(head);
  const body=document.createElement('tbody');
- let metros=0,tiras=0,cuplas=0,llaves=0;
+ let metros=0,tiras=0,cuplas=0,llaves=0,pendientes=0;
+ const inventario=Object.create(null);
+ const avisos=[];
  const grupos=Object.create(null);
  tramos.forEach(t=>{
-  const n=Math.ceil(t.metros/6-1e-10);
-  const uniones=Math.max(0,n-1);
+  const calculo=evaluarTramo(t);
+  const n=calculo.tiras;
+  const uniones=calculo.cuplas;
+  if(calculo.pendiente){pendientes++;avisos.push(t.desde+'–'+t.hasta+': '+calculo.motivo);}
+  calculo.accesorios.forEach(a=>{
+   const nombre=nombreAccesorio(a);
+   inventario[nombre]=(inventario[nombre]||0)+1;
+  });
   const compra=n*6;
   metros+=t.metros;
   tiras+=n;
   cuplas+=uniones;
   llaves+=t.llave?1:0;
-  if(!grupos[t.diametro])
-   grupos[t.diametro]={metros:0,tiras:0};
-  grupos[t.diametro].metros+=t.metros;
-  grupos[t.diametro].tiras+=n;
+  calculo.segmentos.forEach(seg=>{
+   if(!grupos[seg.diametro])grupos[seg.diametro]={metros:0,tiras:0};
+   grupos[seg.diametro].metros+=seg.metros;
+   grupos[seg.diametro].tiras+=tirasPara(seg.metros);
+  });
   const r=document.createElement('tr');
-  [t.desde+'–'+t.hasta,fmt(t.metros),t.diametro,
+  [t.desde+'–'+t.hasta+(calculo.pendiente?' (provisorio)':''),fmt(t.metros),
+   calculo.segmentos.map(s=>s.diametro).filter((d,i,a)=>a.indexOf(d)===i).join(' → '),
    String(n),fmt(compra)+' m',String(uniones),
    t.llave?'1':'0'].forEach(x=>{
    const td=document.createElement('td');
@@ -526,7 +719,7 @@ function calcularMateriales(){
  out.append(wrap);
  const p=document.createElement('p');
  p.className='resumen';
- p.textContent='Total: '+fmt(metros)+' m | '+
+ p.textContent=(pendientes?'Total provisorio (hay accesorios pendientes): ':'Total: ')+fmt(metros)+' m | '+
   tiras+' tiras | '+fmt(tiras*6)+' m a comprar | '+
   cuplas+' cuplas estimadas | '+llaves+' llaves indicadas.';
  out.append(p);
@@ -534,6 +727,12 @@ function calcularMateriales(){
  extra.textContent='Referencia +10% sobre longitud: '+
   fmt(metros*1.1)+' m. No equivale automáticamente a la cantidad de tiras a comprar.';
  out.append(extra);
+ const tituloAcc=document.createElement('h3');tituloAcc.textContent='Accesorios revisados';out.append(tituloAcc);
+ const lista=document.createElement('p');
+ lista.textContent=Object.entries(inventario).map(([n,c])=>c+' × '+n).join(' | ')||
+  (pendientes?'Pendientes de identificar; no equivale a cero.':'Cero tees, codos y reducciones según revisión de todos los tramos. Las cuplas figuran en el total.');
+ out.append(lista);
+ avisos.forEach(a=>{const p=document.createElement('p');p.className='aviso';p.textContent=a;out.append(p);});
  const titulo=document.createElement('h3');
  titulo.textContent='Resumen por diámetro';
  out.append(titulo);

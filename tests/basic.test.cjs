@@ -42,3 +42,93 @@ test('una foto que supera la cuota no bloquea guardar la aclaración',()=>{
 test('impresión copia la aclaración actual y mantiene advertencias visibles',()=>{
  const a=app();a.run("abrir('gas')");a.elements.get('duda').value='Última aclaración';a.ctx.window.beforeprint();assert.match(a.text('aclaracionImpresion'),/Última aclaración/);assert.match(html,/\.aviso\{display:block;break-inside:avoid\}/);
 });
+
+test('límites comerciales: debajo, exactamente y encima de 6, 12 y 18 m',()=>{
+ const a=app();
+ for(const limite of [6,12,18])for(const delta of [-0.001,0,0.001]){
+  const m=limite+delta;
+  a.ctx.tramo={metros:m,diametro:'3/4"',detalle:{estado:'ninguno'}};
+  const r=a.run('evaluarTramo(tramo)');
+  const n=limite/6+(delta>0?1:0);
+  assert.equal(r.tiras,n,`${m} m`);assert.equal(r.cuplas,n-1,`${m} m`);assert.equal(r.pendiente,false);
+ }
+ // No ocultar un exceso real con una tolerancia aplicada a ceil.
+ assert.equal(a.run('tirasPara(6.0000000001)'),2);
+});
+function evaluar(a,metros,accesorios,metrosFinal,diametro='3/4"'){
+ a.ctx.tramo={desde:'M',hasta:'A',metros,diametro,consumo:9300,
+  detalle:{estado:'completo',accesorios,metrosFinal}};
+ return a.run('evaluarTramo(tramo)');
+}
+test('codo a los 6 m de un tramo de 12 m: dos tiras y cero cuplas',()=>{
+ const a=app();const r=evaluar(a,12,[{tipo:'codo90',metrosAntes:6,salida:'3/4"'}],6);
+ assert.equal(r.pendiente,false);assert.equal(r.tiras,2);assert.equal(r.cuplas,0);assert.equal(r.accesorios.length,1);
+});
+test('cuplas solo dentro de segmentos: 12 m + codo 45° + 6 m',()=>{
+ const a=app();const r=evaluar(a,18,[{tipo:'codo45',metrosAntes:12,salida:'3/4"'}],6);
+ assert.equal(r.tiras,3);assert.equal(r.cuplas,1);assert.match(a.run('nombreAccesorio(evaluarTramo(tramo).accesorios[0])'),/45°/);
+});
+test('tee conserva los tres diámetros y no agrega una reducción independiente',()=>{
+ const a=app();const r=evaluar(a,12,[{tipo:'tee',metrosAntes:6,salida:'3/4"',ramal:'1/2"',nodo:'T1'}],6);
+ assert.equal(r.pendiente,false);assert.equal(r.accesorios.length,1);assert.equal(r.accesorios[0].entrada,'3/4"');assert.equal(r.accesorios[0].ramal,'1/2"');
+ assert.match(a.run('nombreAccesorio(evaluarTramo(tramo).accesorios[0])'),/Tee reductora/);
+});
+test('codo reductor y reducción independiente se cuentan como piezas diferentes',()=>{
+ const a=app();const r=evaluar(a,18,[{tipo:'codo90',metrosAntes:6,salida:'1/2"'},
+  {tipo:'reduccion',metrosAntes:6,salida:'3/8"'}],6);
+ assert.equal(r.pendiente,false);assert.equal(r.tiras,3);assert.equal(r.cuplas,0);
+ assert.equal(r.accesorios.length,2);assert.deepEqual(Array.from(r.segmentos,s=>s.diametro),['3/4"','1/2"','3/8"']);
+ assert.match(a.run('nombreAccesorio(evaluarTramo(tramo).accesorios[0])'),/Codo 90° reductor/);
+ assert.match(a.run('nombreAccesorio(evaluarTramo(tramo).accesorios[1])'),/Reducción independiente/);
+});
+test('no inventa accesorios si faltan longitudes, ramal o nombre de tee',()=>{
+ const a=app();
+ for(const acc of [
+  {tipo:'tee',metrosAntes:6,salida:'3/4"',ramal:'',nodo:'T1'},
+  {tipo:'tee',metrosAntes:6,salida:'3/4"',ramal:'1/2"',nodo:''},
+  {tipo:'codo90',metrosAntes:'',salida:'3/4"'},
+  {tipo:'codo90',metrosAntes:-1,salida:'3/4"'},
+  {tipo:'reduccion',metrosAntes:6,salida:'3/4"'}]){
+  const r=evaluar(a,12,[acc],6);assert.equal(r.pendiente,true);assert.equal(r.accesorios.length,0);assert.ok(r.motivo);
+ }
+ assert.equal(evaluar(a,12,[{tipo:'codo90',metrosAntes:4,salida:'3/4"'}],4).pendiente,true);
+});
+test('pendiente, cero confirmado y tramo antiguo son estados distintos',()=>{
+ const a=app();a.ctx.tramo={metros:12,diametro:'3/4"'};
+ assert.equal(a.run('evaluarTramo(tramo).pendiente'),true);
+ a.run("tramo.detalle={estado:'pendiente',accesorios:[]}");assert.equal(a.run('evaluarTramo(tramo).pendiente'),true);
+ a.run("tramo.detalle={estado:'ninguno',accesorios:[]}");assert.equal(a.run('evaluarTramo(tramo).pendiente'),false);
+ a.run("tramo.detalle={estado:'completo',accesorios:[]}");assert.equal(a.run('evaluarTramo(tramo).pendiente'),true);
+});
+test('dos accesorios contiguos y accesorios de extremo no inventan cuplas',()=>{
+ const a=app();const r=evaluar(a,6,[{tipo:'codo90',metrosAntes:0,salida:'3/4"'},
+  {tipo:'reduccion',metrosAntes:0,salida:'1/2"'}],6);
+ assert.equal(r.pendiente,false);assert.equal(r.tiras,1);assert.equal(r.cuplas,0);
+});
+test('tee compartida no se cuenta dos veces con el mismo nombre',()=>{
+ const a=app();evaluar(a,12,[{tipo:'tee',metrosAntes:6,salida:'3/4"',ramal:'1/2"',nodo:'T1'}],6);
+ a.run('tramos=[tramo]');
+ const r=evaluar(a,12,[{tipo:'tee',metrosAntes:6,salida:'3/4"',ramal:'1/2"',nodo:' t1 '}],6);
+ assert.equal(r.pendiente,true);assert.match(r.motivo,/repetida/);
+ assert.equal(a.run('evaluarTramo(tramos[0]).pendiente'),false);
+ // Si se importan duplicados ya guardados, ambos quedan pendientes.
+ a.run('tramos.push(tramo)');assert.equal(a.run('evaluarTramo(tramos[0]).pendiente'),true);
+});
+test('accesorios sobreviven a recarga y materiales se agrupan por diámetro de segmento',()=>{
+ const a=app();a.run("abrir('gas')");evaluar(a,18,[{tipo:'reduccion',metrosAntes:12,salida:'1/2"'}],6);
+ a.run('tramos=[tramo];guardarDatos()');const b=app(a.saved());b.run("abrir('gas')");
+ assert.equal(b.run('evaluarTramo(tramos[0]).cuplas'),1);b.run('calcularMateriales()');
+ const textos=b.elements.get('resultadoMateriales').children.map(x=>x.textContent).join(' ');
+ assert.match(textos,/Reducción independiente/);assert.match(textos,/3\/4".*12 m de recorrido, 2 tiras/);assert.match(textos,/1\/2".*6 m de recorrido, 1 tiras/);
+});
+test('editar longitud o diámetro requiere volver a revisar accesorios',()=>{
+ const a=app();a.run("abrir('gas')");evaluar(a,12,[{tipo:'codo90',metrosAntes:6,salida:'3/4"'}],6);
+ a.run('tramos=[tramo];editandoTramo=0');
+ for(const [id,v] of Object.entries({desde:'M',hasta:'A',metros:'18',consumoTramo:'9300',diametro:'3/4"'}))a.elements.get(id).value=v;
+ a.run('agregarTramo()');assert.equal(a.run('tramos.length'),1);assert.equal(a.run('tramos[0].detalle.estado'),'pendiente');assert.equal(a.run('tramos[0].detalle.accesorios.length'),1);
+});
+test('editor permite corregir un detalle incompleto sin perder el tramo original',()=>{
+ const a=app();a.run("abrir('gas')");evaluar(a,12,[{tipo:'codo90',metrosAntes:6,salida:'3/4"'}],6);a.run('tramos=[tramo];abrirAccesorios(0)');
+ a.elements.get('estadoAccesorios').value='completo';a.elements.get('metrosFinal').value='3';a.run('guardarAccesorios()');assert.equal(a.run('editandoAccesorios'),0);assert.match(a.text('errorAccesorios'),/deben sumar/);
+ a.elements.get('metrosFinal').value='6';a.run('guardarAccesorios()');assert.equal(a.run('editandoAccesorios'),-1);assert.equal(a.run('evaluarTramo(tramos[0]).pendiente'),false);
+});
