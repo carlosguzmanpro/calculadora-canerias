@@ -36,6 +36,31 @@ Las fotografías PNG, JPEG o WebP de hasta **1 MB** se guardan localmente si hay
 
 Si las fotografías exceden la cuota del navegador, se guarda el proyecto sin fotos y se informa. Si el almacenamiento está bloqueado o lleno incluso sin fotos, se avisa y la aplicación sigue funcionando durante la sesión; guardá una impresión antes de cerrar. El modo privado y borrar los datos del navegador pueden eliminar todo. El guardado no sincroniza dispositivos y **no es una copia de seguridad**. Dos pestañas pueden sobrescribir cambios: trabajá en una sola.
 
+## Revisión de resultados simulados (primera etapa de IA)
+
+Esta versión NO reconoce fotografías ni conecta Gemini. En GAS, **Revisar ejemplo SIMULADO de croquis** abre una demostración independiente de cualquier imagen cargada. No se envían imágenes ni datos a servicios externos.
+
+El borrador usa el contrato JSON v1: `version`, `origen: "simulado"`, `id`, `aplicado` y una lista de `tramos`. Cada tramo tiene `incluir`, `campos` y `accesorios`; cada dato editable tiene `{valor, confirmado, duda}`. `null` representa información faltante y nunca se convierte automáticamente en cero. Cada accesorio tiene también `incluir`. El esquema incluye origen, destino, longitud total, diámetro inicial, consumos, artefacto, llave, longitudes entre accesorios y las conexiones de tees, codos y reducciones. Los datos se convierten al modelo de cálculo existente solo tras la revisión. La futura conexión de IA requerirá su propio adaptador y validación: esta versión solo admite origen simulado.
+
+Cada casilla confirma un campo. Editarlo quita esa confirmación. Se puede excluir un tramo o un accesorio incorrecto; hay que corregir las longitudes y conexiones que dependían de él. Para indicar que no existe un artefacto, escribí `Ninguno` y consumo de placa `0`, y confirmá ambos. La longitud del tramo tiene que ser positiva; la suma de segmentos y la continuidad de diámetros se validan antes de incorporar. Los nombres de tees no pueden duplicarse. No se dimensiona ni se certifica la instalación.
+
+La incorporación agrega los datos a los existentes sin reemplazarlos. Si un dato es inválido, no se agrega ningún tramo ni artefacto del borrador. Un borrador ya incorporado no puede volver a agregarse, incluso después de recargar cuando el guardado local funciona. Las correcciones y confirmaciones se guardan en el navegador con el resto del proyecto. Descartar el borrador no elimina tramos o artefactos ya incorporados; para quitarlos, usá sus botones Quitar habituales.
+
+Los datos de demostración conservan la marca **SIMULADO** en listas, resultados de materiales, consumo e impresión, incluso si se editan después. No deben confundirse con un proyecto real. Esta pantalla usa una lista para que el formato pueda admitir varios tramos; el ejemplo inicial contiene un solo tramo con todos los tipos de accesorios.
+
+### Qué tocar en Android
+
+1. Descargá y descomprimí `canerias-revision-simulada.zip` con Files de Google. Abrí `index.html` usando el mismo navegador o visor HTML local con JavaScript que utilizaste para probar la versión anterior. Un visor que solo muestre código no ejecuta la aplicación. No hace falta una computadora para esta demostración; según Android, abrir HTML local puede requerir una aplicación de vista previa HTML. No se incluye alojamiento ni un enlace web publicado.
+2. Tocá **Gas** y después **Revisar ejemplo SIMULADO de croquis**.
+3. Tocá **Cargar ejemplo SIMULADO de GAS**. No hace falta cargar una foto: el ejemplo no proviene de ninguna imagen.
+4. Revisá los datos del tramo. En **Metros después del último accesorio**, ingresá **6**. Es el dato que dejamos vacío para practicar. Marcá cada casilla **Confirmo** del tramo y de sus accesorios. Si cambiás un valor, volvé a confirmarlo.
+5. Podés cambiar tipos, metros, diámetros y artefactos, o desmarcar **Incluir accesorio** si una pieza no corresponde; después ajustá longitudes y diámetros para mantener la continuidad. Para la primera prueba, conservá los valores del ejemplo salvo los 6 m finales.
+6. Tocá **Incorporar datos SIMULADOS confirmados al proyecto**. Si falta algo, el aviso explica qué corregir. Nada se agrega parcialmente.
+7. Tocá **Volver a croquis y tramos** y luego **CALCULAR MATERIALES**. El ejemplo sin modificar aporta 18 m, 3 tiras, 0 cuplas, una tee, un codo de 90°, una reducción independiente y un codo de 45°. Si ya había datos, el total los incluye también y mantiene la marca de simulación.
+8. En **Consulta de consumos de gas**, tocá **CALCULAR CONSUMO TOTAL**: el ejemplo agrega un artefacto de 9300 kcal/h, equivalente a 1 m³/h orientativo con gas natural. El resultado advertirá que incluye datos simulados.
+9. Recargá para comprobar el guardado. Si abriste un archivo local, algunos navegadores bloquean o cambian el almacenamiento; la aplicación lo avisa. No uses modo incógnito. Mantené el mismo archivo y navegador.
+10. Para imprimir desde la vista de tramos, usá **Imprimir o guardar esta revisión**. Los resultados incluyen el aviso de simulación. Para limpiar la prueba, quitá el tramo DEMO y el artefacto simulado, y descartá el borrador.
+
 ## Probar desde un celular sin publicar
 
 1. Descomprimí la copia de prueba en una computadora con Python 3.
@@ -59,6 +84,6 @@ Prueba opcional de navegador: `npm install`, `npx playwright install chromium` y
 
 ## Rama y conservación de la versión
 
-La mejora inicial se preparó en la rama local `prueba/mejoras-locales`; el registro de accesorios continúa en `prueba/accesorios-gas`, partiendo de los archivos del commit de GitHub `9c94db1af8167012af764ebaf95151e928aed8b7`. La conexión Git del entorno falló y se recuperaron los archivos mediante la conexión de lectura de GitHub. Por eso el historial Git de esta copia es una instantánea local, no un clon del historial remoto. No se subió ninguna rama ni se modificó `main` en GitHub.
+La mejora inicial se preparó en la rama local `prueba/mejoras-locales`; el registro de accesorios continúa en `prueba/accesorios-gas` y la revisión simulada en `prueba/revision-croquis-gas`, partiendo de los archivos del commit de GitHub `9c94db1af8167012af764ebaf95151e928aed8b7`. La conexión Git del entorno falló y se recuperaron los archivos mediante la conexión de lectura de GitHub. Por eso el historial Git de esta copia es una instantánea local, no un clon del historial remoto. No se subió ninguna rama ni se modificó `main` en GitHub.
 
 Para incorporar el parche en un clon normal, primero conservá tus cambios locales, creá la rama con `git switch -c prueba/mejoras-locales` y ejecutá `git apply --check /ruta/canerias-mejoras.patch`. Si pasa, aplicá `git apply /ruta/canerias-mejoras.patch`. El parche está preparado sobre la versión indicada; si el repositorio avanzó, revisá las diferencias antes de aplicarlo. No hagas push ni fusiones con `main` hasta decidir publicar esos cambios.

@@ -73,10 +73,23 @@ section{box-shadow:none}
 <h2 id="titulo"></h2>
 
 <div id="menuGas" class="oculto">
+<button class="alt" onclick="mostrarVista('revisionCroquis')">Revisar ejemplo SIMULADO de croquis</button>
 <button onclick="mostrarVista('croquis')">📷 Trabajar con croquis y tramos</button>
 <button class="alt" onclick="mostrarVista('consumos')">🧮 Consulta de consumos de gas</button>
 </div>
 
+<section id="revisionCroquis" class="oculto">
+<h2>Revisión de croquis · DEMOSTRACIÓN SIMULADA</h2>
+<div class="aviso">Esta pantalla usa datos de ejemplo escritos para practicar. No analiza tu fotografía, no usa IA ni envía imágenes. Los datos simulados se agregarán a tu proyecto solo si los confirmás. Para datos reales, seguí con la carga manual.</div>
+<button class="alt" onclick="cargarEjemploCroquis()">Cargar ejemplo SIMULADO de GAS</button>
+<p>Revisá cada campo, corregí lo que necesites y marcá su casilla «Confirmo». Modificar un dato quita su confirmación. Ningún dato faltante se completa automáticamente.</p>
+<p>El ejemplo contiene una tee, codos de 90° y 45° y una reducción independiente. Falta intencionalmente la longitud final: ingresá 6 m para completar el ejercicio. La entrada de cada accesorio debe coincidir con la salida del anterior.</p>
+<div id="datosCroquis"></div>
+<p id="mensajeCroquis" class="aviso" role="status"></p>
+<button id="incorporarCroquis" onclick="incorporarCroquis()">Incorporar datos SIMULADOS confirmados al proyecto</button>
+<button class="alt" onclick="descartarBorradorCroquis()">Descartar borrador simulado</button>
+<button class="alt" onclick="mostrarVista('croquis')">Volver a croquis y tramos</button>
+</section>
 <div id="croquis" class="oculto">
 <h3>1. Cargar croquis</h3>
 <p class="nota">Sacá una foto o elegí una imagen guardada en tu teléfono.</p>
@@ -232,6 +245,7 @@ function guardarDatos(){
  const actual=proyectos[modulo];
  actual.aclaracion=$('duda').value;
  actual.revision=$('revision').textContent;
+ proyectos.gas.borradorCroquis=borradorCroquis;
  proyectos.gas.tramos=tramos;
  proyectos.gas.artefactos=artefactos;
  proyectos.gas.tipoGas=$('gt').value;
@@ -256,6 +270,7 @@ function restaurarDatos(){
   const datos=JSON.parse(localStorage.getItem(CLAVE)||'null');
   if(datos && especialidades.every(m=>datos[m] && typeof datos[m]==='object' && !Array.isArray(datos[m]))) proyectos=datos;
   const g=proyectos.gas;
+ borradorCroquis=formatoBorradorValido(g.borradorCroquis)?g.borradorCroquis:null;
   tramos=Array.isArray(g.tramos)?g.tramos.filter(t=>t && typeof t.desde==='string' && typeof t.hasta==='string' && typeof t.diametro==='string' && Number.isFinite(t.metros) && t.metros>0 && Number.isFinite(t.consumo) && t.consumo>=0):[];
   artefactos=Array.isArray(g.artefactos)?g.artefactos.filter(a=>a && typeof a.nombre==='string' && Number.isFinite(a.consumo) && a.consumo>0):[];
   if(['9300','22300'].includes(g.tipoGas)) $('gt').value=g.tipoGas;
@@ -263,7 +278,7 @@ function restaurarDatos(){
  }catch(e){
   $('estadoGuardado').textContent='No se pudieron recuperar los datos locales. Podés trabajar, pero verificá el guardado antes de cerrar.';
  }
- renderTramos();renderGas();
+ renderTramos();renderGas();renderRevisionCroquis();
 }
 function actualizarEstadoFoto(){
  $('estadoFoto').textContent=proyectos[modulo].foto?
@@ -309,6 +324,9 @@ function volver(){
 }
 
 function mostrarVista(v){
+ if(v==='revisionCroquis' && modulo!=='gas')return;
+ $('revisionCroquis').classList.toggle('oculto',v!=='revisionCroquis');
+ if(v==='revisionCroquis')renderRevisionCroquis();
  $('croquis').classList.toggle('oculto',v!=='croquis');
  $('consumos').classList.toggle('oculto',v!=='consumos');
  if(v==='pendiente'){
@@ -407,7 +425,7 @@ function renderGas(){
   const d=document.createElement('div');
   d.className='fila';
   const s=document.createElement('span');
-  s.textContent=a.nombre+': '+fmt(a.consumo)+' kcal/h';
+  s.textContent=(a.origen?.tipo==='simulado'?'[SIMULADO] ':'')+a.nombre+': '+fmt(a.consumo)+' kcal/h';
   const b=document.createElement('button');
   b.className='peq alt';
   b.textContent='Quitar';
@@ -426,10 +444,11 @@ function calcularConsumos(){
   $('resultadoGas').textContent='Agregá al menos un artefacto.';
   return;
  }
+ const avisoSimulado=artefactos.some(a=>a.origen?.tipo==='simulado')?'Incluye artefactos SIMULADOS de demostración. ':'';
  const total=artefactos.reduce((s,a)=>s+a.consumo,0);
  const poder=Number($('gt').value);
  $('resultadoGas').textContent=
-  'Artefactos: '+artefactos.length+
+  avisoSimulado+'Artefactos: '+artefactos.length+
   ' | Consumo total: '+fmt(total)+' kcal/h'+
   ' | Caudal orientativo: '+fmt(total/poder)+' m³/h.'+
   ' Valor estimado con poder calorífico de referencia.'+
@@ -445,6 +464,144 @@ $('diametro').addEventListener('change',()=>{
  $('diametro').value!=='Otro (especificar)');
 });
 
+// Contrato v1: valores separados de su confirmación; null significa dato faltante.
+// Esta etapa solo admite ejemplos simulados, nunca resultados de reconocimiento real.
+const CAMPOS_CROQUIS={desde:['Desde','text'],hasta:['Hasta','text'],metros:['Metros totales','number'],
+ diametro:['Diámetro inicial','text'],consumo:['Consumo que transporta (kcal/h)','number'],
+ artefacto:['Artefacto de destino (o Ninguno)','text'],consumoArtefacto:['Consumo de placa del artefacto (kcal/h; 0 si no hay)','number'],
+ llave:['¿Hay una llave de paso?','checkbox'],metrosFinal:['Metros después del último accesorio','number']};
+const CAMPOS_ACCESORIO={tipo:['Tipo de accesorio','select'],metrosAntes:['Metros antes de este accesorio','number'],
+ entrada:['Diámetro de entrada','text'],salida:['Diámetro de salida','text'],ramal:['Diámetro del ramal de la tee','text'],nodo:['Nombre único de derivación','text']};
+let borradorCroquis=null;
+function datoCroquis(valor,duda=''){return {valor,confirmado:false,duda};}
+function formatoBorradorValido(b){
+ const campoValido=c=>!!(c && typeof c==='object' && (['string','number','boolean'].includes(typeof c.valor) || c.valor===null));
+ return !!(b && b.version===1 && b.origen==='simulado' && typeof b.id==='string' && typeof b.aplicado==='boolean' &&
+  Array.isArray(b.tramos) && b.tramos.length>0 && b.tramos.length<=100 && b.tramos.every(t=>
+   t && typeof t.incluir==='boolean' && t.campos && Object.keys(CAMPOS_CROQUIS).every(k=>campoValido(t.campos[k]) && typeof t.campos[k].confirmado==='boolean') &&
+   Array.isArray(t.accesorios) && t.accesorios.length<=100 && t.accesorios.every(a=>a && typeof a.incluir==='boolean' && Object.keys(CAMPOS_ACCESORIO).every(k=>campoValido(a[k]) && typeof a[k].confirmado==='boolean'))));
+}
+function cargarEjemploCroquis(){
+ if(modulo!=='gas')return;
+ if(borradorCroquis){$('mensajeCroquis').textContent='Ya hay un borrador. Podés revisarlo o descartarlo antes de cargar otro.';return;}
+ const campos={desde:'DEMO-M',hasta:'DEMO-A',metros:18,diametro:'3/4"',consumo:9300,
+  artefacto:'Calefactor (ejemplo simulado)',consumoArtefacto:9300,llave:false,metrosFinal:null};
+ const accesorios=[
+  {tipo:'tee',metrosAntes:6,entrada:'3/4"',salida:'3/4"',ramal:'1/2"',nodo:'DEMO-T1'},
+  {tipo:'codo90',metrosAntes:6,entrada:'3/4"',salida:'3/4"',ramal:'',nodo:''},
+  {tipo:'reduccion',metrosAntes:0,entrada:'3/4"',salida:'1/2"',ramal:'',nodo:''},
+  {tipo:'codo45',metrosAntes:0,entrada:'1/2"',salida:'1/2"',ramal:'',nodo:''}
+ ];
+ borradorCroquis={version:1,origen:'simulado',id:'demo-gas-'+Date.now(),aplicado:false,
+  tramos:[{incluir:true,campos:Object.fromEntries(Object.entries(campos).map(([k,v])=>[k,datoCroquis(v,k==='metrosFinal'?'Ejercicio: este dato está vacío. Para completar el ejemplo, ingresá 6 m.':'')])),
+   accesorios:accesorios.map(a=>({incluir:true,...Object.fromEntries(Object.entries(a).map(([k,v])=>[k,datoCroquis(v)]))}))}]};
+ guardarDatos();renderRevisionCroquis();
+}
+function descartarBorradorCroquis(){
+ borradorCroquis=null;guardarDatos();renderRevisionCroquis();
+ $('mensajeCroquis').textContent='Borrador descartado. Los tramos ya incorporados, si los hay, no se eliminaron.';
+}
+function cambiarDatoCroquis(dato,valor){dato.valor=valor;dato.confirmado=false;guardarDatos();}
+function renderRevisionCroquis(){
+ const cont=$('datosCroquis');cont.replaceChildren();
+ $('incorporarCroquis').disabled=!borradorCroquis || borradorCroquis.aplicado;
+ $('mensajeCroquis').textContent=borradorCroquis?.aplicado?'Ejemplo SIMULADO incorporado. No se volverá a agregar al recargar.':
+  (borradorCroquis?'Borrador SIMULADO: revisá y confirmá cada dato. Completá los campos vacíos antes de incorporar.':'Todavía no hay borrador. Cargá el ejemplo simulado para practicar.');
+ if(!borradorCroquis)return;
+ const bloqueado=borradorCroquis.aplicado;
+ borradorCroquis.tramos.forEach((t,i)=>{
+  const bloque=document.createElement('section');
+  const titulo=document.createElement('h3');titulo.textContent='Tramo '+(i+1)+' · EJEMPLO SIMULADO';bloque.append(titulo);
+  const incluirLabel=document.createElement('label');const incluir=document.createElement('input');
+  incluir.type='checkbox';incluir.style.width='auto';incluir.checked=t.incluir;incluir.disabled=bloqueado;
+  incluir.onchange=()=>{t.incluir=incluir.checked;guardarDatos();};
+  incluirLabel.append(incluir,document.createTextNode(' Incluir este tramo al confirmar'));bloque.append(incluirLabel);
+  function campo(diccionario,k,def){
+   const d=diccionario[k];
+   const fila=document.createElement('div');fila.className='detalle';
+   const label=document.createElement('label');label.textContent=def[0];
+   const input=document.createElement(def[1]==='select'?'select':'input');
+   if(def[1]==='select'){
+    [['tee','Tee'],['codo45','Codo de 45°'],['codo90','Codo de 90°'],['reduccion','Reducción independiente']].forEach(([v,n])=>{
+     const o=document.createElement('option');o.value=v;o.textContent=n;input.append(o);
+    });
+   }else{input.type=def[1];if(def[1]==='number'){input.min='0';input.step='any';}else input.maxLength=80;}
+   input.value=d.valor??'';if(def[1]==='checkbox'){input.checked=!!d.valor;input.style.width='auto';}
+   input.disabled=bloqueado;
+   const confirmar=document.createElement('input');confirmar.type='checkbox';confirmar.style.width='auto';confirmar.checked=d.confirmado;confirmar.disabled=bloqueado;
+   const confirmLabel=document.createElement('label');confirmLabel.append(confirmar,document.createTextNode(' Confirmo '+def[0].toLowerCase()));
+   input.oninput=()=>{
+    cambiarDatoCroquis(d,def[1]==='number'?(input.value===''?null:Number(input.value)):(def[1]==='checkbox'?input.checked:input.value));
+    confirmar.checked=false;
+   };
+   if(k==='tipo')input.onchange=()=>{input.oninput();renderRevisionCroquis();};
+   confirmar.onchange=()=>{d.confirmado=confirmar.checked;guardarDatos();};
+   label.append(input);fila.append(label,confirmLabel);
+   if(d.duda){const duda=document.createElement('p');duda.textContent='Dato a revisar: '+d.duda;fila.append(duda);}
+   bloque.append(fila);
+  }
+  Object.entries(CAMPOS_CROQUIS).forEach(([k,def])=>campo(t.campos,k,def));
+  t.accesorios.forEach((a,j)=>{
+   const titulo=document.createElement('h4');titulo.textContent='Accesorio '+(j+1);bloque.append(titulo);
+   const labelIncluir=document.createElement('label');const checkIncluir=document.createElement('input');
+   checkIncluir.type='checkbox';checkIncluir.style.width='auto';checkIncluir.checked=a.incluir;checkIncluir.disabled=bloqueado;
+   checkIncluir.onchange=()=>{a.incluir=checkIncluir.checked;guardarDatos();};
+   labelIncluir.append(checkIncluir,document.createTextNode(' Incluir accesorio '+(j+1)+' (desmarcá si no corresponde)'));bloque.append(labelIncluir);
+   Object.entries(CAMPOS_ACCESORIO).filter(([k])=>a.tipo.valor==='tee' || !['ramal','nodo'].includes(k)).forEach(([k,def])=>campo(a,k,def));
+  });
+  cont.append(bloque);
+ });
+}
+function prepararIncorporacionCroquis(b){
+ if(!formatoBorradorValido(b))throw Error('El formato del borrador simulado no es válido.');
+ if(b.aplicado)throw Error('Este borrador ya fue incorporado.');
+ const elegidos=b.tramos.filter(t=>t.incluir);
+ if(!elegidos.length)throw Error('Seleccioná al menos un tramo para incorporar.');
+ function valor(d,tipo,nombre){
+  if(!d.confirmado)throw Error('Falta confirmar: '+nombre+'.');
+  if(tipo==='text' && (typeof d.valor!=='string' || !d.valor.trim()))throw Error('Completá: '+nombre+'.');
+  if(tipo==='number' && (!Number.isFinite(d.valor) || d.valor<0))throw Error('Ingresá un número válido: '+nombre+'.');
+  if(tipo==='checkbox' && typeof d.valor!=='boolean')throw Error('Revisá: '+nombre+'.');
+  return typeof d.valor==='string'?d.valor.trim():d.valor;
+ }
+ const nuevos=[],nuevosArtefactos=[];
+ elegidos.forEach((t,i)=>{
+  const c={};Object.entries(CAMPOS_CROQUIS).forEach(([k,[nombre,tipo]])=>c[k]=valor(t.campos[k],tipo,'tramo '+(i+1)+' · '+nombre));
+  if(c.metros<=0)throw Error('Los metros totales deben ser mayores a cero.');
+  const accesorios=[];let diametro=c.diametro;
+  t.accesorios.filter(a=>a.incluir).forEach((a,j)=>{
+   const tipo=valor(a.tipo,'text','tipo del accesorio '+(j+1));
+   if(!['tee','codo45','codo90','reduccion'].includes(tipo))throw Error('Tipo de accesorio desconocido.');
+   const pieza={tipo};
+   ['metrosAntes','entrada','salida',...(tipo==='tee'?['ramal','nodo']:[])].forEach(k=>pieza[k]=valor(a[k],CAMPOS_ACCESORIO[k][1],'accesorio '+(j+1)+' · '+CAMPOS_ACCESORIO[k][0]));
+   if(pieza.entrada!==diametro)throw Error('El diámetro de entrada del accesorio '+(j+1)+' no coincide con el segmento anterior. Corregí los diámetros.');
+   diametro=pieza.salida;accesorios.push(pieza);
+  });
+  if(!accesorios.length && Math.abs(c.metrosFinal-c.metros)>1e-9*Math.max(1,c.metros))throw Error('Sin accesorios, los metros finales deben coincidir con la longitud total del tramo.');
+  const ninguno=c.artefacto.toLocaleLowerCase('es')==='ninguno';
+  if((ninguno && c.consumoArtefacto!==0) || (!ninguno && c.consumoArtefacto<=0))throw Error('Indicá «Ninguno» con consumo de placa 0, o un artefacto con consumo de placa mayor a cero.');
+  const origen={tipo:'simulado',borradorId:b.id};
+  nuevos.push({desde:c.desde,hasta:c.hasta,metros:c.metros,diametro:c.diametro,consumo:c.consumo,
+   artefacto:ninguno?'':c.artefacto,llave:c.llave,origen,
+   detalle:{estado:accesorios.length?'completo':'ninguno',accesorios,metrosFinal:c.metrosFinal}});
+  if(!ninguno)nuevosArtefactos.push({nombre:c.artefacto,consumo:c.consumoArtefacto,origen});
+ });
+ const conjunto=[...tramos,...nuevos];
+ nuevos.forEach(t=>{const r=evaluarTramo(t,conjunto);if(r.pendiente)throw Error(r.motivo);});
+ // No aceptar una nueva tee que invalide una tee ya registrada.
+ tramos.forEach(t=>{if(!evaluarTramo(t).pendiente && evaluarTramo(t,conjunto).pendiente)throw Error('La incorporación duplica una tee de un tramo existente.');});
+ return {tramos:nuevos,artefactos:nuevosArtefactos};
+}
+function incorporarCroquis(){
+ if(modulo!=='gas')return;
+ try{
+  const nuevos=prepararIncorporacionCroquis(borradorCroquis);
+  tramos.push(...nuevos.tramos);artefactos.push(...nuevos.artefactos);borradorCroquis.aplicado=true;
+  cancelarEdicionTramo();cerrarAccesorios();actualizarTramos();renderGas();guardarDatos();renderRevisionCroquis();
+  $('mensajeCroquis').textContent='Ejemplo SIMULADO agregado sin reemplazar tus datos. Volvé a «Croquis y tramos» para calcular materiales o consultá consumos.';
+ }catch(e){$('mensajeCroquis').textContent=e.message;}
+}
+
 function tirasPara(metros){return metros===0?0:Math.ceil(metros/6);}
 function nombreAccesorio(a){
  const reductor=a.entrada!==a.salida || (a.tipo==='tee' && a.ramal!==a.entrada);
@@ -452,7 +609,7 @@ function nombreAccesorio(a){
  if(a.tipo==='reduccion')return 'Reducción independiente '+a.entrada+' → '+a.salida;
  return 'Codo '+(a.tipo==='codo45'?'45°':'90°')+(reductor?' reductor':'')+' '+a.entrada+' → '+a.salida;
 }
-function evaluarTramo(t){
+function evaluarTramo(t,coleccion=tramos){
  const provisional=motivo=>({pendiente:true,motivo,segmentos:[{metros:t.metros,diametro:t.diametro}],
   tiras:tirasPara(t.metros),cuplas:Math.max(0,tirasPara(t.metros)-1),accesorios:[]});
  const d=t.detalle;
@@ -474,7 +631,7 @@ function evaluarTramo(t){
    if(typeof a.ramal!=='string' || !a.ramal.trim() || typeof a.nodo!=='string' || !a.nodo.trim())
     return provisional('La tee necesita diámetro del ramal y un nombre único de derivación.');
    const nodo=a.nodo.trim().toLocaleLowerCase('es');
-   if(nodos.has(nodo) || tramos.some(otro=>otro!==t && Array.isArray(otro.detalle?.accesorios) &&
+   if(nodos.has(nodo) || coleccion.some(otro=>otro!==t && Array.isArray(otro.detalle?.accesorios) &&
     otro.detalle.accesorios.some(b=>b?.tipo==='tee' && typeof b.nodo==='string' && b.nodo.trim().toLocaleLowerCase('es')===nodo)))
     return provisional('Derivación «'+a.nodo+'» repetida. Registrá esa tee una sola vez en el tramo principal.');
    nodos.add(nodo);
@@ -604,7 +761,7 @@ function agregarTramo(){
   artefacto:$('destinoArtefacto').value,llave:$('llave').checked};
  if(editandoTramo>=0){
   const anterior=tramos[editandoTramo];
-  datos.detalle=anterior.detalle;
+  datos.detalle=anterior.detalle;datos.origen=anterior.origen;
   if(anterior.metros!==datos.metros || anterior.diametro!==datos.diametro){
    datos.detalle={...anterior.detalle,estado:'pendiente'};
   }
@@ -630,7 +787,7 @@ function renderTramos(){
   const d=document.createElement('div');
   d.className='detalle';
   const s=document.createElement('div');
-  s.textContent=t.desde+'–'+t.hasta+' | '+
+  s.textContent=(t.origen?.tipo==='simulado'?'[SIMULADO] ':'')+t.desde+'–'+t.hasta+' | '+
    fmt(t.metros)+' m | '+fmt(t.consumo)+' kcal/h | '+
    t.diametro+(t.artefacto?' | '+t.artefacto:'')+
    (t.llave?' | 1 llave':'');
@@ -666,6 +823,7 @@ function calcularMateriales(){
   out.textContent='Agregá al menos un tramo.';
   return;
  }
+ if(tramos.some(t=>t.origen?.tipo==='simulado')){const aviso=document.createElement('p');aviso.className='aviso';aviso.textContent='Este cálculo incluye datos SIMULADOS incorporados desde la demostración. No describe un croquis reconocido ni una instalación real.';out.append(aviso);}
  const tabla=document.createElement('table');
  tabla.className='tabla';
  const head=document.createElement('thead');
@@ -702,7 +860,7 @@ function calcularMateriales(){
    grupos[seg.diametro].tiras+=tirasPara(seg.metros);
   });
   const r=document.createElement('tr');
-  [t.desde+'–'+t.hasta+(calculo.pendiente?' (provisorio)':''),fmt(t.metros),
+  [(t.origen?.tipo==='simulado'?'[SIMULADO] ':'')+t.desde+'–'+t.hasta+(calculo.pendiente?' (provisorio)':''),fmt(t.metros),
    calculo.segmentos.map(s=>s.diametro).filter((d,i,a)=>a.indexOf(d)===i).join(' → '),
    String(n),fmt(compra)+' m',String(uniones),
    t.llave?'1':'0'].forEach(x=>{

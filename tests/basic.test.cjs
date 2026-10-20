@@ -8,10 +8,10 @@ const script=html.match(/<script>([\s\S]*?)<\/script>/)[1];
 // La maquetación, cámara e impresión visual requieren la prueba de navegador.
 function app(saved=null,{blocked=false,quota=Infinity}={}){
  const elements=new Map();const store=new Map(saved?[['canerias-proyectos-v1',saved]]:[]);
- function element(){return {value:'',textContent:'',checked:false,children:[],className:'',classList:{hidden:false,add(c){if(c==='oculto')this.hidden=true;},remove(c){if(c==='oculto')this.hidden=false;},toggle(c,b){if(c==='oculto')this.hidden=b;}},append(...x){this.children.push(...x)},replaceChildren(){this.children=[];this.textContent=''},removeAttribute(k){delete this[k]},addEventListener(k,fn){this[k]=fn}};}
+ function element(){return {value:'',textContent:'',checked:false,style:{},children:[],className:'',classList:{hidden:false,add(c){if(c==='oculto')this.hidden=true;},remove(c){if(c==='oculto')this.hidden=false;},toggle(c,b){if(c==='oculto')this.hidden=b;}},append(...x){this.children.push(...x)},replaceChildren(){this.children=[];this.textContent=''},removeAttribute(k){delete this[k]},addEventListener(k,fn){this[k]=fn}};}
  for(const m of html.matchAll(/id="([^"]+)"/g))elements.set(m[1],element());
  elements.get('gt').value='9300';elements.get('ga').value='Cocina';
- const ctx=vm.createContext({document:{getElementById:id=>elements.get(id),createElement:element},window:{scrollTo(){},addEventListener(k,fn){this[k]=fn}},localStorage:{getItem:k=>{if(blocked)throw Error('blocked');return store.get(k)||null},setItem(k,v){if(blocked||v.length>quota)throw Error('quota');store.set(k,v)}},URL:{revokeObjectURL(){}},alert(){}});
+ const ctx=vm.createContext({document:{getElementById:id=>elements.get(id),createElement:element,createTextNode:text=>({textContent:text})},window:{scrollTo(){},addEventListener(k,fn){this[k]=fn}},localStorage:{getItem:k=>{if(blocked)throw Error('blocked');return store.get(k)||null},setItem(k,v){if(blocked||v.length>quota)throw Error('quota');store.set(k,v)}},URL:{revokeObjectURL(){}},alert(){}});
  vm.runInContext(script,ctx);
  return {ctx,elements,run:code=>vm.runInContext(code,ctx),saved:()=>store.get('canerias-proyectos-v1'),text:id=>elements.get(id).textContent};
 }
@@ -131,4 +131,82 @@ test('editor permite corregir un detalle incompleto sin perder el tramo original
  const a=app();a.run("abrir('gas')");evaluar(a,12,[{tipo:'codo90',metrosAntes:6,salida:'3/4"'}],6);a.run('tramos=[tramo];abrirAccesorios(0)');
  a.elements.get('estadoAccesorios').value='completo';a.elements.get('metrosFinal').value='3';a.run('guardarAccesorios()');assert.equal(a.run('editandoAccesorios'),0);assert.match(a.text('errorAccesorios'),/deben sumar/);
  a.elements.get('metrosFinal').value='6';a.run('guardarAccesorios()');assert.equal(a.run('editandoAccesorios'),-1);assert.equal(a.run('evaluarTramo(tramos[0]).pendiente'),false);
+});
+
+function ejemploRevisado(a){
+ a.run("abrir('gas');cargarEjemploCroquis();borradorCroquis.tramos[0].campos.metrosFinal.valor=6");
+ a.run('borradorCroquis.tramos.forEach(t=>{Object.values(t.campos).forEach(d=>d.confirmado=true);t.accesorios.forEach(a=>Object.values(a).forEach(d=>{if(d && typeof d===\'object\')d.confirmado=true;}));})');
+}
+test('ejemplo simulado no analiza fotos ni incorpora datos sin confirmación',()=>{
+ const a=app();a.run("abrir('gas');fotoURL='blob:foto-personal';cargarEjemploCroquis()");
+ assert.equal(a.run('borradorCroquis.origen'),'simulado');assert.equal(a.run('fotoURL'),'blob:foto-personal');
+ assert.equal(a.run('tramos.length'),0);a.run('incorporarCroquis()');assert.equal(a.run('tramos.length'),0);assert.match(a.text('mensajeCroquis'),/Falta confirmar/);
+ assert.equal(a.run('borradorCroquis.tramos[0].campos.metrosFinal.valor'),null);
+});
+test('incorporación confirmada conserva datos previos, calcula materiales y marca simulación',()=>{
+ const a=app();ejemploRevisado(a);
+ a.run("tramos.push({desde:'Real-M',hasta:'Real-A',metros:6,diametro:'1/2\"',consumo:1,detalle:{estado:'ninguno'}});artefactos.push({nombre:'Real',consumo:1000});incorporarCroquis()");
+ assert.equal(a.run('tramos.length'),2);assert.equal(a.run('artefactos.length'),2);assert.equal(a.run('tramos[0].desde'),'Real-M');
+ assert.equal(a.run('evaluarTramo(tramos[1]).pendiente'),false);assert.equal(a.run('evaluarTramo(tramos[1]).tiras'),3);assert.equal(a.run('evaluarTramo(tramos[1]).cuplas'),0);
+ a.run('calcularMateriales();calcularConsumos()');assert.match(a.elements.get('resultadoMateriales').children[0].textContent,/SIMULADOS/);assert.match(a.text('resultadoGas'),/SIMULADOS/);
+ assert.equal(a.run('borradorCroquis.aplicado'),true);a.run('incorporarCroquis()');assert.equal(a.run('tramos.length'),2);
+});
+test('modificar un dato elimina su confirmación y evita la incorporación',()=>{
+ const a=app();ejemploRevisado(a);a.run('cambiarDatoCroquis(borradorCroquis.tramos[0].campos.metros,20);incorporarCroquis()');
+ assert.equal(a.run('tramos.length'),0);assert.equal(a.run('borradorCroquis.tramos[0].campos.metros.confirmado'),false);assert.match(a.text('mensajeCroquis'),/Falta confirmar/);
+});
+test('no acepta campos vacíos, longitudes incompatibles ni entrada de accesorio incorrecta',()=>{
+ for(const cambio of [
+  'borradorCroquis.tramos[0].campos.metrosFinal.valor=null',
+  'borradorCroquis.tramos[0].campos.metrosFinal.valor=2',
+  "borradorCroquis.tramos[0].accesorios[0].entrada.valor='2\"'",
+  "borradorCroquis.tramos[0].accesorios[0].ramal.valor=''",
+  "borradorCroquis.tramos[0].campos.artefacto.valor='Ninguno'"
+ ]){
+  const a=app();ejemploRevisado(a);a.run(cambio+';incorporarCroquis()');assert.equal(a.run('tramos.length'),0);assert.equal(a.run('artefactos.length'),0);assert.equal(a.run('borradorCroquis.aplicado'),false);
+ }
+});
+test('confirmaciones y correcciones sobreviven a recarga sin incorporar automáticamente',()=>{
+ const a=app();ejemploRevisado(a);a.run('guardarDatos()');const b=app(a.saved());
+ assert.equal(b.run('borradorCroquis.tramos[0].campos.metrosFinal.valor'),6);assert.equal(b.run('borradorCroquis.tramos[0].campos.metros.confirmado'),true);assert.equal(b.run('tramos.length'),0);
+ b.run("abrir('gas');incorporarCroquis()");const c=app(b.saved());c.run("abrir('gas');incorporarCroquis()");assert.equal(c.run('tramos.length'),1);
+});
+test('puede descartar un tramo o accesorio y corregir el resto antes de incorporar',()=>{
+ const a=app();ejemploRevisado(a);a.run('borradorCroquis.tramos[0].incluir=false;incorporarCroquis()');assert.equal(a.run('tramos.length'),0);assert.match(a.text('mensajeCroquis'),/Seleccioná/);
+ a.run("borradorCroquis.tramos[0].incluir=true;borradorCroquis.tramos[0].accesorios[0].incluir=false;borradorCroquis.tramos[0].campos.metrosFinal.valor=12;incorporarCroquis()");
+ assert.equal(a.run('tramos.length'),1);assert.equal(a.run('tramos[0].detalle.accesorios.length'),3);
+});
+test('rechaza tees duplicadas sin modificar datos reales ni importar parcialmente',()=>{
+ const a=app();ejemploRevisado(a);
+ a.run("tramos.push({desde:'X',hasta:'Y',metros:6,diametro:'3/4\"',consumo:1,detalle:{estado:'completo',metrosFinal:0,accesorios:[{tipo:'tee',metrosAntes:6,salida:'3/4\"',ramal:'1/2\"',nodo:'DEMO-T1'}]}});incorporarCroquis()");
+ assert.equal(a.run('tramos.length'),1);assert.equal(a.run('artefactos.length'),0);assert.match(a.text('mensajeCroquis'),/repetida/);
+});
+test('no admite origen de IA y no expone la revisión en agua o cloacas',()=>{
+ const a=app();ejemploRevisado(a);a.run("borradorCroquis.origen='gemini';incorporarCroquis()");assert.equal(a.run('tramos.length'),0);assert.match(a.text('mensajeCroquis'),/formato/);
+ for(const m of ['agua','cloacas']){a.run(`abrir('${m}');mostrarVista('revisionCroquis')`);assert.equal(a.elements.get('revisionCroquis').classList.hidden,true);}
+});
+test('descartar un borrador no elimina datos incorporados y permite cargar otro',()=>{
+ const a=app();ejemploRevisado(a);a.run('incorporarCroquis();descartarBorradorCroquis()');assert.equal(a.run('tramos.length'),1);assert.equal(a.run('borradorCroquis'),null);
+ a.run('cargarEjemploCroquis()');assert.equal(a.run('borradorCroquis.aplicado'),false);
+});
+test('sin accesorios exige revisar la longitud continua completa',()=>{
+ const a=app();ejemploRevisado(a);a.run('borradorCroquis.tramos[0].accesorios.forEach(a=>a.incluir=false);incorporarCroquis()');assert.equal(a.run('tramos.length'),0);
+ a.run('borradorCroquis.tramos[0].campos.metrosFinal.valor=18;incorporarCroquis()');assert.equal(a.run('tramos.length'),1);assert.equal(a.run('evaluarTramo(tramos[0]).cuplas'),2);
+});
+test('un formato guardado corrupto no rompe los proyectos manuales',()=>{
+ const a=app();a.run("abrir('gas');proyectos.gas.borradorCroquis={version:1,origen:'simulado',id:'x',aplicado:false,tramos:[{}]}");
+ // Escribir la corrupción directamente: guardarDatos sustituye este campo por el borrador validado.
+ const datos=JSON.parse(a.saved()||'{"gas":{},"agua":{},"cloacas":{}}');datos.gas.borradorCroquis={version:1,origen:'simulado',id:'x',aplicado:false,tramos:[{}]};
+ const b=app(JSON.stringify(datos));assert.equal(b.run('borradorCroquis'),null);
+});
+test('los controles de revisión corrigen y desconfirman el dato editado',()=>{
+ const a=app();ejemploRevisado(a);a.run('renderRevisionCroquis()');
+ function buscar(n,p){if(p(n))return n;for(const c of n.children||[]){const r=buscar(c,p);if(r)return r;}}
+ const label=buscar(a.elements.get('datosCroquis'),n=>n.textContent==='Metros totales');
+ const input=label.children[0];input.value='24';input.oninput();
+ assert.equal(a.run('borradorCroquis.tramos[0].campos.metros.valor'),24);assert.equal(a.run('borradorCroquis.tramos[0].campos.metros.confirmado'),false);
+});
+test('varios tramos se validan antes de agregar cualquiera de ellos',()=>{
+ const a=app();ejemploRevisado(a);a.run("const otro=JSON.parse(JSON.stringify(borradorCroquis.tramos[0]));otro.campos.metros.confirmado=false;borradorCroquis.tramos.push(otro);incorporarCroquis()");
+ assert.equal(a.run('tramos.length'),0);assert.equal(a.run('artefactos.length'),0);
 });
