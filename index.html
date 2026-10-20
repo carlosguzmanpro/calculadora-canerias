@@ -40,8 +40,14 @@ dialog img{max-height:78vh;max-width:90vw}
 .tabla th,.tabla td{border-bottom:1px solid #dce7e9;padding:8px 5px;text-align:left}
 .tabla-wrap{overflow-x:auto}
 .resumen{font-weight:bold;margin-top:10px}
+.solo-impresion{display:none}
 @media print{
-button,input,select,textarea,.aviso,#inicio,.nota{display:none!important}
+.solo-impresion{display:block;white-space:pre-wrap}
+button,input,select,textarea,#inicio,.nota,.solo-pantalla{display:none!important}
+.aviso{display:block;break-inside:avoid}
+.resultado,.detalle{break-inside:avoid}
+.tabla-wrap{overflow:visible}
+img{max-height:45vh}
 body{background:white}
 section{box-shadow:none}
 }
@@ -53,6 +59,7 @@ section{box-shadow:none}
 <p>Del croquis a los materiales</p>
 </header>
 <main>
+<p id="estadoGuardado" class="nota solo-pantalla" role="status"></p>
 <section id="inicio">
 <h2>¿Qué instalación querés trabajar?</h2>
 <button onclick="abrir('gas')">🔥 Gas</button>
@@ -88,13 +95,16 @@ section{box-shadow:none}
 <b>Foto de referencia:</b> podés verla y ampliarla. Los tramos se ingresan manualmente; la app no interpreta la imagen ni inventa longitudes.
 </div>
 
+<p id="estadoFoto" class="nota" role="status"></p>
 <h3>2. Revisar croquis</h3>
 <p class="nota">Anotá cualquier aclaración sobre las medidas o los símbolos.</p>
 <label for="duda">Dato dudoso o aclaración (opcional)</label>
 <textarea id="duda" rows="3" placeholder="Ej.: En el tramo A-B dice 15 m"></textarea>
 <button class="alt" onclick="guardarRevision()">Guardar aclaración</button>
+<div id="aclaracionImpresion" class="solo-impresion"></div>
 <div id="revision" class="resultado" aria-live="polite">Todavía no hay una revisión registrada.</div>
 
+<div id="formularioGas">
 <h3>3. Registrar tramos de GAS</h3>
 <p class="nota">Copiá cada tramo del croquis. El diámetro se ingresa como dato del proyecto, no se determina automáticamente.</p>
 <label for="desde">Desde</label>
@@ -136,7 +146,8 @@ section{box-shadow:none}
 <div class="aviso">
 Estimación de compra: se cuentan tiras completas de 6 m por tramo, sin reutilizar sobrantes. Las cuplas se estiman para unir esas tiras dentro de cada tramo. No incluye codos, tees, reducciones ni verificación de diámetros. Antes de construir, un profesional habilitado debe comprobar el diseño y la normativa de gas.
 </div>
-<h3>4. Plano</h3>
+</div>
+<h3>Plano</h3>
 <div class="aviso">Pendiente: generación del plano y reconocimiento automático del croquis. Los cálculos actuales utilizan únicamente los datos ingresados.</div>
 <button class="alt" onclick="window.print()">Imprimir o guardar esta revisión</button>
 </div>
@@ -184,10 +195,78 @@ Estimación de compra: se cuentan tiras completas de 6 m por tramo, sin reutiliz
 'use strict';
 const $=id=>document.getElementById(id);
 let modulo='',fotoURL=null,artefactos=[],tramos=[];
+const fotosSesion={};
+const CLAVE='canerias-proyectos-v1';
+const especialidades=['gas','agua','cloacas'];
+let proyectos={gas:{},agua:{},cloacas:{}};
+function invalidarConsumos(){
+ $('resultadoGas').textContent='Datos actualizados. Tocá CALCULAR CONSUMO TOTAL.';
+}
+function guardarDatos(){
+ if(!modulo)return;
+ const actual=proyectos[modulo];
+ actual.aclaracion=$('duda').value;
+ actual.revision=$('revision').textContent;
+ proyectos.gas.tramos=tramos;
+ proyectos.gas.artefactos=artefactos;
+ proyectos.gas.tipoGas=$('gt').value;
+ try{
+  localStorage.setItem(CLAVE,JSON.stringify(proyectos));
+  $('estadoGuardado').textContent='Datos guardados en este navegador. No se envían a ningún servidor.';
+ }catch(e){
+  // La foto no debe impedir guardar el resto del proyecto.
+  const sinFotos=JSON.parse(JSON.stringify(proyectos));
+  especialidades.forEach(m=>delete sinFotos[m].foto);
+  try{
+   localStorage.setItem(CLAVE,JSON.stringify(sinFotos));
+   especialidades.forEach(m=>delete proyectos[m].foto);
+   $('estadoGuardado').textContent='Datos guardados, pero las fotos solo quedan en esta sesión por falta de espacio.';
+  }catch(error){
+   $('estadoGuardado').textContent='No se pudo guardar: almacenamiento bloqueado o lleno. Conservá una impresión antes de cerrar.';
+  }
+ }
+}
+function restaurarDatos(){
+ try{
+  const datos=JSON.parse(localStorage.getItem(CLAVE)||'null');
+  if(datos && especialidades.every(m=>datos[m] && typeof datos[m]==='object' && !Array.isArray(datos[m]))) proyectos=datos;
+  const g=proyectos.gas;
+  tramos=Array.isArray(g.tramos)?g.tramos.filter(t=>t && typeof t.desde==='string' && typeof t.hasta==='string' && typeof t.diametro==='string' && Number.isFinite(t.metros) && t.metros>0 && Number.isFinite(t.consumo) && t.consumo>=0):[];
+  artefactos=Array.isArray(g.artefactos)?g.artefactos.filter(a=>a && typeof a.nombre==='string' && Number.isFinite(a.consumo) && a.consumo>0):[];
+  if(['9300','22300'].includes(g.tipoGas)) $('gt').value=g.tipoGas;
+  $('estadoGuardado').textContent='Guardado local en este navegador. Borrar sus datos elimina los proyectos.';
+ }catch(e){
+  $('estadoGuardado').textContent='No se pudieron recuperar los datos locales. Podés trabajar, pero verificá el guardado antes de cerrar.';
+ }
+ renderTramos();renderGas();
+}
+function actualizarEstadoFoto(){
+ $('estadoFoto').textContent=proyectos[modulo].foto?
+  'Foto guardada en este navegador. No se sube a ningún servidor.':
+  (fotoURL?'Foto disponible solo en esta sesión. Para guardarla: PNG, JPEG o WebP de hasta 1 MB y espacio disponible.':'No hay foto cargada en esta especialidad.');
+}
+function mostrarFotoLocal(){
+ fotoURL=null;
+ if(fotosSesion[modulo])fotoURL=fotosSesion[modulo];
+ const foto=proyectos[modulo].foto;
+ if(typeof foto==='string' && /^data:image\/(png|jpeg|webp);base64,/.test(foto))fotoURL=foto;
+ $('imagen').classList.toggle('oculto',!fotoURL);
+ $('accionesFoto').classList.toggle('oculto',!fotoURL);
+ actualizarEstadoFoto();
+ if(fotoURL)$('imagen').src=fotoURL;
+ else $('imagen').removeAttribute('src');
+}
+
 const fmt=n=>Number(n).toLocaleString('es-AR',{maximumFractionDigits:2});
 
 function abrir(m){
+ if(!especialidades.includes(m))return;
+ if(modulo)guardarDatos();
  modulo=m;
+ $('duda').value=proyectos[m].aclaracion||'';
+ $('revision').textContent=proyectos[m].revision||'Todavía no hay una revisión registrada.';
+ $('formularioGas').classList.toggle('oculto',m!=='gas');
+ mostrarFotoLocal();
  $('inicio').classList.add('oculto');
  $('trabajo').classList.remove('oculto');
  $('titulo').textContent={gas:'🔥 GAS',agua:'💧 AGUA',cloacas:'🚽 CLOACAS'}[m];
@@ -198,6 +277,7 @@ function abrir(m){
 }
 
 function volver(){
+ guardarDatos();
  $('trabajo').classList.add('oculto');
  $('inicio').classList.remove('oculto');
  window.scrollTo(0,0);
@@ -216,6 +296,7 @@ function mostrarVista(v){
 }
 
 function cargarFoto(e){
+ if(!modulo)return;
  const f=e.target.files&&e.target.files[0];
  if(!f)return;
  if(!f.type.startsWith('image/')){
@@ -224,21 +305,44 @@ function cargarFoto(e){
  }
  if(fotoURL)URL.revokeObjectURL(fotoURL);
  fotoURL=URL.createObjectURL(f);
+ fotosSesion[modulo]=fotoURL;
+ delete proyectos[modulo].foto;
+ guardarDatos();
+ const proyecto=modulo;
+ const urlActual=fotoURL;
+ if(['image/png','image/jpeg','image/webp'].includes(f.type) && f.size<=1024*1024){
+  const lector=new FileReader();
+  lector.onload=()=>{
+   if(modulo!==proyecto || fotoURL!==urlActual)return;
+   proyectos[proyecto].foto=lector.result;
+   guardarDatos();
+   actualizarEstadoFoto();
+  };
+  lector.onerror=()=>{$('estadoGuardado').textContent='La foto solo está disponible en esta sesión: no se pudo leer para guardarla.';};
+  lector.readAsDataURL(f);
+ }else{
+  $('estadoGuardado').textContent='Foto solo en esta sesión. Para guardarla localmente usá PNG, JPEG o WebP de hasta 1 MB. Los demás datos sí se guardan.';
+ }
  $('imagen').src=fotoURL;
  $('imagen').classList.remove('oculto');
  $('accionesFoto').classList.remove('oculto');
  $('camara').value='';
  $('galeria').value='';
+ actualizarEstadoFoto();
 }
 $('camara').addEventListener('change',cargarFoto);
 $('galeria').addEventListener('change',cargarFoto);
 
 function quitarFoto(){
+ delete proyectos[modulo].foto;
+ delete fotosSesion[modulo];
+ guardarDatos();
  if(fotoURL)URL.revokeObjectURL(fotoURL);
  fotoURL=null;
  $('imagen').removeAttribute('src');
  $('imagen').classList.add('oculto');
  $('accionesFoto').classList.add('oculto');
+ actualizarEstadoFoto();
 }
 
 function ampliar(){
@@ -252,6 +356,7 @@ function guardarRevision(){
  $('revision').textContent=t?
   'Aclaración registrada (sin análisis automático): '+t:
   'No ingresaste ninguna aclaración.';
+ guardarDatos();
 }
 
 function agregarArtefacto(){
@@ -266,9 +371,11 @@ function agregarArtefacto(){
  });
  $('gp').value='';
  renderGas();
+ guardarDatos();
 }
 
 function renderGas(){
+ invalidarConsumos();
  const cont=$('listaGas');
  cont.replaceChildren();
  artefactos.forEach((a,i)=>{
@@ -282,6 +389,7 @@ function renderGas(){
   b.onclick=()=>{
    artefactos.splice(i,1);
    renderGas();
+   guardarDatos();
   };
   d.append(s,b);
   cont.append(d);
@@ -303,6 +411,9 @@ function calcularConsumos(){
   ' No determina si una cañería existente es suficiente:'+
   ' faltan longitud, material, presión, simultaneidad y otras verificaciones.';
 }
+
+$('gt').addEventListener('change',()=>{invalidarConsumos();guardarDatos();});
+$('duda').addEventListener('input',guardarDatos);
 
 $('diametro').addEventListener('change',()=>{
  $('otroDiametro').classList.toggle('oculto',
@@ -336,6 +447,7 @@ function agregarTramo(){
  renderTramos();
  $('resultadoMateriales').textContent=
   'Tramos actualizados. Tocá CALCULAR MATERIALES.';
+ guardarDatos();
 }
 
 function renderTramos(){
@@ -357,6 +469,7 @@ function renderTramos(){
    renderTramos();
    $('resultadoMateriales').textContent=
     'Tramos actualizados. Tocá CALCULAR MATERIALES.';
+ guardarDatos();
   };
   d.append(s,b);
   cont.append(d);
@@ -383,7 +496,7 @@ function calcularMateriales(){
  tabla.append(head);
  const body=document.createElement('tbody');
  let metros=0,tiras=0,cuplas=0,llaves=0;
- const grupos={};
+ const grupos=Object.create(null);
  tramos.forEach(t=>{
   const n=Math.ceil(t.metros/6-1e-10);
   const uniones=Math.max(0,n-1);
@@ -432,6 +545,14 @@ function calcularMateriales(){
   out.append(x);
  });
 }
+window.addEventListener('beforeprint',()=>{
+ $('aclaracionImpresion').textContent='Aclaración actual: '+($('duda').value.trim()||'Sin aclaración.');
+ if(modulo==='gas'){
+  if(tramos.length)calcularMateriales();
+  if(artefactos.length)calcularConsumos();
+ }
+});
+restaurarDatos();
 </script>
 </body>
 </html>

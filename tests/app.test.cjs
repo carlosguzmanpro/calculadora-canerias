@@ -1,0 +1,32 @@
+const {test}=require('node:test');
+const assert=require('node:assert/strict');
+const {chromium}=require('playwright');
+const http=require('node:http');
+const fs=require('node:fs');
+test('persistencia, consumos, especialidades, impresión y foto local',async()=>{
+ const browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||'/usr/bin/chromium',headless:true,args:['--no-sandbox']});
+ try{
+ const page=await browser.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto(require('node:url').pathToFileURL(require('node:path').resolve('index.html')).href);await page.evaluate(()=>localStorage.clear());await page.reload();
+ await page.getByRole('button',{name:'🔥 Gas',exact:true}).click();
+ await page.locator('#duda').fill('Revisar tramo A-B');await page.getByRole('button',{name:'Guardar aclaración',exact:true}).click();
+ for(const [id,value] of Object.entries({desde:'A',hasta:'B',metros:'15',consumoTramo:'16000'}))await page.locator('#'+id).fill(value);
+ await page.locator('#diametro').selectOption({label:'1/2"'});await page.locator('#llave').check();
+ await page.getByRole('button',{name:'+ AGREGAR TRAMO',exact:true}).click();
+ await page.getByRole('button',{name:'🧮 CALCULAR MATERIALES',exact:true}).click();
+ assert.match(await page.locator('#resultadoMateriales').innerText(),/3 tiras.*18 m a comprar.*2 cuplas/s);
+ await page.locator('#galeria').setInputFiles({name:'foto.png',mimeType:'image/png',buffer:Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jXioAAAAASUVORK5CYII=','base64')});
+ await page.waitForFunction(()=>JSON.parse(localStorage.getItem('canerias-proyectos-v1')).gas.foto);
+ await page.getByRole('button',{name:'🧮 Consulta de consumos de gas',exact:true}).click();
+ await page.locator('#gp').fill('9300');await page.getByRole('button',{name:'Agregar artefacto',exact:true}).click();
+ await page.getByRole('button',{name:'CALCULAR CONSUMO TOTAL',exact:true}).click();assert.match(await page.locator('#resultadoGas').innerText(),/1 m³\/h/);
+ await page.locator('#gt').selectOption('22300');assert.match(await page.locator('#resultadoGas').innerText(),/Datos actualizados/);
+ await page.reload();await page.getByRole('button',{name:'🔥 Gas',exact:true}).click();
+ assert.equal(await page.locator('#duda').inputValue(),'Revisar tramo A-B');assert.match(await page.locator('#listaTramos').innerText(),/15 m/);assert.match(await page.locator('#imagen').getAttribute('src'),/^data:image\/png/);
+ await page.getByRole('button',{name:'← Cambiar especialidad',exact:true}).click();await page.getByRole('button',{name:'💧 Agua',exact:true}).click();await page.getByRole('button',{name:'Cargar croquis de referencia',exact:true}).click();assert.equal(await page.locator('#formularioGas').isVisible(),false);assert.equal(await page.locator('#duda').inputValue(),'');
+ await page.locator('#duda').fill('Agua separada');
+ await page.getByRole('button',{name:'← Cambiar especialidad',exact:true}).click();await page.getByRole('button',{name:'🔥 Gas',exact:true}).click();assert.equal(await page.locator('#duda').inputValue(),'Revisar tramo A-B');
+ await page.getByRole('button',{name:'🧮 CALCULAR MATERIALES',exact:true}).click();await page.emulateMedia({media:'print'});assert.equal(await page.locator('#croquis .aviso').first().isVisible(),true);assert.equal(await page.locator('#resultadoMateriales').isVisible(),true);
+ assert.deepEqual(errors,[]);
+ }finally{await browser.close();}
+});
