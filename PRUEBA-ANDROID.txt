@@ -1,13 +1,13 @@
-CAÑERÍAS · PREPARACIÓN GEMINI SIN CONEXIÓN
+CAÑERÍAS · RED DOMICILIARIA DE GAS · SIN DIMENSIONAMIENTO
 
-### Prueba corta desde Android, sin computadora
+### Prueba en Android
 
-1. Descomprimí `canerias-gemini-preparacion.zip` y abrí `index.html` con el mismo método que usaste para probar el ZIP anterior. Sigue siendo una aplicación HTML local; algunas versiones de Android necesitan un visor HTML con JavaScript y el guardado de archivos locales depende del navegador.
-2. Entrá en **Gas**. Podés cargar una foto desde **Galería** como antes.
-3. Tocá **Analizar foto con Gemini · DESACTIVADO**: debe decir que no se envió ninguna foto.
-4. Abrí **Pruebas locales de la integración · SIN IA** y tocá **Probar respuesta incompleta · SIN IA**. Si hay un borrador anterior, se conserva y la pantalla indica que debés descartarlo antes de cargar otra prueba.
-5. Verás **PRUEBA LOCAL SIN IA**, metros/diámetros/consumos vacíos, llave **Pendiente** y accesorios pendientes. Tocá **Incorporar datos revisados al proyecto** sin completar ni confirmar: debe rechazarlo, conservando el proyecto.
-6. Volvé a croquis, abrí las pruebas locales y tocá **Probar cuota agotada · SIN CONEXIÓN** o **Probar error de conexión · SIN CONEXIÓN**: solo cambia el aviso. La carga manual sigue disponible.
-7. Para repetir la demostración completa anterior: **Revisar croquis y ejemplos → Descartar borrador de revisión → Cargar ejemplo SIMULADO de GAS**. Completá los 6 m finales y confirmá cada dato. El cálculo mantiene los resultados anteriores: 18 m, 3 tiras, 0 cuplas y los cuatro accesorios. Los datos que incorpores de cualquier prueba local se imprimen como SIMULADO.
-
-No ingreses claves en el HTML, en el chat ni en archivos del ZIP. Para la fase real faltarán la autorización de despliegue, cuenta/modelo con cuota gratuita, secreto solo en servidor, autenticación y cuota persistente reales y el adaptador que envíe la petición a Gemini. Ninguna de esas acciones se realiza con este ZIP.
+1. Descomprimí `canerias-red-gas.zip` y abrí `index.html` con el método que ya usaste para las versiones anteriores. No se publicó una dirección web.
+2. Entrá en **Gas → Consulta de consumos de gas**. Para un ejercicio ficticio podés cargar Cocina con **9000 kcal/h** y Calefactor con **4000 kcal/h**. Son datos de prueba, no consumos recomendados. Si ya hay artefactos, todos deberán conectarse una vez; no los borres para hacer la prueba sin conservar antes tu información.
+3. En **Trabajar con croquis y tramos**, registrá tres tramos con las longitudes y diámetros ya indicados en tu proyecto: M–T1, T1–Cocina y T1–Calefactor. El consumo manual puede quedar vacío; la red lo calculará. No se elige un diámetro a partir del consumo o la foto en esta etapa.
+4. Tocá **Instalación: datos y conexiones de GAS**. Completá únicamente los datos generales que conozcas y guardalos. Si faltan presiones o normativa, dejalos pendientes: la suma de una red bien conectada puede probarse igual.
+5. Agregá los puntos **M (Medidor)**, **T1 (Derivación/unión)**, **Cocina (Artefacto, seleccionando Cocina de la lista)** y **Calefactor (Artefacto, seleccionando Calefactor)**.
+6. En cada tramo elegí sus conexiones: **M → T1**, **T1 → Cocina**, **T1 → Calefactor**. El resultado debe mostrar **13000**, **9000** y **4000 kcal/h**, respectivamente, si esos son los únicos artefactos. Los accesorios que no revisaste seguirán pendientes. Una tee del croquis debe quedar en el extremo del tramo que llega a T1 o sale de T1, nunca dentro de un tramo que atraviesa la derivación sin dividirse.
+7. Dejá un destino sin seleccionar: los acumulados deben dejar de mostrarse y aparecer el dato faltante. Volvé a conectarlo: se recalculan automáticamente.
+8. Recargá, volvé a GAS y a datos/conexiones: la red y el perfil deben conservarse si el navegador permite almacenamiento local. Probá también editar un punto y **Imprimir datos y conexiones**.
+9. Aunque se completen los datos, el aviso **Dimensionamiento NO habilitado** debe permanecer. Todavía no existe un método normativo implementado. No uses la suma de placas para elegir diámetros por cuenta de la aplicación.

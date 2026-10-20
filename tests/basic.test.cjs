@@ -276,3 +276,93 @@ test('probar otra respuesta no reemplaza un borrador ni oculta el aviso',()=>{
 test('la preparación de Gemini aparece solo en GAS y deja las fotos de las otras especialidades',()=>{
  const a=app();for(const m of ['gas','agua','cloacas']){a.run(`abrir('${m}');mostrarVista('croquis')`);assert.equal(a.elements.get('panelGemini').classList.hidden,m!=='gas');assert.equal(a.elements.get('croquis').classList.hidden,false);}
 });
+
+function redEjemplo(a){
+ a.run("abrir('gas')");
+ a.ctx.datosRed={version:1,perfil:{pais:'AR',uso:'domiciliario',gas:'GN',provincia:'Provincia de prueba',localidad:'Localidad de prueba',distribuidora:'Distribuidora de prueba',material:'Material declarado',sistema:'Sistema declarado',unidadPresion:'Pa',presionDisponible:'100',presionMinima:'60',perdidaMaxima:'20',fuentePresiones:'Solo datos de prueba, no valores de diseño',referenciaNormativa:'Referencia de prueba no verificada',criterioDemanda:'placa-total'},
+  nodos:[{id:'m',nombre:'M',tipo:'medidor'},{id:'t1',nombre:'T1',tipo:'derivacion'},
+   {id:'a',nombre:'Cocina',tipo:'artefacto',artefactoId:'a1'},{id:'b',nombre:'Calefactor',tipo:'artefacto',artefactoId:'a2'}]};
+ a.run("instalacionGas=datosRed;artefactos=[{id:'a1',nombre:'Cocina',consumo:9000},{id:'a2',nombre:'Calefactor',consumo:4000}];tramos=[{id:'t0',desde:'M',hasta:'T1',metros:6,diametro:'3/4\"',consumo:999,red:{desde:'m',hasta:'t1'},detalle:{estado:'completo',metrosFinal:0,accesorios:[{tipo:'tee',nodo:'T1',metrosAntes:6,salida:'3/4\"',ramal:'1/2\"'}]}},{id:'t1',desde:'T1',hasta:'Cocina',metros:3,diametro:'3/4\"',consumo:null,red:{desde:'t1',hasta:'a'},detalle:{estado:'ninguno'}},{id:'t2',desde:'T1',hasta:'Calefactor',metros:4,diametro:'1/2\"',consumo:null,red:{desde:'t1',hasta:'b'},detalle:{estado:'ninguno'}}]");
+}
+test('red ramificada suma aguas abajo sin reemplazar el consumo manual ni recomendar diámetros',()=>{
+ const a=app();redEjemplo(a);const r=a.run('analizarRedGas()');
+ assert.deepEqual(Array.from(r.errores),[]);assert.equal(r.porTramo.t0,13000);assert.equal(r.porTramo.t1,9000);assert.equal(r.porTramo.t2,4000);assert.equal(r.total,13000);
+ assert.equal(a.run('tramos[0].consumo'),999);assert.equal(a.run('tramos[0].diametro'),'3/4"');assert.equal(r.datosCompletos,true);assert.equal(r.listoParaDimensionar,false);assert.match(r.bloqueoNormativo,/método normativo/);
+});
+test('red no depende del orden de carga de los tramos',()=>{
+ const a=app();redEjemplo(a);a.run('tramos.reverse()');assert.equal(a.run('analizarRedGas().porTramo.t0'),13000);
+});
+test('detecta tramos sin conexión, destino eliminado y autorreferencia sin publicar totales parciales',()=>{
+ for(const cambio of ["delete tramos[0].red","tramos[0].red.hasta='eliminado'","tramos[0].red.hasta='m'"]){
+  const a=app();redEjemplo(a);a.run(cambio);const r=a.run('analizarRedGas()');assert.ok(r.errores.length);assert.equal(r.total,null);assert.equal(Object.keys(r.porTramo).length,0);
+ }
+});
+test('detecta circuitos cerrados, alimentación invertida y dos entradas en una unión',()=>{
+ const a=app();redEjemplo(a);a.run("tramos.push({id:'ciclo',desde:'A',hasta:'T1',metros:1,diametro:'1/2\"',consumo:0,red:{desde:'a',hasta:'t1'}})");
+ const r=a.run('analizarRedGas()');assert.match(r.errores.join(' '),/circuito cerrado/);assert.match(r.errores.join(' '),/no puede alimentar/);assert.equal(r.total,null);
+});
+test('detecta componentes desconectados del medidor',()=>{
+ const a=app();redEjemplo(a);a.run("instalacionGas.nodos.push({id:'sin',nombre:'Sin conexión',tipo:'derivacion'})");assert.match(a.run('analizarRedGas().errores.join(" ")'),/no está conectado al medidor/);
+});
+test('un artefacto no puede contarse dos veces o quedar fuera de la red',()=>{
+ const a=app();redEjemplo(a);a.run("instalacionGas.nodos[3].artefactoId='a1'");const r=a.run('analizarRedGas()');assert.match(r.errores.join(' '),/más de una vez/);assert.match(r.errores.join(' '),/todavía no está conectado/);assert.equal(r.total,null);
+});
+test('agregar, quitar o cambiar un artefacto invalida o recalcula la demanda',()=>{
+ const a=app();redEjemplo(a);a.run('artefactos[1].consumo=6000');assert.equal(a.run('analizarRedGas().porTramo.t0'),15000);
+ a.run("artefactos.push({id:'nuevo',nombre:'Sin conectar',consumo:2000})");assert.equal(a.run('analizarRedGas().total'),null);
+ a.run("artefactos=artefactos.filter(a=>a.id!=='nuevo'&&a.id!=='a2')");assert.match(a.run('analizarRedGas().errores.join(" ")'),/artefacto existente/);
+});
+test('no permite demandas nulas, negativas, no finitas o vacías',()=>{
+ const a=app();redEjemplo(a);for(const valor of [null,-1,0,NaN,Infinity]){a.ctx.mal=valor;a.run('artefactos[0].consumo=mal');assert.equal(a.run('analizarRedGas().total'),null);}
+});
+test('faltantes generales no impiden sumar la red pero impiden declarar datos completos',()=>{
+ const a=app();redEjemplo(a);a.run("delete instalacionGas.perfil.material;instalacionGas.perfil.presionDisponible='';instalacionGas.perfil.referenciaNormativa=''");
+ const r=a.run('analizarRedGas()');assert.equal(r.total,13000);assert.equal(r.datosCompletos,false);assert.ok(r.faltantes.length>=3);assert.equal(r.listoParaDimensionar,false);
+});
+test('valida coherencia de presiones sin calcular pérdida ni diámetro',()=>{
+ const a=app();redEjemplo(a);a.run("instalacionGas.perfil.presionDisponible='50';instalacionGas.perfil.perdidaMaxima='100'");assert.match(a.run('analizarRedGas().faltantes.join(" ")'),/debe superar|supera la diferencia/);
+});
+test('otros perfiles quedan guardables pero no habilitados para dimensionamiento',()=>{
+ const a=app();redEjemplo(a);a.run("instalacionGas.perfil.gas='GLP';instalacionGas.perfil.pais='OTRO'");assert.match(a.run('analizarRedGas().faltantes.join(" ")'),/no soportado/);assert.equal(a.run('analizarRedGas().listoParaDimensionar'),false);
+});
+test('tee interior exige dividir el tramo y tee con ramal sin conectar bloquea la suma',()=>{
+ const a=app();redEjemplo(a);a.run('tramos[0].metros=12;tramos[0].detalle.metrosFinal=6');assert.match(a.run('analizarRedGas().errores.join(" ")'),/Dividí/);assert.equal(a.run('analizarRedGas().total'),null);
+});
+test('sin tee registrada una bifurcación permanece pendiente y no se inventan accesorios',()=>{
+ const a=app();redEjemplo(a);a.run("tramos[0].detalle={estado:'ninguno'}");const r=a.run('analizarRedGas()');assert.equal(r.total,13000);assert.equal(r.datosCompletos,false);assert.match(r.pendientes.join(' '),/registrar una sola tee/);assert.equal(a.run('tramos[0].detalle.accesorios'),undefined);
+});
+test('perfil, conexiones e identificadores sobreviven a recarga',()=>{
+ const a=app();redEjemplo(a);a.run('guardarDatos()');const b=app(a.saved());assert.equal(b.run('analizarRedGas().total'),13000);assert.equal(b.run('instalacionGas.perfil.localidad'),'Localidad de prueba');assert.equal(b.run('tramos[0].id'),'t0');assert.equal(b.run('tramos[1].consumo'),null);
+});
+test('editar un tramo conserva su asociación de red y su identificador',()=>{
+ const a=app();redEjemplo(a);a.run('editandoTramo=0');for(const [id,v]of Object.entries({desde:'M-corregido',hasta:'T1',metros:'6',consumoTramo:'',diametro:'3/4"'}))a.elements.get(id).value=v;
+ a.run('agregarTramo()');assert.equal(a.run('tramos[0].id'),'t0');assert.equal(a.run('tramos[0].red.desde'),'m');assert.equal(a.run('analizarRedGas().porTramo.t0'),13000);assert.equal(a.run('tramos[0].consumo'),null);
+});
+test('crear, editar y quitar puntos conserva los tramos y detecta referencias pendientes',()=>{
+ const a=app();a.run("abrir('gas')");a.elements.get('redNombreNodo').value='M';a.elements.get('redTipoNodo').value='medidor';a.run('guardarNodoGas()');assert.equal(a.run('instalacionGas.nodos.length'),1);
+ a.elements.get('redNombreNodo').value='Otro medidor';a.run('guardarNodoGas()');assert.equal(a.run('instalacionGas.nodos.length'),1);assert.match(a.text('redMensaje'),/Ya existe/);
+ redEjemplo(a);a.run('renderRedGas()');a.elements.get('redNodos').children[1].children[2].onclick();assert.equal(a.run('tramos.length'),3);assert.equal(a.run('analizarRedGas().total'),null);
+});
+test('la vista de red está separada de agua y cloacas y produce resumen imprimible',()=>{
+ const a=app();redEjemplo(a);a.run("mostrarVista('redGas');renderRedGas()");assert.equal(a.elements.get('redGas').classList.hidden,false);
+ assert.match(a.elements.get('redResultado').children.map(n=>n.textContent).join(' '),/13.000 kcal\/h/);
+ assert.ok(a.elements.get('redResultado').children.some(n=>n.className==='solo-impresion'));
+ for(const m of ['agua','cloacas']){a.run(`abrir('${m}');mostrarVista('redGas')`);assert.equal(a.elements.get('redGas').classList.hidden,true);}
+});
+test('datos anteriores se conservan sin asignar conexiones por semejanza de nombres',()=>{
+ const a=app();a.run("abrir('gas');tramos=[{desde:'M',hasta:'Cocina',metros:6,diametro:'1/2\"',consumo:9000}];artefactos=[{nombre:'Cocina',consumo:9000}];guardarDatos()");
+ const b=app(a.saved());assert.equal(b.run('tramos.length'),1);assert.equal(b.run('tramos[0].red'),undefined);assert.equal(b.run('analizarRedGas().total'),null);assert.ok(b.run('tramos[0].id'));
+});
+test('medidores múltiples, nombres duplicados y tramos paralelos bloquean la red',()=>{
+ for(const cambio of ["instalacionGas.nodos.push({id:'m2',nombre:'M2',tipo:'medidor'})","instalacionGas.nodos[3].nombre='Cocina'","tramos.push({...tramos[1],id:'duplicado'})"]){const a=app();redEjemplo(a);a.run(cambio);assert.equal(a.run('analizarRedGas().total'),null);}
+});
+test('una tee declarada sin segundo ramal no permite sumar una demanda incompleta',()=>{
+ const a=app();redEjemplo(a);a.run("tramos=tramos.filter(t=>t.id!=='t2');artefactos=artefactos.filter(a=>a.id!=='a2');instalacionGas.nodos=instalacionGas.nodos.filter(n=>n.id!=='b')");assert.match(a.run('analizarRedGas().errores.join(" ")'),/Falta registrar un ramal/);assert.equal(a.run('analizarRedGas().total'),null);
+});
+test('el perfil incompleto no se rellena con presiones o normas supuestas',()=>{
+ const a=app();a.run("abrir('gas')");assert.equal(a.run('instalacionGas.perfil.gas'),'GN');assert.equal(a.elements.get('redPresion').value,'');assert.equal(a.run('instalacionGas.perfil.referenciaNormativa'),undefined);
+ a.elements.get('redLocalidad').value='Mi localidad';a.run('guardarPerfilGas()');assert.equal(a.run('instalacionGas.perfil.localidad'),'Mi localidad');assert.equal(a.run('instalacionGas.perfil.presionDisponible'),'');
+});
+test('red corrupta guardada avisa y conserva tramos y artefactos',()=>{
+ const a=app();redEjemplo(a);a.run('guardarDatos()');const datos=JSON.parse(a.saved());datos.gas.instalacion.nodos=[null];const b=app(JSON.stringify(datos));assert.equal(b.run('tramos.length'),3);assert.equal(b.run('artefactos.length'),2);assert.match(b.run('avisoRestauracionRedGas'),/No se pudo recuperar/);
+});

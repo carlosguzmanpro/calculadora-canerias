@@ -12,6 +12,37 @@ Aplicación gratuita, estática y en español para registrar croquis y estimar m
 
 No interpreta fotografías, genera planos ni verifica diámetros, presiones o normativa. Gemini queda para una etapa futura; esta versión no llama a APIs ni activa servicios pagos.
 
+## Datos de instalación y red domiciliaria de GAS
+
+En GAS, **Instalación: datos y conexiones de GAS** prepara el perfil Argentina / domiciliario / gas natural. El perfil versionado conserva provincia, localidad, distribuidora, material, sistema de unión, presiones y unidad común, pérdida máxima admisible y sus fuentes, referencia normativa aportada y confirmación de suma total de placas sin simultaneidad. No se precargan presiones, normas ni límites de diseño. Queda preparado para agregar perfiles de otras distribuidoras, localidades y gases, pero GLP y otros perfiles todavía no están habilitados para dimensionar.
+
+Se registran puntos de tipo medidor, derivación/unión y artefacto, con identificadores estables. Cada artefacto de la lista de consumos debe asociarse una sola vez. Los tramos existentes se conectan explícitamente mediante selectores de origen y destino. La coincidencia de nombres no crea conexiones por sí sola. Cada tramo tiene un identificador estable; editarlo conserva su asociación de red y renombrar un punto no corta conexiones. Quitar puntos o artefactos conserva los tramos, pero avisa de las referencias que hay que corregir.
+
+Esta etapa admite una red ramificada: un medidor, un tramo saliente del medidor, una entrada por punto y uno o dos tramos salientes por derivación. No admite anillos, múltiples alimentaciones, tramos paralelos, artefactos con salidas ni puntos aislados. Una derivación de más de tres conexiones debe descomponerse en los puntos reales. Si una tee está dentro de un tramo, este debe dividirse en la derivación: no hay un único consumo transportado a ambos lados de esa tee. La tee se registra una sola vez, en un extremo de uno de los tramos conectados, con el mismo nombre del punto. Una tee registrada con un ramal ausente bloquea el cálculo; una bifurcación sin accesorios revisados queda pendiente, sin inventar la tee.
+
+La suma se hace desde los artefactos aguas abajo hasta el medidor, independientemente del orden de carga. Es **consumo instalado acumulado en kcal/h, sin simultaneidad**, no caudal normativo de diseño. Ante errores de conexión o consumos inválidos no se presentan totales parciales que puedan subestimar la instalación. Los datos generales o accesorios pendientes permiten ver una suma topológica válida, pero impiden marcar los datos como completos.
+
+El dato manual de consumo por tramo sigue disponible, ahora opcional: vacío significa pendiente, no cero. El cálculo de red no lo sobrescribe; muestra diferencias respecto al acumulado. No calcula ni sustituye diámetros. Tampoco calcula pérdidas de carga, presión final, longitudes equivalentes ni aplica tablas o métodos normativos. Se mantienen los cálculos de inventario de materiales existentes.
+
+Hay dos estados separados:
+
+- **Datos pendientes:** se listan datos generales, conexiones o accesorios por revisar.
+- **Datos completos para preparar la siguiente etapa:** el perfil, la red y las revisiones requeridas están completos. **El dimensionamiento sigue NO habilitado**, porque falta incorporar y verificar el método normativo específico. Una referencia normativa escrita por el usuario no constituye esa verificación.
+
+La red, el perfil y sus asociaciones se guardan localmente con el proyecto. Los registros anteriores se conservan y reciben identificadores, pero quedan sin conexiones hasta que el usuario las indique. Los datos simulados siguen marcados. El resumen y las conexiones se pueden imprimir; las funciones de fotografías, borradores de croquis, Gemini desactivado, consumo manual, AGUA y CLOACAS se conservan.
+
+### Prueba en Android
+
+1. Descomprimí `canerias-red-gas.zip` y abrí `index.html` con el método que ya usaste para las versiones anteriores. No se publicó una dirección web.
+2. Entrá en **Gas → Consulta de consumos de gas**. Para un ejercicio ficticio podés cargar Cocina con **9000 kcal/h** y Calefactor con **4000 kcal/h**. Son datos de prueba, no consumos recomendados. Si ya hay artefactos, todos deberán conectarse una vez; no los borres para hacer la prueba sin conservar antes tu información.
+3. En **Trabajar con croquis y tramos**, registrá tres tramos con las longitudes y diámetros ya indicados en tu proyecto: M–T1, T1–Cocina y T1–Calefactor. El consumo manual puede quedar vacío; la red lo calculará. No se elige un diámetro a partir del consumo o la foto en esta etapa.
+4. Tocá **Instalación: datos y conexiones de GAS**. Completá únicamente los datos generales que conozcas y guardalos. Si faltan presiones o normativa, dejalos pendientes: la suma de una red bien conectada puede probarse igual.
+5. Agregá los puntos **M (Medidor)**, **T1 (Derivación/unión)**, **Cocina (Artefacto, seleccionando Cocina de la lista)** y **Calefactor (Artefacto, seleccionando Calefactor)**.
+6. En cada tramo elegí sus conexiones: **M → T1**, **T1 → Cocina**, **T1 → Calefactor**. El resultado debe mostrar **13000**, **9000** y **4000 kcal/h**, respectivamente, si esos son los únicos artefactos. Los accesorios que no revisaste seguirán pendientes. Una tee del croquis debe quedar en el extremo del tramo que llega a T1 o sale de T1, nunca dentro de un tramo que atraviesa la derivación sin dividirse.
+7. Dejá un destino sin seleccionar: los acumulados deben dejar de mostrarse y aparecer el dato faltante. Volvé a conectarlo: se recalculan automáticamente.
+8. Recargá, volvé a GAS y a datos/conexiones: la red y el perfil deben conservarse si el navegador permite almacenamiento local. Probá también editar un punto y **Imprimir datos y conexiones**.
+9. Aunque se completen los datos, el aviso **Dimensionamiento NO habilitado** debe permanecer. Todavía no existe un método normativo implementado. No uses la suma de placas para elegir diámetros por cuenta de la aplicación.
+
 ## Registro guiado de accesorios de GAS
 
 Después de agregar un tramo, tocá **Revisar accesorios**. Elegí uno de tres estados:
@@ -106,6 +137,6 @@ Prueba opcional de navegador: `npm install`, `npx playwright install chromium` y
 
 ## Rama y conservación de la versión
 
-La mejora inicial se preparó en la rama local `prueba/mejoras-locales`; el registro de accesorios continúa en `prueba/accesorios-gas` y la revisión simulada en `prueba/revision-croquis-gas` y la preparación desconectada en `prueba/preparacion-gemini`, partiendo de los archivos del commit de GitHub `9c94db1af8167012af764ebaf95151e928aed8b7`. La conexión Git del entorno falló y se recuperaron los archivos mediante la conexión de lectura de GitHub. Por eso el historial Git de esta copia es una instantánea local, no un clon del historial remoto. No se subió ninguna rama ni se modificó `main` en GitHub.
+La mejora inicial se preparó en la rama local `prueba/mejoras-locales`; el registro de accesorios continúa en `prueba/accesorios-gas` y la revisión simulada en `prueba/revision-croquis-gas` y la preparación desconectada en `prueba/preparacion-gemini` y los datos/red en `prueba/red-gas-domiciliaria`, partiendo de los archivos del commit de GitHub `9c94db1af8167012af764ebaf95151e928aed8b7`. La conexión Git del entorno falló y se recuperaron los archivos mediante la conexión de lectura de GitHub. Por eso el historial Git de esta copia es una instantánea local, no un clon del historial remoto. No se subió ninguna rama ni se modificó `main` en GitHub.
 
 Para incorporar el parche en un clon normal, primero conservá tus cambios locales, creá la rama con `git switch -c prueba/mejoras-locales` y ejecutá `git apply --check /ruta/canerias-mejoras.patch`. Si pasa, aplicá `git apply /ruta/canerias-mejoras.patch`. El parche está preparado sobre la versión indicada; si el repositorio avanzó, revisá las diferencias antes de aplicarlo. No hagas push ni fusiones con `main` hasta decidir publicar esos cambios.

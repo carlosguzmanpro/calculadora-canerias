@@ -73,10 +73,49 @@ section{box-shadow:none}
 <h2 id="titulo"></h2>
 
 <div id="menuGas" class="oculto">
+<button class="alt" onclick="mostrarVista('redGas')">Instalación: datos y conexiones de GAS</button>
 <button class="alt" onclick="mostrarVista('revisionCroquis')">Revisar croquis y ejemplos</button>
 <button onclick="mostrarVista('croquis')">📷 Trabajar con croquis y tramos</button>
 <button class="alt" onclick="mostrarVista('consumos')">🧮 Consulta de consumos de gas</button>
 </div>
+
+<section id="redGas" class="oculto">
+<h2>Instalación de GAS · Datos y conexiones</h2>
+<div class="aviso">Argentina · instalación domiciliaria · gas natural. Esta etapa suma consumos de placa sin aplicar simultaneidad. No calcula ni recomienda diámetros, pérdidas o presiones finales. La normativa y el método de dimensionamiento siguen pendientes de verificación.</div>
+<details open><summary>1. Datos generales de la instalación</summary>
+<p>Completá datos comprobados; no uses valores supuestos. Las presiones y la pérdida máxima deben estar expresadas en la misma unidad. La referencia normativa aportada no se considera verificada automáticamente.</p>
+<label for="redProvincia">Provincia</label><input id="redProvincia" maxlength="80" onchange="guardarPerfilGas()">
+<label for="redLocalidad">Localidad</label><input id="redLocalidad" maxlength="80" onchange="guardarPerfilGas()">
+<label for="redDistribuidora">Distribuidora</label><input id="redDistribuidora" maxlength="80" onchange="guardarPerfilGas()">
+<label for="redMaterial">Material de cañería</label><input id="redMaterial" maxlength="80" onchange="guardarPerfilGas()">
+<label for="redSistema">Sistema de unión / familia comercial</label><input id="redSistema" maxlength="80" onchange="guardarPerfilGas()">
+<label for="redUnidad">Unidad común de presión</label><select id="redUnidad" onchange="guardarPerfilGas()"><option value="">Elegir unidad</option><option value="mbar">mbar</option><option value="Pa">Pa</option><option value="mmca">mm de columna de agua</option></select>
+<label for="redPresion">Presión disponible a la salida del medidor</label><input id="redPresion" type="number" min="0" step="any" onchange="guardarPerfilGas()">
+<label for="redMinima">Presión mínima requerida por los artefactos (la más exigente)</label><input id="redMinima" type="number" min="0" step="any" onchange="guardarPerfilGas()">
+<label for="redPerdida">Pérdida máxima admisible indicada para el proyecto</label><input id="redPerdida" type="number" min="0" step="any" onchange="guardarPerfilGas()">
+<label for="redFuente">Fuente de presiones y pérdida admisible</label><input id="redFuente" maxlength="160" onchange="guardarPerfilGas()">
+<label for="redNorma">Referencia normativa / requisitos de distribuidora aportados</label><input id="redNorma" maxlength="160" onchange="guardarPerfilGas()">
+<label for="redDemanda">Criterio de la suma de consumos</label><select id="redDemanda" onchange="guardarPerfilGas()"><option value="">Pendiente de confirmar</option><option value="placa-total">Sumar todos los consumos de placa, sin simultaneidad</option></select>
+<button class="alt" onclick="guardarPerfilGas()">Guardar datos generales</button>
+</details>
+<h3>2. Medidor, derivaciones y artefactos</h3>
+<p>Agregá un solo medidor. Creá un nodo para cada derivación y cada artefacto. Cada artefacto de la consulta de consumos debe estar conectado una sola vez. Cambiar un nombre conserva sus conexiones.</p>
+<button class="alt" onclick="mostrarVista('consumos')">Ir a consumos para agregar artefactos</button>
+<label for="redNombreNodo">Nombre del punto (ej.: M, T1, Cocina)</label><input id="redNombreNodo" maxlength="35">
+<label for="redTipoNodo">Tipo de punto</label><select id="redTipoNodo"><option value="medidor">Medidor</option><option value="derivacion">Derivación / unión</option><option value="artefacto">Artefacto</option></select>
+<label for="redArtefactoNodo">Artefacto de la lista (solo si elegiste tipo Artefacto)</label><select id="redArtefactoNodo"></select>
+<button id="redGuardarNodo" onclick="guardarNodoGas()">Agregar punto</button>
+<button class="alt" onclick="cancelarNodoGas()">Cancelar edición del punto</button>
+<p id="redMensaje" role="status"></p>
+<div id="redNodos"></div>
+<h3>3. Conectar los tramos existentes</h3>
+<p>Elegí origen y destino en el sentido medidor → artefactos. Cada tramo debe terminar en la derivación: si una tee está en su interior, dividí ese tramo manualmente en dos. No se crean tees ni reducciones automáticamente. El consumo manual anterior se conserva por separado.</p>
+<button class="alt" onclick="mostrarVista('croquis')">Ir a croquis para agregar o corregir tramos</button>
+<div id="redConexiones"></div>
+<h3>4. Estado y consumos acumulados</h3>
+<div id="redResultado" class="resultado" aria-live="polite"></div>
+<button class="alt" onclick="window.print()">Imprimir datos y conexiones</button>
+</section>
 
 <section id="revisionCroquis" class="oculto">
 <h2 id="tituloRevisionCroquis">Revisión de croquis</h2>
@@ -136,7 +175,7 @@ section{box-shadow:none}
 <input id="hasta" placeholder="Ej.: A o TERMO" maxlength="35">
 <label for="metros">Metros del tramo</label>
 <input id="metros" type="number" min="0" step="any" placeholder="Ej.: 15">
-<label for="consumoTramo">Consumo que transporta (kcal/h)</label>
+<label for="consumoTramo">Consumo manual (kcal/h; opcional, se acumula en la red)</label>
 <input id="consumoTramo" type="number" min="0" step="any" placeholder="Ej.: 29200">
 <label for="diametro">Diámetro indicado en el proyecto</label>
 <select id="diametro">
@@ -247,6 +286,189 @@ const fotosSesion={};
 const CLAVE='canerias-proyectos-v1';
 const especialidades=['gas','agua','cloacas'];
 let proyectos={gas:{},agua:{},cloacas:{}};
+const CAMPOS_INSTALACION={provincia:'redProvincia',localidad:'redLocalidad',distribuidora:'redDistribuidora',material:'redMaterial',
+ sistema:'redSistema',unidadPresion:'redUnidad',presionDisponible:'redPresion',presionMinima:'redMinima',perdidaMaxima:'redPerdida',fuentePresiones:'redFuente',referenciaNormativa:'redNorma',criterioDemanda:'redDemanda'};
+let instalacionGas={version:1,perfil:{pais:'AR',uso:'domiciliario',gas:'GN'},nodos:[]},editandoNodoGas=null,secuenciaGas=0,avisoRestauracionRedGas='';
+function idGas(prefijo){return prefijo+'-'+Date.now().toString(36)+'-'+(++secuenciaGas);}
+function asegurarIdsGas(){
+ for(const [lista,prefijo] of [[tramos,'tramo'],[artefactos,'artefacto']]){
+  const usados=new Set();lista.forEach(x=>{if(typeof x.id!=='string'||!x.id||usados.has(x.id))x.id=idGas(prefijo);usados.add(x.id);});
+ }
+}
+function restaurarInstalacionGas(g){
+ const x=g.instalacion;
+ if(x && x.version===1 && x.perfil && typeof x.perfil==='object' && Array.isArray(x.nodos) && x.nodos.every(n=>n && typeof n.id==='string' && typeof n.nombre==='string' && ['medidor','derivacion','artefacto'].includes(n.tipo))){
+  instalacionGas={version:1,perfil:{...x.perfil},nodos:x.nodos};
+ }else if(x){avisoRestauracionRedGas='No se pudo recuperar el formato de la red guardada. Los tramos, artefactos y fotografías se conservaron; revisá los puntos y conexiones antes de guardar una nueva red.';}
+ asegurarIdsGas();
+ $('redTipoNodo').value='medidor';
+ Object.entries(CAMPOS_INSTALACION).forEach(([k,id])=>$(id).value=typeof instalacionGas.perfil[k]==='string'?instalacionGas.perfil[k]:'');
+ renderRedGas();
+}
+function guardarPerfilGas(){
+ Object.entries(CAMPOS_INSTALACION).forEach(([k,id])=>instalacionGas.perfil[k]=$(id).value.trim());
+ guardarDatos();
+}
+function analizarRedGas(listaTramos=tramos,listaArtefactos=artefactos,instalacion=instalacionGas){
+ const errores=[],faltantes=[],pendientes=[];const perfil=instalacion.perfil||{};
+ const nodos=Array.isArray(instalacion.nodos)?instalacion.nodos:[];
+ const mapa=new Map(),salidas=new Map(),entradas=new Map(),porTramo=Object.create(null),usosArtefacto=new Map();
+ if(perfil.pais!=='AR'||perfil.uso!=='domiciliario'||perfil.gas!=='GN')faltantes.push('Perfil todavía no soportado: esta etapa prepara Argentina, gas natural domiciliario.');
+ Object.keys(CAMPOS_INSTALACION).forEach(k=>{if(typeof perfil[k]!=='string'||!perfil[k].trim())faltantes.push('Completar '+CAMPOS_INSTALACION[k].replace('red','')+'.');});
+ const numeros=['presionDisponible','presionMinima','perdidaMaxima'];
+ numeros.forEach(k=>{if(perfil[k]!==undefined && perfil[k]!=='' && (!Number.isFinite(Number(perfil[k]))||Number(perfil[k])<=0))faltantes.push('Revisar '+k+': debe ser un valor positivo comprobado.');});
+ if(perfil.unidadPresion && !['mbar','Pa','mmca'].includes(perfil.unidadPresion))faltantes.push('Unidad de presión no reconocida.');
+ if(perfil.criterioDemanda && perfil.criterioDemanda!=='placa-total')faltantes.push('Criterio de demanda no soportado; no se aplicó simultaneidad.');
+ if(numeros.every(k=>Number.isFinite(Number(perfil[k]))&&Number(perfil[k])>0)){
+  if(Number(perfil.presionDisponible)<=Number(perfil.presionMinima))faltantes.push('La presión disponible debe superar la mínima requerida.');
+  if(Number(perfil.perdidaMaxima)>Number(perfil.presionDisponible)-Number(perfil.presionMinima))faltantes.push('La pérdida máxima indicada supera la diferencia entre presión disponible y mínima. Revisá esos datos.');
+ }
+ const nombres=new Set();
+ nodos.forEach(n=>{
+  if(!n || typeof n.id!=='string' || !n.id || typeof n.nombre!=='string'||!n.nombre.trim()||!['medidor','derivacion','artefacto'].includes(n.tipo)){
+   errores.push('Hay un punto incompleto o de tipo desconocido.');return;
+  }
+  if(mapa.has(n.id))errores.push('Identificador de punto duplicado: '+n.nombre+'.');
+  const nombre=n.nombre.trim().toLocaleLowerCase('es');if(nombres.has(nombre))errores.push('Nombre de punto repetido: '+n.nombre+'.');nombres.add(nombre);
+  mapa.set(n.id,n);salidas.set(n.id,[]);entradas.set(n.id,[]);
+ });
+ const medidores=nodos.filter(n=>n?.tipo==='medidor' && mapa.has(n.id));
+ if(medidores.length!==1)errores.push('La red necesita exactamente un medidor.');
+ if(!listaTramos.length)errores.push('Agregá los tramos de la instalación.');
+ if(!listaArtefactos.length)errores.push('Agregá artefactos con sus consumos de placa.');
+ const idsTramo=new Set(),pares=new Set();
+ listaTramos.forEach(t=>{
+  if(!t.id||idsTramo.has(t.id))errores.push('Identificador de tramo faltante o duplicado.');idsTramo.add(t.id);
+  if(!Number.isFinite(t.metros)||t.metros<=0)errores.push('El tramo '+t.desde+'–'+t.hasta+' necesita longitud positiva.');
+  const r=t.red;
+  if(!r||!mapa.has(r.desde)||!mapa.has(r.hasta)){errores.push('Conectar origen y destino válidos del tramo '+t.desde+'–'+t.hasta+'.');return;}
+  if(r.desde===r.hasta){errores.push('Un tramo no puede volver al mismo punto: '+t.desde+'–'+t.hasta+'.');return;}
+  const par=JSON.stringify([r.desde,r.hasta]);if(pares.has(par))errores.push('Hay tramos duplicados entre los mismos puntos.');pares.add(par);
+  salidas.get(r.desde).push(t);entradas.get(r.hasta).push(t);
+  if(Array.isArray(t.detalle?.accesorios)){
+   let posicion=0;
+   for(const a of t.detalle.accesorios){
+    if(!a||!Number.isFinite(a.metrosAntes)){pendientes.push('Revisar posiciones de accesorios del tramo '+t.desde+'–'+t.hasta+'.');break;}
+    posicion+=a.metrosAntes;
+    if(a.tipo==='tee'){
+     if(posicion>1e-9 && posicion<t.metros-1e-9)errores.push('La tee '+(a.nodo||'sin nombre')+' está dentro de un tramo. Dividí el tramo en esa derivación.');
+     else{
+      const extremo=posicion<=1e-9?mapa.get(r.desde):mapa.get(r.hasta);
+      if(extremo.tipo!=='derivacion'||typeof a.nodo!=='string'||extremo.nombre.trim().toLocaleLowerCase('es')!==a.nodo.trim().toLocaleLowerCase('es'))errores.push('La tee '+(a.nodo||'sin nombre')+' debe coincidir con el punto de derivación de su extremo.');
+     }
+    }
+   }
+  }
+  const accesorios=evaluarTramo(t,listaTramos);if(accesorios.pendiente)pendientes.push('Accesorios por revisar en '+t.desde+'–'+t.hasta+'.');
+ });
+ const artPorId=new Map();listaArtefactos.forEach(a=>{
+  if(!a.id||artPorId.has(a.id))errores.push('Identificador de artefacto faltante o duplicado.');
+  artPorId.set(a.id,a);if(!Number.isFinite(a.consumo)||a.consumo<=0)errores.push('El artefacto '+a.nombre+' necesita consumo de placa positivo.');
+ });
+ for(const n of mapa.values()){
+  const ent=entradas.get(n.id).length,sal=salidas.get(n.id).length;
+  if(n.tipo==='medidor'){
+   if(ent)errores.push('El medidor no puede recibir un tramo de la instalación.');
+   if(sal!==1)errores.push('El medidor debe alimentar un tramo; registrá las bifurcaciones como derivaciones.');
+  }else if(ent!==1)errores.push('El punto '+n.nombre+' debe recibir exactamente un tramo.');
+  if(n.tipo==='artefacto'){
+   if(sal)errores.push('Un artefacto no puede alimentar otro tramo: '+n.nombre+'.');
+   if(!artPorId.has(n.artefactoId))errores.push('Elegí un artefacto existente para '+n.nombre+'.');
+   else usosArtefacto.set(n.artefactoId,(usosArtefacto.get(n.artefactoId)||0)+1);
+  }else if(n.artefactoId)errores.push('Solo un punto de tipo artefacto puede tener un consumo asociado.');
+  if(n.tipo==='derivacion'){
+   const tees=listaTramos.flatMap(t=>Array.isArray(t.detalle?.accesorios)?t.detalle.accesorios:[]).filter(a=>a?.tipo==='tee' && typeof a.nodo==='string' && a.nodo.trim().toLocaleLowerCase('es')===n.nombre.trim().toLocaleLowerCase('es'));
+   if(sal===2 && tees.length!==1)pendientes.push('Revisar y registrar una sola tee en la derivación '+n.nombre+'; la red no agrega accesorios automáticamente.');
+   if(sal===1 && tees.length)errores.push('La tee '+n.nombre+' necesita las dos salidas conectadas. Falta registrar un ramal.');
+  }
+  if(n.tipo==='derivacion'&&(sal<1||sal>2))errores.push('La derivación '+n.nombre+' debe continuar a uno o dos tramos; descomponé las derivaciones múltiples.');
+ }
+ for(const a of listaArtefactos){const usos=usosArtefacto.get(a.id)||0;if(usos!==1)errores.push(usos?'El artefacto '+a.nombre+' está conectado más de una vez.':'El artefacto '+a.nombre+' todavía no está conectado.');}
+ // DFS iterativo: detecta ciclos incluso desconectados, sin desbordar la pila.
+ const color=new Map();let ciclo=false;
+ for(const raiz of mapa.keys()){
+  if(color.get(raiz))continue;const pila=[[raiz,false]];
+  while(pila.length){const [id,salir]=pila.pop();if(salir){color.set(id,2);continue;}
+   if(color.get(id)===1){ciclo=true;continue;}if(color.get(id)===2)continue;
+   color.set(id,1);pila.push([id,true]);for(const t of salidas.get(id)){if(color.get(t.red.hasta)===1)ciclo=true;else if(color.get(t.red.hasta)!==2)pila.push([t.red.hasta,false]);}
+  }
+ }
+ if(ciclo)errores.push('Hay un circuito cerrado: esta etapa admite redes ramificadas sin anillos.');
+ const alcanzados=new Set();const orden=[];
+ if(medidores.length===1){const cola=[medidores[0].id];for(let i=0;i<cola.length;i++){
+  const id=cola[i];if(alcanzados.has(id))continue;alcanzados.add(id);orden.push(id);for(const t of salidas.get(id)||[])cola.push(t.red.hasta);
+ }}
+ for(const [id,n]of mapa)if(!alcanzados.has(id))errores.push('El punto '+n.nombre+' no está conectado al medidor.');
+ let total=null;
+ if(!errores.length){
+  const demanda=new Map();for(let i=orden.length-1;i>=0;i--){const id=orden[i],n=mapa.get(id);
+   let suma=n.tipo==='artefacto'?artPorId.get(n.artefactoId).consumo:0;
+   for(const t of salidas.get(id)){const d=demanda.get(t.red.hasta);porTramo[t.id]=d;suma+=d;}
+   if(!Number.isFinite(suma))errores.push('El consumo acumulado excede el rango permitido.');demanda.set(id,suma);
+  }
+  if(!errores.length)total=demanda.get(medidores[0].id);
+ }
+ if(errores.length)for(const k of Object.keys(porTramo))delete porTramo[k];
+ const datosCompletos=!errores.length&&!faltantes.length&&!pendientes.length;
+ return {errores:[...new Set(errores)],faltantes:[...new Set(faltantes)],pendientes:[...new Set(pendientes)],porTramo,total,
+  datosCompletos,listoParaDimensionar:false,
+  bloqueoNormativo:'Dimensionamiento NO habilitado: falta incorporar y verificar un método normativo específico.'};
+}
+function cancelarNodoGas(){editandoNodoGas=null;$('redNombreNodo').value='';$('redGuardarNodo').textContent='Agregar punto';}
+function guardarNodoGas(){
+ const nombre=$('redNombreNodo').value.trim(),tipo=$('redTipoNodo').value;
+ if(!nombre||!['medidor','derivacion','artefacto'].includes(tipo)){$('redMensaje').textContent='Completá nombre y tipo del punto.';return;}
+ const nodo={id:editandoNodoGas||idGas('nodo'),nombre,tipo,artefactoId:tipo==='artefacto'?$('redArtefactoNodo').value:''};
+ if(instalacionGas.nodos.some(n=>n.id!==nodo.id && n.nombre.trim().toLocaleLowerCase('es')===nombre.toLocaleLowerCase('es'))){$('redMensaje').textContent='Ese nombre ya existe. Elegí uno distinto.';return;}
+ if(tipo==='medidor'&&instalacionGas.nodos.some(n=>n.id!==nodo.id&&n.tipo==='medidor')){$('redMensaje').textContent='Ya existe un medidor. Editá ese punto.';return;}
+ if(tipo==='artefacto'&&!artefactos.some(a=>a.id===nodo.artefactoId)){$('redMensaje').textContent='Elegí un artefacto existente de la lista de consumos.';return;}
+ const i=instalacionGas.nodos.findIndex(n=>n.id===nodo.id);if(i>=0)instalacionGas.nodos[i]=nodo;else instalacionGas.nodos.push(nodo);
+ cancelarNodoGas();$('redMensaje').textContent='Punto guardado. Revisá las conexiones.';guardarDatos();
+}
+function renderRedGas(){
+ asegurarIdsGas();const select=$('redArtefactoNodo'),valor=select.value;select.replaceChildren();
+ const vacio=document.createElement('option');vacio.value='';vacio.textContent='Elegir artefacto';select.append(vacio);
+ artefactos.forEach(a=>{const o=document.createElement('option');o.value=a.id;o.textContent=(esOrigenSimulado(a.origen)?'[SIMULADO] ':'')+a.nombre+' · '+fmt(a.consumo)+' kcal/h';select.append(o);});select.value=valor;
+ const lista=$('redNodos');lista.replaceChildren();
+ instalacionGas.nodos.forEach(n=>{
+  const fila=document.createElement('div');fila.className='detalle';const texto=document.createElement('p');texto.textContent=n.nombre+' · '+n.tipo+(n.tipo==='artefacto'?' · '+(artefactos.find(a=>a.id===n.artefactoId)?.nombre||'artefacto pendiente'):'');fila.append(texto);
+  const editar=document.createElement('button');editar.className='peq alt';editar.textContent='Editar punto';editar.onclick=()=>{
+   editandoNodoGas=n.id;$('redNombreNodo').value=n.nombre;$('redTipoNodo').value=n.tipo;$('redArtefactoNodo').value=n.artefactoId||'';$('redGuardarNodo').textContent='Guardar cambios del punto';};
+  const quitar=document.createElement('button');quitar.className='peq alt';quitar.textContent='Quitar punto';quitar.onclick=()=>{
+   instalacionGas.nodos=instalacionGas.nodos.filter(x=>x.id!==n.id);cancelarNodoGas();$('redMensaje').textContent='Punto quitado. Sus tramos se conservaron: volvé a conectarlos.';guardarDatos();};
+  fila.append(editar,quitar);lista.append(fila);
+ });
+ const conexiones=$('redConexiones');conexiones.replaceChildren();
+ tramos.forEach(t=>{
+  const fila=document.createElement('div');fila.className='detalle';const titulo=document.createElement('p');titulo.textContent=t.desde+'–'+t.hasta+' · '+fmt(t.metros)+' m';fila.append(titulo);
+  ['desde','hasta'].forEach(k=>{
+   const label=document.createElement('label');label.textContent=k==='desde'?'Origen conectado':'Destino conectado';const s=document.createElement('select');
+   const vacio=document.createElement('option');vacio.value='';vacio.textContent='Elegir punto';s.append(vacio);
+   instalacionGas.nodos.forEach(n=>{const o=document.createElement('option');o.value=n.id;o.textContent=n.nombre+' ('+n.tipo+')';s.append(o);});
+   if(t.red?.[k]&&!instalacionGas.nodos.some(n=>n.id===t.red[k])){const o=document.createElement('option');o.value=t.red[k];o.textContent='Referencia eliminada: elegir otro punto';s.append(o);}
+   s.value=t.red?.[k]||'';s.onchange=()=>{t.red={...t.red,[k]:s.value};guardarDatos();};label.append(s);fila.append(label);
+  });
+  const impreso=document.createElement('p');impreso.className='solo-impresion';
+  impreso.textContent='Conexión: '+(instalacionGas.nodos.find(n=>n.id===t.red?.desde)?.nombre||'origen pendiente')+' → '+(instalacionGas.nodos.find(n=>n.id===t.red?.hasta)?.nombre||'destino pendiente');fila.append(impreso);
+  conexiones.append(fila);
+ });
+ const r=analizarRedGas(),out=$('redResultado');out.replaceChildren();
+ function texto(s,clase){const p=document.createElement('p');p.textContent=s;if(clase)p.className=clase;out.append(p);}
+ texto(r.datosCompletos?'DATOS COMPLETOS para preparar la siguiente etapa.':'DATOS PENDIENTES: la instalación todavía necesita revisión.');
+ texto(r.bloqueoNormativo,'aviso');
+ if(avisoRestauracionRedGas)texto(avisoRestauracionRedGas,'aviso');
+ const perfilImpreso=document.createElement('div');perfilImpreso.className='solo-impresion';
+ Object.entries(CAMPOS_INSTALACION).forEach(([k,id])=>{const p=document.createElement('p');p.textContent=id.replace('red','')+': '+(instalacionGas.perfil[k]||'pendiente');perfilImpreso.append(p);});out.append(perfilImpreso);
+ if(tramos.some(t=>esOrigenSimulado(t.origen))||artefactos.some(a=>esOrigenSimulado(a.origen)))texto('Esta red incluye datos SIMULADOS de demostración. No describe una instalación real.','aviso');
+ [...r.errores,...r.faltantes,...r.pendientes].forEach(e=>texto(e,'aviso'));
+ if(r.total!==null){
+  texto('Demanda instalada conectada: '+fmt(r.total)+' kcal/h. Suma total de placas, sin simultaneidad.');
+  const nombres=new Map(instalacionGas.nodos.map(n=>[n.id,n.nombre]));
+  tramos.forEach(t=>texto(nombres.get(t.red.desde)+' → '+nombres.get(t.red.hasta)+': '+fmt(r.porTramo[t.id])+' kcal/h acumulados'+
+   (t.consumo!==null&&Number.isFinite(t.consumo)&&Math.abs(t.consumo-r.porTramo[t.id])>1e-6?' · difiere del dato manual ('+fmt(t.consumo)+').':'') ));
+ }else texto('No se muestran consumos acumulados mientras la red tenga conexiones o demandas inválidas. El dato manual de cada tramo se conserva.');
+}
+
 function invalidarConsumos(){
  $('resultadoGas').textContent='Datos actualizados. Tocá CALCULAR CONSUMO TOTAL.';
 }
@@ -255,6 +477,9 @@ function guardarDatos(){
  const actual=proyectos[modulo];
  actual.aclaracion=$('duda').value;
  actual.revision=$('revision').textContent;
+ asegurarIdsGas();
+ proyectos.gas.instalacion=instalacionGas;
+ renderRedGas();
  proyectos.gas.borradorCroquis=borradorCroquis;
  proyectos.gas.tramos=tramos;
  proyectos.gas.artefactos=artefactos;
@@ -281,8 +506,9 @@ function restaurarDatos(){
   if(datos && especialidades.every(m=>datos[m] && typeof datos[m]==='object' && !Array.isArray(datos[m]))) proyectos=datos;
   const g=proyectos.gas;
  borradorCroquis=formatoBorradorValido(g.borradorCroquis)?g.borradorCroquis:null;
-  tramos=Array.isArray(g.tramos)?g.tramos.filter(t=>t && typeof t.desde==='string' && typeof t.hasta==='string' && typeof t.diametro==='string' && Number.isFinite(t.metros) && t.metros>0 && Number.isFinite(t.consumo) && t.consumo>=0):[];
+  tramos=Array.isArray(g.tramos)?g.tramos.filter(t=>t && typeof t.desde==='string' && typeof t.hasta==='string' && typeof t.diametro==='string' && Number.isFinite(t.metros) && t.metros>0 && (t.consumo===null || (Number.isFinite(t.consumo) && t.consumo>=0))):[];
   artefactos=Array.isArray(g.artefactos)?g.artefactos.filter(a=>a && typeof a.nombre==='string' && Number.isFinite(a.consumo) && a.consumo>0):[];
+  restaurarInstalacionGas(g);
   if(['9300','22300'].includes(g.tipoGas)) $('gt').value=g.tipoGas;
   $('estadoGuardado').textContent='Guardado local en este navegador. Borrar sus datos elimina los proyectos.';
  }catch(e){
@@ -335,7 +561,9 @@ function volver(){
 }
 
 function mostrarVista(v){
- if(v==='revisionCroquis' && modulo!=='gas')return;
+ if(['revisionCroquis','redGas'].includes(v) && modulo!=='gas')return;
+ $('redGas').classList.toggle('oculto',v!=='redGas');
+ if(v==='redGas')renderRedGas();
  $('revisionCroquis').classList.toggle('oculto',v!=='revisionCroquis');
  if(v==='revisionCroquis')renderRevisionCroquis();
  $('croquis').classList.toggle('oculto',v!=='croquis');
@@ -756,7 +984,7 @@ function editarTramo(i){
  cerrarAccesorios();
  editandoTramo=i;const t=tramos[i];
  $('desde').value=t.desde;$('hasta').value=t.hasta;
- $('metros').value=t.metros;$('consumoTramo').value=t.consumo;
+ $('metros').value=t.metros;$('consumoTramo').value=t.consumo??'';
  const comunes=['1/2"','3/4"','1"','1 1/4"','1 1/2"','2"'];
  $('diametro').value=comunes.includes(t.diametro)?t.diametro:'Otro (especificar)';
  $('otroDiametro').value=t.diametro;$('otroDiametro').classList.toggle('oculto',comunes.includes(t.diametro));
@@ -842,16 +1070,15 @@ function agregarTramo(){
   $('otroDiametro').value.trim():$('diametro').value;
 
  if(!desde||!hasta||m===''||!Number.isFinite(Number(m))||
- Number(m)<=0||c===''||!Number.isFinite(Number(c))||
- Number(c)<0||!di){
-  alert('Completá Desde, Hasta, metros mayores a cero, consumo y diámetro.');
+ Number(m)<=0||(c!==''&&(!Number.isFinite(Number(c))||Number(c)<0))||!di){
+  alert('Completá Desde, Hasta, metros mayores a cero y diámetro. El consumo manual es opcional; si lo completás, debe ser un número no negativo.');
   return;
  }
- const datos={desde,hasta,metros:Number(m),consumo:Number(c),diametro:di,
+ const datos={desde,hasta,metros:Number(m),consumo:c===''?null:Number(c),diametro:di,
   artefacto:$('destinoArtefacto').value,llave:$('llave').checked};
  if(editandoTramo>=0){
   const anterior=tramos[editandoTramo];
-  datos.detalle=anterior.detalle;datos.origen=anterior.origen;
+  datos.detalle=anterior.detalle;datos.origen=anterior.origen;datos.id=anterior.id;datos.red=anterior.red;
   if(anterior.metros!==datos.metros || anterior.diametro!==datos.diametro){
    datos.detalle={...anterior.detalle,estado:'pendiente'};
   }
@@ -878,7 +1105,7 @@ function renderTramos(){
   d.className='detalle';
   const s=document.createElement('div');
   s.textContent=(esOrigenSimulado(t.origen)?'[SIMULADO] ':(t.origen?.tipo==='gemini'?'[IA revisada] ':''))+t.desde+'–'+t.hasta+' | '+
-   fmt(t.metros)+' m | '+fmt(t.consumo)+' kcal/h | '+
+   fmt(t.metros)+' m | '+(t.consumo===null?'consumo manual pendiente':fmt(t.consumo)+' kcal/h manuales')+' | '+
    t.diametro+(t.artefacto?' | '+t.artefacto:'')+
    (t.llave?' | 1 llave':'');
   const estado=document.createElement('p');
@@ -995,6 +1222,7 @@ function calcularMateriales(){
 window.addEventListener('beforeprint',()=>{
  $('aclaracionImpresion').textContent='Aclaración actual: '+($('duda').value.trim()||'Sin aclaración.');
  if(modulo==='gas'){
+  renderRedGas();
   if(tramos.length)calcularMateriales();
   if(artefactos.length)calcularConsumos();
  }
