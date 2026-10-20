@@ -36,11 +36,33 @@ Las fotografías PNG, JPEG o WebP de hasta **1 MB** se guardan localmente si hay
 
 Si las fotografías exceden la cuota del navegador, se guarda el proyecto sin fotos y se informa. Si el almacenamiento está bloqueado o lleno incluso sin fotos, se avisa y la aplicación sigue funcionando durante la sesión; guardá una impresión antes de cerrar. El modo privado y borrar los datos del navegador pueden eliminar todo. El guardado no sincroniza dispositivos y **no es una copia de seguridad**. Dos pestañas pueden sobrescribir cambios: trabajá en una sola.
 
+## Preparación de Gemini · SIN CONEXIÓN
+
+El botón **Analizar foto con Gemini · DESACTIVADO** no lee ni envía la fotografía: informa que la conexión no está habilitada. No hay clave, URL de servicio, llamadas a Google, cuentas creadas, facturación ni despliegue. Todo GAS, AGUA y CLOACAS sigue funcionando con sus opciones manuales.
+
+En GAS, abrí **Pruebas locales de la integración · SIN IA** para ensayar una respuesta incompleta, una cuota agotada o un fallo de conexión. Son acciones locales programadas; no verifican una cuenta de Gemini ni reconocen ninguna fotografía. La respuesta incompleta no reemplaza un borrador existente: primero hay que descartarlo explícitamente.
+
+El adaptador convierte la respuesta externa v1 (esquema en `server/gemini-proxy.mjs`) a un borrador interno v2. El origen distingue `gemini`, reservado para una conexión futura, de `prueba-gemini`, usado en la demostración local. Todos los campos quedan sin confirmar. No convierte cadenas numéricas en medidas ni valores ausentes en cero, false, Ninguno o listas vacías confirmadas. Las llaves admiten **Pendiente / Sí / No**. Los accesorios tienen su propio estado **Pendiente / No hay / Lista revisada** y hay que confirmarlo. Se pueden agregar piezas manualmente en la revisión. Si el modelo no identificó ninguna, eso no demuestra que no existan.
+
+El intermediario está preparado como código de pruebas: su entrada por defecto devuelve `IA_DESACTIVADA` y no contiene transporte hacia Google. Valida consentimiento de envío, acceso y cuotas mediante dependencias de prueba, límites de tamaño/formato y respuestas, además de tiempos de espera y errores sin reintentos. Ver `server/README.md` para las piezas que faltan antes de una conexión real. No es un servidor protegido ya desplegado ni valida autenticación real de usuarios todavía.
+
+### Prueba corta desde Android, sin computadora
+
+1. Descomprimí `canerias-gemini-preparacion.zip` y abrí `index.html` con el mismo método que usaste para probar el ZIP anterior. Sigue siendo una aplicación HTML local; algunas versiones de Android necesitan un visor HTML con JavaScript y el guardado de archivos locales depende del navegador.
+2. Entrá en **Gas**. Podés cargar una foto desde **Galería** como antes.
+3. Tocá **Analizar foto con Gemini · DESACTIVADO**: debe decir que no se envió ninguna foto.
+4. Abrí **Pruebas locales de la integración · SIN IA** y tocá **Probar respuesta incompleta · SIN IA**. Si hay un borrador anterior, se conserva y la pantalla indica que debés descartarlo antes de cargar otra prueba.
+5. Verás **PRUEBA LOCAL SIN IA**, metros/diámetros/consumos vacíos, llave **Pendiente** y accesorios pendientes. Tocá **Incorporar datos revisados al proyecto** sin completar ni confirmar: debe rechazarlo, conservando el proyecto.
+6. Volvé a croquis, abrí las pruebas locales y tocá **Probar cuota agotada · SIN CONEXIÓN** o **Probar error de conexión · SIN CONEXIÓN**: solo cambia el aviso. La carga manual sigue disponible.
+7. Para repetir la demostración completa anterior: **Revisar croquis y ejemplos → Descartar borrador de revisión → Cargar ejemplo SIMULADO de GAS**. Completá los 6 m finales y confirmá cada dato. El cálculo mantiene los resultados anteriores: 18 m, 3 tiras, 0 cuplas y los cuatro accesorios. Los datos que incorpores de cualquier prueba local se imprimen como SIMULADO.
+
+No ingreses claves en el HTML, en el chat ni en archivos del ZIP. Para la fase real faltarán la autorización de despliegue, cuenta/modelo con cuota gratuita, secreto solo en servidor, autenticación y cuota persistente reales y el adaptador que envíe la petición a Gemini. Ninguna de esas acciones se realiza con este ZIP.
+
 ## Revisión de resultados simulados (primera etapa de IA)
 
-Esta versión NO reconoce fotografías ni conecta Gemini. En GAS, **Revisar ejemplo SIMULADO de croquis** abre una demostración independiente de cualquier imagen cargada. No se envían imágenes ni datos a servicios externos.
+Esta versión NO reconoce fotografías ni conecta Gemini. En GAS, **Revisar croquis y ejemplos** abre una demostración independiente de cualquier imagen cargada. No se envían imágenes ni datos a servicios externos.
 
-El borrador usa el contrato JSON v1: `version`, `origen: "simulado"`, `id`, `aplicado` y una lista de `tramos`. Cada tramo tiene `incluir`, `campos` y `accesorios`; cada dato editable tiene `{valor, confirmado, duda}`. `null` representa información faltante y nunca se convierte automáticamente en cero. Cada accesorio tiene también `incluir`. El esquema incluye origen, destino, longitud total, diámetro inicial, consumos, artefacto, llave, longitudes entre accesorios y las conexiones de tees, codos y reducciones. Los datos se convierten al modelo de cálculo existente solo tras la revisión. La futura conexión de IA requerirá su propio adaptador y validación: esta versión solo admite origen simulado.
+El borrador usa el contrato JSON v1: `version`, `origen: "simulado"`, `id`, `aplicado` y una lista de `tramos`. Cada tramo tiene `incluir`, `campos` y `accesorios`; cada dato editable tiene `{valor, confirmado, duda}`. `null` representa información faltante y nunca se convierte automáticamente en cero. Cada accesorio tiene también `incluir`. El esquema incluye origen, destino, longitud total, diámetro inicial, consumos, artefacto, llave, longitudes entre accesorios y las conexiones de tees, codos y reducciones. Los datos se convierten al modelo de cálculo existente solo tras la revisión. El adaptador preparado acepta respuestas estructuradas y produce borradores v2 con origen `gemini` o `prueba-gemini`. La conexión real permanece ausente y desactivada; los ejemplos originales v1 siguen siendo compatibles.
 
 Cada casilla confirma un campo. Editarlo quita esa confirmación. Se puede excluir un tramo o un accesorio incorrecto; hay que corregir las longitudes y conexiones que dependían de él. Para indicar que no existe un artefacto, escribí `Ninguno` y consumo de placa `0`, y confirmá ambos. La longitud del tramo tiene que ser positiva; la suma de segmentos y la continuidad de diámetros se validan antes de incorporar. Los nombres de tees no pueden duplicarse. No se dimensiona ni se certifica la instalación.
 
@@ -51,11 +73,11 @@ Los datos de demostración conservan la marca **SIMULADO** en listas, resultados
 ### Qué tocar en Android
 
 1. Descargá y descomprimí `canerias-revision-simulada.zip` con Files de Google. Abrí `index.html` usando el mismo navegador o visor HTML local con JavaScript que utilizaste para probar la versión anterior. Un visor que solo muestre código no ejecuta la aplicación. No hace falta una computadora para esta demostración; según Android, abrir HTML local puede requerir una aplicación de vista previa HTML. No se incluye alojamiento ni un enlace web publicado.
-2. Tocá **Gas** y después **Revisar ejemplo SIMULADO de croquis**.
+2. Tocá **Gas** y después **Revisar croquis y ejemplos**.
 3. Tocá **Cargar ejemplo SIMULADO de GAS**. No hace falta cargar una foto: el ejemplo no proviene de ninguna imagen.
 4. Revisá los datos del tramo. En **Metros después del último accesorio**, ingresá **6**. Es el dato que dejamos vacío para practicar. Marcá cada casilla **Confirmo** del tramo y de sus accesorios. Si cambiás un valor, volvé a confirmarlo.
 5. Podés cambiar tipos, metros, diámetros y artefactos, o desmarcar **Incluir accesorio** si una pieza no corresponde; después ajustá longitudes y diámetros para mantener la continuidad. Para la primera prueba, conservá los valores del ejemplo salvo los 6 m finales.
-6. Tocá **Incorporar datos SIMULADOS confirmados al proyecto**. Si falta algo, el aviso explica qué corregir. Nada se agrega parcialmente.
+6. Tocá **Incorporar datos revisados al proyecto**. Si falta algo, el aviso explica qué corregir. Nada se agrega parcialmente.
 7. Tocá **Volver a croquis y tramos** y luego **CALCULAR MATERIALES**. El ejemplo sin modificar aporta 18 m, 3 tiras, 0 cuplas, una tee, un codo de 90°, una reducción independiente y un codo de 45°. Si ya había datos, el total los incluye también y mantiene la marca de simulación.
 8. En **Consulta de consumos de gas**, tocá **CALCULAR CONSUMO TOTAL**: el ejemplo agrega un artefacto de 9300 kcal/h, equivalente a 1 m³/h orientativo con gas natural. El resultado advertirá que incluye datos simulados.
 9. Recargá para comprobar el guardado. Si abriste un archivo local, algunos navegadores bloquean o cambian el almacenamiento; la aplicación lo avisa. No uses modo incógnito. Mantené el mismo archivo y navegador.
@@ -78,12 +100,12 @@ No se publica en Internet ni se modifica GitHub con este procedimiento. El servi
 
 ## Pruebas
 
-Con Node.js 20 o superior, ejecutá `npm test`. Las pruebas básicas no requieren instalar paquetes: ejercitan el JavaScript real con un DOM mínimo, recuperación de datos, cálculos, invalidación, separación de especialidades, errores de almacenamiento y preparación de impresión. No validan la apariencia visual ni la cámara.
+Con Node.js 20 o superior, ejecutá `npm test`. Las pruebas de lógica y del intermediario no requieren instalar paquetes: ejercitan el JavaScript real con un DOM mínimo, recuperación de datos, cálculos, invalidación, separación de especialidades, errores de almacenamiento y preparación de impresión. No validan la apariencia visual ni la cámara.
 
 Prueba opcional de navegador: `npm install`, `npx playwright install chromium` y `npm run test:browser`. Definí `CHROMIUM_PATH` con la ruta al ejecutable de Chromium; por defecto se usa `/usr/bin/chromium`. Esta prueba requiere un entorno que permita ejecutar el navegador. En el entorno de preparación se bloquearon Chromium y los sockets, por lo que esta validación visual queda pendiente.
 
 ## Rama y conservación de la versión
 
-La mejora inicial se preparó en la rama local `prueba/mejoras-locales`; el registro de accesorios continúa en `prueba/accesorios-gas` y la revisión simulada en `prueba/revision-croquis-gas`, partiendo de los archivos del commit de GitHub `9c94db1af8167012af764ebaf95151e928aed8b7`. La conexión Git del entorno falló y se recuperaron los archivos mediante la conexión de lectura de GitHub. Por eso el historial Git de esta copia es una instantánea local, no un clon del historial remoto. No se subió ninguna rama ni se modificó `main` en GitHub.
+La mejora inicial se preparó en la rama local `prueba/mejoras-locales`; el registro de accesorios continúa en `prueba/accesorios-gas` y la revisión simulada en `prueba/revision-croquis-gas` y la preparación desconectada en `prueba/preparacion-gemini`, partiendo de los archivos del commit de GitHub `9c94db1af8167012af764ebaf95151e928aed8b7`. La conexión Git del entorno falló y se recuperaron los archivos mediante la conexión de lectura de GitHub. Por eso el historial Git de esta copia es una instantánea local, no un clon del historial remoto. No se subió ninguna rama ni se modificó `main` en GitHub.
 
 Para incorporar el parche en un clon normal, primero conservá tus cambios locales, creá la rama con `git switch -c prueba/mejoras-locales` y ejecutá `git apply --check /ruta/canerias-mejoras.patch`. Si pasa, aplicá `git apply /ruta/canerias-mejoras.patch`. El parche está preparado sobre la versión indicada; si el repositorio avanzó, revisá las diferencias antes de aplicarlo. No hagas push ni fusiones con `main` hasta decidir publicar esos cambios.

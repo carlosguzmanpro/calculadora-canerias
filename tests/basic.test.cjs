@@ -181,8 +181,8 @@ test('rechaza tees duplicadas sin modificar datos reales ni importar parcialment
  a.run("tramos.push({desde:'X',hasta:'Y',metros:6,diametro:'3/4\"',consumo:1,detalle:{estado:'completo',metrosFinal:0,accesorios:[{tipo:'tee',metrosAntes:6,salida:'3/4\"',ramal:'1/2\"',nodo:'DEMO-T1'}]}});incorporarCroquis()");
  assert.equal(a.run('tramos.length'),1);assert.equal(a.run('artefactos.length'),0);assert.match(a.text('mensajeCroquis'),/repetida/);
 });
-test('no admite origen de IA y no expone la revisión en agua o cloacas',()=>{
- const a=app();ejemploRevisado(a);a.run("borradorCroquis.origen='gemini';incorporarCroquis()");assert.equal(a.run('tramos.length'),0);assert.match(a.text('mensajeCroquis'),/formato/);
+test('rechaza orígenes desconocidos y no expone la revisión en agua o cloacas',()=>{
+ const a=app();ejemploRevisado(a);a.run("borradorCroquis.origen='origen-desconocido';incorporarCroquis()");assert.equal(a.run('tramos.length'),0);assert.match(a.text('mensajeCroquis'),/formato/);
  for(const m of ['agua','cloacas']){a.run(`abrir('${m}');mostrarVista('revisionCroquis')`);assert.equal(a.elements.get('revisionCroquis').classList.hidden,true);}
 });
 test('descartar un borrador no elimina datos incorporados y permite cargar otro',()=>{
@@ -209,4 +209,70 @@ test('los controles de revisión corrigen y desconfirman el dato editado',()=>{
 test('varios tramos se validan antes de agregar cualquiera de ellos',()=>{
  const a=app();ejemploRevisado(a);a.run("const otro=JSON.parse(JSON.stringify(borradorCroquis.tramos[0]));otro.campos.metros.confirmado=false;borradorCroquis.tramos.push(otro);incorporarCroquis()");
  assert.equal(a.run('tramos.length'),0);assert.equal(a.run('artefactos.length'),0);
+});
+
+test('botón Gemini desactivado no envía ni lee la foto y conserva todo el proyecto',()=>{
+ const a=app();a.ctx.fetch=()=>assert.fail('No debe existir tráfico de red');
+ a.run("abrir('gas');fotoURL='blob:personal';analizarFotoGemini()");assert.match(a.text('estadoGemini'),/desactivado/);assert.equal(a.run('fotoURL'),'blob:personal');assert.equal(a.run('borradorCroquis'),null);
+});
+test('respuesta incompleta local conserva null, booleano desconocido y accesorios pendientes',()=>{
+ const a=app();a.run("abrir('gas');cargarPruebaGemini()");
+ assert.equal(a.run('borradorCroquis.origen'),'prueba-gemini');assert.equal(a.run('borradorCroquis.version'),2);
+ assert.equal(a.run('borradorCroquis.tramos[0].campos.metros.valor'),null);assert.equal(a.run('borradorCroquis.tramos[0].campos.llave.valor'),null);
+ assert.equal(a.run('borradorCroquis.tramos[0].revisionAccesorios.valor'),'pendiente');a.run('incorporarCroquis()');assert.equal(a.run('tramos.length'),0);
+});
+function geminiRevisado(a){
+ ejemploRevisado(a);
+ a.run("var anterior=borradorCroquis.tramos[0];var bruto={version:1,tramos:[{campos:Object.fromEntries(Object.entries(anterior.campos).map(([k,d])=>[k,d.valor])),estadoAccesorios:'identificados',accesorios:anterior.accesorios.map(a=>Object.fromEntries(Object.entries(a).filter(([k])=>k!=='incluir').map(([k,d])=>[k,d.valor])))}]};borradorCroquis=adaptarRespuestaGemini(bruto,{origen:'prueba-gemini'});");
+ a.run("borradorCroquis.tramos.forEach(t=>{Object.values(t.campos).forEach(d=>d.confirmado=true);t.revisionAccesorios.confirmado=true;t.accesorios.forEach(a=>Object.values(a).forEach(d=>{if(d&&typeof d==='object')d.confirmado=true;}));})");
+}
+test('adaptador ignora confirmaciones del proveedor y no convierte cadenas a números',()=>{
+ const a=app();a.ctx.raw={version:1,confirmado:true,tramos:[{campos:{metros:'6',llave:'false'},accesorios:[],estadoAccesorios:null}]};
+ a.run('borradorCroquis=adaptarRespuestaGemini(raw)');assert.equal(a.run('borradorCroquis.tramos[0].campos.metros.valor'),null);
+ assert.equal(a.run('borradorCroquis.tramos[0].campos.llave.valor'),null);assert.equal(a.run('borradorCroquis.tramos[0].campos.metros.confirmado'),false);assert.equal(a.run('borradorCroquis.tramos[0].revisionAccesorios.valor'),'pendiente');
+});
+test('tipo de accesorio desconocido no se convierte en un codo por defecto',()=>{
+ const a=app();a.run("borradorCroquis=adaptarRespuestaGemini({version:1,tramos:[{campos:{},accesorios:[{tipo:'giro-posible',metrosAntes:3}]}]});renderRevisionCroquis()");
+ assert.equal(a.run('borradorCroquis.tramos[0].accesorios[0].tipo.valor'),null);assert.equal(a.run('borradorCroquis.tramos[0].accesorios[0].salida.valor'),null);
+});
+test('estado de accesorios pendiente o contradictorio impide incorporar',()=>{
+ for(const estado of ['pendiente','ninguno']){const a=app();geminiRevisado(a);a.run(`borradorCroquis.tramos[0].revisionAccesorios.valor='${estado}';incorporarCroquis()`);assert.equal(a.run('tramos.length'),0);assert.match(a.text('mensajeCroquis'),/pendientes|seleccionados/);}
+});
+test('prueba local revisada usa cálculos existentes y mantiene marca SIMULADO al imprimir',()=>{
+ const a=app();geminiRevisado(a);a.run('incorporarCroquis();calcularMateriales();calcularConsumos()');
+ assert.equal(a.run('tramos.length'),1);assert.equal(a.run('tramos[0].origen.tipo'),'prueba-gemini');assert.equal(a.run('evaluarTramo(tramos[0]).tiras'),3);
+ assert.match(a.elements.get('resultadoMateriales').children[0].textContent,/SIMULADOS/);assert.match(a.text('resultadoGas'),/SIMULADOS/);
+ const b=app(a.saved());assert.equal(b.run('borradorCroquis.origen'),'prueba-gemini');assert.equal(b.run('borradorCroquis.aplicado'),true);
+});
+test('prepara origen Gemini sin confundirlo con datos simulados; exige todas las confirmaciones',()=>{
+ const a=app();geminiRevisado(a);a.run("borradorCroquis.origen='gemini';borradorCroquis.tramos[0].campos.llave.valor=null;incorporarCroquis()");assert.equal(a.run('tramos.length'),0);
+ a.run("borradorCroquis.tramos[0].campos.llave.valor=false;incorporarCroquis();calcularMateriales()");assert.equal(a.run('tramos[0].origen.tipo'),'gemini');assert.match(a.elements.get('listaTramos').children[0].children[0].textContent,/IA revisada/);
+});
+test('cuotas y errores locales no borran fotos, borradores ni tramos',()=>{
+ const a=app();ejemploRevisado(a);const antes=a.run('JSON.stringify(borradorCroquis)');a.run("fotoURL='blob:personal';probarErrorGemini('CUOTA_AGOTADA')");assert.match(a.text('estadoGemini'),/PRUEBA LOCAL SIN IA/);assert.match(a.text('estadoGemini'),/no se activan pagos/);
+ a.run("probarErrorGemini('SIN_CONEXION')");assert.equal(a.run('JSON.stringify(borradorCroquis)'),antes);assert.equal(a.run('fotoURL'),'blob:personal');
+});
+test('puede agregar manualmente un accesorio a una revisión incompleta',()=>{
+ const a=app();a.run("abrir('gas');cargarPruebaGemini();agregarAccesorioRevision(borradorCroquis.tramos[0])");
+ assert.equal(a.run('borradorCroquis.tramos[0].accesorios.length'),1);assert.equal(a.run('borradorCroquis.tramos[0].accesorios[0].entrada.valor'),null);assert.equal(a.run('borradorCroquis.tramos[0].revisionAccesorios.confirmado'),false);
+});
+test('No es una respuesta explícita, no un booleano ausente',()=>{
+ const a=app();a.run("abrir('gas');cargarPruebaGemini()");
+ function buscar(n,p){if(p(n))return n;for(const c of n.children||[]){const r=buscar(c,p);if(r)return r;}}
+ const label=buscar(a.elements.get('datosCroquis'),n=>n.textContent==='¿Hay una llave de paso?');const input=label.children[0];
+ assert.equal(input.value,'');input.value='false';input.onchange();assert.equal(a.run('borradorCroquis.tramos[0].campos.llave.valor'),false);assert.equal(a.run('borradorCroquis.tramos[0].campos.llave.confirmado'),false);
+});
+test('contrato del intermediario y adaptador del navegador conservan los mismos desconocidos',async()=>{
+ const {validateModelResult}=await import('../server/gemini-proxy.mjs');const a=app();
+ a.ctx.normalizado=validateModelResult({version:1,tramos:[{campos:{metros:'inventado',llave:null},accesorios:[]}]});
+ a.run("borradorCroquis=adaptarRespuestaGemini(normalizado,{origen:'prueba-gemini'})");
+ assert.equal(a.run('formatoBorradorValido(borradorCroquis)'),true);assert.equal(a.run('borradorCroquis.tramos[0].campos.metros.valor'),null);
+ assert.equal(a.run('borradorCroquis.tramos[0].revisionAccesorios.valor'),'pendiente');
+});
+test('probar otra respuesta no reemplaza un borrador ni oculta el aviso',()=>{
+ const a=app();ejemploRevisado(a);const antes=a.run('JSON.stringify(borradorCroquis)');a.run("mostrarVista('croquis');cargarPruebaGemini()");
+ assert.equal(a.run('JSON.stringify(borradorCroquis)'),antes);assert.equal(a.elements.get('revisionCroquis').classList.hidden,false);assert.match(a.text('mensajeCroquis'),/Conservamos/);
+});
+test('la preparación de Gemini aparece solo en GAS y deja las fotos de las otras especialidades',()=>{
+ const a=app();for(const m of ['gas','agua','cloacas']){a.run(`abrir('${m}');mostrarVista('croquis')`);assert.equal(a.elements.get('panelGemini').classList.hidden,m!=='gas');assert.equal(a.elements.get('croquis').classList.hidden,false);}
 });

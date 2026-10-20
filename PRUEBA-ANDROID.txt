@@ -1,0 +1,13 @@
+CAÑERÍAS · PREPARACIÓN GEMINI SIN CONEXIÓN
+
+### Prueba corta desde Android, sin computadora
+
+1. Descomprimí `canerias-gemini-preparacion.zip` y abrí `index.html` con el mismo método que usaste para probar el ZIP anterior. Sigue siendo una aplicación HTML local; algunas versiones de Android necesitan un visor HTML con JavaScript y el guardado de archivos locales depende del navegador.
+2. Entrá en **Gas**. Podés cargar una foto desde **Galería** como antes.
+3. Tocá **Analizar foto con Gemini · DESACTIVADO**: debe decir que no se envió ninguna foto.
+4. Abrí **Pruebas locales de la integración · SIN IA** y tocá **Probar respuesta incompleta · SIN IA**. Si hay un borrador anterior, se conserva y la pantalla indica que debés descartarlo antes de cargar otra prueba.
+5. Verás **PRUEBA LOCAL SIN IA**, metros/diámetros/consumos vacíos, llave **Pendiente** y accesorios pendientes. Tocá **Incorporar datos revisados al proyecto** sin completar ni confirmar: debe rechazarlo, conservando el proyecto.
+6. Volvé a croquis, abrí las pruebas locales y tocá **Probar cuota agotada · SIN CONEXIÓN** o **Probar error de conexión · SIN CONEXIÓN**: solo cambia el aviso. La carga manual sigue disponible.
+7. Para repetir la demostración completa anterior: **Revisar croquis y ejemplos → Descartar borrador de revisión → Cargar ejemplo SIMULADO de GAS**. Completá los 6 m finales y confirmá cada dato. El cálculo mantiene los resultados anteriores: 18 m, 3 tiras, 0 cuplas y los cuatro accesorios. Los datos que incorpores de cualquier prueba local se imprimen como SIMULADO.
+
+No ingreses claves en el HTML, en el chat ni en archivos del ZIP. Para la fase real faltarán la autorización de despliegue, cuenta/modelo con cuota gratuita, secreto solo en servidor, autenticación y cuota persistente reales y el adaptador que envíe la petición a Gemini. Ninguna de esas acciones se realiza con este ZIP.
