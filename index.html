@@ -83,8 +83,10 @@ section{box-shadow:none}
 <section id="dimensionGas" class="oculto">
 <h2>Dimensionamiento automático de GAS · experimental</h2>
 <h3>Método de clase · acero roscado con epoxi · GN</h3>
+<button class="alt" onclick="mostrarRevisionTablasGas()">Revisar tablas transcritas y pendientes</button>
+<div id="revisionTablasGas" class="resultado" aria-live="polite"></div>
 <p>Los 15 m adicionales son solo una estimación inicial. Las equivalencias definitivas dependen de las tablas y los accesorios identificados, incluyendo paso directo o giro de cada tee. Las reducciones se cuentan como materiales y se excluyen de equivalentes en este método de clase.</p>
-<div class="aviso">No están disponibles las fotografías de las tablas N.º 3 y N.º 18. Los diámetros definitivos permanecen bloqueados. Este procedimiento no certifica una instalación real ni asume su presión de suministro.</div>
+<div class="aviso">Se registraron 12 capacidades y 9 coeficientes aportados por mensaje. Faltan las fotografías, las filas restantes, los diámetros interiores y el cotejo de las tablas N.º 3 y N.º 18. Los diámetros definitivos permanecen bloqueados. Este procedimiento no certifica una instalación real ni asume su presión de suministro.</div>
 <button class="alt" onclick="prepararPerfilClaseGas()">Elegir acero roscado epoxi y condiciones del ejercicio para mi red</button>
 <button onclick="ejecutarClaseMiRedGas()">Analizar mi red con el método de clase</button>
 <div id="informeClaseMiRed" class="resultado" aria-live="polite"></div>
@@ -310,6 +312,9 @@ Estimación de compra sin reutilizar sobrantes: tiras de 6 m por segmento contin
 <button onclick="document.getElementById('visor').close()">Cerrar imagen</button>
 </dialog>
 
+<script src="datos/tabla-3.js"></script>
+<script src="datos/tabla-18.js"></script>
+<script src="datos/validacion-tablas.js"></script>
 <script>
 'use strict';
 const $=id=>document.getElementById(id);
@@ -476,8 +481,27 @@ function motorDimensionarGas(ts,arts,inst,paquete=null,{modoPrueba=false,maxComb
 
 const PERFIL_CLASE_ACERO={pais:'AR',uso:'domiciliario',gas:'GN',material:'Acero con revestimiento epoxi',sistema:'Roscado',poderCalorifico:'9300',densidadRelativa:'0.65',fuenteGas:'Condiciones del ejercicio de clase; no condiciones de suministro verificadas'};
 const AVISO_CLASE='Método de clase, NO aptitud para ejecutar una instalación real. Las reducciones se incluyen en el inventario como piezas pero se excluyen de equivalentes por este procedimiento; la verificación normativa puede exigir sus pérdidas y otras adicionales.';
+function mostrarRevisionTablasGas(){
+ const out=$('revisionTablasGas');out.replaceChildren();
+ const texto=t=>{const p=document.createElement('p');p.textContent=t;out.append(p);};
+ if(typeof ValidacionTablasGas==='undefined'||typeof TABLA_NAG200_3==='undefined'||typeof TABLA_NAG200_18==='undefined'){
+  texto('No se cargaron los archivos de datos. Descomprimí el ZIP completo conservando la carpeta datos. Diámetros definitivos bloqueados.');return null;
+ }
+ const t3=TABLA_NAG200_3,t18=TABLA_NAG200_18,r=ValidacionTablasGas.validarTablas(t3,t18);
+ texto('TABLAS EN REVISIÓN · NO HABILITAN DIÁMETROS DEFINITIVOS. Procedencia: mensaje del usuario; documento declarado NAG-200. Edición y vigencia no verificadas.');
+ texto(r.capacidades+' capacidades en L/h y '+r.coeficientes+' coeficientes d registrados. Cotejo contra fotografías: pendiente; ningún valor cotejado con imagen en esta entrega.');
+ texto('Tabla 3 · longitud (m) | '+t3.columnas.join(' | '));
+ t3.filas.forEach(f=>texto(f.longitud+' m | '+f.capacidades.map(v=>v===null?'DUDOSO / PENDIENTE':v).join(' | ')+' L/h'));
+ texto('Conversión: consumo kcal/h ÷ 9300 = m³/h; m³/h × 1000 = L/h. No se confunden capacidades en litros con m³/h.');
+ texto('La fila superior se elige sin interpolación solo después de verificar la tabla completa. Las cuatro filas de control no reemplazan las filas faltantes.');
+ t18.accesorios.forEach(a=>texto(a.tipo+': '+a.factorD+' d · '+a.base));
+ texto('d es diámetro interior, NO nominal en pulgadas. Sin diámetro interior y redondeo cotejados no se generan equivalentes numéricos. Una llave genérica requiere identificar el tipo de válvula.');
+ texto('Particularidad del método de clase: las reducciones son materiales, pero su equivalente 10 d del diámetro menor NO se suma. Esto no implica pérdida física nula ni certificación normativa.');
+ for(const f of [...r.errores,...r.pendientes])texto('PENDIENTE / REVISAR: '+f);
+ return r;
+}
 function validarCatalogoClase(p,modoPrueba=false){
- if(!p)return ['Faltan fotografías o transcripción verificada de la Tabla N.º 3 completa (capacidades) y Tabla N.º 18 completa (equivalencias de accesorios roscados), con encabezados, unidades, notas, fuente y edición.'];
+ if(!p)return ['Hay 12 capacidades y 9 coeficientes declarados por mensaje, sin cotejo fotográfico ni catálogo habilitado. Faltan fotografías o transcripción verificada de la Tabla N.º 3 completa (capacidades) y Tabla N.º 18 completa (equivalencias de accesorios roscados), con encabezados, unidades, notas, fuente y edición.'];
  const faltan=[];
  if(p.soloPruebas&&!modoPrueba)faltan.push('El catálogo de ensayo no se puede usar para resultados técnicos.');
  for(const [key,numero]of [['tabla3',3],['tabla18',18]]){
@@ -569,6 +593,7 @@ function mostrarInformeClaseGas(r,id){
  }
  for(const [id,t]of Object.entries(r.porTramo)){
   texto('Tramo '+id+' | real: '+fmt(t.longitudReal)+' m | demanda: '+(t.consumoKcal===null?'PENDIENTE':fmt(t.consumoKcal)+' kcal/h · '+fmt(t.caudal)+' m³/h'));
+  if(t.consumoKcal!==null&&typeof ValidacionTablasGas!=='undefined')texto('Consulta de Tabla 3: '+fmt(ValidacionTablasGas.caudalClaseDesdeKcal(t.consumoKcal).litrosHora)+' L/h (consumo ÷ 9300 × 1000).');
   texto('Accesorios: '+(t.accesorios?t.accesorios.map(a=>a.tipo+' '+a.medidas.join('/')).join(', ')||'ninguno':t.accesoriosIdentificados===null?'PENDIENTES DE IDENTIFICAR':t.accesoriosIdentificados.map(a=>a.tipo).join(', ')||'ninguno declarado'));
   texto('Equivalentes: '+(t.longitudEquivalenteAccesorios===null?'PENDIENTES':fmt(t.longitudEquivalenteAccesorios)+' m')+' | definitiva de tramo: '+(t.longitudDefinitiva===null?'PENDIENTE':fmt(t.longitudDefinitiva)+' m')+' | longitud de cálculo (recorrido desfavorable): '+(t.longitudDeCalculo===null?'PENDIENTE':fmt(t.longitudDeCalculo)+' m')+' | diámetro: '+(t.diametroCalculado||'PENDIENTE')+' | capacidad: '+(t.capacidad===null?'PENDIENTE':fmt(t.capacidad)+' m³/h')+' | '+t.comprobacion);
  }

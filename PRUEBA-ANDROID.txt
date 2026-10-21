@@ -2,8 +2,8 @@ CAÑERÍAS · MÉTODO DE CLASE · ACERO ROSCADO EPOXI
 
 ### Probar desde Android
 
-1. Descomprimí `canerias-clase-acero-epoxi.zip` y abrí `index.html` con el navegador o visor HTML que usaste en las pruebas anteriores. No reemplaces la aplicación publicada. El guardado local puede estar separado al abrir desde otra ubicación: conservá la versión anterior y sus datos.
-2. Entrá en **Gas → Calcular diámetros · diagnóstico**.
+1. Descomprimí `canerias-tablas-nag200-revision.zip` conservando la carpeta `datos` junto a `index.html`, y abrí `index.html` con el navegador o visor HTML que usaste en las pruebas anteriores. No reemplaces la aplicación publicada. El guardado local puede estar separado al abrir desde otra ubicación: conservá la versión anterior y sus datos.
+2. Entrá en **Gas → Calcular diámetros · diagnóstico**. Tocá **Revisar tablas transcritas y pendientes**: deben aparecer 12 capacidades en L/h y 9 factores d, sin afirmar cotejo fotográfico. Los diámetros definitivos siguen bloqueados.
 3. En **Ejercicio de clase M–A–B**, tocá **Probar método de clase M–A–B sin diámetros**. Es una copia separada: no reemplaza ni agrega datos a tu instalación.
 4. Marcá la casilla solo después de comprobar en el croquis que 15, 9, 8, 6 y 13 m son longitudes individuales. Sin confirmación el resultado queda bloqueado.
 5. Compará los recorridos: Cocina **36 m**, Calefactor **29 m**, Termotanque **24 m**; estimación inicial **51, 44 y 39 m**. Los 15 m extra nunca se presentan como equivalentes definitivos.
@@ -13,3 +13,5 @@ CAÑERÍAS · MÉTODO DE CLASE · ACERO ROSCADO EPOXI
 9. Podés imprimir el informe desde **Imprimir diagnóstico y comparación**, conservando advertencias y resultados visibles. Comprobá también fotografías, carga manual, revisión de croquis y guardado como antes.
 
 Gemini sigue desactivado: no se envían fotografías. No se incorporaron servicios ni claves. Las pruebas automáticas cubren la lógica; la comprobación visual de esta entrega en Android queda pendiente.
+
+IMPORTANTE: descomprimí TODO el ZIP. Abrir únicamente index.html fuera de la carpeta puede impedir cargar los archivos de datos. No requiere conexión ni envía fotos. Leé INFORME-TABLAS.md para los controles y pendientes.

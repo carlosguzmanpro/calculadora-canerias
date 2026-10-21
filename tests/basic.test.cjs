@@ -12,6 +12,7 @@ function app(saved=null,{blocked=false,quota=Infinity}={}){
  for(const m of html.matchAll(/id="([^"]+)"/g))elements.set(m[1],element());
  elements.get('gt').value='9300';elements.get('ga').value='Cocina';
  const ctx=vm.createContext({document:{getElementById:id=>elements.get(id),createElement:element,createTextNode:text=>({textContent:text})},window:{scrollTo(){},addEventListener(k,fn){this[k]=fn}},localStorage:{getItem:k=>{if(blocked)throw Error('blocked');return store.get(k)||null},setItem(k,v){if(blocked||v.length>quota)throw Error('quota');store.set(k,v)}},URL:{revokeObjectURL(){}},alert(){}});
+ for(const m of html.matchAll(/<script src="([^"]+)"><\/script>/g))vm.runInContext(fs.readFileSync(m[1],'utf8'),ctx);
  vm.runInContext(script,ctx);
  return {ctx,elements,run:code=>vm.runInContext(code,ctx),saved:()=>store.get('canerias-proyectos-v1'),text:id=>elements.get(id).textContent};
 }
@@ -527,4 +528,19 @@ test('clase: cuplas de segmentos comerciales se suman o excluyen solo con fuente
 });
 test('clase: conexiones incorrectas no producen caudales ni tamaños parciales',()=>{
  const a=app();fixtureClase(a);a.run("tramos[2].red.hasta='inexistente'");const r=clase(a);assert.equal(r.diametros,null);assert.equal(r.recorridos.length,0);assert.equal(r.porTramo.t0.caudal,null);
+});
+
+test('tablas: pantalla local muestra 12 capacidades, 9 factores y origen sin cotejo',()=>{
+ const a=app();a.run("abrir('gas');mostrarVista('dimensionGas')");const r=a.run('mostrarRevisionTablasGas()');assert.equal(r.habilitado,false);assert.equal(r.capacidades,12);assert.equal(r.coeficientes,9);
+ const texto=a.elements.get('revisionTablasGas').children.map(p=>p.textContent).join(' ');assert.match(texto,/800 \| 2210 \| 4525/);assert.match(texto,/ningún valor cotejado/);assert.match(texto,/Edición y vigencia no verificadas/);assert.match(texto,/NO se suma/);
+});
+test('tablas: datos declarados no registran catálogo ni habilitan los diámetros del ejercicio',()=>{
+ const a=app();a.run("abrir('gas');mostrarRevisionTablasGas()");a.elements.get('claseLongitudesConfirmadas').checked=true;
+ const r=a.run('probarMetodoClaseGas()');assert.equal(r.diametros,null);assert.equal(r.estado,'bloqueado');assert.equal(a.run('CATALOGOS_GAS_VERIFICADOS.length'),0);
+ assert.match(r.faltantes.join(' '),/sin cotejo fotográfico/);assert.ok(Object.values(r.porTramo).every(t=>t.diametroCalculado===null));
+});
+test('tablas: falta de un archivo se informa sin perder la carga manual',()=>{
+ const a=app();a.run("abrir('gas');delete globalThis.TABLA_NAG200_18");assert.equal(a.run('mostrarRevisionTablasGas()'),null);assert.match(a.elements.get('revisionTablasGas').children[0].textContent,/ZIP completo/);
+ for(const [id,v]of Object.entries({desde:'M',hasta:'A',metros:'6',consumoTramo:'',diametro:''}))a.elements.get(id).value=v;
+ a.run('agregarTramo()');assert.equal(a.run('tramos.length'),1);assert.equal(a.run('tramos[0].diametro'),null);
 });

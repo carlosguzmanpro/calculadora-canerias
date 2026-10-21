@@ -2,7 +2,7 @@
   "name": "calculadora-canerias",
   "private": true,
   "scripts": {
-    "test": "node --test tests/basic.test.cjs tests/proxy.test.mjs",
+    "test": "node --test tests/basic.test.cjs tests/proxy.test.mjs tests/tablas.test.cjs",
     "test:browser": "node --test tests/app.test.cjs"
   },
   "devDependencies": {
