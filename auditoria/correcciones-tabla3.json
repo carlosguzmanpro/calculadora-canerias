@@ -1,0 +1,50 @@
+{
+  "base": "1e99313",
+  "correcciones": [
+    {
+      "longitud": 10,
+      "diametro": "4\"",
+      "anterior": 287190,
+      "corregido": 287189,
+      "motivo": "Error de transcripción de 1e99313; corrección cotejada en ampliación de fotografía original, sin alterar la imagen",
+      "fuente": "fuentes/tabla-3-347520.jpg",
+      "estado": "Cotejo visual; pendiente revisión técnica independiente"
+    },
+    {
+      "longitud": 12,
+      "diametro": "4\"",
+      "anterior": 262151,
+      "corregido": 282151,
+      "motivo": "Error de transcripción de 1e99313; corrección cotejada en ampliación de fotografía original, sin alterar la imagen",
+      "fuente": "fuentes/tabla-3-347520.jpg",
+      "estado": "Cotejo visual; pendiente revisión técnica independiente"
+    },
+    {
+      "longitud": 16,
+      "diametro": "4\"",
+      "anterior": 227244,
+      "corregido": 227024,
+      "motivo": "Error de transcripción de 1e99313; corrección cotejada en ampliación de fotografía original, sin alterar la imagen",
+      "fuente": "fuentes/tabla-3-347520.jpg",
+      "estado": "Cotejo visual; pendiente revisión técnica independiente"
+    },
+    {
+      "longitud": 55,
+      "diametro": "3\"",
+      "anterior": 59612,
+      "corregido": 59650,
+      "motivo": "Error de transcripción de 1e99313; corrección cotejada en ampliación de fotografía original, sin alterar la imagen",
+      "fuente": "fuentes/tabla-3-347520.jpg",
+      "estado": "Cotejo visual; pendiente revisión técnica independiente"
+    },
+    {
+      "longitud": 85,
+      "diametro": "2\"",
+      "anterior": 17655,
+      "corregido": 17565,
+      "motivo": "Error de transcripción de 1e99313; corrección cotejada en ampliación de fotografía original, sin alterar la imagen",
+      "fuente": "fuentes/tabla-3-347520.jpg",
+      "estado": "Cotejo visual; pendiente revisión técnica independiente"
+    }
+  ]
+}

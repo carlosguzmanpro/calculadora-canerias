@@ -1,6 +1,5 @@
-/* Transcripción visual de fotografía adjunta; ver procedencia y pendientes. Sin lógica de cálculo. */
-(function(root){
- const datos={
+/* Datos cotejados visualmente; sin habilitación técnica. Ver historial de auditoría. */
+(function(root){const datos={
   "tabla": 18,
   "titulo": "Longitudes equivalentes de accesorios roscados",
   "unidadDiametro": "m",
@@ -17,7 +16,7 @@
     "sha256": "d9f541eb091f705c0dead916066da755f9cf2cb9a5f449be025f7dae2bad41a0",
     "alcanceCotejo": "Lectura visual de la fotografía; pendiente revisión técnica e independiente"
   },
-  "transcripcionCompleta": false,
+  "transcripcionCompleta": true,
   "diametros": [
     {
       "nominal": "1/2\"",
@@ -161,14 +160,13 @@
     "fuentePoliticaCuplas": null
   },
   "pendientes": [
-    "Dos celdas dudosas del complemento: codo90/cantidad5/2 pulgadas y tee-directo/cantidad5/3 pulgadas",
+    "Codos90/cantidad5/2 pulgadas: impreso 7,67, calculado 7,65; divergencia técnica sin resolver",
     "Fuente, edición, vigencia y aplicabilidad no demostradas por la fotografía",
     "Los nueve d del encabezado están cotejados; no se identifican como interiores reales de un producto comercial",
-    "Discrepancias de redondeo: conservar fuente y verificar criterio antes de calcular",
-    "Tratamiento documentado de cuplas",
-    "Aplicación de equivalencias a tees reductoras",
+    "Nueve discrepancias originales de codos45: conservar fuente y verificar criterio de redondeo",
+    "Tratamiento documentado de cuplas y aplicación de equivalencias a tees reductoras",
     "Tipo real de cada llave y compatibilidad comercial de accesorios",
-    "Revisión independiente de transcripción y ejercicio completo"
+    "Revisión técnica independiente de transcripción y ejercicio completo"
   ],
   "complemento": [
     {
@@ -225,7 +223,7 @@
       "equivalentesM": [
         1.56,
         2.28,
-        3.0,
+        3,
         3.84,
         4.56,
         6.12,
@@ -244,12 +242,12 @@
         3.75,
         4.8,
         5.7,
-        null,
+        7.67,
         9.45,
         11.4,
         15.15
       ],
-      "estado": "lectura-dudosa"
+      "estado": "cotejado"
     },
     {
       "tipo": "codo45",
@@ -353,7 +351,7 @@
       "equivalentesM": [
         0.52,
         0.76,
-        1.0,
+        1,
         1.28,
         1.52,
         2.04,
@@ -385,7 +383,7 @@
       "equivalentesM": [
         1.04,
         1.52,
-        2.0,
+        2,
         2.56,
         3.04,
         4.08,
@@ -406,10 +404,10 @@
         3.8,
         5.1,
         6.3,
-        null,
+        7.6,
         10.1
       ],
-      "estado": "lectura-dudosa"
+      "estado": "cotejado"
     },
     {
       "tipo": "tee-giro90",
@@ -433,7 +431,7 @@
       "equivalentesM": [
         1.56,
         2.28,
-        3.0,
+        3,
         3.84,
         4.56,
         6.12,
@@ -465,7 +463,7 @@
       "equivalentesM": [
         3.12,
         4.56,
-        6.0,
+        6,
         7.68,
         9.12,
         12.24,
@@ -513,7 +511,7 @@
       "equivalentesM": [
         2.6,
         3.8,
-        5.0,
+        5,
         6.4,
         7.6,
         10.2,
@@ -545,7 +543,7 @@
       "equivalentesM": [
         5.2,
         7.6,
-        10.0,
+        10,
         12.8,
         15.2,
         20.4,
@@ -562,34 +560,17 @@
         6.5,
         9.5,
         12.5,
-        16.0,
-        19.0,
+        16,
+        19,
         25.5,
         31.5,
-        38.0,
+        38,
         50.5
       ],
       "estado": "cotejado"
     }
   ],
-  "celdasDudosas": [
-    {
-      "tipo": "codo90",
-      "cantidad": 5,
-      "columna": "2\"",
-      "valor": null,
-      "lecturaParcial": "7,6?",
-      "motivo": "Último dígito y discrepancia con 5 × 30 × 0,051. Solicitar ampliación; no completar por fórmula."
-    },
-    {
-      "tipo": "tee-directo",
-      "cantidad": 5,
-      "columna": "3\"",
-      "valor": null,
-      "lecturaParcial": "7,6?",
-      "motivo": "Último dígito y discrepancia con 5 × 20 × 0,076. Solicitar ampliación; no completar por fórmula."
-    }
-  ],
+  "celdasDudosas": [],
   "ejemploFotografiado": {
     "tipo": "codo90",
     "cantidad": 2,
@@ -599,7 +580,29 @@
     "equivalenteM": 1.14,
     "estado": "cotejado"
   },
-  "segundaRevisionIndependiente": false
-};
- if(typeof module==='object'&&module.exports)module.exports=datos;else root.TABLA_NAG200_18=datos;
-})(globalThis);
+  "segundaRevisionIndependiente": false,
+  "celdasReexaminadas": [
+    {
+      "tipo": "codo90",
+      "cantidad": 5,
+      "columna": "2\"",
+      "valorImpreso": 7.67,
+      "calculado": 7.65,
+      "diferencia": 0.02,
+      "estadoLectura": "Cotejado visualmente con ampliación del original",
+      "estadoTecnico": "Divergencia no resuelta; no utilizar como equivalente verificado",
+      "nota": "7,65 es el producto exacto con d=0,051; 7,67 no se explica por redondeo a centésimos. Posibles errata o d distinto no documentado; no se confirma ninguna hipótesis."
+    },
+    {
+      "tipo": "tee-directo",
+      "cantidad": 5,
+      "columna": "3\"",
+      "valorImpreso": 7.6,
+      "calculado": 7.6,
+      "diferencia": 0,
+      "estadoLectura": "Cotejado visualmente con ampliación del original",
+      "estadoTecnico": "Coincide aritméticamente; aplicabilidad general pendiente",
+      "nota": "El último dígito impreso es 0; la interpretación anterior como 7,61 no se conserva como dato."
+    }
+  ]
+};if(typeof module==='object'&&module.exports)module.exports=datos;else root.TABLA_NAG200_18=datos;})(globalThis);

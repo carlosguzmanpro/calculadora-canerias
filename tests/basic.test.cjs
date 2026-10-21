@@ -6,13 +6,13 @@ const html=fs.readFileSync('index.html','utf8');
 const script=html.match(/<script>([\s\S]*?)<\/script>/)[1];
 // DOM mínimo: estas pruebas ejercitan el estado y los cálculos reales del script.
 // La maquetación, cámara e impresión visual requieren la prueba de navegador.
-function app(saved=null,{blocked=false,quota=Infinity,tablasLegadas=false}={}){
+function app(saved=null,{blocked=false,quota=Infinity,tablasLegadas=false,tablasFotoBase=false}={}){
  const elements=new Map();const store=new Map(saved?[['canerias-proyectos-v1',saved]]:[]);
  function element(){return {value:'',textContent:'',checked:false,style:{},children:[],className:'',classList:{hidden:false,add(c){if(c==='oculto')this.hidden=true;},remove(c){if(c==='oculto')this.hidden=false;},toggle(c,b){if(c==='oculto')this.hidden=b;}},append(...x){this.children.push(...x)},replaceChildren(){this.children=[];this.textContent=''},removeAttribute(k){delete this[k]},addEventListener(k,fn){this[k]=fn}};}
  for(const m of html.matchAll(/id="([^"]+)"/g))elements.set(m[1],element());
  elements.get('gt').value='9300';elements.get('ga').value='Cocina';
  const ctx=vm.createContext({document:{getElementById:id=>elements.get(id),createElement:element,createTextNode:text=>({textContent:text})},window:{scrollTo(){},addEventListener(k,fn){this[k]=fn}},localStorage:{getItem:k=>{if(blocked)throw Error('blocked');return store.get(k)||null},setItem(k,v){if(blocked||v.length>quota)throw Error('quota');store.set(k,v)}},URL:{revokeObjectURL(){}},alert(){}});
- for(const m of html.matchAll(/<script src="([^"]+)"><\/script>/g)){const ruta=tablasLegadas&&/^datos\/tabla-(3|18)\.js$/.test(m[1])?m[1].replace('datos/tabla-','tests/fixtures/tabla-').replace('.js','-22028c8.cjs'):m[1];vm.runInContext(fs.readFileSync(ruta,'utf8'),ctx);}
+ for(const m of html.matchAll(/<script src="([^"]+)"><\/script>/g)){const ruta=tablasFotoBase&&/^datos\/tabla-(3|18)\.js$/.test(m[1])?m[1].replace('datos/tabla-','tests/fixtures/tabla-').replace('.js','-1e99313.cjs'):tablasLegadas&&/^datos\/tabla-(3|18)\.js$/.test(m[1])?m[1].replace('datos/tabla-','tests/fixtures/tabla-').replace('.js','-22028c8.cjs'):m[1];vm.runInContext(fs.readFileSync(ruta,'utf8'),ctx);}
  vm.runInContext(script,ctx);
  return {ctx,elements,run:code=>vm.runInContext(code,ctx),saved:()=>store.get('canerias-proyectos-v1'),text:id=>elements.get(id).textContent};
 }
@@ -546,16 +546,28 @@ test('tablas: falta de un archivo se informa sin perder la carga manual',()=>{
 });
 
 test('fotos: pantalla muestra transcripción actual y coordenadas exactas de dudas',()=>{
- const a=app();a.run("abrir('gas')");const r=a.run('mostrarRevisionTablasGas()');assert.equal(r.capacidades,441);assert.equal(r.coeficientes,9);assert.equal(r.habilitado,false);
+ const a=app(null,{tablasFotoBase:true});a.run("abrir('gas')");const r=a.run('mostrarRevisionTablasGas()');assert.equal(r.capacidades,441);assert.equal(r.coeficientes,9);assert.equal(r.habilitado,false);
  const texto=a.elements.get('revisionTablasGas').children.map(p=>p.textContent).join(' ');assert.match(texto,/223 equivalencias numéricas, 2 celdas dudosas y 9 diferencias/);assert.match(texto,/codo90 · cantidad 5 · columna 2"/);assert.match(texto,/tee-directo · cantidad 5 · columna 3"/);assert.match(texto,/50 m \| 715 \| 1975 \| 4035/);assert.doesNotMatch(texto,/ningún valor cotejado/);
  assert.equal(a.elements.get('revisionTablasGas').children.filter(p=>p.href?.startsWith('fuentes/')).length,2);
 });
 test('fotos: reconocer la transcripción no habilita catálogo ni las pulgadas del ejercicio',()=>{
- const a=app();a.run("abrir('gas');mostrarRevisionTablasGas()");a.elements.get('claseLongitudesConfirmadas').checked=true;
+ const a=app(null,{tablasFotoBase:true});a.run("abrir('gas');mostrarRevisionTablasGas()");a.elements.get('claseLongitudesConfirmadas').checked=true;
  const r=a.run('probarMetodoClaseGas()');assert.equal(r.diametros,null);assert.equal(r.estado,'bloqueado');assert.equal(a.run('CATALOGOS_GAS_VERIFICADOS.length'),0);assert.match(r.faltantes.join(' '),/ya están transcritas/);
  assert.ok(Object.values(r.porTramo).every(t=>t.diametroCalculado===null));
 });
 test('fotos: revisión de tablas no cambia el proyecto guardado ni llama a una API',()=>{
- const a=app();a.run("abrir('gas');guardarDatos()");const anterior=a.saved();a.ctx.fetch=()=>assert.fail('No se debe llamar a servicios');a.run('mostrarRevisionTablasGas();probarMetodoClaseGas()');assert.equal(a.saved(),anterior);
+ const a=app(null,{tablasFotoBase:true});a.run("abrir('gas');guardarDatos()");const anterior=a.saved();a.ctx.fetch=()=>assert.fail('No se debe llamar a servicios');a.run('mostrarRevisionTablasGas();probarMetodoClaseGas()');assert.equal(a.saved(),anterior);
  for(const m of ['agua','cloacas']){a.run(`abrir('${m}')`);assert.equal(a.elements.get('formularioGas').classList.hidden,true);}
+});
+
+test('auditoría final: pantalla incluye las cinco correcciones y tabla de nueve filas con ocho columnas',()=>{
+ const a=app();a.run("abrir('gas')");const r=a.run('mostrarAuditoriaFinalGas()');assert.equal(r.habilitado,false);assert.equal(r.tabla3.integra,true);assert.equal(r.tabla3.correccionesDocumentadas.length,5);
+ const texto=a.elements.get('auditoriaFinalGas').children.map(p=>p.textContent).join(' ');assert.match(texto,/287190 → 287189/);assert.match(texto,/262151 → 282151/);assert.match(texto,/7.67 m/);assert.match(texto,/7.65 m/);assert.match(texto,/NO resuelta/);
+ const tabla=a.elements.get('auditoriaFinalGas').children.find(p=>p.className==='tabla-wrap').children[0];assert.equal(tabla.children.length,10);assert.ok(tabla.children.every(f=>f.children.length===8));
+});
+test('auditoría final: no reemplaza el proyecto ni habilita resultado de diámetros',()=>{
+ const a=app();a.run("abrir('gas');guardarDatos()");const anterior=a.saved();a.ctx.fetch=()=>assert.fail('No se llama a servicios');a.run('mostrarAuditoriaFinalGas()');a.elements.get('claseLongitudesConfirmadas').checked=true;const r=a.run('probarMetodoClaseGas()');assert.equal(r.diametros,null);assert.equal(a.run('CATALOGOS_GAS_VERIFICADOS.length'),0);assert.equal(a.saved(),anterior);
+});
+test('auditoría final: archivo de referencia ausente se informa sin inventar verificaciones',()=>{
+ const a=app();a.run("abrir('gas');delete globalThis.REFERENCIA_AUDITORIA_TABLA3");assert.equal(a.run('mostrarAuditoriaFinalGas()'),null);assert.match(a.elements.get('auditoriaFinalGas').children.map(p=>p.textContent).join(' '),/Faltan archivos/);
 });

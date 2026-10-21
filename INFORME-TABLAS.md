@@ -1,3 +1,5 @@
+> **Informe histórico de 1e99313.** Sus dos lecturas pendientes y cinco capacidades transcritas fueron revisadas en la entrega actual. Ver [AUDITORIA-FINAL.md](AUDITORIA-FINAL.md) para el estado vigente de esta rama.
+
 # Cotejo visual de las fotografías · Tablas N.º 3 y N.º 18
 
 Base: rama `prueba/tablas-nag200-revision`, commit `22028c8`.

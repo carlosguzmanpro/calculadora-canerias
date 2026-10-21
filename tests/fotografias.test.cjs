@@ -3,7 +3,7 @@ const {test}=require('node:test');
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const crypto=require('node:crypto');
-const t3=require('../datos/tabla-3.js'),t18=require('../datos/tabla-18.js');
+const t3=require('./fixtures/tabla-3-1e99313.cjs'),t18=require('./fixtures/tabla-18-1e99313.cjs');
 const {validarTablas,auditarComplemento,consultarCapacidadDeclarada}=require('../datos/validacion-tablas.js');
 const clonar=x=>structuredClone(x);
 test('foto3: las 49 longitudes y nueve columnas están representadas sin filas inventadas',()=>{

@@ -1,6 +1,5 @@
-/* Transcripción visual de fotografía adjunta; ver procedencia y pendientes. Sin lógica de cálculo. */
-(function(root){
- const datos={
+/* Datos cotejados visualmente; sin habilitación técnica. Ver historial de auditoría. */
+(function(root){const datos={
   "tabla": 3,
   "titulo": "GAS NATURAL · Caudal en litros de gas por hora",
   "unidadLongitud": "m",
@@ -184,7 +183,7 @@
         51245,
         88689,
         139903,
-        287190
+        287189
       ],
       "estado": "cotejado"
     },
@@ -199,7 +198,7 @@
         46790,
         80957,
         127705,
-        262151
+        282151
       ],
       "estado": "cotejado"
     },
@@ -229,7 +228,7 @@
         40515,
         70109,
         110593,
-        227244
+        227024
       ],
       "estado": "cotejado"
     },
@@ -498,7 +497,7 @@
         10845,
         21850,
         37815,
-        59612,
+        59650,
         122403
       ],
       "estado": "cotejado"
@@ -586,7 +585,7 @@
         3105,
         5425,
         8555,
-        17655,
+        17565,
         30419,
         47984,
         98502
@@ -793,8 +792,57 @@
   "pendientes": [
     "Fuente y edición no aparecen en la fotografía; verificar atribución y aplicabilidad al acero roscado epoxi",
     "Confirmar interpretación de h = 10 mm y condiciones del método",
-    "Revisión independiente de las 441 celdas y comparación con ejercicios reales"
-  ]
-};
- if(typeof module==='object'&&module.exports)module.exports=datos;else root.TABLA_NAG200_3=datos;
-})(globalThis);
+    "Revisión técnica independiente de las cifras, incluidas las cinco correcciones, y comparación con ejercicio completo"
+  ],
+  "auditoria": {
+    "base": "1e99313",
+    "correcciones": [
+      {
+        "longitud": 10,
+        "diametro": "4\"",
+        "anterior": 287190,
+        "corregido": 287189,
+        "motivo": "Error de transcripción de 1e99313; corrección cotejada en ampliación de fotografía original, sin alterar la imagen",
+        "fuente": "fuentes/tabla-3-347520.jpg",
+        "estado": "Cotejo visual; pendiente revisión técnica independiente"
+      },
+      {
+        "longitud": 12,
+        "diametro": "4\"",
+        "anterior": 262151,
+        "corregido": 282151,
+        "motivo": "Error de transcripción de 1e99313; corrección cotejada en ampliación de fotografía original, sin alterar la imagen",
+        "fuente": "fuentes/tabla-3-347520.jpg",
+        "estado": "Cotejo visual; pendiente revisión técnica independiente"
+      },
+      {
+        "longitud": 16,
+        "diametro": "4\"",
+        "anterior": 227244,
+        "corregido": 227024,
+        "motivo": "Error de transcripción de 1e99313; corrección cotejada en ampliación de fotografía original, sin alterar la imagen",
+        "fuente": "fuentes/tabla-3-347520.jpg",
+        "estado": "Cotejo visual; pendiente revisión técnica independiente"
+      },
+      {
+        "longitud": 55,
+        "diametro": "3\"",
+        "anterior": 59612,
+        "corregido": 59650,
+        "motivo": "Error de transcripción de 1e99313; corrección cotejada en ampliación de fotografía original, sin alterar la imagen",
+        "fuente": "fuentes/tabla-3-347520.jpg",
+        "estado": "Cotejo visual; pendiente revisión técnica independiente"
+      },
+      {
+        "longitud": 85,
+        "diametro": "2\"",
+        "anterior": 17655,
+        "corregido": 17565,
+        "motivo": "Error de transcripción de 1e99313; corrección cotejada en ampliación de fotografía original, sin alterar la imagen",
+        "fuente": "fuentes/tabla-3-347520.jpg",
+        "estado": "Cotejo visual; pendiente revisión técnica independiente"
+      }
+    ],
+    "alcance": "Revisión visual ampliada por filas/columnas; no certificación técnica ni segundo revisor independiente"
+  }
+};if(typeof module==='object'&&module.exports)module.exports=datos;else root.TABLA_NAG200_3=datos;})(globalThis);

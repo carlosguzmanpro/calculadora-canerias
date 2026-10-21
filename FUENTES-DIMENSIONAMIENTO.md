@@ -63,3 +63,11 @@ La validación se separa en `datos/validacion-tablas.js`; pruebas exactas de los
 En la rama `prueba/cotejo-fotografias-nag200` se incorporan los originales `347520.jpg` y `347525.jpg` bajo `fuentes/`, con sus SHA-256. Sustituye el estado anterior de «fotos no disponibles». Se transcriben 441 capacidades, 9 coeficientes, 9 d tabulados y 223 equivalencias; dos celdas quedan nulas y nueve redondeos no se asumen resueltos. El d del encabezado es distinto del interior real comercial, aún no verificado. No hay portada/edición en las fotografías; no se afirma vigencia normativa.
 
 El ejemplo impreso 2 × 30 × 0,019 = 1,14 está cotejado y comprobado aritméticamente. No basta para habilitar todo el motor ni para resolver los redondeos de otras filas. Los pendientes y sus coordenadas exactas están en `INFORME-TABLAS.md`. Pasan 143 pruebas y el catálogo sigue deshabilitado.
+
+## Auditoría final (estado actual; sustituye las lecturas pendientes anteriores)
+
+Rama `prueba/auditoria-final-tablas`, base `1e99313`. Se reexaminan las imágenes mediante ampliación sin alterar los originales: codos90/cantidad5/2″ se lee 7,67, que difiere del producto exacto 7,65; tee-directo/cantidad5/3″ se lee 7,60 y coincide con el producto. No se utiliza una cifra derivada para corregir la fuente. Nueve diferencias originales de codos45 y la divergencia de codos90 siguen pendientes de justificación técnica.
+
+Se corrigen explícitamente cinco errores de transcripción de Tabla 3 (10 m/4″, 12 m/4″, 16 m/4″, 55 m/3″ y 85 m/2″), con historial antes/después. Los 441 valores se auditan por coordenadas; no se confunde esta referencia de integridad con una segunda fuente normativa. Las fotos no identifican una edición de NAG-200 ni prueban su aplicabilidad a acero epoxi roscado. Se requiere fuente/edición, método y documentación del fabricante para dimensiones/interiores reales y sistema compatible. No se realizó una consulta externa nueva que resuelva esos puntos. El catálogo permanece vacío.
+
+El informe actual es `AUDITORIA-FINAL.md`; el anterior conserva el estado histórico. Pasan 165 pruebas, incluidas las 143 previas con datos de regresión. No constituyen certificación técnica ni normativa.

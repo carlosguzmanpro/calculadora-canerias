@@ -85,8 +85,10 @@ section{box-shadow:none}
 <h3>Método de clase · acero roscado con epoxi · GN</h3>
 <button class="alt" onclick="mostrarRevisionTablasGas()">Revisar tablas transcritas y pendientes</button>
 <div id="revisionTablasGas" class="resultado" aria-live="polite"></div>
+<button class="alt" onclick="mostrarAuditoriaFinalGas()">Ver auditoría final de tablas</button>
+<div id="auditoriaFinalGas" class="resultado" aria-live="polite"></div>
 <p>Los 15 m adicionales son solo una estimación inicial. Las equivalencias definitivas dependen de las tablas y los accesorios identificados, incluyendo paso directo o giro de cada tee. Las reducciones se cuentan como materiales y se excluyen de equivalentes en este método de clase.</p>
-<div class="aviso">Se transcribieron las fotografías: Tabla 3 con 49 filas y 9 columnas; Tabla 18 con 9 coeficientes y 223 equivalencias legibles. Hay 2 celdas dudosas y discrepancias de redondeo pendientes. La edición, aplicabilidad e interiores reales no están verificados. Los diámetros definitivos permanecen bloqueados. Este procedimiento no certifica una instalación real ni asume su presión de suministro.</div>
+<div class="aviso">Se transcribieron las fotografías: Tabla 3 con 49 filas y 9 columnas; Tabla 18 con 9 coeficientes y 225 equivalencias leídas. Hay cinco correcciones documentadas en Tabla 3; nueve diferencias originales de redondeo y una divergencia adicional (7,67 impreso frente a 7,65 calculado) pendientes de verificación técnica. La edición, aplicabilidad e interiores reales no están verificados. Los diámetros definitivos permanecen bloqueados. Este procedimiento no certifica una instalación real ni asume su presión de suministro.</div>
 <button class="alt" onclick="prepararPerfilClaseGas()">Elegir acero roscado epoxi y condiciones del ejercicio para mi red</button>
 <button onclick="ejecutarClaseMiRedGas()">Analizar mi red con el método de clase</button>
 <div id="informeClaseMiRed" class="resultado" aria-live="polite"></div>
@@ -315,6 +317,8 @@ Estimación de compra sin reutilizar sobrantes: tiras de 6 m por segmento contin
 <script src="datos/tabla-3.js"></script>
 <script src="datos/tabla-18.js"></script>
 <script src="datos/validacion-tablas.js"></script>
+<script src="datos/referencia-auditoria-tabla3.js"></script>
+<script src="datos/auditoria-tablas.js"></script>
 <script>
 'use strict';
 const $=id=>document.getElementById(id);
@@ -508,9 +512,30 @@ function mostrarRevisionTablasGas(){
  for(const f of [...r.errores,...r.pendientes])texto('PENDIENTE / REVISAR: '+f);
  return r;
 }
+function mostrarAuditoriaFinalGas(){
+ const out=$('auditoriaFinalGas');out.replaceChildren();
+ const texto=t=>{const p=document.createElement('p');p.textContent=t;out.append(p);};
+ texto('AUDITORÍA · DIÁMETROS DEFINITIVOS BLOQUEADOS. Las cifras impresas y los cálculos derivados se mantienen separados.');
+ if(typeof AuditoriaFinalTablasGas==='undefined'||typeof REFERENCIA_AUDITORIA_TABLA3==='undefined'||typeof TABLA_NAG200_3==='undefined'||typeof TABLA_NAG200_18==='undefined'){texto('Faltan archivos de auditoría/tablas. Descomprimí el ZIP completo.');return null;}
+ const tabla3=AuditoriaFinalTablasGas.auditarTabla3(TABLA_NAG200_3,REFERENCIA_AUDITORIA_TABLA3);
+ const redondeos=AuditoriaFinalTablasGas.auditarRedondeos(TABLA_NAG200_18),dudas=AuditoriaFinalTablasGas.auditarDudas(TABLA_NAG200_18);
+ texto('Tabla 3: '+tabla3.posiciones+' posiciones revisadas; '+tabla3.coincidencias+' coincidencias con referencia y correcciones documentadas. Integridad: '+(tabla3.integra?'SIN ERRORES ESTRUCTURALES DETECTADOS':'REVISAR')+'.');
+ for(const c of tabla3.correccionesDocumentadas||[])texto('CORRECCIÓN EXPLÍCITA · '+c.longitud+' m / '+c.diametro+': '+c.anterior+' → '+c.corregido+' L/h. '+c.motivo);
+ for(const t of [...tabla3.errores,...tabla3.alertas])texto(t);
+ for(const c of dudas)texto(c.tipo+' · cantidad '+c.cantidad+' · '+c.nominal+' | impreso: '+(c.valorOriginal===null?'PENDIENTE':c.valorOriginal.toFixed(2))+' m | calculado: '+c.calculado.toFixed(2)+' m | diferencia impreso − calculado: '+(c.diferencia===null?'PENDIENTE':c.diferencia.toFixed(2))+' m | '+c.estado+'. '+c.explicacion);
+ texto('Nueve diferencias originales de codos de 45°. Calculado = cantidad × 14 × d; diferencia = impreso − calculado. El centésimo es solo referencia de auditoría, no regla adoptada.');
+ const wrapper=document.createElement('div');wrapper.className='tabla-wrap';const tabla=document.createElement('table');tabla.className='tabla';
+ function fila(valores,header=false){const tr=document.createElement('tr');for(const v of valores){const celda=document.createElement(header?'th':'td');celda.textContent=v;tr.append(celda);}tabla.append(tr);}
+ fila(['Accesorio','Cantidad','Diámetro','Impreso (m)','Calculado (m)','Diferencia (m)','Posible explicación','Estado'],true);
+ for(const c of redondeos.filas.filter(c=>c.accesorio==='codo45'))fila(['Codo 45°',c.cantidad,c.diametro,c.impreso.toFixed(2),c.calculado.toFixed(3),c.diferencia.toFixed(3),c.posibleExplicacion,c.estado]);
+ wrapper.append(tabla);out.append(wrapper);
+ texto('Procedencia: las fotos no muestran edición ni fecha; no se puede acreditar vigencia ni aplicabilidad a acero epoxi roscado. Se necesitan portada/edición/fuente oficial y documentación del sistema/fabricante con dimensiones interiores, serie/espesor, accesorios compatibles y condiciones de uso. Los d del encabezado no prueban los interiores comerciales.');
+ texto('Para comparar el ejercicio: confirmar longitudes de tramo y accesorios con posiciones y vías de tee; documentar cuplas, válvulas y tees reductoras; resolver pérdidas/redondeo, fuente y condiciones del método. Se conservan +15 m solo iniciales, consumos acumulados, iteración y reducciones en materiales excluidas de equivalentes solo por método de clase. No certifica una instalación.');
+ return {tabla3,redondeos,dudas,habilitado:false};
+}
 function validarCatalogoClase(p,modoPrueba=false){
  if(!p){
-  if(typeof TABLA_NAG200_3!=='undefined'&&TABLA_NAG200_3.procedencia.fotografiaDisponible)return ['Las fotografías de Tablas 3 y 18 ya están transcritas, pero falta verificación técnica: dos celdas dudosas, redondeos, interiores/aplicabilidad al producto, fuente/edición, cuplas y comparación con ejercicios. No hay catálogo habilitado.'];
+  if(typeof TABLA_NAG200_3!=='undefined'&&TABLA_NAG200_3.procedencia.fotografiaDisponible)return ['Las fotografías de Tablas 3 y 18 ya están transcritas, pero falta verificación técnica: divergencia 7,67/7,65, redondeos, interiores/aplicabilidad al producto, fuente/edición, cuplas y comparación con ejercicios. No hay catálogo habilitado.'];
   return ['Hay 12 capacidades y 9 coeficientes declarados por mensaje, sin cotejo fotográfico ni catálogo habilitado. Faltan fotografías o transcripción verificada de la Tabla N.º 3 completa (capacidades) y Tabla N.º 18 completa (equivalencias de accesorios roscados), con encabezados, unidades, notas, fuente y edición.'];
  }
  const faltan=[];
