@@ -1,6 +1,21 @@
+MATERIALES DE GAS · NUEVO PANEL DE REVISIÓN
+
+1. Descomprimí todo canerias-materiales-gas-revision.zip y abrí index.html conservando sus carpetas.
+2. GAS → Trabajar con croquis y tramos → Plan de compra y revisión de materiales.
+3. Elegí largo comercial, propuesta de reutilización y mínimo de sobrante. Tocá Probar materiales: calefón y cocina.
+4. Deben aparecer 17 codos, una tee y dos llaves. Las medidas siguen propuestas. A 6 m, el mínimo por longitud es 7 caños de 1 pulgada y 2 de 3/4; compra y cuplas reales pendientes.
+5. Seleccioná el tipo de pieza en A y generá de nuevo: tee reductora integrada sin reducción duplicada, o tee igual más reducción independiente. Por defecto queda pendiente.
+6. Ajustá cantidades y revisá cada fila antes de Imprimir lista revisada o Descargar lista revisada (CSV). Revisar no transforma estimaciones en definitivas. Cambiar tramos/configuración obliga a generar y revisar nuevamente.
+7. La casilla Hipótesis por longitud NO resuelve las posiciones del croquis. Si la activás se muestran 9 barras/6 uniones en un escenario matemático, NO cuplas ni compra confirmadas.
+8. Generar lista de mi proyecto usa tus tramos, sin incorporar el ejemplo. Completá posiciones en Revisar accesorios para un plan por segmentos reales. Ver MATERIALES-GAS.md.
+
+Los diámetros definitivos siguen bloqueados. No se modificaron tablas ni se activaron servicios. Se conservan todas las funciones anteriores.
+
+INSTRUCCIONES HISTÓRICAS PARA EL DIAGNÓSTICO PREVIO:
+
 PRUEBA INTEGRAL EDUCATIVA · CALEFÓN Y COCINA
 
-1. Descomprimí TODO canerias-diagnostico-calefon-cocina.zip.
+1. Descomprimí TODO canerias-materiales-gas-revision.zip.
 2. Abrí DIAGNOSTICO-CALEFON-COCINA.html: contiene el informe ya ejecutado y un botón para imprimir. No hace falta ejecutar comandos ni conectarse a Internet.
 3. Revisá los nueve escenarios y la traza de selección inicial y recálculo. El caso macho + dos giros da 50,00 y 40,64 m, pero es una hipótesis no confirmada.
 4. Falta confirmar orientación de tee, tipo de cada llave y criterio/posiciones de cuplas. Los candidatos NO son diámetros definitivos.
@@ -12,7 +27,7 @@ CAÑERÍAS · MÉTODO DE CLASE · ACERO ROSCADO EPOXI
 
 ### Probar desde Android
 
-1. Descomprimí `canerias-diagnostico-calefon-cocina.zip` conservando las carpetas `datos` y `fuentes` junto a `index.html`, y abrí `index.html` con el navegador o visor HTML que usaste en las pruebas anteriores. No reemplaces la aplicación publicada. El guardado local puede estar separado al abrir desde otra ubicación: conservá la versión anterior y sus datos.
+1. Descomprimí `canerias-materiales-gas-revision.zip` conservando las carpetas `datos` y `fuentes` junto a `index.html`, y abrí `index.html` con el navegador o visor HTML que usaste en las pruebas anteriores. No reemplaces la aplicación publicada. El guardado local puede estar separado al abrir desde otra ubicación: conservá la versión anterior y sus datos.
 2. Entrá en **Gas → Calcular diámetros · diagnóstico**. Tocá **Revisar tablas transcritas y pendientes**: deben aparecer 441 capacidades en L/h, 9 factores d y 225 equivalencias impresas; siguen pendientes criterios técnicos. Tocá VER AUDITORÍA FINAL DE TABLAS: debe mostrar cinco correcciones explícitas y una tabla de nueve diferencias originales, además del caso adicional 7,67 impreso frente a 7,65 calculado. Hay enlaces a las fotografías originales. El cotejo visual no equivale a validación técnica. Los diámetros definitivos siguen bloqueados.
 3. En **Ejercicio de clase M–A–B**, tocá **Probar método de clase M–A–B sin diámetros**. Es una copia separada: no reemplaza ni agrega datos a tu instalación.
 4. Marcá la casilla solo después de comprobar en el croquis que 15, 9, 8, 6 y 13 m son longitudes individuales. Sin confirmación el resultado queda bloqueado.

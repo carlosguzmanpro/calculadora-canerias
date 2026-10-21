@@ -266,6 +266,31 @@ section{box-shadow:none}
 </section>
 <button onclick="calcularMateriales()">🧮 CALCULAR MATERIALES</button>
 <div id="resultadoMateriales" class="resultado" aria-live="polite">Agregá tramos y tocá CALCULAR MATERIALES.</div>
+<button class="alt" onclick="abrirPlanGas()">Plan de compra y revisión de materiales</button>
+<section id="planCompraGas" class="oculto">
+<h3>Materiales de GAS · lista para revisar</h3>
+<div class="aviso">Los diámetros definitivos siguen bloqueados. Cantidad identificada no significa medida confirmada. La compra y las cuplas quedan pendientes si faltan posiciones de accesorios. El cálculo anterior de tiras de 6 m se conserva como referencia separada.</div>
+<label>Largo comercial del caño (m)<input id="matLargo" type="number" min="0.01" step="any" value="6" onchange="guardarOpcionesMaterialesGas()"></label>
+<label><input id="matReusar" type="checkbox" style="width:auto" onchange="guardarOpcionesMaterialesGas()"> Proponer reutilización de sobrantes compatibles entre segmentos</label>
+<label>Sobrante mínimo recuperable (m)<input id="matSobrante" type="number" min="0" step="any" value="0.5" onchange="guardarOpcionesMaterialesGas()"></label>
+<label><input id="matHipotesis" type="checkbox" style="width:auto" onchange="guardarOpcionesMaterialesGas()"> Mostrar hipótesis por longitud cuando faltan posiciones (NO lista de compra)</label>
+<div id="matUniones"></div>
+<button onclick="generarPlanGas('proyecto')">Generar lista de mi proyecto</button>
+<button class="alt" onclick="generarPlanGas('ejemplo')">Probar materiales: calefón y cocina</button>
+<details><summary>Agregar otro accesorio identificado manualmente</summary>
+<label>Nombre / tipo<input id="matExtraNombre" maxlength="100"></label>
+<label>Diámetro o conexiones (separar con →)<input id="matExtraDiametro" maxlength="100" placeholder="Ej.: 1&quot; → 3/4&quot;"></label>
+<label>Cantidad<input id="matExtraCantidad" type="number" min="1" step="1"></label>
+<label>Tramo o ubicación<input id="matExtraUbicacion" maxlength="100"></label>
+<label>Nodo físico, si corresponde (obligatorio para tee)<select id="matExtraNodo"><option value="">Sin nodo identificado</option></select></label>
+<label><input id="matExtraConfirmado" type="checkbox" style="width:auto"> Confirmé este accesorio y su cantidad en el croquis</label>
+<button onclick="agregarExtraMaterialGas()">Agregar a la revisión de mi proyecto</button>
+</details>
+<p id="matMensaje" aria-live="polite"></p>
+<div id="matResultado" class="resultado" aria-live="polite"></div>
+<button class="alt" onclick="imprimirMaterialesGas()">Imprimir lista revisada</button>
+<button class="alt" onclick="descargarMaterialesGas()">Descargar lista revisada (CSV)</button>
+</section>
 <div class="aviso">
 Estimación de compra sin reutilizar sobrantes: tiras de 6 m por segmento continuo y cuplas solo entre tiras del mismo segmento. Tees, codos y reducciones se cuentan según los datos revisados. Los tramos pendientes conservan la estimación anterior por longitud, marcada como provisoria; no confirman ausencia de accesorios. No verifica diámetros ni incluye conexiones adicionales exigidas por el sistema constructivo. Antes de construir, un profesional habilitado debe comprobar el diseño y la normativa de gas.
 </div>
@@ -314,6 +339,8 @@ Estimación de compra sin reutilizar sobrantes: tiras de 6 m por segmento contin
 <button onclick="document.getElementById('visor').close()">Cerrar imagen</button>
 </dialog>
 
+<script src="materiales/planificador-gas.js"></script>
+<script src="materiales/interfaz-gas.js"></script>
 <script src="datos/tabla-3.js"></script>
 <script src="datos/tabla-18.js"></script>
 <script src="datos/validacion-tablas.js"></script>
@@ -933,6 +960,7 @@ function guardarDatos(){
  proyectos.gas.tramos=tramos;
  proyectos.gas.artefactos=artefactos;
  proyectos.gas.tipoGas=$('gt').value;
+ if(typeof invalidarMaterialesGas==='function')invalidarMaterialesGas();
  try{
   localStorage.setItem(CLAVE,JSON.stringify(proyectos));
   $('estadoGuardado').textContent='Datos guardados en este navegador. No se envían a ningún servidor.';

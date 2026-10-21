@@ -2,7 +2,15 @@
 
 Aplicación gratuita, estática y en español para registrar croquis y estimar materiales de instalaciones. Se ejecuta en el navegador, sin cuentas, backend ni dependencias de ejecución.
 
-## Prueba integral educativa: calefón y cocina (entrega actual)
+## Materiales y revisión de compra (entrega actual)
+
+Rama `prueba/materiales-gas-revision`, base `73cf0ec`. Nuevo panel en **GAS → Trabajar con croquis y tramos → Plan de compra y revisión de materiales**. Configura largo comercial, propuesta de reutilización y mínimo recuperable; separa mínimo por longitud, compra estimada y cuplas de segmentos conocidos. Una tee se cuenta una sola vez; los cambios de diámetro requieren identificar la solución para no duplicar reducciones.
+
+La tabla permite ajustes manuales y revisión antes de imprimir o descargar CSV. Guarda opciones/revisiones localmente e invalida resultados si cambian los datos. Los accesorios adicionales identificados no reciben equivalentes inventados. Diámetros definitivos, Gemini y servicios siguen desactivados. El cálculo anterior de 6 m y las demás funciones se conservan.
+
+El ejemplo muestra **17 codos, una tee y dos llaves**; con medidas propuestas, mínimo por longitud de **7 caños de 1″ y 2 de ¾″** a 6 m. Compra y cuplas reales quedan pendientes de posiciones. La hipótesis opcional de 9 barras/6 uniones es matemática, no una lista de compra para ese croquis. Pasan **216 pruebas**, incluidas las 183 anteriores. Detalles, supuestos y pasos Android en [MATERIALES-GAS.md](MATERIALES-GAS.md).
+
+## Prueba integral educativa: calefón y cocina (etapa anterior)
 
 Rama `prueba/diagnostico-calefon-cocina`, base `279dcdc`. Se ejecuta el motor existente con los datos del ejercicio, sin registrar un catálogo habilitado ni modificar tablas. La salida es **diagnóstico condicional**, con propuestas separadas y diámetros definitivos nulos. El modo normal sigue bloqueado. No se inventan posiciones de accesorios: las cuplas quedan pendientes.
 
@@ -50,7 +58,7 @@ Las tees tienen tres medidas y equivalencias independientes para paso directo y 
 
 ### Probar desde Android
 
-1. Descomprimí `canerias-diagnostico-calefon-cocina.zip` conservando las carpetas `datos` y `fuentes` junto a `index.html`, y abrí `index.html` con el navegador o visor HTML que usaste en las pruebas anteriores. No reemplaces la aplicación publicada. El guardado local puede estar separado al abrir desde otra ubicación: conservá la versión anterior y sus datos.
+1. Descomprimí `canerias-materiales-gas-revision.zip` conservando las carpetas `datos` y `fuentes` junto a `index.html`, y abrí `index.html` con el navegador o visor HTML que usaste en las pruebas anteriores. No reemplaces la aplicación publicada. El guardado local puede estar separado al abrir desde otra ubicación: conservá la versión anterior y sus datos.
 2. Entrá en **Gas → Calcular diámetros · diagnóstico** y tocá **Revisar tablas transcritas y pendientes**. Verificá los impresos y luego tocá **Ver auditoría final de tablas**. Debe mostrar 441 posiciones, cinco correcciones, los casos 7,67/7,65 y 7,60/7,60 y la tabla de nueve diferencias. Los diámetros siguen bloqueados.
 3. En **Ejercicio de clase M–A–B**, tocá **Probar método de clase M–A–B sin diámetros**. Es una copia separada: no reemplaza ni agrega datos a tu instalación.
 4. Marcá la casilla solo después de comprobar en el croquis que 15, 9, 8, 6 y 13 m son longitudes individuales. Sin confirmación el resultado queda bloqueado.

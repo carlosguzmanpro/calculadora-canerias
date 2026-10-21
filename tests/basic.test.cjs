@@ -571,3 +571,50 @@ test('auditoría final: no reemplaza el proyecto ni habilita resultado de diáme
 test('auditoría final: archivo de referencia ausente se informa sin inventar verificaciones',()=>{
  const a=app();a.run("abrir('gas');delete globalThis.REFERENCIA_AUDITORIA_TABLA3");assert.equal(a.run('mostrarAuditoriaFinalGas()'),null);assert.match(a.elements.get('auditoriaFinalGas').children.map(p=>p.textContent).join(' '),/Faltan archivos/);
 });
+
+test('plan materiales: ejercicio conserva cantidades físicas 17 codos, una tee y dos llaves',()=>{
+ const a=app();a.run("abrir('gas');generarPlanGas('ejemplo')");const r=a.run('revisionMaterialesGas.plan');const q=tipo=>r.filas.filter(f=>f.tipo===tipo).reduce((n,f)=>n+(f.cantidad||0),0);
+ assert.equal(q('codo90'),17);assert.equal(q('tee'),1);assert.equal(q('llave'),2);assert.deepEqual(Array.from(r.planes,g=>g.minimoTeorico),[7,2]);assert.ok(r.planes.every(g=>g.compraEstimada===null&&g.cuplasPropuestas===null));assert.equal(a.run('tramos.length'),0);assert.equal(a.run('CATALOGOS_GAS_VERIFICADOS.length'),0);
+});
+test('plan materiales: opciones por tee evitan reducciones duplicadas y dejan el cambio pendiente por defecto',()=>{
+ const a=app();a.run("abrir('gas');generarPlanGas('ejemplo')");assert.equal(a.run("revisionMaterialesGas.plan.filas.filter(f=>f.tipo==='reduccion-pendiente').length"),1);
+ a.run("datosPlanGas().opciones.uniones={A:'tee-igual-reduccion'};datosPlanGas().opciones.unionesEjemplo={A:'tee-reductora'};generarPlanGas('ejemplo')");assert.equal(a.run("revisionMaterialesGas.plan.filas.filter(f=>f.tipo==='reduccion').length"),0);assert.equal(a.run('datosPlanGas().opciones.uniones.A'),'tee-igual-reduccion');
+ a.run("datosPlanGas().opciones.unionesEjemplo={A:'tee-igual-reduccion'};generarPlanGas('ejemplo')");assert.equal(a.run("revisionMaterialesGas.plan.filas.filter(f=>f.tipo==='reduccion').length"),1);assert.equal(a.run("revisionMaterialesGas.plan.filas.filter(f=>f.tipo==='tee').length"),1);
+});
+function proyectoPlan(a){a.run("abrir('gas');instalacionGas.perfil.material='Acero epoxi';instalacionGas.perfil.sistema='Roscado';tramos=[{id:'t',desde:'M',hasta:'A',metros:12,diametro:'1\"',consumo:null,detalle:{estado:'ninguno'}}];generarPlanGas('proyecto')");}
+test('plan materiales: largo comercial persiste sin cambiar el cálculo anterior de 6 m',()=>{
+ const a=app();proyectoPlan(a);a.elements.get('matLargo').value='5';a.run('guardarOpcionesMaterialesGas();generarPlanGas()');assert.equal(a.run('revisionMaterialesGas.plan.planes[0].compraEstimada'),3);assert.equal(a.run('evaluarTramo(tramos[0]).tiras'),2);
+ const b=app(a.saved());b.run("abrir('gas');abrirPlanGas();generarPlanGas()");assert.equal(b.elements.get('matLargo').value,5);assert.equal(b.run('revisionMaterialesGas.plan.planes[0].cuplasPropuestas'),2);
+});
+test('plan materiales: revisar, ajustar cantidad y recargar conserva revisión sin alterar tramos',()=>{
+ const a=app();proyectoPlan(a);let tabla=a.elements.get('matResultado').children.find(n=>n.className==='tabla-wrap').children[0];const qty=tabla.children[1].children[2].children[0];qty.value='4';qty.onchange();
+ assert.equal(a.run('revisionMaterialesGas.plan.filas[0].cantidad'),4);assert.equal(a.run('revisionMaterialesGas.plan.filas[0].estado'),'estimado');assert.equal(a.run('tramos[0].metros'),12);
+ a.run('revisionMaterialesGas.plan.filas.forEach(f=>f.revisado=true);guardarRevisionMaterialesGas()');const b=app(a.saved());b.run("abrir('gas');generarPlanGas()");assert.equal(b.run('revisionMaterialesGas.plan.filas[0].cantidad'),4);assert.equal(b.run('revisionMaterialesGas.plan.filas[0].cantidadCalculada'),2);assert.ok(b.run('revisionMaterialesGas.plan.filas.every(f=>f.revisado)'));
+});
+test('plan materiales: cambio de datos invalida revisión y evita salida desactualizada',()=>{
+ const a=app();proyectoPlan(a);a.run('revisionMaterialesGas.plan.filas.forEach(f=>f.revisado=true);guardarRevisionMaterialesGas();tramos[0].metros=13;guardarDatos()');assert.equal(a.run('revisionMaterialesGas'),null);assert.equal(a.run('prepararSalidaMaterialesGas()'),null);assert.match(a.text('matResultado'),/actualizados/);
+});
+test('plan materiales: impresión y exportación exigen revisión explícita',()=>{
+ const a=app();proyectoPlan(a);let prints=0;a.ctx.window.print=()=>prints++;assert.equal(a.run('prepararSalidaMaterialesGas()'),null);a.run('imprimirMaterialesGas()');assert.equal(prints,0);
+ a.run('revisionMaterialesGas.plan.filas.forEach(f=>f.revisado=true);imprimirMaterialesGas()');assert.equal(prints,1);assert.ok(a.run('prepararSalidaMaterialesGas()'));a.ctx.window.afterprint();
+});
+test('plan materiales: desconocidos permanecen pendientes aunque la fila se haya revisado',()=>{
+ const a=app();a.run("abrir('gas');generarPlanGas('ejemplo');revisionMaterialesGas.plan.filas.forEach(f=>f.revisado=true)");const r=a.run('prepararSalidaMaterialesGas()');assert.ok(r);assert.ok(r.plan.filas.some(f=>f.cantidad===null));assert.equal(r.plan.dimensionamientoDefinitivo,false);
+});
+test('plan materiales: reconoce otro accesorio manual y evita añadirlo al ejemplo ajeno',()=>{
+ const a=app();proyectoPlan(a);for(const [k,v]of Object.entries({matExtraNombre:'Unión doble',matExtraCantidad:'2',matExtraDiametro:'1"',matExtraUbicacion:'A'}))a.elements.get(k).value=v;a.elements.get('matExtraConfirmado').checked=true;a.run('agregarExtraMaterialGas()');assert.equal(a.run("revisionMaterialesGas.plan.filas.find(f=>f.tipo==='Unión doble').cantidad"),2);
+ a.run("generarPlanGas('ejemplo');agregarExtraMaterialGas()");assert.match(a.text('matMensaje'),/Mi proyecto/);assert.equal(a.run('datosPlanGas().extras.length'),1);
+});
+test('plan materiales: llave genérica y detallada se cuentan una sola vez, y ubicación desconocida bloquea cuplas',()=>{
+ const a=app();proyectoPlan(a);a.run("tramos[0].llave=true;tramos[0].detalle={estado:'completo',metrosFinal:6,accesorios:[{tipo:'llave',metrosAntes:6,salida:'1\"'}]};generarPlanGas()");assert.equal(a.run("revisionMaterialesGas.plan.filas.filter(f=>f.tipo==='llave').reduce((n,f)=>n+f.cantidad,0)"),1);
+ a.run("tramos[0].detalle={estado:'ninguno'};generarPlanGas()");assert.equal(a.run('revisionMaterialesGas.plan.planes[0].cuplasPropuestas'),null);
+ a.run("tramos[0].llave=false;tramos[0].detalle={estado:'pendiente',accesorios:[{tipo:'codo90'}]};generarPlanGas()");assert.equal(a.run("revisionMaterialesGas.plan.filas.find(f=>f.tipo==='codo90').cantidad"),1);assert.equal(a.run("revisionMaterialesGas.plan.filas.find(f=>f.tipo==='codo90').estado"),'estimado');
+});
+test('plan materiales: otros módulos, fotografías y motor siguen separados del nuevo plan',()=>{
+ const a=app();proyectoPlan(a);a.run("proyectos.gas.foto='data:image/png;base64,x';guardarDatos();generarPlanGas('ejemplo')");assert.equal(a.run('proyectos.gas.foto'),'data:image/png;base64,x');for(const m of ['agua','cloacas']){a.run(`abrir('${m}')`);assert.equal(a.elements.get('formularioGas').classList.hidden,true);}assert.equal(a.run('CATALOGOS_GAS_VERIFICADOS.length'),0);
+});
+test('plan materiales: CSV descargado conserva estados, pendientes y advertencias después de revisión',()=>{
+ const a=app();a.run("abrir('gas');generarPlanGas('ejemplo');revisionMaterialesGas.plan.filas.forEach(f=>f.revisado=true)");let texto='',clicks=0;const crear=a.ctx.document.createElement;
+ a.ctx.Blob=class{constructor(partes){texto=partes.join('');}};a.ctx.URL.createObjectURL=()=> 'blob:prueba';a.ctx.setTimeout=fn=>fn();a.ctx.document.createElement=()=>{const e=crear();e.click=()=>clicks++;return e;};
+ a.run('descargarMaterialesGas()');assert.equal(clicks,1);assert.match(texto,/NO DEFINITIVA/);assert.match(texto,/PENDIENTE/);assert.match(texto,/estimado/);assert.match(texto,/cantidad|Cantidad/);assert.match(texto,/M-A/);assert.equal(a.run('CATALOGOS_GAS_VERIFICADOS.length'),0);
+});
