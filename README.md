@@ -1,5 +1,12 @@
 # CAÑERÍAS
 
+## Formato de entrega GAS (versión experimental actual)
+
+Rama `prueba/formato-entrega-gas`, base `2e10235`. Documento A4 con croquis aportado y confirmado cuando hay información suficiente, planilla de seis columnas, materiales agrupados por tipo/diámetro/estado y observaciones breves. No dibuja recorridos ni posiciones. DEFINITIVO utiliza la longitud de cálculo del recorrido más desfavorable del motor; los datos no disponibles dicen «Pendiente». Diámetros automáticos bloqueados; tablas y motor intactos.
+
+**257 pruebas aprobadas (239 anteriores + 18 nuevas).** La comprobación visual en Android sigue pendiente. Pasos de prueba y significado de columnas en [ENTREGA-GAS.md](ENTREGA-GAS.md). Se mantiene el HTML autónomo y el funcionamiento manual de todas las especialidades.
+
+
 ## Inicio autónomo en Android (versión actual)
 
 Rama `prueba/android-inicio-local`, base `8f4f2be`. `index.html` incluye sus diez dependencias JavaScript para poder abrirse desde proveedores `content://` sin acceso a archivos vecinos. Los fallos de almacenamiento permiten navegar y trabajar en memoria; si no se recuperaron datos con seguridad, no se sobrescribe el almacenamiento anterior. Se conservan informe limpio y separación de demostraciones.

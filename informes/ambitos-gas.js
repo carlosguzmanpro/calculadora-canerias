@@ -26,6 +26,7 @@ function separarLegadoSimuladoGas(){
 }
 function renderAmbitoGas(){
  $('ambitoGas').value=ambitoGas;
+ actualizarVistaEntregaGas();
  $('estadoAmbitoGas').textContent=ambitoGas==='demostracion'?'DEMOSTRACIÓN: datos de práctica separados. No es tu proyecto real.':('MI PROYECTO: ejemplos separados de los datos reales.'+(proyectos.gas.separacionDemostraciones?' Se conservaron los simulados antiguos en Demostración y una copia anterior a la separación.':''));
 }
 function seleccionarAmbitoGas(destino){

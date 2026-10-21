@@ -701,3 +701,79 @@ test('Android: fallo de inicialización se distingue del almacenamiento y conser
 test('Android: falta de cuota no elimina la fotografía previamente guardada',()=>{
  const a=app();a.run("abrir('gas');proyectos.gas.foto='data:image/png;base64,ANTERIOR';guardarDatos()");const b=app(a.saved(),{embebido:true,quota:1500});b.run("abrir('gas');proyectos.gas.foto='data:image/png;base64,'+'x'.repeat(5000)");b.elements.get('duda').value='Nueva aclaración';b.run('guardarDatos()');const g=JSON.parse(b.saved()).gas;assert.equal(g.foto,'data:image/png;base64,ANTERIOR');assert.equal(g.aclaracion,'Nueva aclaración');assert.match(b.text('estadoGuardado'),/fotos solo quedan en esta sesión/);
 });
+
+test('entrega: seis encabezados exactos y ordenados, sin operaciones ni controles',()=>{
+ const a=app(null,{embebido:true});proyectoPlan(a);a.run('prepararInformeActual()');const doc=a.elements.get('informeImpresion').innerHTML;
+ const cab=['TRAMO','REAL (m)','EQUIVALENTE (m)','DEFINITIVO (m)','CONSUMO (m³/h)','DIÁMETRO'];assert.ok(doc.includes('<tr>'+cab.map(x=>'<th>'+x+'</th>').join('')+'</tr>'));
+ assert.doesNotMatch(doc,/<(?:button|input|textarea|select)\b|Iteración|semilla|fase inicial|<h2>Plano/);assert.match(doc,/Pendiente/);assert.match(doc,/BLOQUEADOS/);
+});
+test('entrega: definitivo toma longitudDeCalculo del motor, nunca la longitud equivalente local',()=>{
+ const {planilla}=require('../informes/documento-proyecto.js');
+ const ts=[{id:'t',desde:'M',hasta:'A',metros:19,diametro:null}];
+ // Datos sintéticos exclusivos para verificar el mapeo de campos; no son validación técnica.
+ const r={estado:'calculado',convergencia:true,prueba:false,porTramo:{t:{longitudEquivalenteAccesorios:4,longitudDefinitiva:23,longitudDeCalculo:51.25,caudal:2}}};
+ const p=planilla(ts,r,{caudalAplicable:true})[0];assert.equal(p.real,19);assert.equal(p.equivalente,4);assert.equal(p.definitivo,51.25);assert.notEqual(p.definitivo,p.real+p.equivalente);assert.equal(p.consumo,2);assert.equal(p.diametro,'Pendiente');
+});
+test('entrega: motor real bloqueado entrega consumo acumulado sin copiar el consumo manual ni ejercicio',()=>{
+ const a=app();redEjemplo(a);a.run("instalacionGas.perfil.poderCalorifico='9300';tramos.forEach(t=>t.diametro=null)");const d=a.run('modeloInformeActual()');
+ assert.equal(d.planilla[0].consumo,13000/9300);assert.equal(d.planilla[1].consumo,9000/9300);assert.equal(d.planilla[2].consumo,4000/9300);
+ for(const t of d.planilla){assert.equal(t.equivalente,null);assert.equal(t.definitivo,null);assert.equal(t.diametro,'Pendiente');}assert.equal(d.planilla[0].real,6);assert.equal(a.run('CATALOGOS_GAS_VERIFICADOS.length'),0);
+});
+test('entrega: caudal sin poder calorífico aplicable o con conexiones incorrectas queda pendiente',()=>{
+ const a=app();redEjemplo(a);assert.ok(a.run('modeloInformeActual().planilla.every(t=>t.consumo===null)'));
+ a.run("instalacionGas.perfil.poderCalorifico='9300';tramos[0].red.hasta='inexistente'");assert.ok(a.run('modeloInformeActual().planilla.every(t=>t.consumo===null)'));
+});
+test('entrega: resultados de ensayo o diagnóstico y semillas parciales no se presentan como definitivos',()=>{
+ const {planilla}=require('../informes/documento-proyecto.js');const t=[{id:'t',desde:'M',hasta:'A',metros:2}];
+ for(const [estado,prueba,convergencia]of [['diagnostico-educativo',true,true],['bloqueado',false,false],['calculado',true,true],['calculado',false,false]]){
+  const p=planilla(t,{estado,prueba,convergencia,porTramo:{t:{longitudEquivalenteAccesorios:7,longitudDeCalculo:99,diametroCalculado:'1"'}}})[0];assert.equal(p.equivalente,null);assert.equal(p.definitivo,null);assert.equal(p.diametro,'Pendiente');
+ }
+});
+test('entrega: diámetros manuales se conservan identificados sin habilitar medidas automáticas',()=>{
+ const a=app();proyectoPlan(a);const p=a.run('modeloInformeActual().planilla[0]');assert.equal(p.diametro,'1" (manual; no validado)');assert.equal(a.run('tramos[0].diametro'),'1"');
+});
+test('entrega: agrupa por material, tipo, diámetro y estado, sin mezclar pendientes ni medidas',()=>{
+ const {agruparMateriales}=require('../informes/documento-proyecto.js');
+ const f=(cantidad,diametro,estado,ubicacion)=>({tipo:'codo90',material:'Codo 90°',unidad:'u',cantidad,diametro,estado,ubicacion,revisado:true});
+ const r=agruparMateriales([f(5,'1"','confirmado','M-A'),f(7,'1"','confirmado','A-C'),f(2,'1"','estimado','B'),f(null,'1"','estimado','C'),f(0,'3/4"','confirmado','D'),f(3,'Pendiente','confirmado','E')]);
+ assert.equal(r.find(g=>g.estado==='confirmado'&&g.diametro==='1"').cantidad,12);assert.equal(r.find(g=>g.estado==='estimado').cantidad,2);assert.equal(r.find(g=>g.estado==='pendiente'&&g.diametro==='1"').cantidad,null);assert.equal(r.find(g=>g.diametro==='3/4"').cantidad,0);assert.equal(r.find(g=>g.diametro==='Pendiente').estado,'pendiente');
+});
+test('entrega: dos pendientes agrupados no se suman a una cantidad de compra ficticia',()=>{
+ const {agruparMateriales}=require('../informes/documento-proyecto.js');const f={tipo:'cupla-plan',material:'Cuplas',diametro:'1"',cantidad:null,unidad:'u',estado:'estimado'};const r=agruparMateriales([{...f,ubicacion:'A'},{...f,ubicacion:'B'}]);assert.equal(r.length,1);assert.equal(r[0].cantidad,null);assert.deepEqual(r[0].ubicaciones,['A','B']);
+});
+test('entrega: ajustes manuales agrupados no mutan la revisión, el CSV o el proyecto',()=>{
+ const a=app();proyectoPlan(a);a.run('revisionMaterialesGas.plan.filas[0].cantidad=4;revisionMaterialesGas.plan.filas[0].editado=true;revisionMaterialesGas.plan.filas[0].revisado=true;guardarRevisionMaterialesGas()');const antes=a.saved();const d=a.run('modeloInformeActual()');assert.equal(d.materialesAgrupados.find(f=>f.material.startsWith('Caño')).cantidad,4);assert.equal(d.materialesAgrupados.find(f=>f.material.startsWith('Caño')).estado,'estimado');assert.equal(a.saved(),antes);assert.equal(a.run('revisionMaterialesGas.plan.filas[0].cantidad'),4);
+});
+test('entrega: sin foto, red válida o confirmación explícita no incluye un croquis supuesto',()=>{
+ const a=app();redEjemplo(a);assert.equal(a.run('modeloInformeActual().croquis'),undefined);a.run("proyectos.gas.foto='data:image/png;base64,CROQUIS';mostrarFotoLocal();actualizarVistaEntregaGas()");assert.equal(a.run('croquisEntregaDisponible()'),true);assert.equal(a.run('modeloInformeActual().croquis'),undefined);assert.equal(a.elements.get('entregaCroquisConfirmado').checked,false);
+ a.run("tramos[0].red.hasta='desconectado';actualizarVistaEntregaGas()");assert.equal(a.elements.get('entregaCroquisConfirmado').disabled,true);
+});
+test('entrega: croquis confirmado se imprime sin inventar geometría y se conserva al recargar',()=>{
+ const a=app();redEjemplo(a);a.run("proyectos.gas.foto='data:image/png;base64,CROQUIS';mostrarFotoLocal()");a.elements.get('entregaCroquisConfirmado').checked=true;a.run('confirmarCroquisEntrega();prepararInformeActual()');const doc=a.elements.get('informeImpresion').innerHTML;assert.match(doc,/<img src="data:image\/png;base64,CROQUIS"/);assert.match(doc,/Sin escala verificada/);assert.doesNotMatch(doc,/<svg|<canvas/);
+ const b=app(a.saved());b.run("abrir('gas')");assert.equal(b.run('modeloInformeActual().croquis.url'),'data:image/png;base64,CROQUIS');assert.equal(b.elements.get('entregaCroquisConfirmado').checked,true);
+});
+test('entrega: cambio de foto, tramo o artefacto invalida la confirmación gráfica',()=>{
+ for(const cambio of ["tramos[0].metros=7","artefactos[0].consumo=10000","proyectos.gas.foto='data:image/png;base64,OTRA';mostrarFotoLocal()"]){
+  const a=app();redEjemplo(a);a.run("proyectos.gas.foto='data:image/png;base64,CROQUIS';mostrarFotoLocal()");a.elements.get('entregaCroquisConfirmado').checked=true;a.run('confirmarCroquisEntrega();'+cambio);assert.equal(a.run('modeloInformeActual().croquis'),undefined);
+ }
+});
+test('entrega: imagen confirmada del proyecto no pasa a demostración, AGUA ni CLOACAS',()=>{
+ const a=app();redEjemplo(a);a.run("proyectos.gas.foto='data:image/png;base64,REAL';mostrarFotoLocal()");a.elements.get('entregaCroquisConfirmado').checked=true;a.run("confirmarCroquisEntrega();seleccionarAmbitoGas('demostracion')");assert.equal(a.run('modeloInformeActual().croquis'),undefined);assert.equal(a.run('modeloInformeActual().planilla.length'),0);
+ for(const m of ['agua','cloacas']){a.run(`abrir('${m}')`);const d=a.run('modeloInformeActual()');assert.equal(d.planilla,undefined);assert.equal(d.croquis,undefined);assert.equal(d.filas.length,0);}
+});
+test('entrega: preparar el documento no escribe el disco ni muestra resultados de ejemplos abiertos',()=>{
+ const a=app();proyectoPlan(a);a.run('guardarDatos()');const antes=a.saved();a.run("probarMetodoClaseGas();generarPlanGas('ejemplo');prepararInformeActual()");assert.equal(a.saved(),antes);const doc=a.elements.get('informeImpresion').innerHTML;assert.doesNotMatch(doc,/DEMO|Termotanque|Calefón|Iteración/);
+});
+test('entrega: confirmación usa la foto persistida y sobrevive al reemplazo del blob de sesión',()=>{
+ const a=app();redEjemplo(a);a.run("proyectos.gas.foto='data:image/png;base64,PERSISTIDA';fotoURL='blob:foto-sesion'");a.elements.get('entregaCroquisConfirmado').checked=true;a.run('confirmarCroquisEntrega()');assert.equal(a.run('modeloInformeActual().croquis.url'),'blob:foto-sesion');const b=app(a.saved());b.run("abrir('gas')");assert.equal(b.run('modeloInformeActual().croquis.url'),'data:image/png;base64,PERSISTIDA');
+});
+test('entrega: guardar cambios quita la confirmación visual sin borrar la foto ni la firma anterior',()=>{
+ const a=app();redEjemplo(a);a.run("proyectos.gas.foto='data:image/png;base64,CROQUIS';mostrarFotoLocal()");a.elements.get('entregaCroquisConfirmado').checked=true;a.run('confirmarCroquisEntrega();tramos[0].metros=7;guardarDatos()');assert.equal(a.elements.get('entregaCroquisConfirmado').checked,false);assert.equal(a.run('proyectos.gas.foto'),'data:image/png;base64,CROQUIS');assert.ok(a.run('proyectos.gas.entregaGas.firmaCroquis'));assert.equal(a.run('modeloInformeActual().croquis'),undefined);
+});
+test('entrega: espera a decodificar el croquis antes de abrir la impresión',async()=>{
+ const a=app();redEjemplo(a);a.run("proyectos.gas.foto='data:image/png;base64,CROQUIS';mostrarFotoLocal()");a.elements.get('entregaCroquisConfirmado').checked=true;a.run('confirmarCroquisEntrega()');let resolver,n=0;
+ a.elements.get('informeImpresion').querySelector=()=>({decode:()=>new Promise(r=>resolver=r)});a.ctx.window.print=()=>{a.ctx.window.beforeprint();n++;};const listo=a.run('imprimirInformeActual()');assert.equal(n,0);resolver();await listo;assert.equal(n,1);
+});
+test('entrega: una imagen que no puede prepararse no genera silenciosamente un PDF incompleto',async()=>{
+ const a=app();proyectoPlan(a);let n=0;a.elements.get('informeImpresion').querySelector=()=>({decode:()=>Promise.reject(Error('Imagen inválida'))});a.ctx.window.print=()=>n++;await a.run('imprimirInformeActual()');assert.equal(n,0);assert.match(a.text('entregaEstado'),/No se pudo preparar la imagen/);
+});
