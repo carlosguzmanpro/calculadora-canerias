@@ -346,22 +346,22 @@ function recorridosGas(ts,inst){
  return resultado;
 }
 function validarCatalogoGas(p,modoPrueba,{clase=false}={}){
- const faltan=[];
+ const faltan=[],educativo=modoPrueba&&p?.soloPruebas===true&&p?.diagnosticoEducativo===true;
  if(!p)return ['Tabla de capacidad/pérdida por diámetro y caudal, específica del material y sistema (Tabla N.º 3 del ejercicio pendiente de verificar).','Longitudes equivalentes de accesorios por medida y recorrido de tee (Tabla N.º 18 del ejercicio pendiente de verificar).','Catálogo de piezas compatibles: tees, codos, llaves, cuplas y reducciones.','Método y condiciones de aplicación verificados, con fuente y edición.'];
  if(p.soloPruebas&&!modoPrueba)faltan.push('El catálogo es ficticio y solo sirve para pruebas del algoritmo.');
- if(p.verificado!==true||!p.fuente||!p.edicion||!p.material||!p.sistema||p.gas!=='GN'||!['perdida-lineal-tabular','longitud-maxima-tabular'].includes(p.metodo))faltan.push('Falta un catálogo aprobado, método tabular verificado y alcance de aplicación.');
+ if((!educativo&&(p.verificado!==true||!p.edicion))||!p.fuente||!p.material||!p.sistema||p.gas!=='GN'||!['perdida-lineal-tabular','longitud-maxima-tabular'].includes(p.metodo))faltan.push('Falta un catálogo aprobado, método tabular verificado y alcance de aplicación.');
  if(!Array.isArray(p.candidatos)||!p.candidatos.length||p.candidatos.some((c,i,a)=>!c.id||!Number.isFinite(c.interiorMm)||c.interiorMm<=0||!Array.isArray(c.filas)||!c.filas.length||c.filas.some((f,j,fs)=>p.metodo==='perdida-lineal-tabular'?
   (!Number.isFinite(f.caudal)||f.caudal<=0||!Number.isFinite(f.perdidaPaM)||f.perdidaPaM<0||(j>0&&(f.caudal<=fs[j-1].caudal||f.perdidaPaM<fs[j-1].perdidaPaM))):
   (!Number.isFinite(f.longitud)||f.longitud<=0||!Number.isFinite(f.caudal)||f.caudal<=0||(j>0&&(f.longitud<=fs[j-1].longitud||f.caudal>fs[j-1].caudal))))||(i>0&&c.interiorMm<=a[i-1].interiorMm)))faltan.push('Falta tabla monotónica y ordenada de capacidad o pérdida con diámetros interiores reales.');
  if(!clase&&p.metodo==='longitud-maxima-tabular'&&(!Number.isFinite(p.condiciones?.caidaPa)||p.condiciones.caidaPa<=0||p.reglaLongitud!=='maxima-ruta-completa-que-contiene-tramo'))faltan.push('Falta caída de presión y regla verificada para elegir longitud de cálculo en la tabla de capacidades.');
  if(Array.isArray(p.candidatos)&&new Set(p.candidatos.map(c=>c.id)).size!==p.candidatos.length)faltan.push('Identificadores de diámetro duplicados en el catálogo.');
  if(!p.piezas||typeof p.piezas!=='object')faltan.push('Catálogo de accesorios con equivalencias verificadas.');
- if(!p.condiciones||(!clase&&(!Number.isFinite(p.condiciones.presionMinPa)||!Number.isFinite(p.condiciones.presionMaxPa)))||!Number.isFinite(p.condiciones.densidadRelativa)||!p.redondeoSuperiorVerificado)faltan.push('Rango de presión, densidad del gas y aplicabilidad del redondeo conservador de caudal.');
+ if(!p.condiciones||(!clase&&(!Number.isFinite(p.condiciones.presionMinPa)||!Number.isFinite(p.condiciones.presionMaxPa)))||!Number.isFinite(p.condiciones.densidadRelativa)||(!p.redondeoSuperiorVerificado&&!educativo))faltan.push('Rango de presión, densidad del gas y aplicabilidad del redondeo conservador de caudal.');
  return faltan;
 }
 function motorDimensionarGas(ts,arts,inst,paquete=null,{modoPrueba=false,maxCombinaciones=100000,contextoClase=false,asignacionFija=null,soloGeometria=false}={}){
- const red=analizarRedGas(ts,arts,inst),faltantes=[...red.errores,...(contextoClase?[]:red.faltantes)];
- const p=inst.perfil||{};
+ const red=analizarRedGas(ts,arts,inst,{diagnosticoEducativo:modoPrueba&&paquete?.soloPruebas===true&&paquete?.diagnosticoEducativo===true}),faltantes=[...red.errores,...(contextoClase?[]:red.faltantes)];
+ const p=inst.perfil||{},educativo=modoPrueba&&paquete?.soloPruebas===true&&paquete?.diagnosticoEducativo===true;
  const positivo=k=>typeof p[k]==='string'&&p[k].trim()&&Number.isFinite(Number(p[k]))&&Number(p[k])>0;
  if(!positivo('poderCalorifico')||!p.fuenteGas)faltantes.push('Poder calorífico del gas en kcal/m³ y su fuente (no se usa automáticamente el valor orientativo de la consulta).');
  if(!positivo('densidadRelativa'))faltantes.push('Densidad relativa del gas, comprobada para las tablas.');
@@ -374,6 +374,13 @@ function motorDimensionarGas(ts,arts,inst,paquete=null,{modoPrueba=false,maxComb
  if(contextoClase)faltantes.push(...validarCatalogoClase(paquete,modoPrueba));
  const geometria=new Map();
  ts.forEach(t=>{
+  if(educativo&&t.detalleDiagnostico){
+   const lista=t.detalleDiagnostico.accesorios;
+   if(!Array.isArray(lista)||lista.some(a=>!a||!['codo45','codo90','llave'].includes(a.tipo)||!Number.isInteger(a.cantidad)||a.cantidad<0||a.cantidad>1000)||paquete.politicaCuplas!=='pendientes-sin-posiciones'){
+    faltantes.push('Cantidades diagnósticas inválidas o falta declarar cuplas pendientes.');return;
+   }
+   geometria.set(t.id,{acc:lista.flatMap(a=>Array.from({length:a.cantidad},()=>({tipo:a.tipo}))),cuplas:null});return;
+  }
   const d=t.detalle;
   if(!d||!['ninguno','completo'].includes(d.estado))faltantes.push('Revisar cantidad, tipo y posición de accesorios de '+t.desde+'–'+t.hasta+'.');
   const acc=d?.estado==='completo'?d.accesorios:[];
@@ -393,8 +400,9 @@ function motorDimensionarGas(ts,arts,inst,paquete=null,{modoPrueba=false,maxComb
  for(const n of inst.nodos){
   const outs=salidas.get(n.id)||[];
   if(n.tipo==='derivacion'&&outs.length===2){
+   if(educativo&&n.configuracionTee==='entrada-por-ramal'&&outs.some(t=>t.red?.via!=='ramal'))faltantes.push('La tee con entrada por ramal requiere dos giros de 90°, sin paso directo.');
    if(n.unionDimensionamiento!=='tee')faltantes.push('Confirmá que '+n.nombre+' es una tee real de tres conexiones.');
-   if(outs.filter(t=>t.red?.via==='principal').length!==1||outs.filter(t=>t.red?.via==='ramal').length!==1)faltantes.push('Identificá paso principal y ramal de la tee '+n.nombre+'.');
+   if(!(educativo&&n.configuracionTee==='entrada-por-ramal'&&outs.every(t=>t.red?.via==='ramal'))&&(outs.filter(t=>t.red?.via==='principal').length!==1||outs.filter(t=>t.red?.via==='ramal').length!==1))faltantes.push('Identificá paso principal y ramal de la tee '+n.nombre+'.');
   }
   if(n.tipo==='derivacion'&&outs.length===1&&['codo45','codo90'].includes(n.unionDimensionamiento)){
    for(const t of ts.filter(t=>t.red?.desde===n.id||t.red?.hasta===n.id)){
@@ -435,7 +443,12 @@ function motorDimensionarGas(ts,arts,inst,paquete=null,{modoPrueba=false,maxComb
   }
   for(const n of inst.nodos.filter(n=>n.tipo==='derivacion')){
    const entrada=ts.find(t=>t.red.hasta===n.id),outs=salidas.get(n.id);
-   if(outs.length===2){
+   if(outs.length===2&&educativo&&n.configuracionTee==='entrada-por-ramal'){
+    const medidas=[asignados[entrada.id].id,...outs.map(t=>asignados[t.id].id)];
+    const a=pieza('tee',medidas,'salida1'),b=pieza('tee',medidas,'salida2');if(!a||!b)return;
+    longEq[outs[0].id]+=a.equivalente;longEq[outs[1].id]+=b.equivalente;
+    inventario.push({...a,nodo:n.id,cantidad:1,configuracion:'entrada-por-ramal',equivalentesPorTramo:{[outs[0].id]:a.equivalente,[outs[1].id]:b.equivalente},tipo:medidas.every(d=>d===medidas[0])?'tee-igual':'tee-reductora'});
+   }else if(outs.length===2){
     const principal=outs.find(t=>t.red.via==='principal'),ramal=outs.find(t=>t.red.via==='ramal');
     const medidas=[asignados[entrada.id].id,asignados[principal.id].id,asignados[ramal.id].id];
     const a=pieza('tee',medidas,'principal'),b=pieza('tee',medidas,'ramal');if(!a||!b)return;
@@ -538,26 +551,27 @@ function validarCatalogoClase(p,modoPrueba=false){
   if(typeof TABLA_NAG200_3!=='undefined'&&TABLA_NAG200_3.procedencia.fotografiaDisponible)return ['Las fotografías de Tablas 3 y 18 ya están transcritas, pero falta verificación técnica: divergencia 7,67/7,65, redondeos, interiores/aplicabilidad al producto, fuente/edición, cuplas y comparación con ejercicios. No hay catálogo habilitado.'];
   return ['Hay 12 capacidades y 9 coeficientes declarados por mensaje, sin cotejo fotográfico ni catálogo habilitado. Faltan fotografías o transcripción verificada de la Tabla N.º 3 completa (capacidades) y Tabla N.º 18 completa (equivalencias de accesorios roscados), con encabezados, unidades, notas, fuente y edición.'];
  }
- const faltan=[];
+ const faltan=[],educativo=modoPrueba&&p.soloPruebas===true&&p.diagnosticoEducativo===true;
  if(p.soloPruebas&&!modoPrueba)faltan.push('El catálogo de ensayo no se puede usar para resultados técnicos.');
  for(const [key,numero]of [['tabla3',3],['tabla18',18]]){
-  const t=p[key];if(!t||t.numero!==numero||t.verificada!==true||!t.fuente||!t.edicion||!t.unidades||!t.aplicabilidadAceroRoscadoEpoxi)faltan.push('Falta verificar documento, unidades y aplicabilidad de Tabla N.º '+numero+' a acero roscado epoxi.');
+  const t=p[key];if(!t||t.numero!==numero||(!educativo&&(t.verificada!==true||!t.edicion||!t.aplicabilidadAceroRoscadoEpoxi))||!t.fuente||!t.unidades)faltan.push('Falta verificar documento, unidades y aplicabilidad de Tabla N.º '+numero+' a acero roscado epoxi.');
  }
  if(p.metodo!=='longitud-maxima-tabular'||p.reglaLongitud!=='maxima-ruta-completa-que-contiene-tramo')faltan.push('Falta verificar la regla de longitud y capacidad tabular del método de clase.');
  if(p.material!==PERFIL_CLASE_ACERO.material||p.sistema!==PERFIL_CLASE_ACERO.sistema||p.gas!=='GN'||p.condiciones?.densidadRelativa!==0.65)faltan.push('El catálogo de clase debe corresponder a GN, densidad 0,65 y acero roscado con epoxi.');
- if(p.tabla3?.unidadCaudal!=='m3/h'||p.tabla3?.unidadLongitud!=='m'||p.tabla3?.referenciaH?.valor!==10||p.tabla3?.referenciaH?.unidad!=='mmca'||!p.tabla3?.referenciaH?.significadoVerificado)faltan.push('Faltan confirmar m³/h, metros y significado/condiciones de h=10 mmca en la Tabla N.º 3; no es presión de suministro asumida.');
+ if(p.tabla3?.unidadCaudal!=='m3/h'||p.tabla3?.unidadLongitud!=='m'||p.tabla3?.referenciaH?.valor!==10||p.tabla3?.referenciaH?.unidad!=='mmca'||(!educativo&&!p.tabla3?.referenciaH?.significadoVerificado))faltan.push('Faltan confirmar m³/h, metros y significado/condiciones de h=10 mmca en la Tabla N.º 3; no es presión de suministro asumida.');
  if(p.tabla18?.unidadEquivalentes!=='m')faltan.push('Falta verificar unidad de longitudes equivalentes de Tabla N.º 18.');
- if(!['incluir','excluir-con-fuente'].includes(p.politicaCuplas)||!p.fuentePoliticaCuplas)faltan.push('Falta criterio documentado para tratar cuplas en equivalentes; no se asume que su pérdida sea cero.');
+ if((!['incluir','excluir-con-fuente'].includes(p.politicaCuplas)&&!(educativo&&p.politicaCuplas==='pendientes-sin-posiciones'))||!p.fuentePoliticaCuplas)faltan.push('Falta criterio documentado para tratar cuplas en equivalentes; no se asume que su pérdida sea cero.');
  return faltan;
 }
 function motorClaseAceroGas(ts,arts,inst,paquete=null,{modoPrueba=false,maxIteraciones=30}={}){
- const red=analizarRedGas(ts,arts,inst),perfil=inst.perfil||{},faltantes=[...red.errores,...red.pendientes,...validarCatalogoGas(paquete,modoPrueba,{clase:true}),...validarCatalogoClase(paquete,modoPrueba)];
+ const educativo=modoPrueba&&paquete?.soloPruebas===true&&paquete?.diagnosticoEducativo===true;
+ const red=analizarRedGas(ts,arts,inst,{diagnosticoEducativo:educativo}),perfil=inst.perfil||{},faltantes=[...red.errores,...red.pendientes,...validarCatalogoGas(paquete,modoPrueba,{clase:true}),...validarCatalogoClase(paquete,modoPrueba)];
  if(perfil.material!==PERFIL_CLASE_ACERO.material||perfil.sistema!==PERFIL_CLASE_ACERO.sistema||perfil.gas!=='GN')faltantes.push('Elegí explícitamente GN / acero con revestimiento epoxi / roscado para usar este procedimiento de clase.');
  if(Number(perfil.poderCalorifico)!==9300||Number(perfil.densidadRelativa)!==0.65)faltantes.push('Este ejercicio utiliza 9300 kcal/m³ y densidad 0,65; no se trasladan a otra instalación sin comprobarlos.');
- for(const t of ts)if(!t.detalle||!['ninguno','completo'].includes(t.detalle.estado))faltantes.push('Identificá accesorios y posiciones de '+t.desde+'–'+t.hasta+'; pendiente no significa cero.');
+ for(const t of ts)if(!(educativo&&t.detalleDiagnostico)&&(!t.detalle||!['ninguno','completo'].includes(t.detalle.estado)))faltantes.push('Identificá accesorios y posiciones de '+t.desde+'–'+t.hasta+'; pendiente no significa cero.');
  for(const n of inst.nodos.filter(n=>n.tipo==='derivacion')){
   const salidas=ts.filter(t=>t.red?.desde===n.id);
-  if(salidas.length===2&&(n.unionDimensionamiento!=='tee'||salidas.filter(t=>t.red.via==='principal').length!==1||salidas.filter(t=>t.red.via==='ramal').length!==1))faltantes.push('Confirmá la tee real de '+n.nombre+' e identificá paso directo y giro de 90°; no se deducen del nombre del punto.');
+  if(salidas.length===2&&!(educativo&&n.unionDimensionamiento==='tee'&&n.configuracionTee==='entrada-por-ramal'&&salidas.every(t=>t.red?.via==='ramal'))&&(n.unionDimensionamiento!=='tee'||salidas.filter(t=>t.red.via==='principal').length!==1||salidas.filter(t=>t.red.via==='ramal').length!==1))faltantes.push('Confirmá la tee real de '+n.nombre+' e identificá paso directo y giro de 90°; no se deducen del nombre del punto.');
  }
  let rutas=[];
  if(!red.errores.length)rutas=recorridosGas(ts,inst).map(r=>({...r,longitudReal:r.tramos.reduce((n,id)=>n+ts.find(t=>t.id===id).metros,0)})).sort((a,b)=>b.longitudReal-a.longitudReal||a.artefacto.localeCompare(b.artefacto));
@@ -593,18 +607,21 @@ function motorClaseAceroGas(ts,arts,inst,paquete=null,{modoPrueba=false,maxItera
    const siguientes=seleccionar(evaluado.recorridos.map(r=>({...r,longitud:r.longitudEquivalente})));
    historia.push({fase:'recalculo',iteracion:i+1,diametrosEvaluados:{...actual.elegidos},diametrosSiguientes:{...siguientes.elegidos},comprobaciones:siguientes.comprobaciones,
     recorridos:evaluado.recorridos.map(r=>({...r,equivalentesAccesorios:r.longitudEquivalente-r.longitudReal,longitudDefinitiva:r.longitudEquivalente}))});
+   if(educativo)Object.assign(historia[historia.length-1],{porTramoEvaluado:evaluado.porTramo,accesoriosEvaluados:evaluado.accesorios});
    if(ts.every(t=>actual.elegidos[t.id]===siguientes.elegidos[t.id])){
     const porTramo={};
     for(const t of ts){
      const r=evaluado.porTramo[t.id];
      const accesorios=evaluado.accesorios.filter(a=>a.tramo===t.id).map(a=>({...a}));
-     for(const a of evaluado.accesorios.filter(a=>a.nodo===t.red.desde))accesorios.push({...a,via:t.red.via,equivalente:a.equivalentes?.[t.red.via],referenciaPiezaCompartida:true});
+     for(const a of evaluado.accesorios.filter(a=>a.nodo===t.red.desde))accesorios.push({...a,via:t.red.via,equivalente:a.equivalentesPorTramo?.[t.id]??a.equivalentes?.[t.red.via],referenciaPiezaCompartida:true});
      porTramo[t.id]={...base.porTramo[t.id],accesorios,longitudEquivalenteAccesorios:r.longitudEquivalente-t.metros,longitudDefinitiva:r.longitudEquivalente,
       ...siguientes.comprobaciones[t.id],diametroCalculado:actual.elegidos[t.id],comprobacion:'CUMPLE CAPACIDAD DEL EJERCICIO'};
     }
     const recorridos=evaluado.recorridos.map(r=>({...base.recorridos.find(b=>b.nodo===r.nodo),longitudEquivalenteAccesorios:r.longitudEquivalente-r.longitudReal,longitudDefinitiva:r.longitudEquivalente,
      diametros:r.tramos.map(id=>actual.elegidos[id]),comprobacion:'CUMPLE CAPACIDAD DEL EJERCICIO'})).sort((a,b)=>b.longitudDefinitiva-a.longitudDefinitiva);
-    return {...base,estado:'calculado',diametros:actual.elegidos,porTramo,recorridos,accesorios:evaluado.accesorios,fuente:paquete.fuente,edicion:paquete.edicion,faltantes:[],convergencia:true};
+    const resultado={...base,estado:'calculado',diametros:actual.elegidos,porTramo,recorridos,accesorios:evaluado.accesorios,fuente:paquete.fuente,edicion:paquete.edicion,faltantes:[],convergencia:true};
+    if(educativo){resultado.estado='diagnostico-educativo';resultado.propuestas=resultado.diametros;resultado.diametros=null;resultado.cuplas='PENDIENTES: faltan posiciones; sus equivalentes no se evaluaron';resultado.advertencias=paquete.advertencias||[];for(const r of Object.values(porTramo)){r.diametroPropuesto=r.diametroCalculado;r.diametroCalculado=null;r.comprobacion='CAPACIDAD DEL ESCENARIO; NO VALIDACIÓN TÉCNICA';}recorridos.forEach(r=>r.comprobacion='CAPACIDAD DEL ESCENARIO; NO VALIDACIÓN TÉCNICA');}
+    return resultado;
    }
    actual=siguientes;
   }
@@ -728,7 +745,7 @@ function guardarPerfilGas(){
  Object.entries(CAMPOS_INSTALACION).forEach(([k,id])=>instalacionGas.perfil[k]=$(id).value.trim());
  guardarDatos();
 }
-function analizarRedGas(listaTramos=tramos,listaArtefactos=artefactos,instalacion=instalacionGas){
+function analizarRedGas(listaTramos=tramos,listaArtefactos=artefactos,instalacion=instalacionGas,{diagnosticoEducativo=false}={}){
  const errores=[],faltantes=[],pendientes=[];const perfil=instalacion.perfil||{};
  const nodos=Array.isArray(instalacion.nodos)?instalacion.nodos:[];
  const mapa=new Map(),salidas=new Map(),entradas=new Map(),porTramo=Object.create(null),usosArtefacto=new Map();
@@ -778,7 +795,7 @@ function analizarRedGas(listaTramos=tramos,listaArtefactos=artefactos,instalacio
     }
    }
   }
-  const accesorios=evaluarTramo(t,listaTramos);if(accesorios.pendiente&&!accesorios.soloMedidasPendientes)pendientes.push('Accesorios por revisar en '+t.desde+'–'+t.hasta+'.');
+  const accesorios=diagnosticoEducativo&&t.detalleDiagnostico?{pendiente:false}:evaluarTramo(t,listaTramos);if(accesorios.pendiente&&!accesorios.soloMedidasPendientes)pendientes.push('Accesorios por revisar en '+t.desde+'–'+t.hasta+'.');
  });
  const artPorId=new Map();listaArtefactos.forEach(a=>{
   if(!a.id||artPorId.has(a.id))errores.push('Identificador de artefacto faltante o duplicado.');
@@ -797,7 +814,7 @@ function analizarRedGas(listaTramos=tramos,listaArtefactos=artefactos,instalacio
   }else if(n.artefactoId)errores.push('Solo un punto de tipo artefacto puede tener un consumo asociado.');
   if(n.tipo==='derivacion'){
    const tees=listaTramos.flatMap(t=>Array.isArray(t.detalle?.accesorios)?t.detalle.accesorios:[]).filter(a=>a?.tipo==='tee' && typeof a.nodo==='string' && a.nodo.trim().toLocaleLowerCase('es')===n.nombre.trim().toLocaleLowerCase('es'));
-   if(sal===2 && tees.length!==1)pendientes.push('Revisar y registrar una sola tee en la derivación '+n.nombre+'; la red no agrega accesorios automáticamente.');
+   if(sal===2 && tees.length!==1 && !(diagnosticoEducativo&&n.unionDimensionamiento==='tee'&&listaTramos.some(t=>t.red?.hasta===n.id&&t.detalleDiagnostico?.teeEnExtremo===n.id)))pendientes.push('Revisar y registrar una sola tee en la derivación '+n.nombre+'; la red no agrega accesorios automáticamente.');
    if(sal===1 && tees.length)errores.push('La tee '+n.nombre+' necesita las dos salidas conectadas. Falta registrar un ramal.');
   }
   if(n.tipo==='derivacion'&&(sal<1||sal>2))errores.push('La derivación '+n.nombre+' debe continuar a uno o dos tramos; descomponé las derivaciones múltiples.');

@@ -1,8 +1,18 @@
+PRUEBA INTEGRAL EDUCATIVA · CALEFÓN Y COCINA
+
+1. Descomprimí TODO canerias-diagnostico-calefon-cocina.zip.
+2. Abrí DIAGNOSTICO-CALEFON-COCINA.html: contiene el informe ya ejecutado y un botón para imprimir. No hace falta ejecutar comandos ni conectarse a Internet.
+3. Revisá los nueve escenarios y la traza de selección inicial y recálculo. El caso macho + dos giros da 50,00 y 40,64 m, pero es una hipótesis no confirmada.
+4. Falta confirmar orientación de tee, tipo de cada llave y criterio/posiciones de cuplas. Los candidatos NO son diámetros definitivos.
+5. La aplicación completa existente se abre con index.html. El informe no reemplaza tus datos ni habilita dimensionamiento normal.
+
+INSTRUCCIONES CONSERVADAS PARA REVISAR LA APLICACIÓN Y TABLAS:
+
 CAÑERÍAS · MÉTODO DE CLASE · ACERO ROSCADO EPOXI
 
 ### Probar desde Android
 
-1. Descomprimí `canerias-auditoria-final-tablas.zip` conservando las carpetas `datos` y `fuentes` junto a `index.html`, y abrí `index.html` con el navegador o visor HTML que usaste en las pruebas anteriores. No reemplaces la aplicación publicada. El guardado local puede estar separado al abrir desde otra ubicación: conservá la versión anterior y sus datos.
+1. Descomprimí `canerias-diagnostico-calefon-cocina.zip` conservando las carpetas `datos` y `fuentes` junto a `index.html`, y abrí `index.html` con el navegador o visor HTML que usaste en las pruebas anteriores. No reemplaces la aplicación publicada. El guardado local puede estar separado al abrir desde otra ubicación: conservá la versión anterior y sus datos.
 2. Entrá en **Gas → Calcular diámetros · diagnóstico**. Tocá **Revisar tablas transcritas y pendientes**: deben aparecer 441 capacidades en L/h, 9 factores d y 225 equivalencias impresas; siguen pendientes criterios técnicos. Tocá VER AUDITORÍA FINAL DE TABLAS: debe mostrar cinco correcciones explícitas y una tabla de nueve diferencias originales, además del caso adicional 7,67 impreso frente a 7,65 calculado. Hay enlaces a las fotografías originales. El cotejo visual no equivale a validación técnica. Los diámetros definitivos siguen bloqueados.
 3. En **Ejercicio de clase M–A–B**, tocá **Probar método de clase M–A–B sin diámetros**. Es una copia separada: no reemplaza ni agrega datos a tu instalación.
 4. Marcá la casilla solo después de comprobar en el croquis que 15, 9, 8, 6 y 13 m son longitudes individuales. Sin confirmación el resultado queda bloqueado.

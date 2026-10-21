@@ -71,3 +71,11 @@ Rama `prueba/auditoria-final-tablas`, base `1e99313`. Se reexaminan las imágene
 Se corrigen explícitamente cinco errores de transcripción de Tabla 3 (10 m/4″, 12 m/4″, 16 m/4″, 55 m/3″ y 85 m/2″), con historial antes/después. Los 441 valores se auditan por coordenadas; no se confunde esta referencia de integridad con una segunda fuente normativa. Las fotos no identifican una edición de NAG-200 ni prueban su aplicabilidad a acero epoxi roscado. Se requiere fuente/edición, método y documentación del fabricante para dimensiones/interiores reales y sistema compatible. No se realizó una consulta externa nueva que resuelva esos puntos. El catálogo permanece vacío.
 
 El informe actual es `AUDITORIA-FINAL.md`; el anterior conserva el estado histórico. Pasan 165 pruebas, incluidas las 143 previas con datos de regresión. No constituyen certificación técnica ni normativa.
+
+## Diagnóstico integral calefón/cocina (entrega posterior a auditoría)
+
+Rama `prueba/diagnostico-calefon-cocina`, base `279dcdc`. Usa las tablas existentes sin cambios y un adaptador educativo explícitamente NO verificado: modoPrueba y diagnosticoEducativo, con propuestas separadas de diámetros definitivos. No se asignan verificado=true ni edición ficticia. Se usan d tabulados para ordenar candidatos y derivar equivalentes; no se presentan como interiores comerciales acreditados. No se registró el paquete en el catálogo habilitado.
+
+Los accesorios se ingresan por cantidades conocidas, sin inventar posiciones. Las cuplas son pendientes y sus equivalentes no se evaluaron, en lugar de inventar cantidad cero. La tee se modela por tres disposiciones hipotéticas: una vía directa y otra con giro, o entrada por ramal con dos giros. Se presupone una sola tee reductora compatible únicamente para calcular escenarios, sin afirmar existencia/aplicabilidad comercial. Las equivalencias por diámetros de salida y los tipos de válvula siguen condicionados a revisión.
+
+Los 9 escenarios homogéneos (ambas llaves del mismo tipo) conservaron 1″/1″/¾″. Macho + ambos giros obtuvo 50,00/40,64 m; filas finales 50/50/42 m. Esto explica la referencia aproximada, no confirma el croquis ni aprueba pérdidas pendientes. Los detalles y cada iteración están en `DIAGNOSTICO-CALEFON-COCINA.md` y el JSON de `diagnosticos/`. Las tablas impresas no se ajustaron para reproducir resultados.

@@ -2,6 +2,14 @@
 
 Aplicación gratuita, estática y en español para registrar croquis y estimar materiales de instalaciones. Se ejecuta en el navegador, sin cuentas, backend ni dependencias de ejecución.
 
+## Prueba integral educativa: calefón y cocina (entrega actual)
+
+Rama `prueba/diagnostico-calefon-cocina`, base `279dcdc`. Se ejecuta el motor existente con los datos del ejercicio, sin registrar un catálogo habilitado ni modificar tablas. La salida es **diagnóstico condicional**, con propuestas separadas y diámetros definitivos nulos. El modo normal sigue bloqueado. No se inventan posiciones de accesorios: las cuplas quedan pendientes.
+
+Se comparan nueve escenarios de válvulas y vías de tee, incluida entrada por ramal con dos giros de 90°. Para llaves macho y ambos giros se obtienen **50,00 y 40,64 m** y candidatos **1″ / 1″ / ¾″**. La cocina consulta fila 42 m, no una fila inventada de 41 m. Para otras orientaciones/tipos cambian los equivalentes: no se da por confirmado el croquis.
+
+Abrí **DIAGNOSTICO-CALEFON-COCINA.html** del ZIP descomprimido para leer/imprimir desde Android. El [informe detallado](DIAGNOSTICO-CALEFON-COCINA.md) incluye las nueve trazas y los pendientes. La app completa sigue en `index.html`. Pasan **183 pruebas: las 165 anteriores y 18 nuevas**. Este resultado no certifica una instalación. No se conectaron servicios ni se modificó main.
+
 ## Funciones actuales
 
 - **GAS:** carga de foto desde cámara o galería, ampliación, aclaraciones, registro y eliminación de tramos, estimación de materiales, consulta y suma de consumos de artefactos.
@@ -20,7 +28,7 @@ En **GAS → Calcular diámetros · diagnóstico** se ejecuta el motor de candid
 
 Los ensayos automáticos verifican ambos adaptadores de tablas (pérdida unitaria y capacidad por longitud) usando datos ficticios solo en pruebas. Se evalúan longitudes reales, equivalentes dependientes de las medidas y paso de tees, consumos acumulados y rutas completas. Si un catálogo verificado se incorpora en otra revisión, los resultados incluirán medidas de piezas compatibles y referencia de fuente/edición. Esta entrega NO habilita resultados técnicos reales ni reemplaza las medidas manuales de tu proyecto.
 
-## Auditoría final de tablas · entrega actual
+## Auditoría final de tablas · etapa anterior (279dcdc)
 
 Rama `prueba/auditoria-final-tablas`, basada en `1e99313`. **Diámetros definitivos bloqueados**. El [informe de auditoría](AUDITORIA-FINAL.md) incluye originales, cálculos y pendientes por separado.
 
@@ -42,7 +50,7 @@ Las tees tienen tres medidas y equivalencias independientes para paso directo y 
 
 ### Probar desde Android
 
-1. Descomprimí `canerias-auditoria-final-tablas.zip` conservando las carpetas `datos` y `fuentes` junto a `index.html`, y abrí `index.html` con el navegador o visor HTML que usaste en las pruebas anteriores. No reemplaces la aplicación publicada. El guardado local puede estar separado al abrir desde otra ubicación: conservá la versión anterior y sus datos.
+1. Descomprimí `canerias-diagnostico-calefon-cocina.zip` conservando las carpetas `datos` y `fuentes` junto a `index.html`, y abrí `index.html` con el navegador o visor HTML que usaste en las pruebas anteriores. No reemplaces la aplicación publicada. El guardado local puede estar separado al abrir desde otra ubicación: conservá la versión anterior y sus datos.
 2. Entrá en **Gas → Calcular diámetros · diagnóstico** y tocá **Revisar tablas transcritas y pendientes**. Verificá los impresos y luego tocá **Ver auditoría final de tablas**. Debe mostrar 441 posiciones, cinco correcciones, los casos 7,67/7,65 y 7,60/7,60 y la tabla de nueve diferencias. Los diámetros siguen bloqueados.
 3. En **Ejercicio de clase M–A–B**, tocá **Probar método de clase M–A–B sin diámetros**. Es una copia separada: no reemplaza ni agrega datos a tu instalación.
 4. Marcá la casilla solo después de comprobar en el croquis que 15, 9, 8, 6 y 13 m son longitudes individuales. Sin confirmación el resultado queda bloqueado.
