@@ -1,7 +1,7 @@
 const {test}=require('node:test');
 const assert=require('node:assert/strict');
-const t3=require('../datos/tabla-3.js');
-const t18=require('../datos/tabla-18.js');
+const t3=require('./fixtures/tabla-3-22028c8.cjs');
+const t18=require('./fixtures/tabla-18-22028c8.cjs');
 const {validarTablas,consultarCapacidadDeclarada,caudalClaseDesdeKcal}=require('../datos/validacion-tablas.js');
 const copia=x=>structuredClone(x);
 test('tabla3: los doce controles del mensaje coinciden exactamente en L/h',()=>{

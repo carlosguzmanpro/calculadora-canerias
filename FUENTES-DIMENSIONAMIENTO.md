@@ -57,3 +57,9 @@ Para habilitar la comparación deben aportarse fotos legibles de las Tablas 3 y 
 Rama `prueba/tablas-nag200-revision`, basada en `ad082dc`. Sin fotografías adjuntas disponibles: se registraron 12 capacidades en L/h y 9 coeficientes d aportados por mensaje, en `datos/tabla-3.js` y `datos/tabla-18.js`. No son una transcripción cotejada de las fotografías ni un catálogo habilitado. Edición, vigencia, interiores, redondeos y transcripción completa siguen pendientes. Ningún dato dudoso se adivina y ninguna fila ausente se interpola. Las 4 filas de control no reemplazan la tabla completa para seleccionar longitudes.
 
 La validación se separa en `datos/validacion-tablas.js`; pruebas exactas de los controles en `tests/tablas.test.cjs`. Pasa un total de 124 pruebas, conservando las 107 anteriores. Consultar `INFORME-TABLAS.md` para cantidades verificadas contra el mensaje (21) y contra fotos (0), archivos, conversiones del ejercicio y pendientes. Los datos declarados no se conectaron al motor como catálogo verificado. No hubo consulta externa nueva que permita atribuir vigencia normativa a estas tablas.
+
+## Fotografías recibidas: estado actual
+
+En la rama `prueba/cotejo-fotografias-nag200` se incorporan los originales `347520.jpg` y `347525.jpg` bajo `fuentes/`, con sus SHA-256. Sustituye el estado anterior de «fotos no disponibles». Se transcriben 441 capacidades, 9 coeficientes, 9 d tabulados y 223 equivalencias; dos celdas quedan nulas y nueve redondeos no se asumen resueltos. El d del encabezado es distinto del interior real comercial, aún no verificado. No hay portada/edición en las fotografías; no se afirma vigencia normativa.
+
+El ejemplo impreso 2 × 30 × 0,019 = 1,14 está cotejado y comprobado aritméticamente. No basta para habilitar todo el motor ni para resolver los redondeos de otras filas. Los pendientes y sus coordenadas exactas están en `INFORME-TABLAS.md`. Pasan 143 pruebas y el catálogo sigue deshabilitado.

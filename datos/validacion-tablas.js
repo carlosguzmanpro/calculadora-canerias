@@ -1,6 +1,33 @@
 /* Sin red ni servicios. Los datos declarados no equivalen a tablas verificadas. */
 (function(root){
  const positivo=x=>Number.isFinite(x)&&x>0;
+ function auditarComplemento(t){
+  const errores=[],dudosas=[],discrepancias=[],filas=t?.complemento;
+  if(!Array.isArray(filas))return {celdas:0,transcritas:0,errores:['Falta complemento de Tabla 18.'],dudosas,discrepancias};
+  const ds=t.diametros||[],tipos=['codo90','codo45','tee-directo','tee-giro90','valvula-macho'],vistas=new Set();let celdas=0,transcritas=0;
+  for(const f of filas){
+   const clave=f.tipo+'|'+f.cantidad;
+   if(vistas.has(clave))errores.push('Fila repetida: '+clave);vistas.add(clave);
+   if(!tipos.includes(f.tipo)||!Number.isInteger(f.cantidad)||f.cantidad<1||f.cantidad>5)errores.push('Accesorio o cantidad inválida: '+clave);
+   if(!Array.isArray(f.equivalentesM)||f.equivalentesM.length!==ds.length){errores.push('Fila incompleta: '+clave);continue;}
+   const factor=t.accesorios.find(a=>a.tipo===f.tipo)?.factorD;
+   f.equivalentesM.forEach((valor,i)=>{
+    celdas++;const ubicacion={tipo:f.tipo,cantidad:f.cantidad,columna:ds[i].nominal};
+    if(valor===null){dudosas.push(ubicacion);return;}
+    if(!positivo(valor)){errores.push('Equivalente inválido: '+clave+' / '+ds[i].nominal);return;}
+    transcritas++;
+    const previo=f.equivalentesM[i-1];if(i&&positivo(previo)&&valor<previo)errores.push('Equivalentes decrecen al aumentar d: '+clave);
+    const anterior=filas.find(a=>a.tipo===f.tipo&&a.cantidad===f.cantidad-1)?.equivalentesM?.[i];
+    if(positivo(anterior)&&valor<anterior)errores.push('Equivalentes decrecen al aumentar cantidad: '+clave);
+    if(!positivo(factor)||!positivo(ds[i].diametroTabuladoM)){errores.push('Falta factor o d tabulado: '+clave+' / '+ds[i].nominal);return;}
+    const producto=f.cantidad*factor*ds[i].diametroTabuladoM;
+    const referenciaCentésimo=Math.round((producto+Number.EPSILON)*100)/100;
+    if(Math.abs(valor-referenciaCentésimo)>1e-9)discrepancias.push({...ubicacion,impreso:valor,productoSinRedondeo:producto,referenciaCentésimo});
+   });
+  }
+  for(const tipo of tipos)for(let n=1;n<=5;n++)if(!vistas.has(tipo+'|'+n))errores.push('Falta fila '+tipo+' / cantidad '+n);
+  return {celdas,transcritas,errores,dudosas,discrepancias};
+ }
  function validarTablas(t3,t18){
   const errores=[],pendientes=[];
   if(!t3||!t18)return {habilitado:false,errores:['No se cargaron ambos archivos de tablas.'],pendientes:[],capacidades:0,coeficientes:0};
@@ -48,6 +75,14 @@
   if(!t18.redondeo?.verificado||!Number.isInteger(t18.redondeo?.decimales)||t18.redondeo.decimales<0||t18.redondeo.decimales>8||t18.redondeo?.regla!=='mas-cercano')pendientes.push('Criterio de redondeo sin verificar o no soportado.');
   if(!['incluir','excluir-con-fuente'].includes(t18.metodoClase?.politicaCuplas)||!t18.metodoClase?.fuentePoliticaCuplas)pendientes.push('Cuplas: falta criterio documentado.');
   if(t18.metodoClase?.reduccionesEnMateriales!==true||t18.metodoClase?.reduccionesEnEquivalentes!==false)errores.push('El método de clase requiere reducciones en materiales y fuera de equivalentes.');
+  if(Array.isArray(t3.diametrosEncabezadoMm)&&t3.diametrosEncabezadoMm.length!==cols.length)errores.push('Encabezado milimétrico incompleto.');
+  if(Array.isArray(t3.diametrosEncabezadoMm)&&Array.isArray(t18.diametros))t3.diametrosEncabezadoMm.forEach((mm,i)=>{
+   if(!positivo(mm)||Math.abs(mm/1000-(t18.diametros[i]?.diametroTabuladoM??NaN))>1e-9||!positivo(t18.diametros[i]?.diametroTabuladoM))errores.push('Encabezados mm/m incompatibles en columna '+cols[i]+'.');
+  });
+  if(t18.complemento){const a=auditarComplemento(t18);errores.push(...a.errores);
+   a.dudosas.forEach(c=>pendientes.push('Celda dudosa: '+c.tipo+' / cantidad '+c.cantidad+' / '+c.columna));
+   a.discrepancias.forEach(c=>pendientes.push('Redondeo por revisar: '+c.tipo+' / cantidad '+c.cantidad+' / '+c.columna+'; impreso '+c.impreso+', referencia al centésimo '+c.referenciaCentésimo+'.'));
+  }
   pendientes.push(...(t3.pendientes||[]),...(t18.pendientes||[]));
   return {habilitado:errores.length===0&&pendientes.length===0,errores,pendientes:[...new Set(pendientes)],capacidades,coeficientes};
  }
@@ -65,6 +100,6 @@
   const metrosCubicosHora=kcalHora/9300;
   return {metrosCubicosHora,litrosHora:metrosCubicosHora*1000,poderCalorificoKcalM3:9300};
  }
- const api={validarTablas,consultarCapacidadDeclarada,caudalClaseDesdeKcal};
+ const api={validarTablas,consultarCapacidadDeclarada,caudalClaseDesdeKcal,auditarComplemento};
  if(typeof module==='object'&&module.exports)module.exports=api;else root.ValidacionTablasGas=api;
 })(globalThis);

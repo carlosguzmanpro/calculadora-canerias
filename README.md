@@ -20,11 +20,13 @@ En **GAS → Calcular diámetros · diagnóstico** se ejecuta el motor de candid
 
 Los ensayos automáticos verifican ambos adaptadores de tablas (pérdida unitaria y capacidad por longitud) usando datos ficticios solo en pruebas. Se evalúan longitudes reales, equivalentes dependientes de las medidas y paso de tees, consumos acumulados y rutas completas. Si un catálogo verificado se incorpora en otra revisión, los resultados incluirán medidas de piezas compatibles y referencia de fuente/edición. Esta entrega NO habilita resultados técnicos reales ni reemplaza las medidas manuales de tu proyecto.
 
-## Tablas NAG-200 en revisión (entrega actual)
+## Fotografías de Tablas 3 y 18: cotejo experimental actual
 
-Rama `prueba/tablas-nag200-revision`, a partir de `ad082dc`. Se registraron en archivos separados **12 capacidades en L/h y 9 coeficientes d**, únicamente a partir del mensaje del usuario. **No llegaron las fotografías**: ningún valor fue cotejado con imágenes, la edición/vigencia no están verificadas y las tablas están incompletas. No se inventaron diámetros interiores ni redondeos. El registro de catálogos habilitados sigue vacío y no emite diámetros definitivos.
+Rama `prueba/cotejo-fotografias-nag200`, a partir de `22028c8`. Se conservaron ambas fotos en `fuentes/` y se transcribieron **441 capacidades en L/h**, **9 coeficientes**, **9 d tabulados** y **223 equivalencias**. Dos celdas dudosas quedan nulas: codos 90°, cantidad 5, 2″; y tee de paso directo, cantidad 5, 3″. **50 m / ½″ = 715 L/h**.
 
-En **GAS → Calcular diámetros · diagnóstico → Revisar tablas transcritas y pendientes** se ven los datos, origen, conversiones y bloqueos. Una celda dudosa queda pendiente, nunca cero. Se conservan las 107 pruebas anteriores y pasan 17 nuevas: **124 en total**. El [informe de revisión](INFORME-TABLAS.md) detalla archivos, cantidades, controles, resultados y pendientes. Estas pruebas no son certificación técnica ni normativa.
+Hay **9 diferencias** frente al redondeo del producto al centésimo; se conservan los números impresos y se deja pendiente el criterio. Los d del encabezado y el ejemplo de 1,14 m están cotejados; los interiores reales de un producto comercial no están acreditados. Tampoco constan edición, vigencia ni aplicabilidad. El catálogo sigue vacío y los diámetros definitivos permanecen bloqueados.
+
+En **GAS → Calcular diámetros · diagnóstico → Revisar tablas transcritas y pendientes** se ven transcripciones, fotos originales y coordenadas de dudas. Pasan **143 pruebas**, conservando las 124 anteriores con sus casos de datos parciales de regresión. El [informe de revisión](INFORME-TABLAS.md) detalla los valores y pendientes. El cotejo visual y las pruebas no son una validación técnica independiente ni certificación de una instalación.
 
 ## Método de clase: acero roscado con revestimiento epoxi
 
@@ -32,14 +34,14 @@ Rama `prueba/metodo-clase-acero-epoxi`, basada en el motor existente. El procedi
 
 Las tees tienen tres medidas y equivalencias independientes para paso directo y giro de 90°. Una tee reductora es una única pieza; no añade reducciones duplicadas. Las reducciones independientes se incluyen en materiales, pero se excluyen de equivalentes exclusivamente en este método de clase (no significa pérdida física cero). El tratamiento de cuplas también requiere una fuente explícita. No se inventan accesorios ni se aplican las referencias de pulgadas como entrada.
 
-**No se encontraron fotos/PDF de las tablas N.º 3 y N.º 18 en el proyecto.** La aplicación no tiene valores tabulares de producción habilitados. Hay que aportar ambas tablas completas, encabezados, notas, unidades, fuente/edición y el croquis con accesorios identificados. Después se verificará su aplicabilidad al acero roscado epoxi. El cálculo no certifica normativa, presiones ni aptitud para ejecutar una instalación.
+**Las fotografías ya están incorporadas.** La aplicación mantiene bloqueados los resultados técnicos mientras se resuelven las dos lecturas, el redondeo y las verificaciones del informe. Falta fuente/edición y el croquis con accesorios identificados, además de comprobar aplicabilidad al acero roscado epoxi. El cálculo no certifica normativa, presiones ni aptitud para ejecutar una instalación.
 
 **Validación de la etapa anterior (ad082dc):** se conservaron las 93 pruebas previas y pasan 14 adicionales: **107 en total** (97 de aplicación y 10 del intermediario desactivado). Se verificaron numéricamente consumos y longitudes del ejercicio. Las selecciones, iteración y equivalencias se ensayaron únicamente con catálogos ficticios aislados en tests. La comparación numérica de diámetros con el ejercicio real permanece pendiente de las tablas originales. No se declara aprobado un cálculo que no pudo ejecutarse con esas tablas.
 
 ### Probar desde Android
 
-1. Descomprimí `canerias-tablas-nag200-revision.zip` conservando la carpeta `datos` junto a `index.html`, y abrí `index.html` con el navegador o visor HTML que usaste en las pruebas anteriores. No reemplaces la aplicación publicada. El guardado local puede estar separado al abrir desde otra ubicación: conservá la versión anterior y sus datos.
-2. Entrá en **Gas → Calcular diámetros · diagnóstico** y tocá **Revisar tablas transcritas y pendientes**. Verificá 12 capacidades y 9 factores, procedencia por mensaje y bloqueo por falta de fotografías/interiores.
+1. Descomprimí `canerias-cotejo-fotografias-nag200.zip` conservando las carpetas `datos` y `fuentes` junto a `index.html`, y abrí `index.html` con el navegador o visor HTML que usaste en las pruebas anteriores. No reemplaces la aplicación publicada. El guardado local puede estar separado al abrir desde otra ubicación: conservá la versión anterior y sus datos.
+2. Entrá en **Gas → Calcular diámetros · diagnóstico** y tocá **Revisar tablas transcritas y pendientes**. Verificá 441 capacidades, 9 factores, 223 equivalencias y 2 lecturas dudosas. Abrí las fotografías originales para comparar. Los diámetros deben seguir bloqueados.
 3. En **Ejercicio de clase M–A–B**, tocá **Probar método de clase M–A–B sin diámetros**. Es una copia separada: no reemplaza ni agrega datos a tu instalación.
 4. Marcá la casilla solo después de comprobar en el croquis que 15, 9, 8, 6 y 13 m son longitudes individuales. Sin confirmación el resultado queda bloqueado.
 5. Compará los recorridos: Cocina **36 m**, Calefactor **29 m**, Termotanque **24 m**; estimación inicial **51, 44 y 39 m**. Los 15 m extra nunca se presentan como equivalentes definitivos.
