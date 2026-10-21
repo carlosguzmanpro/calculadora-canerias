@@ -4,10 +4,11 @@ const {chromium}=require('playwright');
 const http=require('node:http');
 const fs=require('node:fs');
 test('persistencia, consumos, especialidades, impresión y foto local',async()=>{
+ const carpeta=fs.mkdtempSync(require('node:path').join(require('node:os').tmpdir(),'canerias-html-solo-'));fs.copyFileSync('index.html',require('node:path').join(carpeta,'index.html'));
  const browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||'/usr/bin/chromium',headless:true,args:['--no-sandbox']});
  try{
  const page=await browser.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));
- await page.goto(require('node:url').pathToFileURL(require('node:path').resolve('index.html')).href);await page.evaluate(()=>localStorage.clear());await page.reload();
+ await page.goto(require('node:url').pathToFileURL(require('node:path').join(carpeta,'index.html')).href);await page.evaluate(()=>localStorage.clear());await page.reload();
  await page.getByRole('button',{name:'🔥 Gas',exact:true}).click();
  await page.locator('#duda').fill('Revisar tramo A-B');await page.getByRole('button',{name:'Guardar aclaración',exact:true}).click();
  for(const [id,value] of Object.entries({desde:'A',hasta:'B',metros:'15',consumoTramo:'16000'}))await page.locator('#'+id).fill(value);
@@ -28,5 +29,5 @@ test('persistencia, consumos, especialidades, impresión y foto local',async()=>
  await page.getByRole('button',{name:'← Cambiar especialidad',exact:true}).click();await page.getByRole('button',{name:'🔥 Gas',exact:true}).click();assert.equal(await page.locator('#duda').inputValue(),'Revisar tramo A-B');
  await page.getByRole('button',{name:'🧮 CALCULAR MATERIALES',exact:true}).click();await page.evaluate(()=>prepararInformeActual());await page.emulateMedia({media:'print'});assert.equal(await page.locator('#informeImpresion').isVisible(),true);assert.equal(await page.locator('#trabajo').isVisible(),false);assert.match(await page.locator('#informeImpresion').innerText(),/Revisar tramo A-B/);await page.pdf({path:'/tmp/canerias-informe-prueba.pdf',format:'A4',preferCSSPageSize:true});
  assert.deepEqual(errors,[]);
- }finally{await browser.close();}
+ }finally{await browser.close();fs.rmSync(carpeta,{recursive:true,force:true});}
 });

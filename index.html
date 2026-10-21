@@ -66,6 +66,7 @@ section{box-shadow:none}
 </style>
 </head>
 <body>
+<noscript><p>Esta aplicación necesita JavaScript. Si abriste una vista previa de Archivos, elegí abrir index.html en un navegador que ejecute JavaScript.</p></noscript>
 <header>
 <h1>CAÑERÍAS</h1>
 <p>Del croquis a los materiales</p>
@@ -352,16 +353,2624 @@ Estimación de compra sin reutilizar sobrantes: tiras de 6 m por segmento contin
 <button onclick="document.getElementById('visor').close()">Cerrar imagen</button>
 </dialog>
 
-<script src="informes/ambitos-gas.js"></script>
-<script src="informes/documento-proyecto.js"></script>
-<script src="informes/interfaz-informe.js"></script>
-<script src="materiales/planificador-gas.js"></script>
-<script src="materiales/interfaz-gas.js"></script>
-<script src="datos/tabla-3.js"></script>
-<script src="datos/tabla-18.js"></script>
-<script src="datos/validacion-tablas.js"></script>
-<script src="datos/referencia-auditoria-tabla3.js"></script>
-<script src="datos/auditoria-tablas.js"></script>
+<script data-local="informes/ambitos-gas.js">
+/* Espacio de práctica separado. Nunca se clasifican registros solo por su nombre. */
+let ambitoGas='proyecto';
+function espacioDemostracionGas(){
+ const g=proyectos.gas;
+ if(!g.demostracion||typeof g.demostracion!=='object'||Array.isArray(g.demostracion))g.demostracion={};
+ const d=g.demostracion;if(!Array.isArray(d.tramos))d.tramos=[];if(!Array.isArray(d.artefactos))d.artefactos=[];
+ if(!d.instalacion)d.instalacion={version:1,perfil:{pais:'AR',uso:'domiciliario',gas:'GN'},nodos:[]};return d;
+}
+function proyectoGasActual(){return ambitoGas==='demostracion'?espacioDemostracionGas():proyectos.gas;}
+function datosEspecialidadActual(){return modulo==='gas'?proyectoGasActual():proyectos[modulo];}
+function claveFotoActual(){return modulo==='gas'&&ambitoGas==='demostracion'?'gas-demostracion':modulo;}
+function separarLegadoSimuladoGas(){
+ const g=proyectos.gas,ts=Array.isArray(g.tramos)?g.tramos:[],as=Array.isArray(g.artefactos)?g.artefactos:[];
+ const simulados=ts.filter(t=>esOrigenSimulado(t?.origen)),arts=as.filter(a=>esOrigenSimulado(a?.origen));
+ if(!simulados.length&&!arts.length)return;
+ // Copia anterior completa de las colecciones afectadas; las fotos/observaciones no se mueven.
+ if(!g.copiaAntesSepararDemostraciones)g.copiaAntesSepararDemostraciones=JSON.parse(JSON.stringify({tramos:g.tramos||[],artefactos:g.artefactos||[],instalacion:g.instalacion||null,planCompra:g.planCompra||null,borradorCroquis:g.borradorCroquis||null}));
+ const d=espacioDemostracionGas(),reales=ts.filter(t=>!esOrigenSimulado(t?.origen));
+ const idsReales=new Set(reales.flatMap(t=>[t?.red?.desde,t?.red?.hasta]).filter(Boolean)),idsSim=new Set(simulados.flatMap(t=>[t?.red?.desde,t?.red?.hasta]).filter(Boolean)),artSim=new Set(arts.map(a=>a.id));
+ const nodos=Array.isArray(g.instalacion?.nodos)?g.instalacion.nodos:[],mover=n=>n&&!idsReales.has(n.id)&&(idsSim.has(n.id)||artSim.has(n.artefactoId));
+ d.tramos.push(...simulados);d.artefactos.push(...arts);d.instalacion.nodos.push(...nodos.filter(mover));
+ if(g.instalacion)g.instalacion={...g.instalacion,nodos:nodos.filter(n=>!mover(n))};
+ if(g.borradorCroquis?.aplicado&&esOrigenSimulado({tipo:g.borradorCroquis.origen})&&!d.borradorCroquis){d.borradorCroquis=g.borradorCroquis;g.borradorCroquis=null;}
+ g.tramos=reales;g.artefactos=as.filter(a=>!esOrigenSimulado(a?.origen));
+ g.separacionDemostraciones={tramosConservados:simulados.length,artefactosConservados:arts.length,copiaDisponible:true};
+}
+function renderAmbitoGas(){
+ $('ambitoGas').value=ambitoGas;
+ $('estadoAmbitoGas').textContent=ambitoGas==='demostracion'?'DEMOSTRACIÓN: datos de práctica separados. No es tu proyecto real.':('MI PROYECTO: ejemplos separados de los datos reales.'+(proyectos.gas.separacionDemostraciones?' Se conservaron los simulados antiguos en Demostración y una copia anterior a la separación.':''));
+}
+function seleccionarAmbitoGas(destino){
+ if(modulo!=='gas'||!['proyecto','demostracion'].includes(destino))return;
+ guardarDatos();ambitoGas=destino;const g=proyectoGasActual();
+ tramos=Array.isArray(g.tramos)?g.tramos:[];artefactos=Array.isArray(g.artefactos)?g.artefactos:[];
+ instalacionGas={version:1,perfil:{pais:'AR',uso:'domiciliario',gas:'GN'},nodos:[]};avisoRestauracionRedGas='';restaurarInstalacionGas(g);cancelarNodoGas();
+ borradorCroquis=formatoBorradorValido(g.borradorCroquis)?g.borradorCroquis:null;
+ revisionMaterialesGas=null;fuenteMaterialesGas='proyecto';$('matResultado').replaceChildren();
+ $('duda').value=g.aclaracion||'';$('revision').textContent=g.revision||'Todavía no hay una revisión registrada.';
+ $('gt').value=g.tipoGas||'9300';cancelarEdicionTramo();cerrarAccesorios();renderTramos();renderGas();renderRevisionCroquis();renderRedGas();mostrarFotoLocal();renderAmbitoGas();
+ $('resultadoMateriales').replaceChildren();$('resultadoMateriales').textContent='Datos del espacio seleccionado. Recalculá materiales para revisar.';
+ invalidarConsumos();mostrarVista('croquis');
+}
+
+</script>
+<script data-local="informes/documento-proyecto.js">
+/* Documento estático: solo datos, sin copiar el DOM de la aplicación. */
+(function(root){
+ const esc=v=>String(v??'PENDIENTE').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ function documento(d){
+  const tabla=(titulo,cab,filas)=>!filas.length?'':'<h2>'+esc(titulo)+'</h2><table><thead><tr>'+cab.map(x=>'<th>'+esc(x)+'</th>').join('')+'</tr></thead><tbody>'+filas.map(f=>'<tr>'+f.map(v=>'<td>'+esc(v)+'</td>').join('')+'</tr>').join('')+'</tbody></table>';
+  return '<h1>CAÑERÍAS · '+esc(d.titulo)+'</h1><p>'+esc(d.ambito)+'</p>'+
+   tabla('Tramos',['Tramo','Longitud (m)','Diámetro','Estado'],d.tramos.map(t=>[t.desde+'–'+t.hasta,t.metros,t.diametro||'PENDIENTE',t.detalle?.estado==='pendiente'?'Accesorios pendientes':'Registrado; medidas manuales']))+
+   tabla('Artefactos',['Artefacto','Consumo (kcal/h)'],d.artefactos.map(a=>[a.nombre,a.consumo]))+
+   tabla('Materiales para revisión',['Material / accesorio','Diámetro','Cantidad','Unidad','Ubicación','Estado / observaciones'],d.filas.map(f=>[f.material,f.diametro,f.cantidad,f.unidad,f.ubicacion,(f.cantidad==null||/pendiente/i.test(f.diametro)?'PENDIENTE':String(f.estado).toUpperCase())+' · '+(f.revisado?'Revisado':'Sin revisar')+' · '+(f.evidencia||'')+(f.editado?' · Ajuste manual':'')]))+
+   (d.resumen||[]).map(t=>'<p>'+esc(t)+'</p>').join('')+
+   (d.observaciones?'<h2>Observaciones</h2><p>'+esc(d.observaciones)+'</p>':'')+
+   '<p>'+esc(d.advertencia)+'</p>';
+ }
+ root.InformeProyecto={documento};if(typeof module!=='undefined')module.exports=root.InformeProyecto;
+})(typeof globalThis!=='undefined'?globalThis:this);
+
+</script>
+<script data-local="informes/interfaz-informe.js">
+function modeloInformeActual(){
+ const gas=modulo==='gas',d={titulo:({gas:'GAS',agua:'AGUA',cloacas:'CLOACAS'})[modulo]||'Sin proyecto seleccionado',ambito:gas&&ambitoGas==='demostracion'?'DEMOSTRACIÓN · datos de práctica separados':'MI PROYECTO',tramos:gas?tramos:[],artefactos:gas?artefactos:[],filas:[],resumen:[],observaciones:$('duda').value.trim(),advertencia:gas?'Diámetros automáticos definitivos BLOQUEADOS. Cantidades estimadas y datos pendientes conservan su condición. Informe de revisión; no aprueba una instalación real.':''};
+ if(gas&&tramos.length){
+  const entrada=entradaMaterialesGas('proyecto'),opciones=opcionesMaterialesGas('proyecto');
+  const firma=JSON.stringify({fuente:'proyecto',entrada,opciones});
+  const plan=MaterialesGas.planificarMateriales(entrada,opciones),previa=datosPlanGas().revisiones.proyecto;
+  const actuales=fuenteMaterialesGas==='proyecto'&&revisionMaterialesGas?.firma===firma?revisionMaterialesGas.plan.filas:previa?.firma===firma?previa.filas:[];
+  for(const f of plan.filas){const r=actuales.find(r=>r.id===f.id);if(r){f.cantidad=r.cantidad;f.revisado=!!r.revisado;if(r.editado){f.editado=true;f.estado='estimado';}}}
+  d.filas=plan.filas;d.resumen=[...plan.supuestos,...plan.avisos,...plan.planes.map(g=>g.diametro+' · '+g.metros+' m · mínimo teórico '+g.minimoTeorico+' caños · compra estimada '+(g.compraEstimada??'PENDIENTE')+' · cuplas propuestas '+(g.cuplasPropuestas??'PENDIENTES'))];
+ }
+ return d;
+}
+function prepararInformeActual(){
+ try{$('informeImpresion').innerHTML=InformeProyecto.documento(modeloInformeActual());}
+ catch(e){$('informeImpresion').textContent='Informe no disponible: '+e.message+'. No se imprimieron datos de otro proyecto.';}
+}
+function imprimirInformeActual(){prepararInformeActual();window.print();}
+
+</script>
+<script data-local="materiales/planificador-gas.js">
+/* Planificación física, sin dimensionamiento ni equivalentes normativos. */
+(function(root){
+ const valido=n=>Number.isFinite(n)&&n>0;
+ const nombre=t=>({codo90:'Codo 90°',codo45:'Codo 45°',tee:'Tee',reduccion:'Reducción independiente',llave:'Llave de paso',cupla:'Cupla'}[t]||t);
+ function planificarCortes(segmentos,{largoComercial=6,reutilizar=false,minimoSobrante=.5}={}){
+  if(!valido(largoComercial)||!Number.isFinite(minimoSobrante)||minimoSobrante<0)throw Error('Largo comercial positivo y sobrante mínimo no negativo.');
+  const barras=[],piezas=[],porSegmento={};let total=0;
+  for(const s of segmentos){
+   if(!s||!s.id||Object.hasOwn(porSegmento,s.id)||!valido(s.metros))throw Error('Segmentos con identificadores únicos y longitudes positivas.');
+   total+=s.metros;const enteras=Math.floor(s.metros/largoComercial),resto=s.metros-enteras*largoComercial;
+   if(piezas.length+enteras+(resto>0?1:0)>10000)throw Error('Plan demasiado grande; revisá unidades y largo comercial.');
+   porSegmento[s.id]={metros:s.metros,piezas:[],cuplas:0,ubicacion:s.ubicacion||s.id};
+   for(let i=0;i<enteras;i++)piezas.push({segmento:s.id,metros:largoComercial});
+   if(resto>0)piezas.push({segmento:s.id,metros:resto});
+  }
+  // Propuesta FFD: cortes ordenados por longitud; nunca unir sobrantes para fabricar una pieza.
+  piezas.sort((a,b)=>b.metros-a.metros||a.segmento.localeCompare(b.segmento));
+  for(const pieza of piezas){
+   let b=reutilizar?barras.find(b=>b.sobrante>=minimoSobrante&&b.sobrante>=pieza.metros):null;
+   if(!b){b={id:'barra-'+(barras.length+1),metros:largoComercial,cortes:[],sobrante:largoComercial};barras.push(b);}
+   b.cortes.push({...pieza});b.sobrante-=pieza.metros;
+   porSegmento[pieza.segmento].piezas.push({barra:b.id,metros:pieza.metros});
+  }
+  for(const s of Object.values(porSegmento))s.cuplas=Math.max(0,s.piezas.length-1);
+  return {metros:total,minimoTeorico:Math.ceil(total/largoComercial),compraEstimada:barras.length,cuplasPropuestas:Object.values(porSegmento).reduce((n,s)=>n+s.cuplas,0),barras,porSegmento,sobrantes:barras.filter(b=>b.sobrante>0).map(b=>({barra:b.id,metros:b.sobrante,reutilizable:reutilizar&&b.sobrante>=minimoSobrante})),garantiaOptimo:false};
+ }
+ function planificarMateriales(entrada,opciones={}){
+  const config={largoComercial:6,reutilizar:false,minimoSobrante:.5,hipotesisSinPosiciones:false,...opciones};
+  if(!valido(config.largoComercial)||!Number.isFinite(config.minimoSobrante)||config.minimoSobrante<0)throw Error('Configuración de caños inválida.');
+  const ts=entrada.tramos||[],nodos=entrada.nodos||[],filas=[],avisos=[],grupos=new Map(),fisicos=new Map(),ubicaciones=new Map();
+  const fila=(f)=>{const r={id:'material-'+filas.length,unidad:'unidad',estado:'estimado',revisado:false,...f};filas.push(r);return r;};
+  const medidas=a=>{const ds=a.medidas?.filter(Boolean)||[];return ds.length?(a.tipo!=='tee'&&a.tipo!=='reduccion'&&ds.every(d=>d===ds[0])?ds[0]:ds.join(' / ')):'Pendiente';};
+  function agregarAccesorio(a,t){
+   if(!a||typeof a.tipo!=='string'||!a.tipo.trim()||!Number.isInteger(a.cantidad)||a.cantidad<=0)throw Error('Accesorio identificado necesita nombre y cantidad entera positiva.');
+   const id=a.tipo==='tee'&&a.nodo?'tee:'+a.nodo:a.idFisico||null;
+   const requiere=a.tipo==='tee'?3:a.tipo==='reduccion'?2:1,tieneMedidas=Array.isArray(a.medidas)&&a.medidas.length>=requiere&&a.medidas.every(m=>typeof m==='string'&&m.trim());
+   const f={material:nombre(a.tipo),tipo:a.tipo,medidas:a.medidas||[],diametro:medidas(a),cantidad:a.cantidad,ubicacion:a.ubicacion||t?.id||'Manual',estado:a.confirmado&&!a.medidasEstimadas&&tieneMedidas?'confirmado':'estimado',cantidadConfirmada:!!a.confirmado,evidencia:(a.evidencia||'')+(!tieneMedidas?' Medidas/conexiones pendientes.':''),nodo:a.nodo||null,origen:'identificado',equivalentes:'No se calculan en este plan físico'};
+   if(id&&fisicos.has(id)){
+    const previo=fisicos.get(id);if(previo.diametro!==f.diametro||previo.cantidad!==f.cantidad){previo.estado='estimado';previo.conflicto=true;avisos.push('Datos contradictorios para accesorio físico '+id+'. Resolver antes de comprar.');}
+    previo.ubicacion+='; referencia '+f.ubicacion;return previo;
+   }
+   const r=fila(f);if(id)fisicos.set(id,r);if(a.nodo){if(!ubicaciones.has(a.nodo))ubicaciones.set(a.nodo,[]);ubicaciones.get(a.nodo).push(r);}return r;
+  }
+  const idsTramos=new Set();
+  for(const t of ts){
+   if(idsTramos.has(t.id))throw Error('Identificador de tramo duplicado.');idsTramos.add(t.id);
+   if(!t.id||!valido(t.metros))throw Error('Tramo inválido.');
+   for(const a of t.accesorios||[])agregarAccesorio(a,t);
+   const ss=t.segmentos;
+   if(Array.isArray(ss)&&ss.length&&(ss.some(s=>!Number.isFinite(s.metros)||s.metros<0)||Math.abs(ss.reduce((n,s)=>n+s.metros,0)-t.metros)>1e-8))throw Error('Segmentos incompatibles con '+t.id+'.');
+   const conocidos=Array.isArray(ss)&&ss.length;
+   const partes=conocidos?ss.map((s,i)=>({...s,id:t.id+':'+i})).filter(s=>s.metros>0):[{metros:t.metros,id:t.id+':SIN-POSICIONES'}];
+   for(const parte of partes){
+    const diametro=parte.diametro||t.diametro||'Pendiente ('+t.id+')',material=t.material||entrada.material||'',sistema=t.sistema||entrada.sistema||'';
+    const key=JSON.stringify([diametro,material||t.id,sistema||t.id]);
+    if(!grupos.has(key))grupos.set(key,{diametro,material,sistema,metros:0,segmentos:[],faltantes:[],ubicaciones:[],medidasEstimadas:false});
+    const g=grupos.get(key);g.metros+=parte.metros;if(!g.ubicaciones.includes(t.id))g.ubicaciones.push(t.id);g.medidasEstimadas||=!!t.medidasEstimadas||diametro.startsWith('Pendiente');
+    if(diametro.startsWith('Pendiente'))avisos.push('Diámetro pendiente en '+t.id+': no combinar medidas desconocidas para compra.');
+    if(conocidos)g.segmentos.push({id:parte.id,metros:parte.metros,ubicacion:t.id});else g.faltantes.push(t.id);
+   }
+  }
+  for(const a of entrada.extras||[])agregarAccesorio(a);
+  for(const n of nodos){
+   const ent=ts.filter(t=>t.red?.hasta===n.id),sal=ts.filter(t=>t.red?.desde===n.id);
+   if(ent.length!==1||!sal.length)continue;
+   const origen=ent[0],ds=[origen.diametroFinal||origen.diametro,...sal.map(t=>t.diametro)],piezas=ubicaciones.get(n.id)||[],tee=piezas.find(p=>p.tipo==='tee');
+   if(sal.length===2){
+    if(!tee){avisos.push('Falta identificar la pieza física de la derivación '+n.id+'; no se inventó una tee.');continue;}
+    if(ds.some(d=>!d)){avisos.push('Medidas de tee pendientes en '+n.id);continue;}
+    const diferentes=ds.some(d=>d!==ds[0]),eleccion=opciones.uniones?.[n.id]||n.unionMateriales;
+    if(!diferentes){tee.diametro=ds.join(' / ');continue;}
+    tee.estado='estimado';
+    if(eleccion==='tee-reductora'){
+     tee.material='Tee reductora';tee.diametro=ds.join(' / ');tee.evidencia+=' Pieza integrada elegida para revisión; no se duplica reducción.';
+    }else if(eleccion==='tee-igual-reduccion'){
+     tee.material='Tee igual';tee.diametro=[ds[0],ds[0],ds[0]].join(' / ');
+     for(const t of sal.filter(t=>t.diametro!==ds[0])){
+      if(!piezas.some(p=>p.tipo==='reduccion'&&p.diametro===[ds[0],t.diametro].join(' / ')))fila({tipo:'reduccion',material:'Reducción independiente',diametro:[ds[0],t.diametro].join(' / '),cantidad:1,ubicacion:n.id+' · salida a '+t.id,origen:'union-propuesta',equivalentes:'Excluida del método de clase; no significa pérdida nula'});
+     }
+    }else{
+     tee.diametro=ds.join(' / ');tee.evidencia+=' Confirmar tee reductora o tee igual con reducción.';
+     fila({tipo:'reduccion-pendiente',material:'Cambio de diámetro: pieza por confirmar',diametro:ds.join(' / '),cantidad:null,ubicacion:n.id,origen:'union-pendiente',equivalentes:'No incorporado a equivalentes ni cantidad de compra'});
+    }
+   }else if(sal.length===1&&ds.every(Boolean)&&ds[0]!==ds[1]){
+    if(piezas.some(p=>p.tipo==='reduccion'))continue;
+    const tipo=opciones.uniones?.[n.id]||n.unionMateriales||n.unionDimensionamiento;
+    if(tipo==='union'||tipo==='reduccion')fila({tipo:'reduccion',material:'Reducción independiente',diametro:ds.join(' / '),cantidad:1,ubicacion:n.id,origen:'union-propuesta',equivalentes:'Excluida del método de clase; no significa pérdida nula'});
+    else fila({tipo:'reduccion-pendiente',material:'Cambio de diámetro: confirmar pieza y posición',diametro:ds.join(' / '),cantidad:null,ubicacion:n.id,origen:'union-pendiente',equivalentes:'No incorporado a equivalentes ni cantidad de compra'});
+   }else if(sal.length===1&&ds.every(Boolean)&&ds[0]===ds[1]&&(n.unionMateriales==='cupla'||n.unionDimensionamiento==='union')&&!piezas.some(p=>p.tipo==='cupla'))fila({tipo:'cupla',material:'Cupla en unión identificada',diametro:ds[0],cantidad:1,ubicacion:n.id,origen:'union-propuesta'});
+  }
+  const planes=[];
+  for(const g of grupos.values()){
+   const incompleto=!!g.faltantes.length,desconocido=!g.material||!g.sistema||g.diametro.startsWith('Pendiente');
+   const teorico=Math.ceil(g.metros/config.largoComercial);let plan=null;
+   if(!incompleto||config.hipotesisSinPosiciones){
+    const ss=[...g.segmentos,...(config.hipotesisSinPosiciones?g.faltantes.map(id=>({id:id+':HIPOTESIS',metros:ts.find(t=>t.id===id).metros,ubicacion:id})):[])];
+    plan=planificarCortes(ss,{...config,reutilizar:config.reutilizar&&!desconocido});
+   }
+   if(incompleto)avisos.push('Faltan segmentos entre accesorios en '+g.faltantes.join(', ')+': compra y cuplas reales pendientes.');
+   if(desconocido)avisos.push('Medida/material/sistema incompletos en '+g.ubicaciones.join(', ')+': sin propuesta de reutilización entre tramos.');
+   const cuplasRegistradas=filas.some(f=>f.tipo==='cupla'&&f.origen==='identificado'&&(!f.medidas.length||f.medidas.includes(g.diametro)));
+   if(cuplasRegistradas)avisos.push('Hay cuplas identificadas para '+g.diametro+': cotejar con las uniones propuestas; no sumarlas automáticamente.');
+   const resumen={...g,minimoTeorico:teorico,compraEstimada:incompleto?null:plan.compraEstimada,cuplasPropuestas:incompleto?null:plan.cuplasPropuestas,plan,hipotesis:incompleto&&!!plan};planes.push(resumen);
+   fila({tipo:'cano',material:'Caño '+(g.material||'material pendiente')+' / '+(g.sistema||'sistema pendiente')+' · comercial de '+config.largoComercial+' m',diametro:g.diametro,cantidad:incompleto?null:plan.compraEstimada,ubicacion:g.ubicaciones.join(', '),origen:'plan-cortes',minimoTeorico:teorico,evidencia:incompleto?'Compra pendiente: faltan posiciones. Mínimo por longitud, no lista definitiva.':'Estimación por plan de cortes; no se garantiza óptimo ni cortes ejecutables sin revisar.'});
+   fila({tipo:'cupla-plan',material:'Cuplas dentro de segmentos continuos',diametro:g.diametro,cantidad:incompleto||cuplasRegistradas?null:plan.cuplasPropuestas,ubicacion:g.ubicaciones.join(', '),origen:'plan-cortes',evidencia:incompleto?'Cuplas pendientes, no cero.':cuplasRegistradas?'Cotejar cuplas identificadas con las uniones propuestas; sin suma automática.':'Uniones propuestas entre piezas del mismo segmento; no cuenta conexiones de codos/tees como cuplas.'});
+  }
+  return {filas,planes,avisos:[...new Set(avisos)],config,dimensionamientoDefinitivo:false,supuestos:['Configuración usada: largo comercial '+config.largoComercial+' m; reutilización '+(config.reutilizar?'selectiva propuesta':'no propuesta (escenario conservador)')+'; sobrante mínimo '+config.minimoSobrante+' m.','Plan físico independiente del dimensionamiento. Los diámetros propuestos no se convierten en definitivos.','Mínimo teórico = techo de longitud total por medida/material/sistema dividido por largo comercial: solo cota inferior, sin geometría ni desperdicio.','Compra estimada por cortes FFD, no optimización garantizada. Solo se proponen sobrantes del mismo grupo y que cumplan longitud mínima, si se habilita reutilizar.','No se suman sobrantes para fabricar una pieza; esa alternativa requeriría otras cuplas y revisión. No se incluyeron roscas, pérdidas de corte, reserva ni sobrantes preexistentes.','Una cupla por unión propuesta dentro de cada segmento. Posiciones desconocidas producen pendientes. Los accesorios compartidos se cuentan una sola vez por identificación física.','Las reducciones se listan en materiales y no se agregan a equivalentes del método de clase.']};
+ }
+ const api={planificarCortes,planificarMateriales};if(typeof module==='object'&&module.exports)module.exports=api;else root.MaterialesGas=api;
+})(globalThis);
+
+</script>
+<script data-local="materiales/interfaz-gas.js">
+/* Interfaz de revisión de materiales; usa el estado existente, nunca activa diámetros. */
+let revisionMaterialesGas=null,fuenteMaterialesGas='proyecto';
+function datosPlanGas(){
+ const p=proyectoGasActual();
+ if(!p.planCompra||typeof p.planCompra!=='object'||Array.isArray(p.planCompra))p.planCompra={};
+ const d=p.planCompra;if(!d.opciones||typeof d.opciones!=='object')d.opciones={};if(!Array.isArray(d.extras))d.extras=[];if(!d.revisiones||typeof d.revisiones!=='object')d.revisiones={};return d;
+}
+function entradaMaterialesGas(fuente='proyecto'){
+ if(fuente==='ejemplo')return {origen:'Ejemplo educativo calefón/cocina; no incorporado al proyecto',material:'Acero epoxi',sistema:'Roscado',nodos:[{id:'M'},{id:'A'},{id:'Calefón'},{id:'Cocina'}],tramos:[['M','A',19,5,0,'1"'],['A','Calefón',18,7,1,'1"'],['A','Cocina',12,5,1,'3/4"']].map(([desde,hasta,metros,codos,llaves,diametro])=>({id:desde+'-'+hasta,metros,diametro,medidasEstimadas:true,red:{desde,hasta},segmentos:null,accesorios:[{tipo:'codo90',cantidad:codos,medidas:[diametro,diametro],confirmado:true,medidasEstimadas:true,evidencia:'Cantidad aportada en el ejercicio; medidas del diagnóstico condicionado'},...(llaves?[{tipo:'llave',cantidad:llaves,medidas:[diametro],confirmado:true,medidasEstimadas:true}]:[]),...(hasta==='A'?[{tipo:'tee',cantidad:1,nodo:'A',medidas:['1"','1"','3/4"'],confirmado:true,medidasEstimadas:true}]:[])]}))};
+ const nodos=instalacionGas.nodos||[];
+ return {origen:'Proyecto manual actual',material:instalacionGas.perfil.material,sistema:instalacionGas.perfil.sistema,nodos,tramos:tramos.map((t,i)=>{
+  const r=evaluarTramo(t,tramos),d=t.detalle,geometria=d&&['completo','ninguno'].includes(d.estado)&&(!r.pendiente||r.soloMedidasPendientes);
+  let posicion=0,posicionConocida=true,entradaActual=t.diametro;
+  const registrados=geometria?r.accesorios:Array.isArray(d?.accesorios)?d.accesorios.filter(a=>a&&typeof a.tipo==='string'):[];
+  const acc=registrados.map((a,j)=>{
+   if(Number.isFinite(a.metrosAntes)&&posicionConocida)posicion+=a.metrosAntes;else posicionConocida=false;
+   const nodo=a.tipo==='tee'?nodos.find(n=>n.nombre.trim().toLowerCase()===(a.nodo||'').trim().toLowerCase())?.id||('nombre:'+String(a.nodo||'sin-identificar-'+j).trim().toLowerCase()):posicionConocida&&posicion===0?t.red?.desde:posicionConocida&&posicion===t.metros?t.red?.hasta:null;
+   const entrada=a.entrada||entradaActual;entradaActual=a.salida||null;
+   return {idFisico:a.idFisico||undefined,tipo:a.tipo,cantidad:1,nodo,medidas:[entrada,a.salida,...(a.tipo==='tee'?[a.ramal]:[])],confirmado:d?.estado==='completo',evidencia:'Registrado manualmente o incorporado después de revisión del croquis',ubicacion:(t.id||'tramo-'+i)+' · accesorio '+(j+1)};
+  });
+  if(t.llave&&!acc.some(a=>a.tipo==='llave'))acc.push({tipo:'llave',cantidad:1,medidas:[t.diametro],confirmado:true,evidencia:'Llave del tramo; no duplica la llave detallada'});
+  return {id:t.id||'tramo-'+i,metros:t.metros,diametro:t.diametro,diametroFinal:r.segmentos?.at(-1)?.diametro==='Diámetro pendiente'?null:r.segmentos?.at(-1)?.diametro,red:t.red,segmentos:geometria&&!(t.llave&&!acc.some(a=>a.tipo==='llave'&&a.ubicacion))?r.segmentos.map(s=>({metros:s.metros,diametro:s.diametro==='Diámetro pendiente'?null:s.diametro})):null,accesorios:acc};
+ }),extras:datosPlanGas().extras};
+}
+function opcionesMaterialesGas(fuente=fuenteMaterialesGas){const o=datosPlanGas().opciones;return {largoComercial:o.largoComercial??6,reutilizar:!!o.reutilizar,minimoSobrante:o.minimoSobrante??.5,hipotesisSinPosiciones:!!o.hipotesisSinPosiciones,uniones:o[fuente==='ejemplo'?'unionesEjemplo':'uniones']||{}};}
+function firmaMaterialesGas(){return JSON.stringify({fuente:fuenteMaterialesGas,entrada:entradaMaterialesGas(fuenteMaterialesGas),opciones:opcionesMaterialesGas()});}
+function invalidarMaterialesGas(){
+ if(revisionMaterialesGas&&revisionMaterialesGas.firma!==firmaMaterialesGas()){
+  revisionMaterialesGas=null;datosPlanGas().revisiones[fuenteMaterialesGas]=null;
+  $('matResultado').replaceChildren();$('matResultado').textContent='Datos actualizados: generá y revisá de nuevo la lista.';
+ }
+}
+function abrirPlanGas(){
+ if(modulo!=='gas')return;
+ $('planCompraGas').classList.remove('oculto');const o=opcionesMaterialesGas();
+ $('matLargo').value=o.largoComercial??6;$('matReusar').checked=!!o.reutilizar;$('matSobrante').value=o.minimoSobrante??.5;$('matHipotesis').checked=!!o.hipotesisSinPosiciones;
+ renderUnionesMaterialesGas();
+}
+function guardarOpcionesMaterialesGas(){
+ Object.assign(datosPlanGas().opciones,{largoComercial:Number($('matLargo').value),reutilizar:$('matReusar').checked,minimoSobrante:Number($('matSobrante').value),hipotesisSinPosiciones:$('matHipotesis').checked});
+ invalidarMaterialesGas();guardarDatos();
+}
+function renderUnionesMaterialesGas(){
+ const out=$('matUniones');out.replaceChildren();const e=entradaMaterialesGas(fuenteMaterialesGas);
+ const nodos=$('matExtraNodo');nodos.replaceChildren();const sin=document.createElement('option');sin.value='';sin.textContent='Sin nodo identificado';nodos.append(sin);for(const n of e.nodos){const o=document.createElement('option');o.value=n.id;o.textContent=n.nombre||n.id;nodos.append(o);}
+ for(const n of e.nodos.filter(n=>e.tramos.filter(t=>t.red?.desde===n.id).length===2)){
+  const label=document.createElement('label');label.textContent='Pieza real o hipótesis de revisión en '+(n.nombre||n.id);
+  const select=document.createElement('select');for(const [v,texto]of [['','Pendiente: identificar pieza'],['tee-reductora','Una tee reductora integrada'],['tee-igual-reduccion','Tee igual y reducción independiente']]){const opt=document.createElement('option');opt.value=v;opt.textContent=texto;select.append(opt);}
+  select.value=opcionesMaterialesGas().uniones?.[n.id]||'';
+  select.onchange=()=>{const o=datosPlanGas().opciones;const k=fuenteMaterialesGas==='ejemplo'?'unionesEjemplo':'uniones';o[k]={...o[k],[n.id]:select.value};invalidarMaterialesGas();guardarDatos();};label.append(select);out.append(label);
+ }
+}
+function generarPlanGas(fuente='proyecto'){
+ if(modulo!=='gas')return;
+ fuenteMaterialesGas=fuente;abrirPlanGas();
+ try{
+  if(typeof MaterialesGas==='undefined')throw Error('Falta el archivo de materiales. Descomprimí el ZIP completo.');
+  const entrada=entradaMaterialesGas(fuente);if(!entrada.tramos.length)throw Error('Agregá tramos para planificar.');
+  const firma=firmaMaterialesGas(),previa=datosPlanGas().revisiones[fuente];
+  revisionMaterialesGas={firma,fuente,plan:MaterialesGas.planificarMateriales(entrada,opcionesMaterialesGas())};
+  if(previa?.firma===firma&&Array.isArray(previa.filas))for(const f of revisionMaterialesGas.plan.filas){const r=previa.filas.find(r=>r.id===f.id);if(r&&(r.cantidad===null||(Number.isInteger(r.cantidad)&&r.cantidad>=0))){if(r.editado)f.cantidadCalculada=f.cantidad;f.cantidad=r.cantidad;f.revisado=!!r.revisado;if(r.editado){f.estado='estimado';f.editado=true;f.cantidadConfirmada=false;}}}
+  renderPlanGas();
+ }catch(e){revisionMaterialesGas=null;$('matResultado').replaceChildren();$('matResultado').textContent=e.message;}
+}
+function guardarRevisionMaterialesGas(){
+ if(!revisionMaterialesGas)return;
+ datosPlanGas().revisiones[fuenteMaterialesGas]={firma:revisionMaterialesGas.firma,filas:revisionMaterialesGas.plan.filas.map(f=>({id:f.id,cantidad:f.cantidad,revisado:f.revisado,editado:!!f.editado}))};guardarDatos();
+}
+function renderPlanGas(){
+ const out=$('matResultado');out.replaceChildren();if(!revisionMaterialesGas)return;const r=revisionMaterialesGas.plan;
+ const texto=t=>{const p=document.createElement('p');p.textContent=t;out.append(p);};
+ texto((fuenteMaterialesGas==='ejemplo'?'EJEMPLO SEPARADO: no reemplaza tus datos. ':'PROYECTO ACTUAL. ')+'Lista para revisión, no cantidades definitivas. Diámetros automáticos definitivos bloqueados.');
+ r.supuestos.forEach(texto);r.avisos.forEach(texto);
+ for(const g of r.planes){
+  texto(g.diametro+' · '+(g.material||'material pendiente')+' / '+(g.sistema||'sistema pendiente')+' · '+g.metros+' m · mínimo teórico '+g.minimoTeorico+' caños de '+r.config.largoComercial+' m · compra estimada '+(g.compraEstimada??'PENDIENTE')+' · cuplas propuestas '+(g.cuplasPropuestas??'PENDIENTES'));
+  if(g.hipotesis)texto('HIPÓTESIS POR LONGITUD, NO COMPRA: '+g.plan.compraEstimada+' barras y '+g.plan.cuplasPropuestas+' uniones si cada tramo fuera continuo; NO representa los codos del croquis ni resuelve cuplas reales.');
+  if(g.plan)for(const b of g.plan.barras)texto(b.id+' · cortes '+b.cortes.map(c=>c.metros+' m para '+c.segmento).join('; ')+' · sobrante '+fmt(b.sobrante)+' m');
+ }
+ const wrap=document.createElement('div');wrap.className='tabla-wrap';const tabla=document.createElement('table');tabla.className='tabla';const head=document.createElement('tr');
+ for(const t of ['Material / accesorio','Diámetro','Cantidad','Unidad','Tramo / ubicación','Estado y evidencia','Revisado']){const th=document.createElement('th');th.textContent=t;head.append(th);}tabla.append(head);
+ for(const f of r.filas){
+  const tr=document.createElement('tr');
+  for(const v of [f.material,f.diametro]){const td=document.createElement('td');td.textContent=v;tr.append(td);}
+  const qty=document.createElement('td'),input=document.createElement('input');input.type='number';input.min='0';input.step='1';input.placeholder='PENDIENTE';input.value=f.cantidad??'';
+  input.onchange=()=>{const n=input.value===''?null:Number(input.value);if(n!==null&&(!Number.isInteger(n)||n<0)){$('matMensaje').textContent='Cantidad entera no negativa o pendiente.';input.value=f.cantidad??'';f.revisado=false;guardarRevisionMaterialesGas();return;}if(!f.editado)f.cantidadCalculada=f.cantidad;f.cantidad=n;f.revisado=false;f.editado=true;f.cantidadConfirmada=false;f.estado='estimado';guardarRevisionMaterialesGas();renderPlanGas();};qty.append(input);const imp=document.createElement('span');imp.className='solo-impresion';imp.textContent=f.cantidad??'PENDIENTE';qty.append(imp);tr.append(qty);
+  for(const v of [f.unidad,f.ubicacion,f.estado.toUpperCase()+(f.cantidadConfirmada?' · cantidad identificada':'')+' · '+(f.evidencia||f.equivalentes||'')+(f.editado?' · cantidad ajustada manualmente; calculada originalmente '+(f.cantidadCalculada??'PENDIENTE'):'' )]){const td=document.createElement('td');td.textContent=v;tr.append(td);}
+  const td=document.createElement('td'),check=document.createElement('input');check.type='checkbox';check.checked=f.revisado;check.onchange=()=>{f.revisado=check.checked;guardarRevisionMaterialesGas();};td.append(check);tr.append(td);tabla.append(tr);
+ }
+ wrap.append(tabla);out.append(wrap);texto('Revisar una fila no transforma una estimación en cantidad definitiva. Pendiente no significa cero. Los ajustes manuales no cambian el croquis ni el motor.');
+}
+function agregarExtraMaterialGas(){
+ if(fuenteMaterialesGas!=='proyecto'){$('matMensaje').textContent='Seleccioná Mi proyecto para agregar accesorios propios.';return;}
+ const nombre=$('matExtraNombre').value.trim(),normal=nombre.toLowerCase(),tipo=({'cupla':'cupla','tee':'tee','reducción':'reduccion','reduccion':'reduccion','llave':'llave','llave de paso':'llave','codo 90°':'codo90','codo 45°':'codo45'}[normal]||nombre),nodo=$('matExtraNodo').value||null,cantidad=Number($('matExtraCantidad').value),ubicacion=$('matExtraUbicacion').value.trim(),diametro=$('matExtraDiametro').value.trim();
+ if(!tipo||!Number.isInteger(cantidad)||cantidad<=0||!ubicacion){$('matMensaje').textContent='Indicá accesorio, cantidad entera positiva y ubicación.';return;}
+ if(tipo==='tee'&&!nodo){$('matMensaje').textContent='Elegí el nodo físico de la tee para evitar duplicaciones.';return;}
+ datosPlanGas().extras.push({nodo,idFisico:idGas('extra'),tipo,cantidad,ubicacion,medidas:diametro?diametro.split(/\s*(?:→|->)\s*/):[],confirmado:$('matExtraConfirmado').checked,evidencia:'Accesorio adicional identificado manualmente; sin equivalentes automáticos'});
+ guardarDatos();generarPlanGas('proyecto');$('matMensaje').textContent='Accesorio añadido a la revisión.';
+}
+function prepararSalidaMaterialesGas(){
+ invalidarMaterialesGas();if(!revisionMaterialesGas){$('matMensaje').textContent='Generá de nuevo la lista.';return null;}
+ if(revisionMaterialesGas.plan.filas.some(f=>!f.revisado)){$('matMensaje').textContent='Revisá todas las filas antes de imprimir o descargar. Podés revisar y conservar un dato pendiente.';return null;}
+ $('matMensaje').textContent='Lista revisada: se conservan los estados estimados y pendientes.';return revisionMaterialesGas;
+}
+function descargarMaterialesGas(){
+ const r=prepararSalidaMaterialesGas();if(!r)return;
+ const quote=x=>'"'+String(x??'PENDIENTE').replaceAll('"','""')+'"';
+ const filas=[['LISTA PARA REVISIÓN; NO DEFINITIVA'],...r.plan.supuestos.map(t=>[t]),...r.plan.avisos.map(t=>[t]),...r.plan.planes.map(g=>['RESUMEN',g.diametro,'Mínimo teórico: '+g.minimoTeorico,'Compra estimada: '+(g.compraEstimada??'PENDIENTE'),'Cuplas propuestas: '+(g.cuplasPropuestas??'PENDIENTES'),g.hipotesis?'Hipótesis NO COMPRA: '+g.plan.compraEstimada+' barras / '+g.plan.cuplasPropuestas+' uniones':'']),['Material','Diámetro','Cantidad','Unidad','Ubicación','Estado','Revisado','Evidencia'],...r.plan.filas.map(f=>[f.material,f.diametro,f.cantidad,f.unidad,f.ubicacion,f.estado,f.revisado?'Sí':'No',f.evidencia||f.equivalentes||''])];
+ const csv='\uFEFF'+filas.map(f=>f.map(quote).join(';')).join('\r\n');
+ const blob=new Blob([csv],{type:'text/csv;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='canerias-materiales-revision.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+function imprimirMaterialesGas(){if(!prepararSalidaMaterialesGas())return;if(fuenteMaterialesGas==='ejemplo'){$('matMensaje').textContent='El ejemplo es una vista separada. Seleccioná Mi proyecto o Demostración para imprimir su informe.';return;}imprimirInformeActual();}
+window.addEventListener('afterprint',()=>{$('resultadoMateriales').classList.remove('solo-pantalla');});
+
+</script>
+<script data-local="datos/tabla-3.js">
+/* Datos cotejados visualmente; sin habilitación técnica. Ver historial de auditoría. */
+(function(root){const datos={
+  "tabla": 3,
+  "titulo": "GAS NATURAL · Caudal en litros de gas por hora",
+  "unidadLongitud": "m",
+  "unidadCapacidad": "L/h",
+  "procedencia": {
+    "tipo": "fotografia-del-usuario",
+    "documentoDeclarado": "NAG-200, Tabla N.º 3 (atribución del usuario; edición no visible)",
+    "edicion": null,
+    "fotografiaDisponible": true,
+    "cotejoFotografico": true,
+    "vigenciaVerificada": false,
+    "aplicabilidadVerificada": false,
+    "archivo": "fuentes/tabla-3-347520.jpg",
+    "sha256": "ce11e42467d7a4f4aa31b96c0ca83a3c97b5e6ae0cea0cf62cdb5db9f6e6d4f5",
+    "alcanceCotejo": "Lectura visual de la fotografía; pendiente revisión técnica e independiente"
+  },
+  "condiciones": {
+    "gas": "GN",
+    "densidadRelativa": 0.65,
+    "referenciaH": {
+      "valor": 10,
+      "unidad": "mmca",
+      "unidadImpresa": "mm",
+      "significadoVerificado": false,
+      "textoFotografia": "Para caída de presión h = 10 mm."
+    }
+  },
+  "transcripcionCompleta": true,
+  "ejerciciosValidados": false,
+  "columnas": [
+    "1/2\"",
+    "3/4\"",
+    "1\"",
+    "1 1/4\"",
+    "1 1/2\"",
+    "2\"",
+    "2 1/2\"",
+    "3\"",
+    "4\""
+  ],
+  "diametrosEncabezadoMm": [
+    13,
+    19,
+    25,
+    32,
+    38,
+    51,
+    63,
+    76,
+    101
+  ],
+  "filas": [
+    {
+      "longitud": 2,
+      "capacidades": [
+        3580,
+        9895,
+        20260,
+        35695,
+        55835,
+        114615,
+        198330,
+        312851,
+        624217
+      ],
+      "estado": "cotejado"
+    },
+    {
+      "longitud": 3,
+      "capacidades": [
+        2925,
+        8065,
+        16540,
+        28900,
+        45585,
+        93580,
+        161915,
+        255411,
+        524304
+      ],
+      "estado": "cotejado"
+    },
+    {
+      "longitud": 4,
+      "capacidades": [
+        2535,
+        6985,
+        14325,
+        25080,
+        39480,
+        81050,
+        140219,
+        221186,
+        454046
+      ],
+      "estado": "cotejado"
+    },
+    {
+      "longitud": 5,
+      "capacidades": [
+        2265,
+        6250,
+        12810,
+        22685,
+        35310,
+        72490,
+        125419,
+        197840,
+        406125
+      ],
+      "estado": "cotejado"
+    },
+    {
+      "longitud": 6,
+      "capacidades": [
+        2070,
+        5705,
+        11695,
+        20435,
+        32230,
+        66165,
+        114511,
+        180634,
+        370802
+      ],
+      "estado": "cotejado"
+    },
+    {
+      "longitud": 7,
+      "capacidades": [
+        1915,
+        5280,
+        10835,
+        18920,
+        29845,
+        61265,
+        106025,
+        167250,
+        343325
+      ],
+      "estado": "cotejado"
+    },
+    {
+      "longitud": 8,
+      "capacidades": [
+        1790,
+        4940,
+        10130,
+        17695,
+        27910,
+        57295,
+        99165,
+        156425,
+        321108
+      ],
+      "estado": "cotejado"
+    },
+    {
+      "longitud": 9,
+      "capacidades": [
+        1690,
+        4655,
+        9550,
+        16685,
+        26320,
+        54025,
+        93479,
+        147457,
+        302698
+      ],
+      "estado": "cotejado"
+    },
+    {
+      "longitud": 10,
+      "capacidades": [
+        1600,
+        4420,
+        9060,
+        15825,
+        24965,
+        51245,
+        88689,
+        139903,
+        287189
+      ],
+      "estado": "cotejado"
+    },
+    {
+      "longitud": 12,
+      "capacidades": [
+        1460,
+        4035,
+        8270,
+        14450,
+        22790,
+        46790,
+        80957,
+        127705,
+        282151
+      ],
+      "estado": "cotejado"
+    },
+    {
+      "longitud": 14,
+      "capacidades": [
+        1355,
+        3735,
+        7655,
+        13375,
+        21100,
+        43315,
+        74963,
+        118249,
+        242740
+      ],
+      "estado": "cotejado"
+    },
+    {
+      "longitud": 16,
+      "capacidades": [
+        1265,
+        3495,
+        7160,
+        12510,
+        19595,
+        40515,
+        70109,
+        110593,
+        227024
+      ],
+      "estado": "cotejado"
+    },
+    {
+      "longitud": 18,
+      "capacidades": [
+        1195,
+        3290,
+        6750,
+        11795,
+        18605,
+        38190,
+        66110,
+        104283,
+        214071
+      ],
+      "estado": "cotejado"
+    },
+    {
+      "longitud": 20,
+      "capacidades": [
+        1130,
+        3125,
+        6405,
+        11190,
+        17655,
+        36240,
+        62709,
+        98919,
+        203062
+      ],
+      "estado": "cotejado"
+    },
+    {
+      "longitud": 22,
+      "capacidades": [
+        1080,
+        2980,
+        6105,
+        10670,
+        16830,
+        34550,
+        59794,
+        94322,
+        190784
+      ],
+      "estado": "cotejado"
+    },
+    {
+      "longitud": 24,
+      "capacidades": [
+        1035,
+        2850,
+        5845,
+        10215,
+        16110,
+        33060,
+        57244,
+        90298,
+        185363
+      ],
+      "estado": "cotejado"
+    },
+    {
+      "longitud": 26,
+      "capacidades": [
+        990,
+        2740,
+        5620,
+        9815,
+        15485,
+        31785,
+        54991,
+        86690,
+        178092
+      ],
+      "estado": "cotejado"
+    },
+    {
+      "longitud": 28,
+      "capacidades": [
+        960,
+        2640,
+        5415,
+        9460,
+        14920,
+        30630,
+        53002,
+        83608,
+        174449
+      ],
+      "estado": "cotejado"
+    },
+    {
+      "longitud": 30,
+      "capacidades": [
+        925,
+        2550,
+        5230,
+        9135,
+        14100,
+        29580,
+        51202,
+        80768,
+        165800
+      ],
+      "estado": "cotejado"
+    },
+    {
+      "longitud": 32,
+      "capacidades": [
+        895,
+        2470,
+        5065,
+        8850,
+        13955,
+        29075,
+        49582,
+        78312,
+        160553
+      ],
+      "estado": "cotejado"
+    },
+    {
+      "longitud": 34,
+      "capacidades": [
+        870,
+        2395,
+        4910,
+        8580,
+        13535,
+        27785,
+        48094,
+        75865,
+        155753
+      ],
+      "estado": "cotejado"
+    },
+    {
+      "longitud": 36,
+      "capacidades": [
+        845,
+        2330,
+        4775,
+        8340,
+        13155,
+        27005,
+        46739,
+        73728,
+        151349
+      ],
+      "estado": "cotejado"
+    },
+    {
+      "longitud": 38,
+      "capacidades": [
+        820,
+        2265,
+        4650,
+        8120,
+        12805,
+        26295,
+        45496,
+        71767,
+        147322
+      ],
+      "estado": "cotejado"
+    },
+    {
+      "longitud": 40,
+      "capacidades": [
+        800,
+        2210,
+        4525,
+        7910,
+        12480,
+        25615,
+        44344,
+        69951,
+        143594
+      ],
+      "estado": "cotejado"
+    },
+    {
+      "longitud": 42,
+      "capacidades": [
+        780,
+        2155,
+        4420,
+        7720,
+        12180,
+        25005,
+        43277,
+        68267,
+        140138
+      ],
+      "estado": "cotejado"
+    },
+    {
+      "longitud": 44,
+      "capacidades": [
+        765,
+        2105,
+        4320,
+        7545,
+        11900,
+        24430,
+        42279,
+        66692,
+        136905
+      ],
+      "estado": "cotejado"
+    },
+    {
+      "longitud": 46,
+      "capacidades": [
+        745,
+        2060,
+        4220,
+        7375,
+        11635,
+        23885,
+        41349,
+        65227,
+        133897
+      ],
+      "estado": "cotejado"
+    },
+    {
+      "longitud": 48,
+      "capacidades": [
+        730,
+        2015,
+        4135,
+        7225,
+        11395,
+        23395,
+        40478,
+        63852,
+        131075
+      ],
+      "estado": "cotejado"
+    },
+    {
+      "longitud": 50,
+      "capacidades": [
+        715,
+        1975,
+        4035,
+        7075,
+        11165,
+        22920,
+        39660,
+        62560,
+        128424
+      ],
+      "estado": "cotejado"
+    },
+    {
+      "longitud": 55,
+      "capacidades": [
+        685,
+        1885,
+        3860,
+        6750,
+        10845,
+        21850,
+        37815,
+        59650,
+        122403
+      ],
+      "estado": "cotejado"
+    },
+    {
+      "longitud": 60,
+      "capacidades": [
+        655,
+        1805,
+        3695,
+        6460,
+        10190,
+        20920,
+        36205,
+        57109,
+        117233
+      ],
+      "estado": "cotejado"
+    },
+    {
+      "longitud": 65,
+      "capacidades": [
+        630,
+        1730,
+        3550,
+        6210,
+        9695,
+        20105,
+        34784,
+        54870,
+        112638
+      ],
+      "estado": "cotejado"
+    },
+    {
+      "longitud": 70,
+      "capacidades": [
+        605,
+        1670,
+        3420,
+        5980,
+        9430,
+        19360,
+        33521,
+        52876,
+        108545
+      ],
+      "estado": "cotejado"
+    },
+    {
+      "longitud": 75,
+      "capacidades": [
+        585,
+        1615,
+        3310,
+        5780,
+        9115,
+        18715,
+        32383,
+        51081,
+        104860
+      ],
+      "estado": "cotejado"
+    },
+    {
+      "longitud": 80,
+      "capacidades": [
+        565,
+        1565,
+        3200,
+        5595,
+        8830,
+        18120,
+        31354,
+        49459,
+        101531
+      ],
+      "estado": "cotejado"
+    },
+    {
+      "longitud": 85,
+      "capacidades": [
+        550,
+        1515,
+        3105,
+        5425,
+        8555,
+        17565,
+        30419,
+        47984,
+        98502
+      ],
+      "estado": "cotejado"
+    },
+    {
+      "longitud": 90,
+      "capacidades": [
+        535,
+        1470,
+        3015,
+        5270,
+        8315,
+        17070,
+        29563,
+        46634,
+        95729
+      ],
+      "estado": "cotejado"
+    },
+    {
+      "longitud": 95,
+      "capacidades": [
+        520,
+        1435,
+        2940,
+        5135,
+        8100,
+        16630,
+        28774,
+        45389,
+        93175
+      ],
+      "estado": "cotejado"
+    },
+    {
+      "longitud": 100,
+      "capacidades": [
+        505,
+        1400,
+        2865,
+        5005,
+        7895,
+        16205,
+        28043,
+        44237,
+        90800
+      ],
+      "estado": "cotejado"
+    },
+    {
+      "longitud": 110,
+      "capacidades": [
+        485,
+        1330,
+        2730,
+        4770,
+        7530,
+        15460,
+        26738,
+        42178,
+        86583
+      ],
+      "estado": "cotejado"
+    },
+    {
+      "longitud": 120,
+      "capacidades": [
+        460,
+        1275,
+        2615,
+        4570,
+        7210,
+        14800,
+        25600,
+        40384,
+        82900
+      ],
+      "estado": "cotejado"
+    },
+    {
+      "longitud": 130,
+      "capacidades": [
+        445,
+        1225,
+        2515,
+        4390,
+        6930,
+        14225,
+        24896,
+        38800,
+        79649
+      ],
+      "estado": "cotejado"
+    },
+    {
+      "longitud": 140,
+      "capacidades": [
+        430,
+        1180,
+        2420,
+        4230,
+        6670,
+        13695,
+        23701,
+        37387,
+        76749
+      ],
+      "estado": "cotejado"
+    },
+    {
+      "longitud": 150,
+      "capacidades": [
+        415,
+        1140,
+        2340,
+        4090,
+        6450,
+        13340,
+        22898,
+        36120,
+        74158
+      ],
+      "estado": "cotejado"
+    },
+    {
+      "longitud": 160,
+      "capacidades": [
+        400,
+        1105,
+        2265,
+        3955,
+        6240,
+        12815,
+        22170,
+        34972,
+        71791
+      ],
+      "estado": "cotejado"
+    },
+    {
+      "longitud": 170,
+      "capacidades": [
+        390,
+        1070,
+        2195,
+        3835,
+        6050,
+        12425,
+        21509,
+        33929,
+        69649
+      ],
+      "estado": "cotejado"
+    },
+    {
+      "longitud": 180,
+      "capacidades": [
+        380,
+        1045,
+        2135,
+        3730,
+        5890,
+        12085,
+        20902,
+        32972,
+        67687
+      ],
+      "estado": "cotejado"
+    },
+    {
+      "longitud": 190,
+      "capacidades": [
+        370,
+        1015,
+        2070,
+        3625,
+        5730,
+        11765,
+        20344,
+        32092,
+        65879
+      ],
+      "estado": "cotejado"
+    },
+    {
+      "longitud": 200,
+      "capacidades": [
+        360,
+        990,
+        2025,
+        3540,
+        5580,
+        11460,
+        19830,
+        31230,
+        64217
+      ],
+      "estado": "cotejado"
+    }
+  ],
+  "segundaRevisionIndependiente": false,
+  "pendientes": [
+    "Fuente y edición no aparecen en la fotografía; verificar atribución y aplicabilidad al acero roscado epoxi",
+    "Confirmar interpretación de h = 10 mm y condiciones del método",
+    "Revisión técnica independiente de las cifras, incluidas las cinco correcciones, y comparación con ejercicio completo"
+  ],
+  "auditoria": {
+    "base": "1e99313",
+    "correcciones": [
+      {
+        "longitud": 10,
+        "diametro": "4\"",
+        "anterior": 287190,
+        "corregido": 287189,
+        "motivo": "Error de transcripción de 1e99313; corrección cotejada en ampliación de fotografía original, sin alterar la imagen",
+        "fuente": "fuentes/tabla-3-347520.jpg",
+        "estado": "Cotejo visual; pendiente revisión técnica independiente"
+      },
+      {
+        "longitud": 12,
+        "diametro": "4\"",
+        "anterior": 262151,
+        "corregido": 282151,
+        "motivo": "Error de transcripción de 1e99313; corrección cotejada en ampliación de fotografía original, sin alterar la imagen",
+        "fuente": "fuentes/tabla-3-347520.jpg",
+        "estado": "Cotejo visual; pendiente revisión técnica independiente"
+      },
+      {
+        "longitud": 16,
+        "diametro": "4\"",
+        "anterior": 227244,
+        "corregido": 227024,
+        "motivo": "Error de transcripción de 1e99313; corrección cotejada en ampliación de fotografía original, sin alterar la imagen",
+        "fuente": "fuentes/tabla-3-347520.jpg",
+        "estado": "Cotejo visual; pendiente revisión técnica independiente"
+      },
+      {
+        "longitud": 55,
+        "diametro": "3\"",
+        "anterior": 59612,
+        "corregido": 59650,
+        "motivo": "Error de transcripción de 1e99313; corrección cotejada en ampliación de fotografía original, sin alterar la imagen",
+        "fuente": "fuentes/tabla-3-347520.jpg",
+        "estado": "Cotejo visual; pendiente revisión técnica independiente"
+      },
+      {
+        "longitud": 85,
+        "diametro": "2\"",
+        "anterior": 17655,
+        "corregido": 17565,
+        "motivo": "Error de transcripción de 1e99313; corrección cotejada en ampliación de fotografía original, sin alterar la imagen",
+        "fuente": "fuentes/tabla-3-347520.jpg",
+        "estado": "Cotejo visual; pendiente revisión técnica independiente"
+      }
+    ],
+    "alcance": "Revisión visual ampliada por filas/columnas; no certificación técnica ni segundo revisor independiente"
+  }
+};if(typeof module==='object'&&module.exports)module.exports=datos;else root.TABLA_NAG200_3=datos;})(globalThis);
+
+</script>
+<script data-local="datos/tabla-18.js">
+/* Datos cotejados visualmente; sin habilitación técnica. Ver historial de auditoría. */
+(function(root){const datos={
+  "tabla": 18,
+  "titulo": "Longitudes equivalentes de accesorios roscados",
+  "unidadDiametro": "m",
+  "unidadEquivalente": "m",
+  "procedencia": {
+    "tipo": "fotografia-del-usuario",
+    "documentoDeclarado": "NAG-200, Tabla N.º 18 (atribución del usuario; edición no visible)",
+    "edicion": null,
+    "fotografiaDisponible": true,
+    "cotejoFotografico": true,
+    "vigenciaVerificada": false,
+    "aplicabilidadVerificada": false,
+    "archivo": "fuentes/tabla-18-347525.jpg",
+    "sha256": "d9f541eb091f705c0dead916066da755f9cf2cb9a5f449be025f7dae2bad41a0",
+    "alcanceCotejo": "Lectura visual de la fotografía; pendiente revisión técnica e independiente"
+  },
+  "transcripcionCompleta": true,
+  "diametros": [
+    {
+      "nominal": "1/2\"",
+      "diametroTabuladoM": 0.013,
+      "interiorM": null,
+      "estado": "interior-real-no-verificado",
+      "estadoEncabezado": "cotejado",
+      "nota": "d del encabezado fotografiado y del ejemplo; la foto no demuestra el diámetro interior real de un producto comercial"
+    },
+    {
+      "nominal": "3/4\"",
+      "diametroTabuladoM": 0.019,
+      "interiorM": null,
+      "estado": "interior-real-no-verificado",
+      "estadoEncabezado": "cotejado",
+      "nota": "d del encabezado fotografiado y del ejemplo; la foto no demuestra el diámetro interior real de un producto comercial"
+    },
+    {
+      "nominal": "1\"",
+      "diametroTabuladoM": 0.025,
+      "interiorM": null,
+      "estado": "interior-real-no-verificado",
+      "estadoEncabezado": "cotejado",
+      "nota": "d del encabezado fotografiado y del ejemplo; la foto no demuestra el diámetro interior real de un producto comercial"
+    },
+    {
+      "nominal": "1 1/4\"",
+      "diametroTabuladoM": 0.032,
+      "interiorM": null,
+      "estado": "interior-real-no-verificado",
+      "estadoEncabezado": "cotejado",
+      "nota": "d del encabezado fotografiado y del ejemplo; la foto no demuestra el diámetro interior real de un producto comercial"
+    },
+    {
+      "nominal": "1 1/2\"",
+      "diametroTabuladoM": 0.038,
+      "interiorM": null,
+      "estado": "interior-real-no-verificado",
+      "estadoEncabezado": "cotejado",
+      "nota": "d del encabezado fotografiado y del ejemplo; la foto no demuestra el diámetro interior real de un producto comercial"
+    },
+    {
+      "nominal": "2\"",
+      "diametroTabuladoM": 0.051,
+      "interiorM": null,
+      "estado": "interior-real-no-verificado",
+      "estadoEncabezado": "cotejado",
+      "nota": "d del encabezado fotografiado y del ejemplo; la foto no demuestra el diámetro interior real de un producto comercial"
+    },
+    {
+      "nominal": "2 1/2\"",
+      "diametroTabuladoM": 0.063,
+      "interiorM": null,
+      "estado": "interior-real-no-verificado",
+      "estadoEncabezado": "cotejado",
+      "nota": "d del encabezado fotografiado y del ejemplo; la foto no demuestra el diámetro interior real de un producto comercial"
+    },
+    {
+      "nominal": "3\"",
+      "diametroTabuladoM": 0.076,
+      "interiorM": null,
+      "estado": "interior-real-no-verificado",
+      "estadoEncabezado": "cotejado",
+      "nota": "d del encabezado fotografiado y del ejemplo; la foto no demuestra el diámetro interior real de un producto comercial"
+    },
+    {
+      "nominal": "4\"",
+      "diametroTabuladoM": 0.101,
+      "interiorM": null,
+      "estado": "interior-real-no-verificado",
+      "estadoEncabezado": "cotejado",
+      "nota": "d del encabezado fotografiado y del ejemplo; la foto no demuestra el diámetro interior real de un producto comercial"
+    }
+  ],
+  "accesorios": [
+    {
+      "tipo": "codo45",
+      "factorD": 14,
+      "base": "diametro-del-accesorio",
+      "estado": "cotejado"
+    },
+    {
+      "tipo": "codo90",
+      "factorD": 30,
+      "base": "diametro-del-accesorio",
+      "estado": "cotejado"
+    },
+    {
+      "tipo": "curva",
+      "factorD": 20,
+      "base": "diametro-del-accesorio",
+      "estado": "cotejado"
+    },
+    {
+      "tipo": "tee-directo",
+      "factorD": 20,
+      "base": "diametro-de-la-via",
+      "estado": "cotejado"
+    },
+    {
+      "tipo": "tee-giro90",
+      "factorD": 60,
+      "base": "diametro-de-la-via",
+      "estado": "cotejado"
+    },
+    {
+      "tipo": "reduccion",
+      "factorD": 10,
+      "base": "diametro-menor",
+      "estado": "cotejado"
+    },
+    {
+      "tipo": "valvula-globo",
+      "factorD": 333,
+      "base": "diametro-del-accesorio",
+      "estado": "cotejado"
+    },
+    {
+      "tipo": "valvula-esclusa",
+      "factorD": 7,
+      "base": "diametro-del-accesorio",
+      "estado": "cotejado"
+    },
+    {
+      "tipo": "valvula-macho",
+      "factorD": 100,
+      "base": "diametro-del-accesorio",
+      "estado": "cotejado"
+    }
+  ],
+  "redondeo": {
+    "decimales": 2,
+    "regla": null,
+    "verificado": false,
+    "nota": "Se conservan los valores impresos. Hay diferencias respecto a redondear cantidad × factor × d al centésimo más cercano; no se corrige la fuente automáticamente."
+  },
+  "metodoClase": {
+    "reduccionesEnMateriales": true,
+    "reduccionesEnEquivalentes": false,
+    "politicaCuplas": null,
+    "fuentePoliticaCuplas": null
+  },
+  "pendientes": [
+    "Codos90/cantidad5/2 pulgadas: impreso 7,67, calculado 7,65; divergencia técnica sin resolver",
+    "Fuente, edición, vigencia y aplicabilidad no demostradas por la fotografía",
+    "Los nueve d del encabezado están cotejados; no se identifican como interiores reales de un producto comercial",
+    "Nueve discrepancias originales de codos45: conservar fuente y verificar criterio de redondeo",
+    "Tratamiento documentado de cuplas y aplicación de equivalencias a tees reductoras",
+    "Tipo real de cada llave y compatibilidad comercial de accesorios",
+    "Revisión técnica independiente de transcripción y ejercicio completo"
+  ],
+  "complemento": [
+    {
+      "tipo": "codo90",
+      "cantidad": 1,
+      "equivalentesM": [
+        0.39,
+        0.57,
+        0.75,
+        0.96,
+        1.14,
+        1.53,
+        1.89,
+        2.28,
+        3.03
+      ],
+      "estado": "cotejado"
+    },
+    {
+      "tipo": "codo90",
+      "cantidad": 2,
+      "equivalentesM": [
+        0.78,
+        1.14,
+        1.5,
+        1.92,
+        2.28,
+        3.06,
+        3.78,
+        4.56,
+        6.06
+      ],
+      "estado": "cotejado"
+    },
+    {
+      "tipo": "codo90",
+      "cantidad": 3,
+      "equivalentesM": [
+        1.17,
+        1.71,
+        2.25,
+        2.88,
+        3.42,
+        4.59,
+        5.67,
+        6.84,
+        9.09
+      ],
+      "estado": "cotejado"
+    },
+    {
+      "tipo": "codo90",
+      "cantidad": 4,
+      "equivalentesM": [
+        1.56,
+        2.28,
+        3,
+        3.84,
+        4.56,
+        6.12,
+        7.56,
+        9.12,
+        12.12
+      ],
+      "estado": "cotejado"
+    },
+    {
+      "tipo": "codo90",
+      "cantidad": 5,
+      "equivalentesM": [
+        1.95,
+        2.85,
+        3.75,
+        4.8,
+        5.7,
+        7.67,
+        9.45,
+        11.4,
+        15.15
+      ],
+      "estado": "cotejado"
+    },
+    {
+      "tipo": "codo45",
+      "cantidad": 1,
+      "equivalentesM": [
+        0.18,
+        0.26,
+        0.35,
+        0.45,
+        0.53,
+        0.71,
+        0.88,
+        1.06,
+        1.41
+      ],
+      "estado": "cotejado"
+    },
+    {
+      "tipo": "codo45",
+      "cantidad": 2,
+      "equivalentesM": [
+        0.36,
+        0.53,
+        0.7,
+        0.9,
+        1.06,
+        1.42,
+        1.77,
+        2.13,
+        2.83
+      ],
+      "estado": "cotejado"
+    },
+    {
+      "tipo": "codo45",
+      "cantidad": 3,
+      "equivalentesM": [
+        0.54,
+        0.79,
+        1.05,
+        1.34,
+        1.59,
+        2.14,
+        2.65,
+        3.19,
+        4.24
+      ],
+      "estado": "cotejado"
+    },
+    {
+      "tipo": "codo45",
+      "cantidad": 4,
+      "equivalentesM": [
+        0.72,
+        1.06,
+        1.4,
+        1.79,
+        2.12,
+        2.85,
+        3.53,
+        4.26,
+        5.66
+      ],
+      "estado": "cotejado"
+    },
+    {
+      "tipo": "codo45",
+      "cantidad": 5,
+      "equivalentesM": [
+        0.91,
+        1.33,
+        1.75,
+        2.24,
+        2.66,
+        3.57,
+        4.41,
+        5.32,
+        7.07
+      ],
+      "estado": "cotejado"
+    },
+    {
+      "tipo": "tee-directo",
+      "cantidad": 1,
+      "equivalentesM": [
+        0.26,
+        0.38,
+        0.5,
+        0.64,
+        0.76,
+        1.02,
+        1.26,
+        1.52,
+        2.02
+      ],
+      "estado": "cotejado"
+    },
+    {
+      "tipo": "tee-directo",
+      "cantidad": 2,
+      "equivalentesM": [
+        0.52,
+        0.76,
+        1,
+        1.28,
+        1.52,
+        2.04,
+        2.52,
+        3.04,
+        4.04
+      ],
+      "estado": "cotejado"
+    },
+    {
+      "tipo": "tee-directo",
+      "cantidad": 3,
+      "equivalentesM": [
+        0.78,
+        1.14,
+        1.5,
+        1.92,
+        2.28,
+        3.06,
+        3.78,
+        4.56,
+        6.06
+      ],
+      "estado": "cotejado"
+    },
+    {
+      "tipo": "tee-directo",
+      "cantidad": 4,
+      "equivalentesM": [
+        1.04,
+        1.52,
+        2,
+        2.56,
+        3.04,
+        4.08,
+        5.04,
+        6.08,
+        8.08
+      ],
+      "estado": "cotejado"
+    },
+    {
+      "tipo": "tee-directo",
+      "cantidad": 5,
+      "equivalentesM": [
+        1.3,
+        1.9,
+        2.5,
+        3.2,
+        3.8,
+        5.1,
+        6.3,
+        7.6,
+        10.1
+      ],
+      "estado": "cotejado"
+    },
+    {
+      "tipo": "tee-giro90",
+      "cantidad": 1,
+      "equivalentesM": [
+        0.78,
+        1.14,
+        1.5,
+        1.92,
+        2.28,
+        3.06,
+        3.78,
+        4.56,
+        6.06
+      ],
+      "estado": "cotejado"
+    },
+    {
+      "tipo": "tee-giro90",
+      "cantidad": 2,
+      "equivalentesM": [
+        1.56,
+        2.28,
+        3,
+        3.84,
+        4.56,
+        6.12,
+        7.56,
+        9.12,
+        12.12
+      ],
+      "estado": "cotejado"
+    },
+    {
+      "tipo": "tee-giro90",
+      "cantidad": 3,
+      "equivalentesM": [
+        2.34,
+        3.42,
+        4.5,
+        5.76,
+        6.84,
+        9.18,
+        11.34,
+        13.68,
+        18.18
+      ],
+      "estado": "cotejado"
+    },
+    {
+      "tipo": "tee-giro90",
+      "cantidad": 4,
+      "equivalentesM": [
+        3.12,
+        4.56,
+        6,
+        7.68,
+        9.12,
+        12.24,
+        15.12,
+        18.24,
+        24.24
+      ],
+      "estado": "cotejado"
+    },
+    {
+      "tipo": "tee-giro90",
+      "cantidad": 5,
+      "equivalentesM": [
+        3.9,
+        5.7,
+        7.5,
+        9.6,
+        11.4,
+        15.3,
+        18.9,
+        22.8,
+        30.3
+      ],
+      "estado": "cotejado"
+    },
+    {
+      "tipo": "valvula-macho",
+      "cantidad": 1,
+      "equivalentesM": [
+        1.3,
+        1.9,
+        2.5,
+        3.2,
+        3.8,
+        5.1,
+        6.3,
+        7.6,
+        10.1
+      ],
+      "estado": "cotejado"
+    },
+    {
+      "tipo": "valvula-macho",
+      "cantidad": 2,
+      "equivalentesM": [
+        2.6,
+        3.8,
+        5,
+        6.4,
+        7.6,
+        10.2,
+        12.6,
+        15.2,
+        20.2
+      ],
+      "estado": "cotejado"
+    },
+    {
+      "tipo": "valvula-macho",
+      "cantidad": 3,
+      "equivalentesM": [
+        3.9,
+        5.7,
+        7.5,
+        9.6,
+        11.4,
+        15.3,
+        18.9,
+        22.8,
+        30.3
+      ],
+      "estado": "cotejado"
+    },
+    {
+      "tipo": "valvula-macho",
+      "cantidad": 4,
+      "equivalentesM": [
+        5.2,
+        7.6,
+        10,
+        12.8,
+        15.2,
+        20.4,
+        25.2,
+        30.4,
+        40.4
+      ],
+      "estado": "cotejado"
+    },
+    {
+      "tipo": "valvula-macho",
+      "cantidad": 5,
+      "equivalentesM": [
+        6.5,
+        9.5,
+        12.5,
+        16,
+        19,
+        25.5,
+        31.5,
+        38,
+        50.5
+      ],
+      "estado": "cotejado"
+    }
+  ],
+  "celdasDudosas": [],
+  "ejemploFotografiado": {
+    "tipo": "codo90",
+    "cantidad": 2,
+    "nominal": "3/4\"",
+    "diametroTabuladoM": 0.019,
+    "factorD": 30,
+    "equivalenteM": 1.14,
+    "estado": "cotejado"
+  },
+  "segundaRevisionIndependiente": false,
+  "celdasReexaminadas": [
+    {
+      "tipo": "codo90",
+      "cantidad": 5,
+      "columna": "2\"",
+      "valorImpreso": 7.67,
+      "calculado": 7.65,
+      "diferencia": 0.02,
+      "estadoLectura": "Cotejado visualmente con ampliación del original",
+      "estadoTecnico": "Divergencia no resuelta; no utilizar como equivalente verificado",
+      "nota": "7,65 es el producto exacto con d=0,051; 7,67 no se explica por redondeo a centésimos. Posibles errata o d distinto no documentado; no se confirma ninguna hipótesis."
+    },
+    {
+      "tipo": "tee-directo",
+      "cantidad": 5,
+      "columna": "3\"",
+      "valorImpreso": 7.6,
+      "calculado": 7.6,
+      "diferencia": 0,
+      "estadoLectura": "Cotejado visualmente con ampliación del original",
+      "estadoTecnico": "Coincide aritméticamente; aplicabilidad general pendiente",
+      "nota": "El último dígito impreso es 0; la interpretación anterior como 7,61 no se conserva como dato."
+    }
+  ]
+};if(typeof module==='object'&&module.exports)module.exports=datos;else root.TABLA_NAG200_18=datos;})(globalThis);
+
+</script>
+<script data-local="datos/validacion-tablas.js">
+/* Sin red ni servicios. Los datos declarados no equivalen a tablas verificadas. */
+(function(root){
+ const positivo=x=>Number.isFinite(x)&&x>0;
+ function auditarComplemento(t){
+  const errores=[],dudosas=[],discrepancias=[],filas=t?.complemento;
+  if(!Array.isArray(filas))return {celdas:0,transcritas:0,errores:['Falta complemento de Tabla 18.'],dudosas,discrepancias};
+  const ds=t.diametros||[],tipos=['codo90','codo45','tee-directo','tee-giro90','valvula-macho'],vistas=new Set();let celdas=0,transcritas=0;
+  for(const f of filas){
+   const clave=f.tipo+'|'+f.cantidad;
+   if(vistas.has(clave))errores.push('Fila repetida: '+clave);vistas.add(clave);
+   if(!tipos.includes(f.tipo)||!Number.isInteger(f.cantidad)||f.cantidad<1||f.cantidad>5)errores.push('Accesorio o cantidad inválida: '+clave);
+   if(!Array.isArray(f.equivalentesM)||f.equivalentesM.length!==ds.length){errores.push('Fila incompleta: '+clave);continue;}
+   const factor=t.accesorios.find(a=>a.tipo===f.tipo)?.factorD;
+   f.equivalentesM.forEach((valor,i)=>{
+    celdas++;const ubicacion={tipo:f.tipo,cantidad:f.cantidad,columna:ds[i].nominal};
+    if(valor===null){dudosas.push(ubicacion);return;}
+    if(!positivo(valor)){errores.push('Equivalente inválido: '+clave+' / '+ds[i].nominal);return;}
+    transcritas++;
+    const previo=f.equivalentesM[i-1];if(i&&positivo(previo)&&valor<previo)errores.push('Equivalentes decrecen al aumentar d: '+clave);
+    const anterior=filas.find(a=>a.tipo===f.tipo&&a.cantidad===f.cantidad-1)?.equivalentesM?.[i];
+    if(positivo(anterior)&&valor<anterior)errores.push('Equivalentes decrecen al aumentar cantidad: '+clave);
+    if(!positivo(factor)||!positivo(ds[i].diametroTabuladoM)){errores.push('Falta factor o d tabulado: '+clave+' / '+ds[i].nominal);return;}
+    const producto=f.cantidad*factor*ds[i].diametroTabuladoM;
+    const referenciaCentésimo=Math.round((producto+Number.EPSILON)*100)/100;
+    if(Math.abs(valor-referenciaCentésimo)>1e-9)discrepancias.push({...ubicacion,impreso:valor,productoSinRedondeo:producto,referenciaCentésimo});
+   });
+  }
+  for(const tipo of tipos)for(let n=1;n<=5;n++)if(!vistas.has(tipo+'|'+n))errores.push('Falta fila '+tipo+' / cantidad '+n);
+  return {celdas,transcritas,errores,dudosas,discrepancias};
+ }
+ function validarTablas(t3,t18){
+  const errores=[],pendientes=[];
+  if(!t3||!t18)return {habilitado:false,errores:['No se cargaron ambos archivos de tablas.'],pendientes:[],capacidades:0,coeficientes:0};
+  if(t3.tabla!==3||t18.tabla!==18)errores.push('Identificación de tablas incorrecta.');
+  if(t3.unidadLongitud!=='m'||t3.unidadCapacidad!=='L/h'||t18.unidadDiametro!=='m'||t18.unidadEquivalente!=='m')errores.push('Unidades inválidas: se esperan m y L/h, con diámetros y equivalentes normalizados a metros.');
+  for(const t of [t3,t18]){
+   if(!t.procedencia?.edicion||!t.procedencia?.documentoDeclarado||!t.procedencia?.fotografiaDisponible||!t.procedencia?.cotejoFotografico||!t.procedencia?.aplicabilidadVerificada)pendientes.push('Tabla '+t.tabla+': faltan fotografía, fuente/edición, cotejo y aplicabilidad verificados.');
+   if(!t.transcripcionCompleta)pendientes.push('Tabla '+t.tabla+': transcripción parcial.');
+  }
+  const cols=t3.columnas,filas=t3.filas;
+  if(!Array.isArray(cols)||!cols.length||new Set(cols).size!==cols.length||!Array.isArray(filas)||!filas.length)errores.push('Columnas o filas de capacidades inválidas.');
+  let capacidades=0,coeficientes=0;
+  if(Array.isArray(filas)&&Array.isArray(cols))filas.forEach((f,i)=>{
+   if(!positivo(f.longitud)||(i&&f.longitud<=filas[i-1].longitud))errores.push('Longitud inválida, duplicada o desordenada en fila '+i+'.');
+   if(!Array.isArray(f.capacidades)||f.capacidades.length!==cols.length){errores.push('Fila incompleta en '+f.longitud+' m.');return;}
+   if(f.estado!=='cotejado')pendientes.push('Fila '+f.longitud+' m sin cotejo fotográfico.');
+   f.capacidades.forEach((q,j)=>{
+    if(q===null){pendientes.push('Capacidad dudosa/ausente en '+f.longitud+' m / '+cols[j]+'.');return;}
+    if(!positivo(q)){errores.push('Capacidad inválida en '+f.longitud+' m / '+cols[j]+'.');return;}
+    capacidades++;
+    if(j&&positivo(f.capacidades[j-1])&&q<f.capacidades[j-1])errores.push('Capacidad decrece al aumentar diámetro en '+f.longitud+' m.');
+    const previa=filas[i-1]?.capacidades?.[j];
+    if(i&&positivo(previa)&&q>previa)errores.push('Capacidad crece al aumentar longitud para '+cols[j]+'.');
+   });
+  });
+  if(t3.condiciones?.gas!=='GN'||t3.condiciones?.densidadRelativa!==0.65||t3.condiciones?.referenciaH?.valor!==10||t3.condiciones?.referenciaH?.unidad!=='mmca'||!t3.condiciones?.referenciaH?.significadoVerificado)pendientes.push('Condiciones de Tabla 3 sin verificación completa; h no es presión de suministro.');
+  if(!t3.ejerciciosValidados)pendientes.push('Comparación numérica con ejercicios de clase pendiente.');
+  if(!Array.isArray(t18.diametros)||!t18.diametros.length)errores.push('Faltan columnas de diámetros interiores.');
+  else {
+   if(new Set(t18.diametros.map(d=>d.nominal)).size!==t18.diametros.length)errores.push('Diámetros nominales duplicados.');
+   t18.diametros.forEach((d,i,ds)=>{
+    if(!positivo(d.interiorM)||d.estado!=='cotejado')pendientes.push('Diámetro interior pendiente: '+d.nominal+'.');
+    if(d.interiorM!==null&&!positivo(d.interiorM))errores.push('Diámetro interior inválido: '+d.nominal+'.');
+    if(i&&positivo(d.interiorM)&&positivo(ds[i-1].interiorM)&&d.interiorM<=ds[i-1].interiorM)errores.push('Diámetros interiores inconsistentes.');
+   });
+   if(Array.isArray(cols)&&cols.some(c=>!t18.diametros.some(d=>d.nominal===c)))pendientes.push('Falta diámetro interior para una columna de Tabla 3.');
+  }
+  const requeridos=['codo45','codo90','curva','tee-directo','tee-giro90','reduccion','valvula-globo','valvula-esclusa','valvula-macho'];
+  if(!Array.isArray(t18.accesorios))errores.push('Lista de accesorios inválida.');
+  else{
+   if(new Set(t18.accesorios.map(a=>a.tipo)).size!==t18.accesorios.length)errores.push('Accesorios duplicados.');
+   for(const tipo of requeridos)if(!t18.accesorios.some(a=>a.tipo===tipo))pendientes.push('Falta coeficiente de '+tipo+'.');
+   for(const a of t18.accesorios){if(!positivo(a.factorD))errores.push('Coeficiente inválido: '+a.tipo+'.');else coeficientes++;if(a.estado!=='cotejado')pendientes.push('Coeficiente '+a.tipo+' sin cotejo fotográfico.');}
+  }
+  if(!t18.redondeo?.verificado||!Number.isInteger(t18.redondeo?.decimales)||t18.redondeo.decimales<0||t18.redondeo.decimales>8||t18.redondeo?.regla!=='mas-cercano')pendientes.push('Criterio de redondeo sin verificar o no soportado.');
+  if(!['incluir','excluir-con-fuente'].includes(t18.metodoClase?.politicaCuplas)||!t18.metodoClase?.fuentePoliticaCuplas)pendientes.push('Cuplas: falta criterio documentado.');
+  if(t18.metodoClase?.reduccionesEnMateriales!==true||t18.metodoClase?.reduccionesEnEquivalentes!==false)errores.push('El método de clase requiere reducciones en materiales y fuera de equivalentes.');
+  if(Array.isArray(t3.diametrosEncabezadoMm)&&t3.diametrosEncabezadoMm.length!==cols.length)errores.push('Encabezado milimétrico incompleto.');
+  if(Array.isArray(t3.diametrosEncabezadoMm)&&Array.isArray(t18.diametros))t3.diametrosEncabezadoMm.forEach((mm,i)=>{
+   if(!positivo(mm)||Math.abs(mm/1000-(t18.diametros[i]?.diametroTabuladoM??NaN))>1e-9||!positivo(t18.diametros[i]?.diametroTabuladoM))errores.push('Encabezados mm/m incompatibles en columna '+cols[i]+'.');
+  });
+  if(t18.complemento){const a=auditarComplemento(t18);errores.push(...a.errores);
+   a.dudosas.forEach(c=>pendientes.push('Celda dudosa: '+c.tipo+' / cantidad '+c.cantidad+' / '+c.columna));
+   a.discrepancias.forEach(c=>pendientes.push('Redondeo por revisar: '+c.tipo+' / cantidad '+c.cantidad+' / '+c.columna+'; impreso '+c.impreso+', referencia al centésimo '+c.referenciaCentésimo+'.'));
+  }
+  pendientes.push(...(t3.pendientes||[]),...(t18.pendientes||[]));
+  return {habilitado:errores.length===0&&pendientes.length===0,errores,pendientes:[...new Set(pendientes)],capacidades,coeficientes};
+ }
+ function consultarCapacidadDeclarada(t,longitud,diametro){
+  if(t?.unidadCapacidad!=='L/h'||t.unidadLongitud!=='m'||!positivo(longitud))throw Error('Unidades o longitud inválidas.');
+  const col=t.columnas.indexOf(diametro);if(col<0)throw Error('Diámetro no transcrito.');
+  const filas=t.filas;
+  if(filas.some((f,i)=>!positivo(f.longitud)||(i&&f.longitud<=filas[i-1].longitud)))throw Error('Filas inválidas o desordenadas.');
+  const fila=filas.find(f=>f.longitud>=longitud);if(!fila)throw Error('Fuera de tabla: no se extrapola.');
+  if(!Array.isArray(fila.capacidades)||fila.capacidades.length!==t.columnas.length||!positivo(fila.capacidades[col]))throw Error('Celda ausente o dudosa: no se interpola ni salta la fila.');
+  return {longitudFila:fila.longitud,litrosHora:fila.capacidades[col],metrosCubicosHora:fila.capacidades[col]/1000,estado:'CONSULTA DE DATOS DECLARADOS; NO DIÁMETRO DEFINITIVO'};
+ }
+ function caudalClaseDesdeKcal(kcalHora){
+  if(!positivo(kcalHora))throw Error('Consumo de placa pendiente o inválido.');
+  const metrosCubicosHora=kcalHora/9300;
+  return {metrosCubicosHora,litrosHora:metrosCubicosHora*1000,poderCalorificoKcalM3:9300};
+ }
+ const api={validarTablas,consultarCapacidadDeclarada,caudalClaseDesdeKcal,auditarComplemento};
+ if(typeof module==='object'&&module.exports)module.exports=api;else root.ValidacionTablasGas=api;
+})(globalThis);
+
+</script>
+<script data-local="datos/referencia-auditoria-tabla3.js">
+/* Referencia congelada de integridad; no se utiliza para dimensionar. */
+(function(root){const datos={
+  "base": "1e99313",
+  "alcance": "Referencia de integridad de la transcripción existente; NO fuente normativa ni segundo cotejo independiente de las 441 cifras.",
+  "fotoSha256": "ce11e42467d7a4f4aa31b96c0ca83a3c97b5e6ae0cea0cf62cdb5db9f6e6d4f5",
+  "unidadCapacidad": "L/h",
+  "unidadLongitud": "m",
+  "columnas": [
+    "1/2\"",
+    "3/4\"",
+    "1\"",
+    "1 1/4\"",
+    "1 1/2\"",
+    "2\"",
+    "2 1/2\"",
+    "3\"",
+    "4\""
+  ],
+  "longitudes": [
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    12,
+    14,
+    16,
+    18,
+    20,
+    22,
+    24,
+    26,
+    28,
+    30,
+    32,
+    34,
+    36,
+    38,
+    40,
+    42,
+    44,
+    46,
+    48,
+    50,
+    55,
+    60,
+    65,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95,
+    100,
+    110,
+    120,
+    130,
+    140,
+    150,
+    160,
+    170,
+    180,
+    190,
+    200
+  ],
+  "capacidades": [
+    [
+      3580,
+      9895,
+      20260,
+      35695,
+      55835,
+      114615,
+      198330,
+      312851,
+      624217
+    ],
+    [
+      2925,
+      8065,
+      16540,
+      28900,
+      45585,
+      93580,
+      161915,
+      255411,
+      524304
+    ],
+    [
+      2535,
+      6985,
+      14325,
+      25080,
+      39480,
+      81050,
+      140219,
+      221186,
+      454046
+    ],
+    [
+      2265,
+      6250,
+      12810,
+      22685,
+      35310,
+      72490,
+      125419,
+      197840,
+      406125
+    ],
+    [
+      2070,
+      5705,
+      11695,
+      20435,
+      32230,
+      66165,
+      114511,
+      180634,
+      370802
+    ],
+    [
+      1915,
+      5280,
+      10835,
+      18920,
+      29845,
+      61265,
+      106025,
+      167250,
+      343325
+    ],
+    [
+      1790,
+      4940,
+      10130,
+      17695,
+      27910,
+      57295,
+      99165,
+      156425,
+      321108
+    ],
+    [
+      1690,
+      4655,
+      9550,
+      16685,
+      26320,
+      54025,
+      93479,
+      147457,
+      302698
+    ],
+    [
+      1600,
+      4420,
+      9060,
+      15825,
+      24965,
+      51245,
+      88689,
+      139903,
+      287190
+    ],
+    [
+      1460,
+      4035,
+      8270,
+      14450,
+      22790,
+      46790,
+      80957,
+      127705,
+      262151
+    ],
+    [
+      1355,
+      3735,
+      7655,
+      13375,
+      21100,
+      43315,
+      74963,
+      118249,
+      242740
+    ],
+    [
+      1265,
+      3495,
+      7160,
+      12510,
+      19595,
+      40515,
+      70109,
+      110593,
+      227244
+    ],
+    [
+      1195,
+      3290,
+      6750,
+      11795,
+      18605,
+      38190,
+      66110,
+      104283,
+      214071
+    ],
+    [
+      1130,
+      3125,
+      6405,
+      11190,
+      17655,
+      36240,
+      62709,
+      98919,
+      203062
+    ],
+    [
+      1080,
+      2980,
+      6105,
+      10670,
+      16830,
+      34550,
+      59794,
+      94322,
+      190784
+    ],
+    [
+      1035,
+      2850,
+      5845,
+      10215,
+      16110,
+      33060,
+      57244,
+      90298,
+      185363
+    ],
+    [
+      990,
+      2740,
+      5620,
+      9815,
+      15485,
+      31785,
+      54991,
+      86690,
+      178092
+    ],
+    [
+      960,
+      2640,
+      5415,
+      9460,
+      14920,
+      30630,
+      53002,
+      83608,
+      174449
+    ],
+    [
+      925,
+      2550,
+      5230,
+      9135,
+      14100,
+      29580,
+      51202,
+      80768,
+      165800
+    ],
+    [
+      895,
+      2470,
+      5065,
+      8850,
+      13955,
+      29075,
+      49582,
+      78312,
+      160553
+    ],
+    [
+      870,
+      2395,
+      4910,
+      8580,
+      13535,
+      27785,
+      48094,
+      75865,
+      155753
+    ],
+    [
+      845,
+      2330,
+      4775,
+      8340,
+      13155,
+      27005,
+      46739,
+      73728,
+      151349
+    ],
+    [
+      820,
+      2265,
+      4650,
+      8120,
+      12805,
+      26295,
+      45496,
+      71767,
+      147322
+    ],
+    [
+      800,
+      2210,
+      4525,
+      7910,
+      12480,
+      25615,
+      44344,
+      69951,
+      143594
+    ],
+    [
+      780,
+      2155,
+      4420,
+      7720,
+      12180,
+      25005,
+      43277,
+      68267,
+      140138
+    ],
+    [
+      765,
+      2105,
+      4320,
+      7545,
+      11900,
+      24430,
+      42279,
+      66692,
+      136905
+    ],
+    [
+      745,
+      2060,
+      4220,
+      7375,
+      11635,
+      23885,
+      41349,
+      65227,
+      133897
+    ],
+    [
+      730,
+      2015,
+      4135,
+      7225,
+      11395,
+      23395,
+      40478,
+      63852,
+      131075
+    ],
+    [
+      715,
+      1975,
+      4035,
+      7075,
+      11165,
+      22920,
+      39660,
+      62560,
+      128424
+    ],
+    [
+      685,
+      1885,
+      3860,
+      6750,
+      10845,
+      21850,
+      37815,
+      59612,
+      122403
+    ],
+    [
+      655,
+      1805,
+      3695,
+      6460,
+      10190,
+      20920,
+      36205,
+      57109,
+      117233
+    ],
+    [
+      630,
+      1730,
+      3550,
+      6210,
+      9695,
+      20105,
+      34784,
+      54870,
+      112638
+    ],
+    [
+      605,
+      1670,
+      3420,
+      5980,
+      9430,
+      19360,
+      33521,
+      52876,
+      108545
+    ],
+    [
+      585,
+      1615,
+      3310,
+      5780,
+      9115,
+      18715,
+      32383,
+      51081,
+      104860
+    ],
+    [
+      565,
+      1565,
+      3200,
+      5595,
+      8830,
+      18120,
+      31354,
+      49459,
+      101531
+    ],
+    [
+      550,
+      1515,
+      3105,
+      5425,
+      8555,
+      17655,
+      30419,
+      47984,
+      98502
+    ],
+    [
+      535,
+      1470,
+      3015,
+      5270,
+      8315,
+      17070,
+      29563,
+      46634,
+      95729
+    ],
+    [
+      520,
+      1435,
+      2940,
+      5135,
+      8100,
+      16630,
+      28774,
+      45389,
+      93175
+    ],
+    [
+      505,
+      1400,
+      2865,
+      5005,
+      7895,
+      16205,
+      28043,
+      44237,
+      90800
+    ],
+    [
+      485,
+      1330,
+      2730,
+      4770,
+      7530,
+      15460,
+      26738,
+      42178,
+      86583
+    ],
+    [
+      460,
+      1275,
+      2615,
+      4570,
+      7210,
+      14800,
+      25600,
+      40384,
+      82900
+    ],
+    [
+      445,
+      1225,
+      2515,
+      4390,
+      6930,
+      14225,
+      24896,
+      38800,
+      79649
+    ],
+    [
+      430,
+      1180,
+      2420,
+      4230,
+      6670,
+      13695,
+      23701,
+      37387,
+      76749
+    ],
+    [
+      415,
+      1140,
+      2340,
+      4090,
+      6450,
+      13340,
+      22898,
+      36120,
+      74158
+    ],
+    [
+      400,
+      1105,
+      2265,
+      3955,
+      6240,
+      12815,
+      22170,
+      34972,
+      71791
+    ],
+    [
+      390,
+      1070,
+      2195,
+      3835,
+      6050,
+      12425,
+      21509,
+      33929,
+      69649
+    ],
+    [
+      380,
+      1045,
+      2135,
+      3730,
+      5890,
+      12085,
+      20902,
+      32972,
+      67687
+    ],
+    [
+      370,
+      1015,
+      2070,
+      3625,
+      5730,
+      11765,
+      20344,
+      32092,
+      65879
+    ],
+    [
+      360,
+      990,
+      2025,
+      3540,
+      5580,
+      11460,
+      19830,
+      31230,
+      64217
+    ]
+  ],
+  "correccionesAuditadas": [
+    {
+      "longitud": 10,
+      "diametro": "4\"",
+      "anterior": 287190,
+      "corregido": 287189,
+      "motivo": "Error de transcripción de 1e99313; corrección cotejada en ampliación de fotografía original, sin alterar la imagen",
+      "fuente": "fuentes/tabla-3-347520.jpg",
+      "estado": "Cotejo visual; pendiente revisión técnica independiente"
+    },
+    {
+      "longitud": 12,
+      "diametro": "4\"",
+      "anterior": 262151,
+      "corregido": 282151,
+      "motivo": "Error de transcripción de 1e99313; corrección cotejada en ampliación de fotografía original, sin alterar la imagen",
+      "fuente": "fuentes/tabla-3-347520.jpg",
+      "estado": "Cotejo visual; pendiente revisión técnica independiente"
+    },
+    {
+      "longitud": 16,
+      "diametro": "4\"",
+      "anterior": 227244,
+      "corregido": 227024,
+      "motivo": "Error de transcripción de 1e99313; corrección cotejada en ampliación de fotografía original, sin alterar la imagen",
+      "fuente": "fuentes/tabla-3-347520.jpg",
+      "estado": "Cotejo visual; pendiente revisión técnica independiente"
+    },
+    {
+      "longitud": 55,
+      "diametro": "3\"",
+      "anterior": 59612,
+      "corregido": 59650,
+      "motivo": "Error de transcripción de 1e99313; corrección cotejada en ampliación de fotografía original, sin alterar la imagen",
+      "fuente": "fuentes/tabla-3-347520.jpg",
+      "estado": "Cotejo visual; pendiente revisión técnica independiente"
+    },
+    {
+      "longitud": 85,
+      "diametro": "2\"",
+      "anterior": 17655,
+      "corregido": 17565,
+      "motivo": "Error de transcripción de 1e99313; corrección cotejada en ampliación de fotografía original, sin alterar la imagen",
+      "fuente": "fuentes/tabla-3-347520.jpg",
+      "estado": "Cotejo visual; pendiente revisión técnica independiente"
+    }
+  ]
+};if(typeof module==='object'&&module.exports)module.exports=datos;else root.REFERENCIA_AUDITORIA_TABLA3=datos;})(globalThis);
+
+</script>
+<script data-local="datos/auditoria-tablas.js">
+/* Auditoría sin red, sin modificar tablas originales ni habilitar el motor. */
+(function(root){
+ function auditarTabla3(t,ref){
+  const errores=[],alertas=['La referencia congela la transcripción de 1e99313: no prueba exactitud normativa ni sustituye cotejo independiente de cada cifra.'];
+  let posiciones=0,coincidencias=0,coincidenciasBase=0;const diferencias=[],correccionesDocumentadas=[];
+  if(!t||!ref||!Array.isArray(ref.columnas)||!Array.isArray(ref.longitudes)||!Array.isArray(ref.capacidades))return {integra:false,errores:['Faltan tabla o referencia de integridad.'],alertas,posiciones,coincidencias,diferencias};
+  if(t.unidadCapacidad!=='L/h'||t.unidadLongitud!=='m')errores.push('Unidades incorrectas: se esperan L/h y metros.');
+  if(!Array.isArray(t.columnas)||JSON.stringify(t.columnas)!==JSON.stringify(ref.columnas))errores.push('Encabezados ausentes, duplicados, incompletos o desordenados.');
+  if(!Array.isArray(t.filas))return {integra:false,errores:[...errores,'No hay filas válidas.'],alertas,posiciones,coincidencias,diferencias};
+  const vistas=new Set();
+  for(const [i,f]of t.filas.entries()){
+   if(!f||!Number.isFinite(f.longitud)||f.longitud<=0){errores.push('Fila inválida en posición '+(i+1));continue;}
+   if(vistas.has(f.longitud))errores.push('Longitud duplicada: '+f.longitud+' m.');vistas.add(f.longitud);
+   if(f.longitud!==ref.longitudes[i])errores.push('Orden/cantidad de filas distinto de la referencia en posición '+(i+1)+'.');
+   const ri=ref.longitudes.indexOf(f.longitud);
+   if(ri<0){errores.push('Fila no presente en fotografía transcrita: '+f.longitud+' m.');continue;}
+   if(!Array.isArray(f.capacidades)||f.capacidades.length!==ref.columnas.length){errores.push('Fila incompleta en '+f.longitud+' m.');continue;}
+   for(let j=0;j<ref.columnas.length;j++){
+    posiciones++;const valor=f.capacidades[j],esperado=ref.capacidades[ri]?.[j];
+    if(!Number.isInteger(valor)||valor<=0)errores.push('Capacidad inválida: '+f.longitud+' m / '+ref.columnas[j]+'.');
+    const correccion=ref.correccionesAuditadas?.find(c=>c.longitud===f.longitud&&c.diametro===ref.columnas[j]);
+    if(correccion){
+     if(correccion.anterior!==esperado||valor!==correccion.corregido)diferencias.push({longitud:f.longitud,diametro:ref.columnas[j],registrado:valor,referencia:correccion.corregido});
+     else{coincidencias++;correccionesDocumentadas.push({...correccion});}
+    }else if(valor===esperado){coincidencias++;coincidenciasBase++;}else diferencias.push({longitud:f.longitud,diametro:ref.columnas[j],registrado:valor,referencia:esperado});
+    if(j&&Number.isFinite(f.capacidades[j-1])&&valor<f.capacidades[j-1])errores.push('Capacidad decreciente con diámetro en '+f.longitud+' m.');
+    const anterior=t.filas[i-1]?.capacidades?.[j];
+    if(i&&Number.isFinite(anterior)&&valor>anterior)errores.push('Capacidad creciente con longitud en '+ref.columnas[j]+'.');
+   }
+  }
+  for(const l of ref.longitudes)if(!vistas.has(l))errores.push('Falta fila fotografiada de '+l+' m.');
+  if(diferencias.length)errores.push(diferencias.length+' capacidades distintas de la referencia; revisar coordenadas, sin corregir automáticamente.');
+  if(t.procedencia?.sha256!==ref.fotoSha256)errores.push('Identificador de fotografía distinto de la referencia.');
+  return {integra:errores.length===0&&posiciones===441&&coincidencias===441,errores:[...new Set(errores)],alertas,posiciones,coincidencias,coincidenciasBase,correccionesDocumentadas,diferencias};
+ }
+ function auditarRedondeos(t){
+  const filas=[],errores=[];
+  if(!t||!Array.isArray(t.complemento)||!Array.isArray(t.diametros)||!Array.isArray(t.accesorios))return {filas,errores:['Falta complemento de Tabla 18.']};
+  for(const f of t.complemento){
+   const factor=t.accesorios.find(a=>a.tipo===f.tipo)?.factorD;
+   if(!Array.isArray(f.equivalentesM))continue;
+   for(const [i,impreso]of f.equivalentesM.entries()){
+    const d=t.diametros[i]?.diametroTabuladoM;
+    if(impreso===null)continue;
+    if(!Number.isFinite(impreso)||!Number.isFinite(d)||!Number.isFinite(factor)||!Number.isInteger(f.cantidad)){errores.push('Datos inválidos en '+f.tipo+' / '+f.cantidad);continue;}
+    // Aritmética en enteros: los d fotografiados tienen tres decimales.
+    const mm=Math.round(d*1000),milimetros=f.cantidad*factor*mm;
+    const calculado=milimetros/1000,centimos=Math.round(milimetros/10),redondeado=centimos/100;
+    if(Math.abs(impreso-redondeado)<1e-9)continue;
+    const truncado=Math.trunc(milimetros/10)/100;
+    const explicacion=Math.abs(impreso-truncado)<1e-9?'Compatible con truncamiento a dos decimales en esta celda; hipótesis, no regla confirmada.':'No coincide con truncamiento ni redondeo al centésimo usando d mostrado; posible errata o criterio/d interno diferente, sin evidencia suficiente.';
+    filas.push({accesorio:f.tipo,cantidad:f.cantidad,diametro:t.diametros[i].nominal,impreso,calculado,redondeado,diferencia:Number((impreso-calculado).toFixed(6)),diferenciaCentésimo:Number((impreso-redondeado).toFixed(6)),posibleExplicacion:explicacion,estado:'Impreso conservado; criterio técnico pendiente',origenImpreso:'Fotografía Tabla 18',origenCalculado:'cantidad × factor × d tabulado; valor derivado, no leído'});
+   }
+  }
+  return {filas,errores};
+ }
+ function auditarDudas(t){
+  const objetivos=[{tipo:'codo90',cantidad:5,nominal:'2"',factor:30,d:.051,impresoCotejado:7.67},
+   {tipo:'tee-directo',cantidad:5,nominal:'3"',factor:20,d:.076,impresoCotejado:7.60}];
+  return objetivos.map(c=>{
+   const i=t?.diametros?.findIndex(d=>d.nominal===c.nominal),valor=t?.complemento?.find(f=>f.tipo===c.tipo&&f.cantidad===c.cantidad)?.equivalentesM?.[i];
+   const calculado=c.cantidad*c.factor*Math.round(c.d*1000)/1000;
+   const cotejo=t?.celdasReexaminadas?.find(f=>f.tipo===c.tipo&&f.cantidad===c.cantidad&&f.columna===c.nominal);
+   const lecturaConfirmada=valor===c.impresoCotejado&&cotejo?.valorImpreso===valor&&!!cotejo.estadoLectura;
+   const diferencia=valor==null?null:Number((valor-calculado).toFixed(6));
+   return {...c,valorOriginal:valor??null,calculado,diferencia,lecturaConfirmada,
+    estado:!lecturaConfirmada?'Lectura pendiente; no completar por fórmula':diferencia===0?'Impreso cotejado y aritmética coincidente; aplicabilidad técnica pendiente':'Impreso cotejado; divergencia técnica NO resuelta',
+    explicacion:!lecturaConfirmada?'Falta lectura cotejada; el producto no confirma la cifra impresa.':diferencia===0?'7,60 coincide con 5 × 20 × 0,076. La lectura anterior 7,61 se descarta.':'Se lee 7,67, pero 5 × 30 × 0,051 = 7,65 exactos; la diferencia de 0,02 m no es redondeo al centésimo. Posible errata o d distinto no documentado; ninguna hipótesis confirmada.'};
+  });
+ }
+ const api={auditarTabla3,auditarRedondeos,auditarDudas};
+ if(typeof module==='object'&&module.exports)module.exports=api;else root.AuditoriaFinalTablasGas=api;
+})(globalThis);
+
+</script>
 <script>
 'use strict';
 const $=id=>document.getElementById(id);
@@ -369,6 +2978,7 @@ let modulo='',fotoURL=null,artefactos=[],tramos=[];
 let editandoTramo=-1,editandoAccesorios=-1,borradorAccesorios=[];
 const fotosSesion={};
 const CLAVE='canerias-proyectos-v1';
+let persistenciaHabilitada=false,ultimoGuardadoValido=null;
 const especialidades=['gas','agua','cloacas'];
 let proyectos={gas:{},agua:{},cloacas:{}};
 const CAMPOS_INSTALACION={provincia:'redProvincia',localidad:'redLocalidad',distribuidora:'redDistribuidora',material:'redMaterial',
@@ -977,18 +3587,20 @@ function guardarDatos(){
  proyectoGasActual().artefactos=artefactos;
  proyectoGasActual().tipoGas=$('gt').value;
  if(typeof invalidarMaterialesGas==='function')invalidarMaterialesGas();
+ if(!persistenciaHabilitada){$('estadoGuardado').textContent='No se pudo guardar: no se pudo leer con seguridad el almacenamiento anterior. Seguís trabajando en esta sesión, sin sobrescribir proyectos existentes. Conservá un PDF o respaldo antes de cerrar.';return;}
  try{
-  localStorage.setItem(CLAVE,JSON.stringify(proyectos));
+  const serializado=JSON.stringify(proyectos);
+  localStorage.setItem(CLAVE,serializado);ultimoGuardadoValido=JSON.parse(serializado);
   $('estadoGuardado').textContent='Datos guardados en este navegador. No se envían a ningún servidor.';
  }catch(e){
   // La foto no debe impedir guardar el resto del proyecto.
   const sinFotos=JSON.parse(JSON.stringify(proyectos));
-  especialidades.forEach(m=>delete sinFotos[m].foto);
-  if(sinFotos.gas.demostracion)delete sinFotos.gas.demostracion.foto;
+  especialidades.forEach(m=>{if(ultimoGuardadoValido?.[m]?.foto)sinFotos[m].foto=ultimoGuardadoValido[m].foto;else delete sinFotos[m].foto;});
+  if(sinFotos.gas.demostracion){if(ultimoGuardadoValido?.gas?.demostracion?.foto)sinFotos.gas.demostracion.foto=ultimoGuardadoValido.gas.demostracion.foto;else delete sinFotos.gas.demostracion.foto;}
   try{
    localStorage.setItem(CLAVE,JSON.stringify(sinFotos));
-   especialidades.forEach(m=>delete proyectos[m].foto);
-   if(proyectos.gas.demostracion)delete proyectos.gas.demostracion.foto;
+   ultimoGuardadoValido=JSON.parse(JSON.stringify(sinFotos));
+   // Las fotos anteriores siguen en disco; las nuevas permanecen en memoria/sesión.
    $('estadoGuardado').textContent='Datos guardados, pero las fotos solo quedan en esta sesión por falta de espacio.';
   }catch(error){
    $('estadoGuardado').textContent='No se pudo guardar: almacenamiento bloqueado o lleno. Conservá una impresión antes de cerrar.';
@@ -996,19 +3608,32 @@ function guardarDatos(){
  }
 }
 function restaurarDatos(){
+ let datos=null;
  try{
-  const datos=JSON.parse(localStorage.getItem(CLAVE)||'null');
-  if(datos && especialidades.every(m=>datos[m] && typeof datos[m]==='object' && !Array.isArray(datos[m]))) proyectos=datos;
+  const texto=localStorage.getItem(CLAVE);
+  datos=texto===null?null:JSON.parse(texto);
+  if(datos!==null && !especialidades.every(m=>datos[m] && typeof datos[m]==='object' && !Array.isArray(datos[m])))throw Error('Formato de proyectos no reconocido');
+  ultimoGuardadoValido=datos?JSON.parse(JSON.stringify(datos)):null;
+  persistenciaHabilitada=true;
+ }catch(e){
+  datos=null;persistenciaHabilitada=false;
+  $('estadoGuardado').textContent='No se pudieron recuperar los datos locales ('+(e.name||'Error')+'). El almacenamiento puede estar restringido o los datos no ser legibles. No se sobrescribirán los proyectos anteriores. Podés navegar y trabajar en esta sesión.';
+ }
+ try{
+  if(datos)proyectos=datos;
   separarLegadoSimuladoGas();
   const g=proyectos.gas;
- borradorCroquis=formatoBorradorValido(g.borradorCroquis)?g.borradorCroquis:null;
+  borradorCroquis=formatoBorradorValido(g.borradorCroquis)?g.borradorCroquis:null;
   tramos=Array.isArray(g.tramos)?g.tramos.filter(t=>t && typeof t.desde==='string' && typeof t.hasta==='string' && (t.diametro===null||typeof t.diametro==='string') && Number.isFinite(t.metros) && t.metros>0 && (t.consumo===null || (Number.isFinite(t.consumo) && t.consumo>=0))):[];
   artefactos=Array.isArray(g.artefactos)?g.artefactos.filter(a=>a && typeof a.nombre==='string' && Number.isFinite(a.consumo) && a.consumo>0):[];
   restaurarInstalacionGas(g);
   if(['9300','22300'].includes(g.tipoGas)) $('gt').value=g.tipoGas;
-  $('estadoGuardado').textContent='Guardado local en este navegador. Borrar sus datos elimina los proyectos.';
+  if(persistenciaHabilitada)$('estadoGuardado').textContent='Guardado local en este navegador. Borrar sus datos elimina los proyectos.';
  }catch(e){
-  $('estadoGuardado').textContent='No se pudieron recuperar los datos locales. Podés trabajar, pero verificá el guardado antes de cerrar.';
+  persistenciaHabilitada=false;
+  proyectos={gas:{},agua:{},cloacas:{}};tramos=[];artefactos=[];borradorCroquis=null;
+  instalacionGas={version:1,perfil:{pais:'AR',uso:'domiciliario',gas:'GN'},nodos:[]};
+  $('estadoGuardado').textContent='Error al inicializar el proyecto: '+e.name+' · '+e.message+'. Los datos almacenados no se sobrescribirán.';
  }
  renderTramos();renderGas();renderRevisionCroquis();
 }

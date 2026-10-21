@@ -1,5 +1,12 @@
 # CAÑERÍAS
 
+## Inicio autónomo en Android (versión actual)
+
+Rama `prueba/android-inicio-local`, base `8f4f2be`. `index.html` incluye sus diez dependencias JavaScript para poder abrirse desde proveedores `content://` sin acceso a archivos vecinos. Los fallos de almacenamiento permiten navegar y trabajar en memoria; si no se recuperaron datos con seguridad, no se sobrescribe el almacenamiento anterior. Se conservan informe limpio y separación de demostraciones.
+
+**239 pruebas aprobadas (229 anteriores + 10 nuevas).** La prueba visual de navegador sigue pendiente por bloqueo de Chromium en el entorno. Instrucciones, diagnóstico y límites en [INICIO-ANDROID.md](INICIO-ANDROID.md). Para mantenimiento: `npm run empaquetar:local` actualiza las fuentes incorporadas; `npm test` comprueba su igualdad.
+
+
 ## Informe limpio para Android (versión experimental actual)
 
 Rama `prueba/informe-limpio-android`, base `2a85068`. La impresión usa un documento independiente del proyecto y espacio seleccionados: tramos, artefactos, materiales, estados, observaciones y advertencias. No copia formularios ni paneles; no incluye una sección de plano vacía. Formato A4 con encabezados repetidos y tablas que pueden continuar en otra página.

@@ -24,7 +24,7 @@ Se pide A4 con márgenes de 12 mm, encabezados de tabla repetidos y filas proteg
 ## Prueba desde el celular
 
 1. Conservá la carpeta y la versión anteriores. Descargá y **extraé todo el ZIP** en una carpeta nueva; no abras solo el HTML dentro del archivo comprimido.
-2. Abrí `canerias-informe-limpio-android/index.html` con Chrome o el navegador con el que venías probando la versión local. Los archivos de `informes`, `materiales` y `datos` deben permanecer junto al HTML en sus carpetas.
+2. Abrí `canerias-informe-limpio-android/index.html` con Chrome o el navegador con el que venías probando la versión local. En la corrección posterior de inicio Android, index.html ya incorpora sus scripts y no necesita acceder a las carpetas vecinas para arrancar; ver INICIO-ANDROID.md. Las carpetas se conservan como fuentes y documentación.
 3. Entrá en **GAS** y seleccioná **Mi proyecto**. Revisá que estén los tramos reales. Si el navegador recupera datos mezclados anteriores, los registros con procedencia simulada estarán en **Demostración separada** y aparecerá un aviso de conservación.
 4. Abrí la revisión de materiales con tus tramos, corregí una cantidad y revisá las filas. Guardá la revisión y comprobá también la descarga CSV. No hace falta introducir datos de demostración en el proyecto real.
 5. Tocá **Imprimir informe / guardar PDF**. En el diálogo de impresión elegí **Guardar como PDF**, papel **A4**, orientación vertical. Desactivá encabezados y pies del navegador si esa opción aparece. Guardá y abrí el PDF.

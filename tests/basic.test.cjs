@@ -6,13 +6,14 @@ const html=fs.readFileSync('index.html','utf8');
 const script=html.match(/<script>([\s\S]*?)<\/script>/)[1];
 // DOM mínimo: estas pruebas ejercitan el estado y los cálculos reales del script.
 // La maquetación, cámara e impresión visual requieren la prueba de navegador.
-function app(saved=null,{blocked=false,quota=Infinity,tablasLegadas=false,tablasFotoBase=false}={}){
+function app(saved=null,{blocked=false,quota=Infinity,tablasLegadas=false,tablasFotoBase=false,embebido=false,storageGetter=false,soloLectura=false}={}){
  const elements=new Map();const store=new Map(saved?[['canerias-proyectos-v1',saved]]:[]);
  function element(){return {value:'',textContent:'',checked:false,style:{},children:[],className:'',classList:{hidden:false,add(c){if(c==='oculto')this.hidden=true;},remove(c){if(c==='oculto')this.hidden=false;},toggle(c,b){if(c==='oculto')this.hidden=b;}},append(...x){this.children.push(...x)},replaceChildren(){this.children=[];this.textContent=''},removeAttribute(k){delete this[k]},addEventListener(k,fn){this[k]=fn}};}
  for(const m of html.matchAll(/id="([^"]+)"/g))elements.set(m[1],element());
  elements.get('gt').value='9300';elements.get('ga').value='Cocina';
- const ctx=vm.createContext({document:{getElementById:id=>elements.get(id),createElement:element,createTextNode:text=>({textContent:text})},window:{scrollTo(){},addEventListener(k,fn){this[k]=fn}},localStorage:{getItem:k=>{if(blocked)throw Error('blocked');return store.get(k)||null},setItem(k,v){if(blocked||v.length>quota)throw Error('quota');store.set(k,v)}},URL:{revokeObjectURL(){}},alert(){}});
- for(const m of html.matchAll(/<script src="([^"]+)"><\/script>/g)){const ruta=tablasFotoBase&&/^datos\/tabla-(3|18)\.js$/.test(m[1])?m[1].replace('datos/tabla-','tests/fixtures/tabla-').replace('.js','-1e99313.cjs'):tablasLegadas&&/^datos\/tabla-(3|18)\.js$/.test(m[1])?m[1].replace('datos/tabla-','tests/fixtures/tabla-').replace('.js','-22028c8.cjs'):m[1];vm.runInContext(fs.readFileSync(ruta,'utf8'),ctx);}
+ const ctx=vm.createContext({document:{getElementById:id=>elements.get(id),createElement:element,createTextNode:text=>({textContent:text})},window:{scrollTo(){},addEventListener(k,fn){this[k]=fn}},localStorage:{getItem:k=>{if(blocked)throw Error('blocked');return store.get(k)||null},setItem(k,v){if(blocked||soloLectura||v.length>quota)throw Error('quota');store.set(k,v)}},URL:{revokeObjectURL(){}},alert(){}});
+ if(storageGetter)vm.runInContext("Object.defineProperty(globalThis,'localStorage',{get(){const e=new Error('Acceso restringido');e.name='SecurityError';throw e;}})",ctx);
+ for(const m of html.matchAll(/<script (?:src|data-local)="([^"]+)">([\s\S]*?)<\/script>/g)){const ruta=tablasFotoBase&&/^datos\/tabla-(3|18)\.js$/.test(m[1])?m[1].replace('datos/tabla-','tests/fixtures/tabla-').replace('.js','-1e99313.cjs'):tablasLegadas&&/^datos\/tabla-(3|18)\.js$/.test(m[1])?m[1].replace('datos/tabla-','tests/fixtures/tabla-').replace('.js','-22028c8.cjs'):m[1];vm.runInContext(embebido?m[2]:fs.readFileSync(ruta,'utf8'),ctx);}
  vm.runInContext(script,ctx);
  return {ctx,elements,run:code=>vm.runInContext(code,ctx),saved:()=>store.get('canerias-proyectos-v1'),text:id=>elements.get(id).textContent};
 }
@@ -665,4 +666,38 @@ test('aislamiento: perfiles y editor de nodos cambian junto con el espacio activ
 test('aislamiento: una lectura de foto demorada no escribe en el espacio recién seleccionado',()=>{
  const a=app();a.run("abrir('gas')");let lector;a.ctx.URL.createObjectURL=()=> 'blob:foto';a.ctx.FileReader=class{constructor(){lector=this;}readAsDataURL(){}};
  a.ctx.evento={target:{files:[{type:'image/png',size:10}]}};a.run("cargarFoto(evento);seleccionarAmbitoGas('demostracion')");lector.result='data:image/png;base64,TARDÍA';lector.onload();assert.equal(a.run('proyectos.gas.demostracion.foto'),undefined);assert.equal(a.run('proyectos.gas.foto'),undefined);
+});
+
+test('Android: index autónomo contiene exactamente las diez fuentes locales, sin solicitudes de scripts',()=>{
+ const bloques=[...html.matchAll(/<script data-local="([^"]+)">\n([\s\S]*?)\n<\/script>/g)];assert.equal(bloques.length,10);assert.doesNotMatch(html,/<script\s+src=/i);
+ for(const [,ruta,codigo]of bloques)assert.equal(codigo,fs.readFileSync(ruta,'utf8'),ruta);
+});
+test('Android: ejecuta los scripts incorporados y navega todas las especialidades sin archivos vecinos',()=>{
+ const a=app(null,{embebido:true});for(const m of ['gas','agua','cloacas','gas']){a.run(`abrir('${m}')`);assert.equal(a.run('modulo'),m);assert.equal(a.elements.get('inicio').classList.hidden,true);assert.equal(a.elements.get('trabajo').classList.hidden,false);assert.equal(a.elements.get('formularioGas').classList.hidden,m!=='gas');a.run('volver()');assert.equal(a.elements.get('inicio').classList.hidden,false);}
+});
+test('Android: SecurityError al acceder a localStorage no impide navegar ni imprimir',()=>{
+ const a=app(null,{embebido:true,storageGetter:true});assert.match(a.text('estadoGuardado'),/SecurityError/);
+ for(const m of ['gas','agua','cloacas']){a.run(`abrir('${m}');guardarDatos();prepararInformeActual()`);assert.equal(a.run('modulo'),m);assert.equal(a.elements.get('trabajo').classList.hidden,false);assert.match(a.elements.get('informeImpresion').innerHTML,new RegExp(m.toUpperCase()));}assert.equal(a.saved(),undefined);
+});
+test('Android: lectura bloqueada no impide la carga manual ni aislamiento de ejemplos en memoria',()=>{
+ const a=app(null,{embebido:true,blocked:true});ejemploRevisado(a);a.run('incorporarCroquis()');assert.equal(a.run('ambitoGas'),'demostracion');assert.equal(a.run('tramos.length'),1);a.run("seleccionarAmbitoGas('proyecto')");assert.equal(a.run('tramos.length'),0);assert.equal(a.saved(),undefined);assert.match(a.text('estadoGuardado'),/No se pudo guardar/);
+});
+test('Android: JSON dañado queda intacto aunque el almacenamiento permita escribir',()=>{
+ const original='{JSON anterior ilegible';const a=app(original,{embebido:true});for(const m of ['gas','agua','cloacas'])a.run(`abrir('${m}');guardarDatos()`);assert.equal(a.saved(),original);assert.equal(a.run('persistenciaHabilitada'),false);
+});
+test('Android: estructura desconocida queda intacta y permite volver a GAS',()=>{
+ const original=JSON.stringify({gas:17,agua:{},cloacas:{},extra:'conservar'});const a=app(original,{embebido:true});a.run("abrir('gas');abrir('agua');abrir('gas');guardarDatos()");assert.equal(a.saved(),original);assert.equal(a.run('modulo'),'gas');
+});
+test('Android: fallo solo de escritura conserva proyectos y cambios nuevos en memoria',()=>{
+ const a=app();proyectoPlan(a);a.run('guardarDatos()');const original=a.saved();const b=app(original,{embebido:true,soloLectura:true});b.run("abrir('gas');tramos[0].metros=15;guardarDatos();abrir('agua');abrir('gas');prepararInformeActual()");assert.equal(b.saved(),original);assert.equal(b.run('tramos[0].metros'),15);assert.match(b.elements.get('informeImpresion').innerHTML,/>15<\/td>/);assert.match(b.text('estadoGuardado'),/No se pudo guardar/);
+});
+test('Android: cargar una versión válida no escribe ni migra el disco al iniciar o abrir GAS',()=>{
+ const a=app();proyectoPlan(a);a.run('guardarDatos()');const original=a.saved();const b=app(original,{embebido:true});b.run("abrir('gas')");assert.equal(b.saved(),original);assert.equal(b.run('tramos.length'),1);
+});
+test('Android: fallo de inicialización se distingue del almacenamiento y conserva el original',()=>{
+ const original=JSON.stringify({gas:{tramos:[{desde:'D',hasta:'E',metros:6,diametro:null,consumo:null,origen:{tipo:'simulado'}}],demostracion:{instalacion:{nodos:null}}},agua:{},cloacas:{}});
+ const a=app(original,{embebido:true});assert.match(a.text('estadoGuardado'),/Error al inicializar el proyecto/);a.run("abrir('gas');abrir('agua');guardarDatos()");assert.equal(a.saved(),original);assert.equal(a.run('modulo'),'agua');
+});
+test('Android: falta de cuota no elimina la fotografía previamente guardada',()=>{
+ const a=app();a.run("abrir('gas');proyectos.gas.foto='data:image/png;base64,ANTERIOR';guardarDatos()");const b=app(a.saved(),{embebido:true,quota:1500});b.run("abrir('gas');proyectos.gas.foto='data:image/png;base64,'+'x'.repeat(5000)");b.elements.get('duda').value='Nueva aclaración';b.run('guardarDatos()');const g=JSON.parse(b.saved()).gas;assert.equal(g.foto,'data:image/png;base64,ANTERIOR');assert.equal(g.aclaracion,'Nueva aclaración');assert.match(b.text('estadoGuardado'),/fotos solo quedan en esta sesión/);
 });
