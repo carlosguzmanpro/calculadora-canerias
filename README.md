@@ -1,5 +1,14 @@
 # CAÑERÍAS
 
+## Informe limpio para Android (versión experimental actual)
+
+Rama `prueba/informe-limpio-android`, base `2a85068`. La impresión usa un documento independiente del proyecto y espacio seleccionados: tramos, artefactos, materiales, estados, observaciones y advertencias. No copia formularios ni paneles; no incluye una sección de plano vacía. Formato A4 con encabezados repetidos y tablas que pueden continuar en otra página.
+
+Las prácticas confirmadas se guardan en **Demostración separada**, nunca en **Mi proyecto**. Los simulados antiguos se separan por su procedencia registrada, conservando una copia de los datos anteriores; un nombre “DEMO” por sí solo no mueve un registro. Fotos, notas, perfiles y revisiones de materiales tienen su propio espacio. Las cantidades manuales y el CSV se conservan. No se cambian tablas ni motor; diámetros definitivos bloqueados.
+
+Instrucciones y limitaciones: [IMPRESION-ANDROID.md](IMPRESION-ANDROID.md).
+
+
 Aplicación gratuita, estática y en español para registrar croquis y estimar materiales de instalaciones. Se ejecuta en el navegador, sin cuentas, backend ni dependencias de ejecución.
 
 ## Materiales y revisión de compra (entrega actual)
@@ -24,7 +33,7 @@ Abrí **DIAGNOSTICO-CALEFON-COCINA.html** del ZIP descomprimido para leer/imprim
 - **AGUA y CLOACAS:** cada especialidad tiene su propia foto y aclaración. Sus cálculos técnicos y formularios de materiales están pendientes; no se muestra el formulario de GAS.
 - **Materiales de GAS:** tiras completas de 6 m por segmento continuo entre accesorios, sin reutilizar sobrantes; cuplas solo para unir tiras dentro de cada segmento y llaves indicadas. Resumen por diámetro y referencia adicional del 10% de longitud. Incluye los codos, tees y reducciones registrados y revisados. No dimensiona la instalación ni agrega conexiones desconocidas.
 - **Consumos:** suma de kcal/h de placa y caudal orientativo con poder calorífico de referencia. Agregar o quitar artefactos y cambiar el gas invalida el resultado hasta recalcular.
-- **Impresión:** desde el botón de revisión o la opción Imprimir del navegador. Incluye el contenido de la vista actual, la aclaración actual, resultados y advertencias. Los resultados de GAS se recalculan al preparar la impresión. Puede guardarse como PDF cuando el dispositivo lo permita.
+- **Impresión:** desde el botón de revisión o la opción Imprimir del navegador. Genera únicamente el informe del proyecto y espacio seleccionados, con la aclaración actual, materiales y advertencias; no copia la pantalla ni recalcula el dimensionamiento. Puede guardarse como PDF cuando el dispositivo lo permita.
 
 No interpreta fotografías, genera planos ni verifica diámetros, presiones o normativa. Gemini queda para una etapa futura; esta versión no llama a APIs ni activa servicios pagos.
 

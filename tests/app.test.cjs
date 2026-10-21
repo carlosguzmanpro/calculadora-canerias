@@ -26,7 +26,7 @@ test('persistencia, consumos, especialidades, impresión y foto local',async()=>
  await page.getByRole('button',{name:'← Cambiar especialidad',exact:true}).click();await page.getByRole('button',{name:'💧 Agua',exact:true}).click();await page.getByRole('button',{name:'Cargar croquis de referencia',exact:true}).click();assert.equal(await page.locator('#formularioGas').isVisible(),false);assert.equal(await page.locator('#duda').inputValue(),'');
  await page.locator('#duda').fill('Agua separada');
  await page.getByRole('button',{name:'← Cambiar especialidad',exact:true}).click();await page.getByRole('button',{name:'🔥 Gas',exact:true}).click();assert.equal(await page.locator('#duda').inputValue(),'Revisar tramo A-B');
- await page.getByRole('button',{name:'🧮 CALCULAR MATERIALES',exact:true}).click();await page.emulateMedia({media:'print'});assert.equal(await page.locator('#croquis .aviso').first().isVisible(),true);assert.equal(await page.locator('#resultadoMateriales').isVisible(),true);
+ await page.getByRole('button',{name:'🧮 CALCULAR MATERIALES',exact:true}).click();await page.evaluate(()=>prepararInformeActual());await page.emulateMedia({media:'print'});assert.equal(await page.locator('#informeImpresion').isVisible(),true);assert.equal(await page.locator('#trabajo').isVisible(),false);assert.match(await page.locator('#informeImpresion').innerText(),/Revisar tramo A-B/);await page.pdf({path:'/tmp/canerias-informe-prueba.pdf',format:'A4',preferCSSPageSize:true});
  assert.deepEqual(errors,[]);
  }finally{await browser.close();}
 });

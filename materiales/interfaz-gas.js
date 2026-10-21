@@ -1,7 +1,7 @@
 /* Interfaz de revisión de materiales; usa el estado existente, nunca activa diámetros. */
 let revisionMaterialesGas=null,fuenteMaterialesGas='proyecto';
 function datosPlanGas(){
- const p=proyectos.gas;
+ const p=proyectoGasActual();
  if(!p.planCompra||typeof p.planCompra!=='object'||Array.isArray(p.planCompra))p.planCompra={};
  const d=p.planCompra;if(!d.opciones||typeof d.opciones!=='object')d.opciones={};if(!Array.isArray(d.extras))d.extras=[];if(!d.revisiones||typeof d.revisiones!=='object')d.revisiones={};return d;
 }
@@ -22,7 +22,7 @@ function entradaMaterialesGas(fuente='proyecto'){
   return {id:t.id||'tramo-'+i,metros:t.metros,diametro:t.diametro,diametroFinal:r.segmentos?.at(-1)?.diametro==='Diámetro pendiente'?null:r.segmentos?.at(-1)?.diametro,red:t.red,segmentos:geometria&&!(t.llave&&!acc.some(a=>a.tipo==='llave'&&a.ubicacion))?r.segmentos.map(s=>({metros:s.metros,diametro:s.diametro==='Diámetro pendiente'?null:s.diametro})):null,accesorios:acc};
  }),extras:datosPlanGas().extras};
 }
-function opcionesMaterialesGas(){const o=datosPlanGas().opciones;return {largoComercial:o.largoComercial??6,reutilizar:!!o.reutilizar,minimoSobrante:o.minimoSobrante??.5,hipotesisSinPosiciones:!!o.hipotesisSinPosiciones,uniones:o[fuenteMaterialesGas==='ejemplo'?'unionesEjemplo':'uniones']||{}};}
+function opcionesMaterialesGas(fuente=fuenteMaterialesGas){const o=datosPlanGas().opciones;return {largoComercial:o.largoComercial??6,reutilizar:!!o.reutilizar,minimoSobrante:o.minimoSobrante??.5,hipotesisSinPosiciones:!!o.hipotesisSinPosiciones,uniones:o[fuente==='ejemplo'?'unionesEjemplo':'uniones']||{}};}
 function firmaMaterialesGas(){return JSON.stringify({fuente:fuenteMaterialesGas,entrada:entradaMaterialesGas(fuenteMaterialesGas),opciones:opcionesMaterialesGas()});}
 function invalidarMaterialesGas(){
  if(revisionMaterialesGas&&revisionMaterialesGas.firma!==firmaMaterialesGas()){
@@ -108,5 +108,5 @@ function descargarMaterialesGas(){
  const csv='\uFEFF'+filas.map(f=>f.map(quote).join(';')).join('\r\n');
  const blob=new Blob([csv],{type:'text/csv;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='canerias-materiales-revision.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
-function imprimirMaterialesGas(){if(prepararSalidaMaterialesGas()){$('resultadoMateriales').classList.add('solo-pantalla');window.print();}}
+function imprimirMaterialesGas(){if(!prepararSalidaMaterialesGas())return;if(fuenteMaterialesGas==='ejemplo'){$('matMensaje').textContent='El ejemplo es una vista separada. Seleccioná Mi proyecto o Demostración para imprimir su informe.';return;}imprimirInformeActual();}
 window.addEventListener('afterprint',()=>{$('resultadoMateriales').classList.remove('solo-pantalla');});

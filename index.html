@@ -51,6 +51,18 @@ img{max-height:45vh}
 body{background:white}
 section{box-shadow:none}
 }
+
+#informeImpresion{display:none}
+@page{size:A4;margin:12mm}
+@media print{
+ body > :not(#informeImpresion){display:none!important}
+ #informeImpresion{display:block!important;color:#000;background:#fff;font:10pt Arial,sans-serif}
+ #informeImpresion h1{font-size:18pt} #informeImpresion h2{font-size:12pt;break-after:avoid}
+ #informeImpresion table{width:100%;border-collapse:collapse;table-layout:fixed;margin:6pt 0 12pt;break-inside:auto}
+ #informeImpresion th,#informeImpresion td{border:1px solid #999;padding:4pt;overflow-wrap:anywhere;vertical-align:top}
+ #informeImpresion thead{display:table-header-group} #informeImpresion tr{break-inside:avoid}
+ #informeImpresion p{white-space:pre-wrap;margin:5pt 0;orphans:3;widows:3}
+}
 </style>
 </head>
 <body>
@@ -70,9 +82,10 @@ section{box-shadow:none}
 
 <section id="trabajo" class="oculto">
 <button class="alt" onclick="volver()">← Cambiar especialidad</button>
-<h2 id="titulo"></h2>
+<h2 id="titulo"></h2><button class="alt" onclick="imprimirInformeActual()">Imprimir informe / guardar PDF</button>
 
 <div id="menuGas" class="oculto">
+<label>Espacio de trabajo <select id="ambitoGas" onchange="seleccionarAmbitoGas(this.value)"><option value="proyecto">Mi proyecto</option><option value="demostracion">Demostración separada</option></select></label><p id="estadoAmbitoGas"></p>
 <button onclick="mostrarVista('dimensionGas')">Calcular diámetros · diagnóstico</button>
 <button class="alt" onclick="mostrarVista('redGas')">Instalación: datos y conexiones de GAS</button>
 <button class="alt" onclick="mostrarVista('revisionCroquis')">Revisar croquis y ejemplos</button>
@@ -339,6 +352,9 @@ Estimación de compra sin reutilizar sobrantes: tiras de 6 m por segmento contin
 <button onclick="document.getElementById('visor').close()">Cerrar imagen</button>
 </dialog>
 
+<script src="informes/ambitos-gas.js"></script>
+<script src="informes/documento-proyecto.js"></script>
+<script src="informes/interfaz-informe.js"></script>
 <script src="materiales/planificador-gas.js"></script>
 <script src="materiales/interfaz-gas.js"></script>
 <script src="datos/tabla-3.js"></script>
@@ -947,19 +963,19 @@ function invalidarConsumos(){
 }
 function guardarDatos(){
  if(!modulo)return;
- const actual=proyectos[modulo];
+ const actual=datosEspecialidadActual();
  actual.aclaracion=$('duda').value;
  actual.revision=$('revision').textContent;
  asegurarIdsGas();
  $('informeClaseMiRed').replaceChildren();
  $('informeClaseMiRed').textContent='Datos actualizados. Volvé a ejecutar el método de clase.';
  $('resultadoDimensionamiento').textContent='Datos actualizados. Ejecutá nuevamente el diagnóstico de dimensionamiento.';
- proyectos.gas.instalacion=instalacionGas;
+ proyectoGasActual().instalacion=instalacionGas;
  renderRedGas();
- proyectos.gas.borradorCroquis=borradorCroquis;
- proyectos.gas.tramos=tramos;
- proyectos.gas.artefactos=artefactos;
- proyectos.gas.tipoGas=$('gt').value;
+ proyectoGasActual().borradorCroquis=borradorCroquis;
+ proyectoGasActual().tramos=tramos;
+ proyectoGasActual().artefactos=artefactos;
+ proyectoGasActual().tipoGas=$('gt').value;
  if(typeof invalidarMaterialesGas==='function')invalidarMaterialesGas();
  try{
   localStorage.setItem(CLAVE,JSON.stringify(proyectos));
@@ -968,9 +984,11 @@ function guardarDatos(){
   // La foto no debe impedir guardar el resto del proyecto.
   const sinFotos=JSON.parse(JSON.stringify(proyectos));
   especialidades.forEach(m=>delete sinFotos[m].foto);
+  if(sinFotos.gas.demostracion)delete sinFotos.gas.demostracion.foto;
   try{
    localStorage.setItem(CLAVE,JSON.stringify(sinFotos));
    especialidades.forEach(m=>delete proyectos[m].foto);
+   if(proyectos.gas.demostracion)delete proyectos.gas.demostracion.foto;
    $('estadoGuardado').textContent='Datos guardados, pero las fotos solo quedan en esta sesión por falta de espacio.';
   }catch(error){
    $('estadoGuardado').textContent='No se pudo guardar: almacenamiento bloqueado o lleno. Conservá una impresión antes de cerrar.';
@@ -981,6 +999,7 @@ function restaurarDatos(){
  try{
   const datos=JSON.parse(localStorage.getItem(CLAVE)||'null');
   if(datos && especialidades.every(m=>datos[m] && typeof datos[m]==='object' && !Array.isArray(datos[m]))) proyectos=datos;
+  separarLegadoSimuladoGas();
   const g=proyectos.gas;
  borradorCroquis=formatoBorradorValido(g.borradorCroquis)?g.borradorCroquis:null;
   tramos=Array.isArray(g.tramos)?g.tramos.filter(t=>t && typeof t.desde==='string' && typeof t.hasta==='string' && (t.diametro===null||typeof t.diametro==='string') && Number.isFinite(t.metros) && t.metros>0 && (t.consumo===null || (Number.isFinite(t.consumo) && t.consumo>=0))):[];
@@ -994,14 +1013,14 @@ function restaurarDatos(){
  renderTramos();renderGas();renderRevisionCroquis();
 }
 function actualizarEstadoFoto(){
- $('estadoFoto').textContent=proyectos[modulo].foto?
+ $('estadoFoto').textContent=datosEspecialidadActual().foto?
   'Foto guardada en este navegador. No se sube a ningún servidor.':
   (fotoURL?'Foto disponible solo en esta sesión. Para guardarla: PNG, JPEG o WebP de hasta 1 MB y espacio disponible.':'No hay foto cargada en esta especialidad.');
 }
 function mostrarFotoLocal(){
  fotoURL=null;
- if(fotosSesion[modulo])fotoURL=fotosSesion[modulo];
- const foto=proyectos[modulo].foto;
+ if(fotosSesion[claveFotoActual()])fotoURL=fotosSesion[claveFotoActual()];
+ const foto=datosEspecialidadActual().foto;
  if(typeof foto==='string' && /^data:image\/(png|jpeg|webp);base64,/.test(foto))fotoURL=foto;
  $('imagen').classList.toggle('oculto',!fotoURL);
  $('accionesFoto').classList.toggle('oculto',!fotoURL);
@@ -1016,8 +1035,8 @@ function abrir(m){
  if(!especialidades.includes(m))return;
  if(modulo)guardarDatos();
  modulo=m;
- $('duda').value=proyectos[m].aclaracion||'';
- $('revision').textContent=proyectos[m].revision||'Todavía no hay una revisión registrada.';
+ $('duda').value=datosEspecialidadActual().aclaracion||'';
+ $('revision').textContent=datosEspecialidadActual().revision||'Todavía no hay una revisión registrada.';
  $('formularioGas').classList.toggle('oculto',m!=='gas');
  $('panelGemini').classList.toggle('oculto',m!=='gas');
  mostrarFotoLocal();
@@ -1025,6 +1044,7 @@ function abrir(m){
  $('trabajo').classList.remove('oculto');
  $('titulo').textContent={gas:'🔥 GAS',agua:'💧 AGUA',cloacas:'🚽 CLOACAS'}[m];
  $('menuGas').classList.toggle('oculto',m!=='gas');
+ if(m==='gas')renderAmbitoGas();
  $('pendiente').classList.toggle('oculto',m==='gas');
  mostrarVista(m==='gas'?'croquis':'pendiente');
  window.scrollTo(0,0);
@@ -1066,16 +1086,16 @@ function cargarFoto(e){
  }
  if(fotoURL)URL.revokeObjectURL(fotoURL);
  fotoURL=URL.createObjectURL(f);
- fotosSesion[modulo]=fotoURL;
- delete proyectos[modulo].foto;
+ fotosSesion[claveFotoActual()]=fotoURL;
+ delete datosEspecialidadActual().foto;
  guardarDatos();
- const proyecto=modulo;
+ const proyecto=modulo,claveFoto=claveFotoActual(),destinoFoto=datosEspecialidadActual();
  const urlActual=fotoURL;
  if(['image/png','image/jpeg','image/webp'].includes(f.type) && f.size<=1024*1024){
   const lector=new FileReader();
   lector.onload=()=>{
-   if(modulo!==proyecto || fotoURL!==urlActual)return;
-   proyectos[proyecto].foto=lector.result;
+   if(modulo!==proyecto || claveFotoActual()!==claveFoto || fotoURL!==urlActual)return;
+   destinoFoto.foto=lector.result;
    guardarDatos();
    actualizarEstadoFoto();
   };
@@ -1095,8 +1115,8 @@ $('camara').addEventListener('change',cargarFoto);
 $('galeria').addEventListener('change',cargarFoto);
 
 function quitarFoto(){
- delete proyectos[modulo].foto;
- delete fotosSesion[modulo];
+ delete datosEspecialidadActual().foto;
+ delete fotosSesion[claveFotoActual()];
  guardarDatos();
  if(fotoURL)URL.revokeObjectURL(fotoURL);
  fotoURL=null;
@@ -1290,6 +1310,7 @@ function renderRevisionCroquis(){
  $('contextoRevisionCroquis').textContent=borradorCroquis?.origen==='gemini'?
   'Borrador de Gemini: puede contener errores y omisiones. No es una verificación técnica. Revisá cada dato; nada se incorpora automáticamente.':
   'DEMOSTRACIÓN SIN IA: datos escritos para probar la aplicación. No provienen de tu foto, no se envían imágenes y no hubo reconocimiento real.';
+ $('incorporarCroquis').textContent=esOrigenSimulado({tipo:borradorCroquis?.origen})?'Guardar práctica en Demostración':'Incorporar datos revisados al proyecto';
  $('incorporarCroquis').disabled=!borradorCroquis || borradorCroquis.aplicado;
  $('mensajeCroquis').textContent=borradorCroquis?.aplicado?etiqueta+' incorporado. No se volverá a agregar al recargar.':
   (borradorCroquis?etiqueta+': revisá y confirmá cada dato. Completá los campos vacíos antes de incorporar.':'Todavía no hay borrador. Cargá el ejemplo simulado para practicar.');
@@ -1343,7 +1364,7 @@ function renderRevisionCroquis(){
   cont.append(bloque);
  });
 }
-function prepararIncorporacionCroquis(b){
+function prepararIncorporacionCroquis(b,coleccion=tramos){
  if(!formatoBorradorValido(b))throw Error('El formato del borrador de revisión no es válido.');
  if(b.aplicado)throw Error('Este borrador ya fue incorporado.');
  const elegidos=b.tramos.filter(t=>t.incluir);
@@ -1383,7 +1404,7 @@ function prepararIncorporacionCroquis(b){
    detalle:{estado:accesorios.length?'completo':'ninguno',accesorios,metrosFinal:c.metrosFinal}});
   if(!ninguno)nuevosArtefactos.push({nombre:c.artefacto,consumo:c.consumoArtefacto,origen});
  });
- const conjunto=[...tramos,...nuevos];
+ const conjunto=[...coleccion,...nuevos];
  nuevos.forEach(t=>{
   if(!t.diametro){
    const d=t.detalle,suma=d.accesorios.reduce((n,a)=>n+a.metrosAntes,d.metrosFinal);
@@ -1391,12 +1412,19 @@ function prepararIncorporacionCroquis(b){
   }else{const r=evaluarTramo(t,conjunto);if(r.pendiente)throw Error(r.motivo);}
  });
  // No aceptar una nueva tee que invalide una tee ya registrada.
- tramos.forEach(t=>{if(!evaluarTramo(t).pendiente && evaluarTramo(t,conjunto).pendiente)throw Error('La incorporación duplica una tee de un tramo existente.');});
+ coleccion.forEach(t=>{if(!evaluarTramo(t,coleccion).pendiente && evaluarTramo(t,conjunto).pendiente)throw Error('La incorporación duplica una tee de un tramo existente.');});
  return {tramos:nuevos,artefactos:nuevosArtefactos};
 }
 function incorporarCroquis(){
  if(modulo!=='gas')return;
  try{
+  if(esOrigenSimulado({tipo:borradorCroquis?.origen})&&ambitoGas==='proyecto'){
+   const d=espacioDemostracionGas(),n=prepararIncorporacionCroquis(borradorCroquis,d.tramos);
+   d.tramos.push(...n.tramos);d.artefactos.push(...n.artefactos);
+   d.borradorCroquis=JSON.parse(JSON.stringify({...borradorCroquis,aplicado:true}));
+   borradorCroquis=null;seleccionarAmbitoGas('demostracion');
+   $('mensajeCroquis').textContent='Práctica guardada en Demostración. Mi proyecto conserva sus datos.';return;
+  }
   const nuevos=prepararIncorporacionCroquis(borradorCroquis);
   tramos.push(...nuevos.tramos);artefactos.push(...nuevos.artefactos);borradorCroquis.aplicado=true;
   cancelarEdicionTramo();cerrarAccesorios();actualizarTramos();renderGas();guardarDatos();renderRevisionCroquis();
@@ -1718,14 +1746,11 @@ function calcularMateriales(){
 }
 window.addEventListener('beforeprint',()=>{
  $('aclaracionImpresion').textContent='Aclaración actual: '+($('duda').value.trim()||'Sin aclaración.');
- if(modulo==='gas'){
-  renderRedGas();
-  if(tramos.length)calcularMateriales();
-  if(artefactos.length)calcularConsumos();
- }
+ prepararInformeActual();
 });
 restaurarDatos();
 </script>
+<article id="informeImpresion" aria-label="Informe del proyecto"></article>
 </body>
 </html>
 

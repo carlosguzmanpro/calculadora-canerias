@@ -147,10 +147,10 @@ test('ejemplo simulado no analiza fotos ni incorpora datos sin confirmación',()
 test('incorporación confirmada conserva datos previos, calcula materiales y marca simulación',()=>{
  const a=app();ejemploRevisado(a);
  a.run("tramos.push({desde:'Real-M',hasta:'Real-A',metros:6,diametro:'1/2\"',consumo:1,detalle:{estado:'ninguno'}});artefactos.push({nombre:'Real',consumo:1000});incorporarCroquis()");
- assert.equal(a.run('tramos.length'),2);assert.equal(a.run('artefactos.length'),2);assert.equal(a.run('tramos[0].desde'),'Real-M');
- assert.equal(a.run('evaluarTramo(tramos[1]).pendiente'),false);assert.equal(a.run('evaluarTramo(tramos[1]).tiras'),3);assert.equal(a.run('evaluarTramo(tramos[1]).cuplas'),0);
+ assert.equal(a.run('tramos.length'),1);assert.equal(a.run('artefactos.length'),1);assert.equal(a.run('proyectos.gas.tramos[0].desde'),'Real-M');assert.equal(a.run('proyectos.gas.artefactos[0].nombre'),'Real');
+ assert.equal(a.run('evaluarTramo(tramos[0]).pendiente'),false);assert.equal(a.run('evaluarTramo(tramos[0]).tiras'),3);assert.equal(a.run('evaluarTramo(tramos[0]).cuplas'),0);
  a.run('calcularMateriales();calcularConsumos()');assert.match(a.elements.get('resultadoMateriales').children[0].textContent,/SIMULADOS/);assert.match(a.text('resultadoGas'),/SIMULADOS/);
- assert.equal(a.run('borradorCroquis.aplicado'),true);a.run('incorporarCroquis()');assert.equal(a.run('tramos.length'),2);
+ assert.equal(a.run('borradorCroquis.aplicado'),true);a.run('incorporarCroquis()');assert.equal(a.run('tramos.length'),1);
 });
 test('modificar un dato elimina su confirmación y evita la incorporación',()=>{
  const a=app();ejemploRevisado(a);a.run('cambiarDatoCroquis(borradorCroquis.tramos[0].campos.metros,20);incorporarCroquis()');
@@ -170,7 +170,7 @@ test('no acepta campos vacíos, longitudes incompatibles ni entrada de accesorio
 test('confirmaciones y correcciones sobreviven a recarga sin incorporar automáticamente',()=>{
  const a=app();ejemploRevisado(a);a.run('guardarDatos()');const b=app(a.saved());
  assert.equal(b.run('borradorCroquis.tramos[0].campos.metrosFinal.valor'),6);assert.equal(b.run('borradorCroquis.tramos[0].campos.metros.confirmado'),true);assert.equal(b.run('tramos.length'),0);
- b.run("abrir('gas');incorporarCroquis()");const c=app(b.saved());c.run("abrir('gas');incorporarCroquis()");assert.equal(c.run('tramos.length'),1);
+ b.run("abrir('gas');incorporarCroquis()");const c=app(b.saved());c.run("abrir('gas')");assert.equal(c.run('tramos.length'),0);c.run("seleccionarAmbitoGas('demostracion');incorporarCroquis()");assert.equal(c.run('tramos.length'),1);
 });
 test('puede descartar un tramo o accesorio y corregir el resto antes de incorporar',()=>{
  const a=app();ejemploRevisado(a);a.run('borradorCroquis.tramos[0].incluir=false;incorporarCroquis()');assert.equal(a.run('tramos.length'),0);assert.match(a.text('mensajeCroquis'),/Seleccioná/);
@@ -179,8 +179,8 @@ test('puede descartar un tramo o accesorio y corregir el resto antes de incorpor
 });
 test('rechaza tees duplicadas sin modificar datos reales ni importar parcialmente',()=>{
  const a=app();ejemploRevisado(a);
- a.run("tramos.push({desde:'X',hasta:'Y',metros:6,diametro:'3/4\"',consumo:1,detalle:{estado:'completo',metrosFinal:0,accesorios:[{tipo:'tee',metrosAntes:6,salida:'3/4\"',ramal:'1/2\"',nodo:'DEMO-T1'}]}});incorporarCroquis()");
- assert.equal(a.run('tramos.length'),1);assert.equal(a.run('artefactos.length'),0);assert.match(a.text('mensajeCroquis'),/repetida/);
+ a.run("espacioDemostracionGas().tramos.push({desde:'X',hasta:'Y',metros:6,diametro:'3/4\"',consumo:1,detalle:{estado:'completo',metrosFinal:0,accesorios:[{tipo:'tee',metrosAntes:6,salida:'3/4\"',ramal:'1/2\"',nodo:'DEMO-T1'}]}});incorporarCroquis()");
+ assert.equal(a.run('tramos.length'),0);assert.equal(a.run('espacioDemostracionGas().tramos.length'),1);assert.equal(a.run('artefactos.length'),0);assert.match(a.text('mensajeCroquis'),/repetida/);
 });
 test('rechaza orígenes desconocidos y no expone la revisión en agua o cloacas',()=>{
  const a=app();ejemploRevisado(a);a.run("borradorCroquis.origen='origen-desconocido';incorporarCroquis()");assert.equal(a.run('tramos.length'),0);assert.match(a.text('mensajeCroquis'),/formato/);
@@ -243,7 +243,7 @@ test('prueba local revisada usa cálculos existentes y mantiene marca SIMULADO a
  const a=app();geminiRevisado(a);a.run('incorporarCroquis();calcularMateriales();calcularConsumos()');
  assert.equal(a.run('tramos.length'),1);assert.equal(a.run('tramos[0].origen.tipo'),'prueba-gemini');assert.equal(a.run('evaluarTramo(tramos[0]).tiras'),3);
  assert.match(a.elements.get('resultadoMateriales').children[0].textContent,/SIMULADOS/);assert.match(a.text('resultadoGas'),/SIMULADOS/);
- const b=app(a.saved());assert.equal(b.run('borradorCroquis.origen'),'prueba-gemini');assert.equal(b.run('borradorCroquis.aplicado'),true);
+ const b=app(a.saved());b.run("abrir('gas');seleccionarAmbitoGas('demostracion')");assert.equal(b.run('borradorCroquis.origen'),'prueba-gemini');assert.equal(b.run('borradorCroquis.aplicado'),true);
 });
 test('prepara origen Gemini sin confundirlo con datos simulados; exige todas las confirmaciones',()=>{
  const a=app();geminiRevisado(a);a.run("borradorCroquis.origen='gemini';borradorCroquis.tramos[0].campos.llave.valor=null;incorporarCroquis()");assert.equal(a.run('tramos.length'),0);
@@ -617,4 +617,52 @@ test('plan materiales: CSV descargado conserva estados, pendientes y advertencia
  const a=app();a.run("abrir('gas');generarPlanGas('ejemplo');revisionMaterialesGas.plan.filas.forEach(f=>f.revisado=true)");let texto='',clicks=0;const crear=a.ctx.document.createElement;
  a.ctx.Blob=class{constructor(partes){texto=partes.join('');}};a.ctx.URL.createObjectURL=()=> 'blob:prueba';a.ctx.setTimeout=fn=>fn();a.ctx.document.createElement=()=>{const e=crear();e.click=()=>clicks++;return e;};
  a.run('descargarMaterialesGas()');assert.equal(clicks,1);assert.match(texto,/NO DEFINITIVA/);assert.match(texto,/PENDIENTE/);assert.match(texto,/estimado/);assert.match(texto,/cantidad|Cantidad/);assert.match(texto,/M-A/);assert.equal(a.run('CATALOGOS_GAS_VERIFICADOS.length'),0);
+});
+
+test('aislamiento: migra simulados antiguos conservando originales, nodos y copia recuperable',()=>{
+ const a=app();a.run("abrir('gas');tramos=[{desde:'10',hasta:'5',metros:6,diametro:null,consumo:null,red:{desde:'m',hasta:'a'}},{desde:'DEMO-M',hasta:'DEMO-A',metros:12,diametro:null,consumo:null,origen:{tipo:'simulado'},red:{desde:'dm',hasta:'da'}}];artefactos=[{id:'real',nombre:'Cocina',consumo:1000},{id:'sim',nombre:'Demo',consumo:2000,origen:{tipo:'simulado'}}];instalacionGas.nodos=[{id:'m',nombre:'M',tipo:'medidor'},{id:'a',nombre:'A',tipo:'derivacion'},{id:'dm',nombre:'DM',tipo:'medidor'},{id:'da',nombre:'DA',tipo:'artefacto',artefactoId:'sim'}];guardarDatos()");
+ const b=app(a.saved());b.run("abrir('gas');guardarDatos()");const g=JSON.parse(b.saved()).gas;
+ assert.equal(g.tramos.length,1);assert.equal(g.tramos[0].desde,'10');assert.equal(g.demostracion.tramos.length,1);assert.equal(g.demostracion.artefactos.length,1);assert.equal(g.copiaAntesSepararDemostraciones.tramos.length,2);assert.equal(g.copiaAntesSepararDemostraciones.instalacion.nodos.length,4);assert.equal(g.instalacion.nodos.length,2);
+ const c=app(b.saved());c.run("abrir('gas');guardarDatos()");assert.equal(JSON.parse(c.saved()).gas.demostracion.tramos.length,1);
+});
+test('aislamiento: un nombre DEMO manual no basta para mover datos',()=>{
+ const a=app();a.run("abrir('gas');tramos=[{desde:'DEMO-M',hasta:'A',metros:6,diametro:null,consumo:null}];guardarDatos()");const b=app(a.saved());assert.equal(b.run('tramos.length'),1);assert.equal(b.run('proyectos.gas.copiaAntesSepararDemostraciones'),undefined);
+});
+test('aislamiento: notas y fotos de proyecto, demostración, AGUA y CLOACAS sobreviven separados',()=>{
+ const a=app();a.run("abrir('gas');proyectoGasActual().foto='data:image/png;base64,REAL'");a.elements.get('duda').value='Nota real';a.run("seleccionarAmbitoGas('demostracion');proyectoGasActual().foto='data:image/png;base64,DEMO'");a.elements.get('duda').value='Nota práctica';a.run("seleccionarAmbitoGas('proyecto');mostrarFotoLocal()");assert.equal(a.run('fotoURL'),'data:image/png;base64,REAL');assert.equal(a.elements.get('duda').value,'Nota real');
+ for(const m of ['agua','cloacas']){a.run(`abrir('${m}')`);a.elements.get('duda').value=m;a.run('guardarDatos()');assert.equal(a.run('fotoURL'),null);}
+ const b=app(a.saved());b.run("abrir('gas');seleccionarAmbitoGas('demostracion')");assert.equal(b.elements.get('duda').value,'Nota práctica');assert.equal(b.run('fotoURL'),'data:image/png;base64,DEMO');
+});
+test('aislamiento: carga y confirmación de ejemplo conservan el proyecto sin agregarle práctica',()=>{
+ const a=app();ejemploRevisado(a);assert.equal(a.run('tramos.length'),0);a.run('incorporarCroquis()');assert.equal(a.run('ambitoGas'),'demostracion');assert.equal(a.run('proyectos.gas.tramos.length'),0);a.run("seleccionarAmbitoGas('proyecto');guardarDatos()");assert.equal(a.run('tramos.length'),0);const b=app(a.saved());assert.equal(b.run('tramos.length'),0);assert.equal(b.run('proyectos.gas.demostracion.tramos.length'),1);
+});
+test('informe: imprime datos de GAS sin copiar formularios, botones, Gemini ni plano vacío',()=>{
+ const a=app();proyectoPlan(a);a.elements.get('duda').value='Observación <script>alert(1)</script>';a.ctx.window.beforeprint();const doc=a.elements.get('informeImpresion').innerHTML;
+ assert.match(doc,/Materiales para revisión/);assert.match(doc,/Observación &lt;script&gt;/);assert.match(doc,/BLOQUEADOS/);assert.doesNotMatch(doc,/<(?:input|button|select|textarea|script)\b|Gemini|<h2>Plano/);assert.match(html,/@page\{size:A4;margin:12mm\}/);assert.match(html,/body > :not\(#informeImpresion\)/);assert.match(html,/thead\{display:table-header-group\}/);
+});
+test('informe: AGUA y CLOACAS no contienen tramos o materiales de GAS ni notas de otra especialidad',()=>{
+ const a=app();proyectoPlan(a);a.elements.get('duda').value='NOTA-GAS-PRIVADA';
+ for(const m of ['agua','cloacas']){a.run(`abrir('${m}')`);a.elements.get('duda').value='NOTA-'+m;a.run('prepararInformeActual()');const doc=a.elements.get('informeImpresion').innerHTML;assert.match(doc,new RegExp('NOTA-'+m));assert.doesNotMatch(doc,/NOTA-GAS-PRIVADA|Materiales para revisión|<h2>Tramos/);}
+});
+test('informe: vista del ejemplo calefón no contamina la impresión del proyecto activo',()=>{
+ const a=app();proyectoPlan(a);a.run("generarPlanGas('ejemplo');prepararInformeActual()");const doc=a.elements.get('informeImpresion').innerHTML;assert.doesNotMatch(doc,/Calefón|Cocina|calefón/);assert.match(doc,/MI PROYECTO/);assert.equal(a.run('fuenteMaterialesGas'),'ejemplo');
+});
+test('informe: demostración tiene título propio y no imprime los datos reales',()=>{
+ const a=app();a.run("abrir('gas');tramos=[{desde:'REAL-10',hasta:'5',metros:6,diametro:null,consumo:null}];guardarDatos()");ejemploRevisado(a);a.run('incorporarCroquis();prepararInformeActual()');const doc=a.elements.get('informeImpresion').innerHTML;assert.match(doc,/DEMOSTRACIÓN/);assert.match(doc,/DEMO-M/);assert.doesNotMatch(doc,/REAL-10/);
+});
+test('informe: conserva cantidad manual revisada al recargar y no modifica su guardado',()=>{
+ const a=app();proyectoPlan(a);a.run('revisionMaterialesGas.plan.filas[0].cantidad=0;revisionMaterialesGas.plan.filas[0].editado=true;revisionMaterialesGas.plan.filas[0].revisado=true;guardarRevisionMaterialesGas()');const b=app(a.saved());b.run("abrir('gas')");const antes=b.saved();const d=b.run('modeloInformeActual()');assert.equal(d.filas[0].cantidad,0);assert.equal(d.filas[0].revisado,true);assert.equal(d.filas[0].estado,'estimado');assert.equal(b.saved(),antes);
+});
+test('informe: un pendiente revisado permanece distinto de cero y confirmado',()=>{
+ const {documento}=require('../informes/documento-proyecto.js');const doc=documento({titulo:'GAS',ambito:'MI PROYECTO',tramos:[],artefactos:[],filas:[{material:'Cupla',diametro:'1"',cantidad:null,unidad:'u',estado:'estimado',revisado:true},{material:'Codo',diametro:'1"',cantidad:0,unidad:'u',estado:'confirmado',revisado:true}],observaciones:'',advertencia:'Bloqueado'});assert.match(doc,/PENDIENTE · Revisado/);assert.match(doc,/>0<\/td>/);assert.match(doc,/CONFIRMADO · Revisado/);
+});
+test('informe: impide imprimir el ejemplo separado como si fuera el proyecto',()=>{
+ const a=app();a.run("abrir('gas');generarPlanGas('ejemplo');revisionMaterialesGas.plan.filas.forEach(f=>f.revisado=true)");let n=0;a.ctx.window.print=()=>n++;a.run('imprimirMaterialesGas()');assert.equal(n,0);assert.match(a.text('matMensaje'),/ejemplo es una vista separada/);
+});
+test('aislamiento: perfiles y editor de nodos cambian junto con el espacio activo',()=>{
+ const a=app();a.run("abrir('gas');instalacionGas.perfil.localidad='REAL';guardarDatos();editandoNodoGas='anterior';seleccionarAmbitoGas('demostracion')");assert.equal(a.elements.get('redLocalidad').value,'');assert.equal(a.run('editandoNodoGas'),null);a.elements.get('redLocalidad').value='PRÁCTICA';a.run("guardarPerfilGas();seleccionarAmbitoGas('proyecto')");assert.equal(a.elements.get('redLocalidad').value,'REAL');assert.equal(a.run('instalacionGas.perfil.localidad'),'REAL');
+});
+test('aislamiento: una lectura de foto demorada no escribe en el espacio recién seleccionado',()=>{
+ const a=app();a.run("abrir('gas')");let lector;a.ctx.URL.createObjectURL=()=> 'blob:foto';a.ctx.FileReader=class{constructor(){lector=this;}readAsDataURL(){}};
+ a.ctx.evento={target:{files:[{type:'image/png',size:10}]}};a.run("cargarFoto(evento);seleccionarAmbitoGas('demostracion')");lector.result='data:image/png;base64,TARDÍA';lector.onload();assert.equal(a.run('proyectos.gas.demostracion.foto'),undefined);assert.equal(a.run('proyectos.gas.foto'),undefined);
 });
