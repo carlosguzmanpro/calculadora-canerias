@@ -453,3 +453,78 @@ test('cuplas y codos se cuantifican por segmentos aun sin diámetros',()=>{
  const r=a.run('evaluarTramo(tramo)');assert.equal(r.cuplas,0);assert.equal(r.tiras,2);assert.equal(r.accesorios.length,1);assert.equal(r.soloMedidasPendientes,true);
  assert.match(a.run('nombreAccesorio(evaluarTramo(tramo).accesorios[0])'),/medidas pendientes/);
 });
+
+// Catálogo FICTICIO aislado: comprueba aritmética/control, jamás valores técnicos.
+function fixtureClase(a){
+ fixtureMotor(a);
+ a.run("instalacionGas.perfil={...PERFIL_CLASE_ACERO};packMotor.material=PERFIL_CLASE_ACERO.material;packMotor.sistema=PERFIL_CLASE_ACERO.sistema;packMotor.metodo='longitud-maxima-tabular';packMotor.reglaLongitud='maxima-ruta-completa-que-contiene-tramo';packMotor.condiciones={densidadRelativa:0.65};packMotor.politicaCuplas='incluir';packMotor.fuentePoliticaCuplas='FICTICIO SOLO TEST';packMotor.tabla3={numero:3,verificada:true,fuente:'FICTICIO',edicion:'TEST',unidades:'TEST',aplicabilidadAceroRoscadoEpoxi:true,unidadCaudal:'m3/h',unidadLongitud:'m',referenciaH:{valor:10,unidad:'mmca',significadoVerificado:'SOLO TEST'}};packMotor.tabla18={numero:18,verificada:true,fuente:'FICTICIO',edicion:'TEST',unidades:'TEST',aplicabilidadAceroRoscadoEpoxi:true,unidadEquivalentes:'m'};packMotor.candidatos[0].filas=[{longitud:15,caudal:2},{longitud:100,caudal:0.5}];packMotor.candidatos[1].filas=[{longitud:15,caudal:5},{longitud:100,caudal:4}]");
+}
+function clase(a,opts='{}'){return a.run(`motorClaseAceroGas(tramos,artefactos,instalacionGas,packMotor,{modoPrueba:true,...${opts}})`);}
+test('clase: ejercicio real verifica recorridos y consumos, deja tamaños de referencia pendientes',()=>{
+ const a=app();a.run("abrir('gas');var casoClase=casoEjercicioGas();casoClase.instalacion.perfil={...PERFIL_CLASE_ACERO}");
+ const r=a.run('motorClaseAceroGas(casoClase.tramos,casoClase.artefactos,casoClase.instalacion)');
+ assert.equal(r.diametros,null);assert.equal(r.aptoInstalacion,false);
+ assert.deepEqual(Array.from(r.recorridos,x=>x.longitudReal),[36,29,24]);
+ assert.deepEqual(Array.from(r.recorridos,x=>x.longitudInicial),[51,44,39]);
+ assert.deepEqual(Object.values(r.porTramo).map(x=>x.consumoKcal),[29200,16000,13200,3000,10200]);
+ for(const t of Object.values(r.porTramo)){assert.equal(t.caudal,t.consumoKcal/9300);assert.equal(t.diametroCalculado,null);assert.equal(t.longitudDefinitiva,null);}
+ assert.match(r.faltantes.join(' '),/fotografías|Tabla/);
+});
+test('clase: +15 solo inicial; recalcula candidatos y converge con equivalentes reales',()=>{
+ const a=app();fixtureClase(a);const r=clase(a);assert.equal(r.estado,'calculado',r.faltantes.join(' '));
+ assert.equal(r.historia[0].diametros.t0,'D-test-grande');assert.equal(r.diametros.t0,'D-test-pequeno');assert.equal(r.historia.length,3);
+ assert.deepEqual(Array.from(r.recorridos,x=>x.longitudDefinitiva),[12,10]);
+ assert.equal(r.porTramo.t0.longitudDeCalculo,12);assert.equal(r.porTramo.t1.longitudDeCalculo,10);assert.equal(r.porTramo.t2.longitudDeCalculo,12);
+ assert.equal(r.porTramo.t0.caudal,13000/9300);assert.equal(r.porTramo.t0.capacidad,2);assert.equal(r.aptoInstalacion,false);
+ a.ctx.informePrueba=r;a.run("mostrarInformeClaseGas(informePrueba,'informeClaseMiRed')");assert.match(a.elements.get('informeClaseMiRed').children.map(p=>p.textContent).join(' '),/Capacidad comprobada por tramo/);
+});
+test('clase: tee única, paso directo y giro tienen equivalentes distintos',()=>{
+ const a=app();fixtureClase(a);const r=clase(a);
+ assert.equal(r.accesorios.filter(x=>x.tipo.startsWith('tee')).length,1);
+ assert.equal(r.porTramo.t1.longitudEquivalenteAccesorios,1);assert.equal(r.porTramo.t2.longitudEquivalenteAccesorios,2);
+ assert.equal(r.porTramo.t1.accesorios[0].referenciaPiezaCompartida,true);
+});
+test('clase: codo45, codo90 y llave usan su diámetro calculado y equivalentes',()=>{
+ const a=app();fixtureClase(a);a.run("tramos[1].detalle={estado:'completo',metrosFinal:1,accesorios:[{tipo:'codo45',metrosAntes:1},{tipo:'codo90',metrosAntes:1}]};tramos[1].llave=true");
+ const r=clase(a);assert.equal(r.estado,'calculado',r.faltantes.join(' '));assert.equal(r.porTramo.t1.longitudEquivalenteAccesorios,2.5);
+ for(const tipo of ['codo45','codo90','llave'])assert.equal(r.accesorios.find(x=>x.tipo===tipo).medidas[0],r.diametros.t1);
+});
+test('clase: reducción independiente se cuenta una vez sin sumar equivalentes',()=>{
+ const a=app();fixtureClase(a);a.run("tramos=tramos.filter(t=>t.id!=='t2');artefactos=artefactos.filter(a=>a.id==='a1');instalacionGas.nodos=instalacionGas.nodos.filter(n=>n.id!=='b');instalacionGas.nodos[1].unionDimensionamiento='union';tramos[0].detalle={estado:'ninguno'};packMotor.candidatos[0].filas=[{longitud:100,caudal:0.5}];artefactos[0].consumo=9000;tramos[1].metros=7;tramos[1].detalle={estado:'ninguno'};packMotor.candidatos[0].filas=[{longitud:10,caudal:2},{longitud:100,caudal:0.5}]");
+ // Una rama única transporta el mismo caudal: forzamos solo geometría para contrastar medidas distintas.
+ const r=a.run("motorDimensionarGas(tramos,artefactos,instalacionGas,packMotor,{modoPrueba:true,contextoClase:true,soloGeometria:true,asignacionFija:{t0:'D-test-grande',t1:'D-test-pequeno'}})");
+ assert.equal(r.estado,'calculado');const p=r.accesorios.filter(x=>x.tipo==='reduccion');assert.equal(p.length,1);assert.equal(p[0].equivalente,null);assert.equal(p[0].excluidoDeEquivalentes,true);
+ assert.equal(r.porTramo.t1.longitudEquivalente,7.5); // solo cupla de 7 m, no reducción
+});
+test('clase: no habilita catálogo sintético en la aplicación',()=>{
+ const a=app();fixtureClase(a);const r=a.run('motorClaseAceroGas(tramos,artefactos,instalacionGas,packMotor)');assert.equal(r.diametros,null);assert.match(r.faltantes.join(' '),/ficticio|ensayo/);assert.equal(a.run('CATALOGOS_GAS_VERIFICADOS.length'),0);
+});
+test('clase: bloquea material, unidades, tabla incompleta y política de cuplas sin fuente',()=>{
+ for(const cambio of ["packMotor.material='Cobre'","delete packMotor.tabla18","packMotor.tabla3.unidadCaudal='kcal/h'","packMotor.tabla3.referenciaH.significadoVerificado=''","delete packMotor.fuentePoliticaCuplas","packMotor.condiciones.densidadRelativa=1"]){const a=app();fixtureClase(a);a.run(cambio);assert.equal(clase(a).diametros,null,cambio);}
+});
+test('clase: accesorios pendientes y vías de tee desconocidas bloquean resultados',()=>{
+ for(const cambio of ["tramos[1].detalle={estado:'pendiente'}","delete tramos[1].red.via","delete instalacionGas.nodos[1].unionDimensionamiento"]){const a=app();fixtureClase(a);a.run(cambio);assert.equal(clase(a).diametros,null,cambio);}
+});
+test('clase: falta de fila superior o equivalente no se sustituye por estimación',()=>{
+ for(const cambio of ["packMotor.candidatos[0].filas=[{longitud:10,caudal:2}]","packMotor.piezas={}"]){const a=app();fixtureClase(a);a.run(cambio);assert.equal(clase(a).diametros,null);}
+});
+test('clase: límite de iteración y oscilación no dan solución parcial',()=>{
+ const a=app();fixtureClase(a);assert.equal(clase(a,'{maxIteraciones:1}').diametros,null);
+ a.run("for(const [k,p]of Object.entries(packMotor.piezas))if(k.startsWith('tee|D-test-pequeno|'))p.equivalentes={principal:30,ramal:30}");
+ const r=clase(a);assert.equal(r.diametros,null);assert.match(r.faltantes.join(' '),/oscila/);
+});
+test('clase: cambiar datos invalida informe de mi red, ejemplo no modifica proyecto',()=>{
+ const a=app();fixtureClase(a);a.run("guardarDatos()");const anterior=a.saved();a.run('probarMetodoClaseGas()');assert.equal(a.saved(),anterior);
+ a.run("ejecutarClaseMiRedGas();guardarDatos()");assert.equal(a.elements.get('informeClaseMiRed').children.length,0);assert.match(a.text('informeClaseMiRed'),/actualizados/);
+});
+test('clase: tee reductora absorbe el cambio sin duplicar reducciones',()=>{
+ const a=app();fixtureClase(a);a.run("packMotor.candidatos[0].filas=[{longitud:100,caudal:1}]");
+ const r=clase(a);assert.equal(r.estado,'calculado',r.faltantes.join(' '));assert.equal(r.diametros.t0,'D-test-grande');assert.equal(r.diametros.t1,'D-test-pequeno');assert.equal(r.accesorios.filter(p=>p.tipo==='tee-reductora').length,1);assert.equal(r.accesorios.filter(p=>p.tipo==='reduccion').length,0);
+});
+test('clase: cuplas de segmentos comerciales se suman o excluyen solo con fuente',()=>{
+ const a=app();fixtureClase(a);a.run("tramos[1].metros=7");let r=clase(a);assert.equal(r.estado,'calculado',r.faltantes.join(' '));assert.equal(r.porTramo.t1.longitudEquivalenteAccesorios,1.5);
+ a.run("packMotor.politicaCuplas='excluir-con-fuente'");r=clase(a);assert.equal(r.porTramo.t1.longitudEquivalenteAccesorios,1);assert.equal(r.accesorios.find(p=>p.tipo==='cupla').equivalente,null);
+});
+test('clase: conexiones incorrectas no producen caudales ni tamaños parciales',()=>{
+ const a=app();fixtureClase(a);a.run("tramos[2].red.hasta='inexistente'");const r=clase(a);assert.equal(r.diametros,null);assert.equal(r.recorridos.length,0);assert.equal(r.porTramo.t0.caudal,null);
+});

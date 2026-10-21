@@ -82,6 +82,18 @@ section{box-shadow:none}
 
 <section id="dimensionGas" class="oculto">
 <h2>Dimensionamiento automático de GAS · experimental</h2>
+<h3>Método de clase · acero roscado con epoxi · GN</h3>
+<p>Los 15 m adicionales son solo una estimación inicial. Las equivalencias definitivas dependen de las tablas y los accesorios identificados, incluyendo paso directo o giro de cada tee. Las reducciones se cuentan como materiales y se excluyen de equivalentes en este método de clase.</p>
+<div class="aviso">No están disponibles las fotografías de las tablas N.º 3 y N.º 18. Los diámetros definitivos permanecen bloqueados. Este procedimiento no certifica una instalación real ni asume su presión de suministro.</div>
+<button class="alt" onclick="prepararPerfilClaseGas()">Elegir acero roscado epoxi y condiciones del ejercicio para mi red</button>
+<button onclick="ejecutarClaseMiRedGas()">Analizar mi red con el método de clase</button>
+<div id="informeClaseMiRed" class="resultado" aria-live="polite"></div>
+<h3>Ejercicio de clase M–A–B · separado de tu proyecto</h3>
+<p>Tramos: 15, 9, 8, 6 y 13 m. Consumos: termotanque 16000, calefactor 3000 y cocina 10200 kcal/h. Conversión: 9300 kcal/m³. Los diámetros anotados son referencias para comparar, nunca entradas del motor. Faltan identificar los accesorios reales y las vías de las tees.</p>
+<label><input id="claseLongitudesConfirmadas" type="checkbox" style="width:auto"> Verifiqué que las cinco medidas son longitudes de tramo, no acumuladas</label>
+<button onclick="probarMetodoClaseGas()">Probar método de clase M–A–B sin diámetros</button>
+<div id="informeMetodoClase" class="resultado" aria-live="polite"></div>
+<h3>Motor general y diagnóstico anterior</h3>
 <div class="aviso">No se requiere ingresar diámetros. El motor solo puede producir medidas con tablas verificadas para el material y sistema exactos. No hay catálogos técnicos habilitados todavía. Las referencias del ejercicio no se usan como resultados del motor.</div>
 <label for="dimPCS">Poder calorífico comprobado (kcal/m³)</label><input id="dimPCS" type="number" min="0" step="any" onchange="guardarCondicionesDimensionamiento()">
 <label for="dimDensidad">Densidad relativa comprobada</label><input id="dimDensidad" type="number" min="0" step="any" onchange="guardarCondicionesDimensionamiento()">
@@ -324,7 +336,7 @@ function recorridosGas(ts,inst){
  }
  return resultado;
 }
-function validarCatalogoGas(p,modoPrueba){
+function validarCatalogoGas(p,modoPrueba,{clase=false}={}){
  const faltan=[];
  if(!p)return ['Tabla de capacidad/pérdida por diámetro y caudal, específica del material y sistema (Tabla N.º 3 del ejercicio pendiente de verificar).','Longitudes equivalentes de accesorios por medida y recorrido de tee (Tabla N.º 18 del ejercicio pendiente de verificar).','Catálogo de piezas compatibles: tees, codos, llaves, cuplas y reducciones.','Método y condiciones de aplicación verificados, con fuente y edición.'];
  if(p.soloPruebas&&!modoPrueba)faltan.push('El catálogo es ficticio y solo sirve para pruebas del algoritmo.');
@@ -332,24 +344,25 @@ function validarCatalogoGas(p,modoPrueba){
  if(!Array.isArray(p.candidatos)||!p.candidatos.length||p.candidatos.some((c,i,a)=>!c.id||!Number.isFinite(c.interiorMm)||c.interiorMm<=0||!Array.isArray(c.filas)||!c.filas.length||c.filas.some((f,j,fs)=>p.metodo==='perdida-lineal-tabular'?
   (!Number.isFinite(f.caudal)||f.caudal<=0||!Number.isFinite(f.perdidaPaM)||f.perdidaPaM<0||(j>0&&(f.caudal<=fs[j-1].caudal||f.perdidaPaM<fs[j-1].perdidaPaM))):
   (!Number.isFinite(f.longitud)||f.longitud<=0||!Number.isFinite(f.caudal)||f.caudal<=0||(j>0&&(f.longitud<=fs[j-1].longitud||f.caudal>fs[j-1].caudal))))||(i>0&&c.interiorMm<=a[i-1].interiorMm)))faltan.push('Falta tabla monotónica y ordenada de capacidad o pérdida con diámetros interiores reales.');
- if(p.metodo==='longitud-maxima-tabular'&&(!Number.isFinite(p.condiciones?.caidaPa)||p.condiciones.caidaPa<=0||p.reglaLongitud!=='maxima-ruta-completa-que-contiene-tramo'))faltan.push('Falta caída de presión y regla verificada para elegir longitud de cálculo en la tabla de capacidades.');
+ if(!clase&&p.metodo==='longitud-maxima-tabular'&&(!Number.isFinite(p.condiciones?.caidaPa)||p.condiciones.caidaPa<=0||p.reglaLongitud!=='maxima-ruta-completa-que-contiene-tramo'))faltan.push('Falta caída de presión y regla verificada para elegir longitud de cálculo en la tabla de capacidades.');
  if(Array.isArray(p.candidatos)&&new Set(p.candidatos.map(c=>c.id)).size!==p.candidatos.length)faltan.push('Identificadores de diámetro duplicados en el catálogo.');
  if(!p.piezas||typeof p.piezas!=='object')faltan.push('Catálogo de accesorios con equivalencias verificadas.');
- if(!p.condiciones||!Number.isFinite(p.condiciones.presionMinPa)||!Number.isFinite(p.condiciones.presionMaxPa)||!Number.isFinite(p.condiciones.densidadRelativa)||!p.redondeoSuperiorVerificado)faltan.push('Rango de presión, densidad del gas y aplicabilidad del redondeo conservador de caudal.');
+ if(!p.condiciones||(!clase&&(!Number.isFinite(p.condiciones.presionMinPa)||!Number.isFinite(p.condiciones.presionMaxPa)))||!Number.isFinite(p.condiciones.densidadRelativa)||!p.redondeoSuperiorVerificado)faltan.push('Rango de presión, densidad del gas y aplicabilidad del redondeo conservador de caudal.');
  return faltan;
 }
-function motorDimensionarGas(ts,arts,inst,paquete=null,{modoPrueba=false,maxCombinaciones=100000}={}){
- const red=analizarRedGas(ts,arts,inst),faltantes=[...red.errores,...red.faltantes];
+function motorDimensionarGas(ts,arts,inst,paquete=null,{modoPrueba=false,maxCombinaciones=100000,contextoClase=false,asignacionFija=null,soloGeometria=false}={}){
+ const red=analizarRedGas(ts,arts,inst),faltantes=[...red.errores,...(contextoClase?[]:red.faltantes)];
  const p=inst.perfil||{};
  const positivo=k=>typeof p[k]==='string'&&p[k].trim()&&Number.isFinite(Number(p[k]))&&Number(p[k])>0;
  if(!positivo('poderCalorifico')||!p.fuenteGas)faltantes.push('Poder calorífico del gas en kcal/m³ y su fuente (no se usa automáticamente el valor orientativo de la consulta).');
  if(!positivo('densidadRelativa'))faltantes.push('Densidad relativa del gas, comprobada para las tablas.');
- if(p.unidadPresion!=='Pa')faltantes.push('Presiones en Pa para este motor tabular; no se reinterpretan mbar o mmca como Pa.');
- faltantes.push(...validarCatalogoGas(paquete,modoPrueba));
+ if(!contextoClase&&p.unidadPresion!=='Pa')faltantes.push('Presiones en Pa para este motor tabular; no se reinterpretan mbar o mmca como Pa.');
+ faltantes.push(...validarCatalogoGas(paquete,modoPrueba,{clase:contextoClase}));
  if(paquete){
   if(paquete.material!==p.material||paquete.sistema!==p.sistema||paquete.gas!==p.gas)faltantes.push('El catálogo no corresponde exactamente al material, sistema y gas seleccionados.');
-  if(paquete.condiciones && (Number(p.presionDisponible)<paquete.condiciones.presionMinPa||Number(p.presionDisponible)>paquete.condiciones.presionMaxPa||Number(p.densidadRelativa)!==paquete.condiciones.densidadRelativa))faltantes.push('Las condiciones de presión o densidad no están cubiertas por el catálogo.');
+  if(!contextoClase&&paquete.condiciones && (Number(p.presionDisponible)<paquete.condiciones.presionMinPa||Number(p.presionDisponible)>paquete.condiciones.presionMaxPa||Number(p.densidadRelativa)!==paquete.condiciones.densidadRelativa))faltantes.push('Las condiciones de presión o densidad no están cubiertas por el catálogo.');
  }
+ if(contextoClase)faltantes.push(...validarCatalogoClase(paquete,modoPrueba));
  const geometria=new Map();
  ts.forEach(t=>{
   const d=t.detalle;
@@ -392,6 +405,10 @@ function motorDimensionarGas(ts,arts,inst,paquete=null,{modoPrueba=false,maxComb
  function pieza(tipo,medidas,via='principal'){
   const key=[tipo,...medidas].join('|'),item=paquete.piezas[key];
   if(item?.noDisponible===true)return null;
+  if(contextoClase&&(tipo==='reduccion'||(tipo==='cupla'&&paquete.politicaCuplas==='excluir-con-fuente'))){
+   if(!item){trazaFallos.add('Falta verificar disponibilidad de la pieza '+key);return null;}
+   return {tipo,medidas,clave:key,equivalente:null,excluidoDeEquivalentes:true,motivoExclusion:tipo==='reduccion'?'Exclusión expresa del método de clase, no pérdida física nula':paquete.fuentePoliticaCuplas};
+  }
   if(!item||!Number.isFinite(item.equivalentes?.[via])||item.equivalentes[via]<0){trazaFallos.add('Falta pieza o longitud equivalente aplicable: '+key+' · '+via);return null;}
   return {tipo,medidas,clave:key,equivalente:item.equivalentes[via]};
  }
@@ -399,7 +416,7 @@ function motorDimensionarGas(ts,arts,inst,paquete=null,{modoPrueba=false,maxComb
   const perdidas={},longEq={},inventario=[];
   const add=(t,tipo,medidas,cantidad=1,via='principal')=>{
    if(!cantidad)return true;const x=pieza(tipo,medidas,via);if(!x)return false;
-   longEq[t.id]+=x.equivalente*cantidad;inventario.push({...x,tramo:t.id,cantidad});return true;
+   if(x.equivalente!==null)longEq[t.id]+=x.equivalente*cantidad;inventario.push({...x,tramo:t.id,cantidad});return true;
   };
   for(const t of ts){
    const id=asignados[t.id].id,g=geometria.get(t.id);longEq[t.id]=t.metros;
@@ -414,7 +431,7 @@ function motorDimensionarGas(ts,arts,inst,paquete=null,{modoPrueba=false,maxComb
     const medidas=[asignados[entrada.id].id,asignados[principal.id].id,asignados[ramal.id].id];
     const a=pieza('tee',medidas,'principal'),b=pieza('tee',medidas,'ramal');if(!a||!b)return;
     longEq[principal.id]+=a.equivalente;longEq[ramal.id]+=b.equivalente;
-    inventario.push({...a,nodo:n.id,cantidad:1,tipo:medidas.every(d=>d===medidas[0])?'tee-igual':'tee-reductora'});
+    inventario.push({...a,equivalentes:{principal:a.equivalente,ramal:b.equivalente},nodo:n.id,cantidad:1,tipo:medidas.every(d=>d===medidas[0])?'tee-igual':'tee-reductora'});
    }else{
     const salida=outs[0],medidas=[asignados[entrada.id].id,asignados[salida.id].id];
     const tipo=n.unionDimensionamiento==='union'?(medidas[0]===medidas[1]?'cupla':'reduccion'):n.unionDimensionamiento;
@@ -422,7 +439,10 @@ function motorDimensionarGas(ts,arts,inst,paquete=null,{modoPrueba=false,maxComb
    }
   }
   let recorridos;
-  if(paquete.metodo==='longitud-maxima-tabular'){
+  if(soloGeometria&&contextoClase){
+   recorridos=rutas.map(r=>({...r,longitudReal:r.tramos.reduce((n,id)=>n+ts.find(t=>t.id===id).metros,0),longitudEquivalente:r.tramos.reduce((n,id)=>n+longEq[id],0),perdidaPa:null}));
+   ts.forEach(t=>perdidas[t.id]=null);
+  }else if(paquete.metodo==='longitud-maxima-tabular'){
    if(Number(p.perdidaMaxima)<paquete.condiciones.caidaPa||Number(p.presionDisponible)-Number(p.presionMinima)<paquete.condiciones.caidaPa){trazaFallos.add('La caída de presión de la tabla excede la permitida por el proyecto.');return;}
    recorridos=rutas.map(r=>({...r,longitudReal:r.tramos.reduce((n,id)=>n+ts.find(t=>t.id===id).metros,0),longitudEquivalente:r.tramos.reduce((n,id)=>n+longEq[id],0),perdidaPa:null}));
    for(const t of ts){
@@ -446,12 +466,136 @@ function motorDimensionarGas(ts,arts,inst,paquete=null,{modoPrueba=false,maxComb
    porTramo:Object.fromEntries(ts.map(t=>[t.id,{caudal:q[t.id],longitudEquivalente:longEq[t.id],perdidaPa:perdidas[t.id]}])),fuente:paquete.fuente,edicion:paquete.edicion,prueba:modoPrueba};
  }
  function buscar(i){if(agotado)return;if(i===ts.length){if(++visitadas>maxCombinaciones){agotado=true;return;}evaluar();return;}
-  const t=ts[i];for(const c of candidatos){asignados[t.id]=c;buscar(i+1);if(agotado)break;}
+  const t=ts[i];for(const c of candidatos.filter(c=>!asignacionFija||asignacionFija[t.id]===c.id)){asignados[t.id]=c;buscar(i+1);if(agotado)break;}
  }
  buscar(0);
  if(agotado)return fallo(['Se alcanzó el límite de combinaciones. No se presenta una solución parcial como óptima; hace falta optimizar o acotar el motor.']);
  if(trazaFallos.size)return fallo(['No se puede completar la evaluación de todos los candidatos sin extrapolar.',...trazaFallos]);
  return mejor||fallo(['Ninguna combinación cubierta por las tablas satisface todos los recorridos y presiones.',...trazaFallos]);
+}
+
+const PERFIL_CLASE_ACERO={pais:'AR',uso:'domiciliario',gas:'GN',material:'Acero con revestimiento epoxi',sistema:'Roscado',poderCalorifico:'9300',densidadRelativa:'0.65',fuenteGas:'Condiciones del ejercicio de clase; no condiciones de suministro verificadas'};
+const AVISO_CLASE='Método de clase, NO aptitud para ejecutar una instalación real. Las reducciones se incluyen en el inventario como piezas pero se excluyen de equivalentes por este procedimiento; la verificación normativa puede exigir sus pérdidas y otras adicionales.';
+function validarCatalogoClase(p,modoPrueba=false){
+ if(!p)return ['Faltan fotografías o transcripción verificada de la Tabla N.º 3 completa (capacidades) y Tabla N.º 18 completa (equivalencias de accesorios roscados), con encabezados, unidades, notas, fuente y edición.'];
+ const faltan=[];
+ if(p.soloPruebas&&!modoPrueba)faltan.push('El catálogo de ensayo no se puede usar para resultados técnicos.');
+ for(const [key,numero]of [['tabla3',3],['tabla18',18]]){
+  const t=p[key];if(!t||t.numero!==numero||t.verificada!==true||!t.fuente||!t.edicion||!t.unidades||!t.aplicabilidadAceroRoscadoEpoxi)faltan.push('Falta verificar documento, unidades y aplicabilidad de Tabla N.º '+numero+' a acero roscado epoxi.');
+ }
+ if(p.metodo!=='longitud-maxima-tabular'||p.reglaLongitud!=='maxima-ruta-completa-que-contiene-tramo')faltan.push('Falta verificar la regla de longitud y capacidad tabular del método de clase.');
+ if(p.material!==PERFIL_CLASE_ACERO.material||p.sistema!==PERFIL_CLASE_ACERO.sistema||p.gas!=='GN'||p.condiciones?.densidadRelativa!==0.65)faltan.push('El catálogo de clase debe corresponder a GN, densidad 0,65 y acero roscado con epoxi.');
+ if(p.tabla3?.unidadCaudal!=='m3/h'||p.tabla3?.unidadLongitud!=='m'||p.tabla3?.referenciaH?.valor!==10||p.tabla3?.referenciaH?.unidad!=='mmca'||!p.tabla3?.referenciaH?.significadoVerificado)faltan.push('Faltan confirmar m³/h, metros y significado/condiciones de h=10 mmca en la Tabla N.º 3; no es presión de suministro asumida.');
+ if(p.tabla18?.unidadEquivalentes!=='m')faltan.push('Falta verificar unidad de longitudes equivalentes de Tabla N.º 18.');
+ if(!['incluir','excluir-con-fuente'].includes(p.politicaCuplas)||!p.fuentePoliticaCuplas)faltan.push('Falta criterio documentado para tratar cuplas en equivalentes; no se asume que su pérdida sea cero.');
+ return faltan;
+}
+function motorClaseAceroGas(ts,arts,inst,paquete=null,{modoPrueba=false,maxIteraciones=30}={}){
+ const red=analizarRedGas(ts,arts,inst),perfil=inst.perfil||{},faltantes=[...red.errores,...red.pendientes,...validarCatalogoGas(paquete,modoPrueba,{clase:true}),...validarCatalogoClase(paquete,modoPrueba)];
+ if(perfil.material!==PERFIL_CLASE_ACERO.material||perfil.sistema!==PERFIL_CLASE_ACERO.sistema||perfil.gas!=='GN')faltantes.push('Elegí explícitamente GN / acero con revestimiento epoxi / roscado para usar este procedimiento de clase.');
+ if(Number(perfil.poderCalorifico)!==9300||Number(perfil.densidadRelativa)!==0.65)faltantes.push('Este ejercicio utiliza 9300 kcal/m³ y densidad 0,65; no se trasladan a otra instalación sin comprobarlos.');
+ for(const t of ts)if(!t.detalle||!['ninguno','completo'].includes(t.detalle.estado))faltantes.push('Identificá accesorios y posiciones de '+t.desde+'–'+t.hasta+'; pendiente no significa cero.');
+ for(const n of inst.nodos.filter(n=>n.tipo==='derivacion')){
+  const salidas=ts.filter(t=>t.red?.desde===n.id);
+  if(salidas.length===2&&(n.unionDimensionamiento!=='tee'||salidas.filter(t=>t.red.via==='principal').length!==1||salidas.filter(t=>t.red.via==='ramal').length!==1))faltantes.push('Confirmá la tee real de '+n.nombre+' e identificá paso directo y giro de 90°; no se deducen del nombre del punto.');
+ }
+ let rutas=[];
+ if(!red.errores.length)rutas=recorridosGas(ts,inst).map(r=>({...r,longitudReal:r.tramos.reduce((n,id)=>n+ts.find(t=>t.id===id).metros,0)})).sort((a,b)=>b.longitudReal-a.longitudReal||a.artefacto.localeCompare(b.artefacto));
+ const historia=[],base={metodo:'clase-tablas-3-18',aptoInstalacion:false,aviso:AVISO_CLASE,prueba:modoPrueba,semillaAdicionalMetros:15,
+  recorridos:rutas.map(r=>({...r,consumoKcal:arts.find(a=>a.id===inst.nodos.find(n=>n.id===r.nodo)?.artefactoId)?.consumo,caudal:arts.find(a=>a.id===inst.nodos.find(n=>n.id===r.nodo)?.artefactoId)?.consumo/9300,longitudInicial:r.longitudReal+15,longitudEquivalenteAccesorios:null,longitudDefinitiva:null,diametroCalculado:null,comprobacion:'PENDIENTE'})),
+  porTramo:Object.fromEntries(ts.map(t=>[t.id,{longitudReal:t.metros,consumoKcal:red.porTramo[t.id]??null,caudal:Number.isFinite(red.porTramo[t.id])?red.porTramo[t.id]/9300:null,accesoriosIdentificados:t.detalle?.estado==='ninguno'?[]:(Array.isArray(t.detalle?.accesorios)?t.detalle.accesorios:null),longitudEquivalenteAccesorios:null,longitudDefinitiva:null,longitudDeCalculo:null,diametroCalculado:null,capacidad:null,comprobacion:'PENDIENTE'}])),historia};
+ const bloquear=motivos=>({...base,estado:'bloqueado',faltantes:[...new Set(motivos)],diametros:null,accesorios:[]});
+ if(faltantes.length)return bloquear(faltantes);
+ function seleccionar(longitudesRutas){
+  const elegidos={},comprobaciones={};
+  for(const t of ts){
+   const longitud=Math.max(...longitudesRutas.filter(r=>r.tramos.includes(t.id)).map(r=>r.longitud));
+   let elegido;
+   for(const c of paquete.candidatos){
+    const fila=c.filas.find(f=>f.longitud>=longitud);
+    if(!fila)throw Error('Tabla N.º 3 sin fila superior para '+longitud+' m en '+c.id+'. No se extrapola.');
+    if(fila.caudal>=base.porTramo[t.id].caudal){elegido=c.id;comprobaciones[t.id]={longitudDeCalculo:longitud,longitudFila:fila.longitud,capacidad:fila.caudal,caudal:base.porTramo[t.id].caudal,cumple:true};break;}
+   }
+   if(!elegido)throw Error('Ningún diámetro tabulado cubre '+t.desde+'–'+t.hasta+' con '+longitud+' m y '+base.porTramo[t.id].caudal+' m³/h.');
+   elegidos[t.id]=elegido;
+  }
+  return {elegidos,comprobaciones};
+ }
+ try{
+  let actual=seleccionar(rutas.map(r=>({...r,longitud:r.longitudReal+15})));
+  historia.push({fase:'inicial',adicionalEstimado:15,diametros:{...actual.elegidos},comprobaciones:actual.comprobaciones});
+  const vistos=new Set();
+  for(let i=0;i<maxIteraciones;i++){
+   const firma=JSON.stringify(ts.map(t=>actual.elegidos[t.id]));
+   if(vistos.has(firma))return bloquear(['La iteración oscila entre candidatos; no hay convergencia comprobada.']);vistos.add(firma);
+   const evaluado=motorDimensionarGas(ts,arts,inst,paquete,{modoPrueba,contextoClase:true,asignacionFija:actual.elegidos,soloGeometria:true});
+   if(evaluado.estado!=='calculado')return bloquear(evaluado.faltantes);
+   const siguientes=seleccionar(evaluado.recorridos.map(r=>({...r,longitud:r.longitudEquivalente})));
+   historia.push({fase:'recalculo',iteracion:i+1,diametrosEvaluados:{...actual.elegidos},diametrosSiguientes:{...siguientes.elegidos},comprobaciones:siguientes.comprobaciones,
+    recorridos:evaluado.recorridos.map(r=>({...r,equivalentesAccesorios:r.longitudEquivalente-r.longitudReal,longitudDefinitiva:r.longitudEquivalente}))});
+   if(ts.every(t=>actual.elegidos[t.id]===siguientes.elegidos[t.id])){
+    const porTramo={};
+    for(const t of ts){
+     const r=evaluado.porTramo[t.id];
+     const accesorios=evaluado.accesorios.filter(a=>a.tramo===t.id).map(a=>({...a}));
+     for(const a of evaluado.accesorios.filter(a=>a.nodo===t.red.desde))accesorios.push({...a,via:t.red.via,equivalente:a.equivalentes?.[t.red.via],referenciaPiezaCompartida:true});
+     porTramo[t.id]={...base.porTramo[t.id],accesorios,longitudEquivalenteAccesorios:r.longitudEquivalente-t.metros,longitudDefinitiva:r.longitudEquivalente,
+      ...siguientes.comprobaciones[t.id],diametroCalculado:actual.elegidos[t.id],comprobacion:'CUMPLE CAPACIDAD DEL EJERCICIO'};
+    }
+    const recorridos=evaluado.recorridos.map(r=>({...base.recorridos.find(b=>b.nodo===r.nodo),longitudEquivalenteAccesorios:r.longitudEquivalente-r.longitudReal,longitudDefinitiva:r.longitudEquivalente,
+     diametros:r.tramos.map(id=>actual.elegidos[id]),comprobacion:'CUMPLE CAPACIDAD DEL EJERCICIO'})).sort((a,b)=>b.longitudDefinitiva-a.longitudDefinitiva);
+    return {...base,estado:'calculado',diametros:actual.elegidos,porTramo,recorridos,accesorios:evaluado.accesorios,fuente:paquete.fuente,edicion:paquete.edicion,faltantes:[],convergencia:true};
+   }
+   actual=siguientes;
+  }
+  return bloquear(['Se alcanzó el límite de iteraciones sin verificar convergencia. No hay diámetros definitivos.']);
+ }catch(e){return bloquear([e.message]);}
+}
+function mostrarInformeClaseGas(r,id){
+ const out=$(id);out.replaceChildren();
+ function texto(t,clase){const p=document.createElement('p');p.textContent=t;if(clase)p.className=clase;out.append(p);}
+ texto(r.estado==='calculado'?'CÁLCULO DE CLASE CONVERGENTE · NO CERTIFICACIÓN':'CÁLCULO DEFINITIVO PENDIENTE · NO SE ASIGNARON DIÁMETROS');
+ texto(r.aviso,'aviso');
+ (r.faltantes||[]).forEach(f=>texto(f,'aviso'));
+ texto('Orden inicial: recorrido más alejado primero. +15 m solo en selección inicial; nunca se conservan como equivalentes definitivos.');
+ for(const ruta of r.recorridos){
+  texto('Recorrido a '+ruta.artefacto+': '+ruta.tramos.join(' → '));
+  texto('Real: '+fmt(ruta.longitudReal)+' m | consumo: '+fmt(ruta.consumoKcal)+' kcal/h = '+fmt(ruta.caudal)+' m³/h | inicial con estimación: '+fmt(ruta.longitudInicial)+' m | equivalentes reales: '+(ruta.longitudEquivalenteAccesorios===null?'PENDIENTES':fmt(ruta.longitudEquivalenteAccesorios)+' m')+' | definitiva: '+(ruta.longitudDefinitiva===null?'PENDIENTE':fmt(ruta.longitudDefinitiva)+' m')+' | diámetros por tramo: '+(ruta.diametros?.join(' → ')||'PENDIENTES')+' | '+ruta.comprobacion);
+ }
+ for(const ruta of r.recorridos){
+  const piezas=ruta.tramos.flatMap(id=>r.porTramo[id].accesorios||[]);
+  texto('Accesorios del recorrido a '+ruta.artefacto+': '+(r.estado==='calculado'?(piezas.map(a=>a.tipo+' '+a.medidas.join('/')).join(', ')||'ninguno'):'PENDIENTES de revisión completa y equivalencias'));
+  if(r.estado==='calculado')texto('Capacidad comprobada por tramo: '+ruta.tramos.map(id=>id+' '+fmt(r.porTramo[id].caudal)+' ≤ '+fmt(r.porTramo[id].capacidad)+' m³/h (fila '+fmt(r.porTramo[id].longitudFila)+' m)').join(' | '));
+ }
+ for(const [id,t]of Object.entries(r.porTramo)){
+  texto('Tramo '+id+' | real: '+fmt(t.longitudReal)+' m | demanda: '+(t.consumoKcal===null?'PENDIENTE':fmt(t.consumoKcal)+' kcal/h · '+fmt(t.caudal)+' m³/h'));
+  texto('Accesorios: '+(t.accesorios?t.accesorios.map(a=>a.tipo+' '+a.medidas.join('/')).join(', ')||'ninguno':t.accesoriosIdentificados===null?'PENDIENTES DE IDENTIFICAR':t.accesoriosIdentificados.map(a=>a.tipo).join(', ')||'ninguno declarado'));
+  texto('Equivalentes: '+(t.longitudEquivalenteAccesorios===null?'PENDIENTES':fmt(t.longitudEquivalenteAccesorios)+' m')+' | definitiva de tramo: '+(t.longitudDefinitiva===null?'PENDIENTE':fmt(t.longitudDefinitiva)+' m')+' | longitud de cálculo (recorrido desfavorable): '+(t.longitudDeCalculo===null?'PENDIENTE':fmt(t.longitudDeCalculo)+' m')+' | diámetro: '+(t.diametroCalculado||'PENDIENTE')+' | capacidad: '+(t.capacidad===null?'PENDIENTE':fmt(t.capacidad)+' m³/h')+' | '+t.comprobacion);
+ }
+ if(r.historia.length)texto('Etapas calculadas: '+r.historia.map(h=>h.fase+(h.iteracion?' '+h.iteracion:'')).join(' → '));
+ if(r.estado==='calculado'){
+  texto('Inventario único de accesorios. Las referencias de tee en dos recorridos NO son dos piezas:');
+  r.accesorios.forEach(a=>texto(a.cantidad+' × '+a.tipo+' '+a.medidas.join('/')+(a.excluidoDeEquivalentes?' · excluido de equivalentes solo en el método de clase':'')));
+ }
+}
+function probarMetodoClaseGas(){
+ const caso=casoEjercicioGas();caso.instalacion.perfil={...PERFIL_CLASE_ACERO};
+ const paquete=$('claseLongitudesConfirmadas').checked?catalogoParaGas(caso.instalacion):null;
+ const resultado=motorClaseAceroGas(caso.tramos,caso.artefactos,caso.instalacion,paquete);
+ if(!$('claseLongitudesConfirmadas').checked){resultado.estado='bloqueado';resultado.diametros=null;resultado.faltantes.unshift('Confirmá que las cinco longitudes aportadas son longitudes de tramo.');}
+ mostrarInformeClaseGas(resultado,'informeMetodoClase');
+ const out=$('informeMetodoClase');
+ Object.entries(caso.referencias).forEach(([id,esperado])=>{const p=document.createElement('p');const valor=resultado.diametros?.[id];p.textContent=id+' · referencia del ejercicio: '+esperado+' · calculado: '+(valor||'PENDIENTE')+' · '+(valor?(valor===esperado?'COINCIDE':'DIFIERE; revisar datos, tablas y método'):'NO VALIDADO NUMÉRICAMENTE');out.append(p);});
+ return resultado;
+}
+
+function prepararPerfilClaseGas(){
+ if(!window.confirm('Aplicar a tu red GN / acero roscado epoxi y las propiedades del ejercicio (9300 kcal/m³, densidad 0,65)? No confirma presiones ni aptitud de instalación.'))return;
+ instalacionGas.perfil={...instalacionGas.perfil,...PERFIL_CLASE_ACERO};guardarDatos();mostrarVista('dimensionGas');
+}
+function ejecutarClaseMiRedGas(){
+ const r=motorClaseAceroGas(tramos,artefactos,instalacionGas,catalogoParaGas(instalacionGas));
+ mostrarInformeClaseGas(r,'informeClaseMiRed');return r;
 }
 
 function guardarCondicionesDimensionamiento(){
@@ -702,6 +846,8 @@ function guardarDatos(){
  actual.aclaracion=$('duda').value;
  actual.revision=$('revision').textContent;
  asegurarIdsGas();
+ $('informeClaseMiRed').replaceChildren();
+ $('informeClaseMiRed').textContent='Datos actualizados. Volvé a ejecutar el método de clase.';
  $('resultadoDimensionamiento').textContent='Datos actualizados. Ejecutá nuevamente el diagnóstico de dimensionamiento.';
  proyectos.gas.instalacion=instalacionGas;
  renderRedGas();

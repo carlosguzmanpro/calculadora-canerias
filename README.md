@@ -16,21 +16,33 @@ No interpreta fotografías, genera planos ni verifica diámetros, presiones o no
 
 El diámetro ya NO es obligatorio para crear, editar, recuperar o revisar tramos. La medida manual se conserva como opción secundaria. Los accesorios se registran por tipo y posición sin medidas de conexión; deben completarse las longitudes entre piezas para contar cuplas y equivalencias. Las tees se vinculan a puntos de derivación y se identifican las salidas principal y ramal.
 
-En **GAS → Calcular diámetros · diagnóstico** se ejecuta el motor de candidatos. No hay tablas técnicas de producción habilitadas todavía: faltan el material/sistema del ejercicio, los documentos completos y verificación de aplicabilidad de Tablas N.º 3 y N.º 18, datos de accesorios y condiciones de suministro. El resultado actual será **SIN DIÁMETROS CALCULADOS**, con una lista específica de pendientes. No se suplanta esa ausencia usando la respuesta anotada del ejercicio o una tabla de otro material. Los detalles técnicos y fuentes están en `FUENTES-DIMENSIONAMIENTO.md`.
+En **GAS → Calcular diámetros · diagnóstico** se ejecuta el motor de candidatos. No hay tablas técnicas de producción habilitadas todavía: el material/sistema del ejercicio está confirmado como acero roscado con revestimiento epoxi; faltan los documentos completos y verificación de aplicabilidad de Tablas N.º 3 y N.º 18, datos de accesorios y condiciones de suministro. El resultado actual será **SIN DIÁMETROS CALCULADOS**, con una lista específica de pendientes. No se suplanta esa ausencia usando la respuesta anotada del ejercicio o una tabla de otro material. Los detalles técnicos y fuentes están en `FUENTES-DIMENSIONAMIENTO.md`.
 
 Los ensayos automáticos verifican ambos adaptadores de tablas (pérdida unitaria y capacidad por longitud) usando datos ficticios solo en pruebas. Se evalúan longitudes reales, equivalentes dependientes de las medidas y paso de tees, consumos acumulados y rutas completas. Si un catálogo verificado se incorpora en otra revisión, los resultados incluirán medidas de piezas compatibles y referencia de fuente/edición. Esta entrega NO habilita resultados técnicos reales ni reemplaza las medidas manuales de tu proyecto.
 
+## Método de clase: acero roscado con revestimiento epoxi
+
+Rama `prueba/metodo-clase-acero-epoxi`, basada en el motor existente. El procedimiento reconstruye recorridos completos, ordena el inicial más alejado primero y acumula consumos por tramo físico. Selecciona candidatos inicialmente con longitud real +15 m; luego recalcula con equivalencias reales dependientes del diámetro hasta converger. En tramos compartidos utiliza el recorrido definitivo más desfavorable y el consumo acumulado. Una oscilación, falta de datos o límite de iteración bloquea los resultados parciales.
+
+Las tees tienen tres medidas y equivalencias independientes para paso directo y giro de 90°. Una tee reductora es una única pieza; no añade reducciones duplicadas. Las reducciones independientes se incluyen en materiales, pero se excluyen de equivalentes exclusivamente en este método de clase (no significa pérdida física cero). El tratamiento de cuplas también requiere una fuente explícita. No se inventan accesorios ni se aplican las referencias de pulgadas como entrada.
+
+**No se encontraron fotos/PDF de las tablas N.º 3 y N.º 18 en el proyecto.** La aplicación no tiene valores tabulares de producción habilitados. Hay que aportar ambas tablas completas, encabezados, notas, unidades, fuente/edición y el croquis con accesorios identificados. Después se verificará su aplicabilidad al acero roscado epoxi. El cálculo no certifica normativa, presiones ni aptitud para ejecutar una instalación.
+
+**Validación:** se conservaron las 93 pruebas previas y pasan 14 adicionales: **107 en total** (97 de aplicación y 10 del intermediario desactivado). Se verificaron numéricamente consumos y longitudes del ejercicio. Las selecciones, iteración y equivalencias se ensayaron únicamente con catálogos ficticios aislados en tests. La comparación numérica de diámetros con el ejercicio real permanece pendiente de las tablas originales. No se declara aprobado un cálculo que no pudo ejecutarse con esas tablas.
+
 ### Probar desde Android
 
-1. Descomprimí `canerias-motor-gas.zip` y abrí `index.html` como en las pruebas anteriores.
-2. En **Gas → Trabajar con croquis y tramos**, agregá un tramo dejando cerrada la opción **Opcional: cargar un diámetro manual conocido**. Se debe guardar sin medida.
-3. En **Revisar accesorios**, podés agregar codos y tees indicando tipo y metros antes/después, dejando vacías las medidas de conexión. Si es una tee, indicá su nombre. En **Instalación: datos y conexiones**, confirmá la pieza real del punto y distinguí paso principal y ramal de cada tee.
-4. Entrá en **Calcular diámetros · diagnóstico** y tocá **Calcular diámetros de mi red**. Debe informar lo que falta, sin producir una medida ni usar el diámetro manual como resultado automático.
-5. Tocá **Ejecutar prueba M–A–B sin ingresar diámetros**. La prueba está separada de tu proyecto; no agrega ni borra tramos. Las medidas y consumos son los que aportaste. Marcá la casilla de verificación de longitudes solo si ya las cotejaste con el croquis.
-6. Verificá demanda total **29200 kcal/h**, A–B **13200 kcal/h** y recorridos **24, 29 y 36 m** si las medidas aportadas son individuales. Las equivalencias todavía no están disponibles, por lo que estos son metros reales, no longitudes de cálculo normativas.
-7. Los diámetros del ejercicio aparecen como **referencias de comparación** y el resultado calculado queda **PENDIENTE** hasta que se verifiquen tablas y condiciones. No es una coincidencia numérica ya demostrada.
+1. Descomprimí `canerias-clase-acero-epoxi.zip` y abrí `index.html` con el navegador o visor HTML que usaste en las pruebas anteriores. No reemplaces la aplicación publicada. El guardado local puede estar separado al abrir desde otra ubicación: conservá la versión anterior y sus datos.
+2. Entrá en **Gas → Calcular diámetros · diagnóstico**.
+3. En **Ejercicio de clase M–A–B**, tocá **Probar método de clase M–A–B sin diámetros**. Es una copia separada: no reemplaza ni agrega datos a tu instalación.
+4. Marcá la casilla solo después de comprobar en el croquis que 15, 9, 8, 6 y 13 m son longitudes individuales. Sin confirmación el resultado queda bloqueado.
+5. Compará los recorridos: Cocina **36 m**, Calefactor **29 m**, Termotanque **24 m**; estimación inicial **51, 44 y 39 m**. Los 15 m extra nunca se presentan como equivalentes definitivos.
+6. Comprobá **29200 kcal/h** en M–A y **13200 kcal/h** en A–B. Los caudales se calculan dividiendo por **9300 kcal/m³**, sin redondear internamente.
+7. Diámetros, equivalentes definitivos y comprobación de capacidad deben seguir **PENDIENTES**. Se indican tablas y accesorios faltantes. Las pulgadas anotadas son referencias del ejercicio, no resultados comprobados del motor.
+8. Para revisar tu propia red, tocá **Analizar mi red con el método de clase**. El botón de selección de acero epoxi solicita confirmación antes de cambiar material y propiedades de tu red; no modifica presiones ni confirma condiciones de suministro. Registrá conexiones, accesorios y vías de tees en las pantallas existentes. No hace falta ingresar diámetros.
+9. Podés imprimir el informe desde **Imprimir diagnóstico y comparación**, conservando advertencias y resultados visibles. Comprobá también fotografías, carga manual, revisión de croquis y guardado como antes.
 
-Se conservan fotografía de referencia, carga manual, revisión de croquis, guardado, impresión y AGUA/CLOACAS. Gemini sigue desactivado y no se agregaron servicios ni claves. La comprobación visual de esta entrega en Android queda pendiente; las pruebas de lógica no certifican una instalación.
+Gemini sigue desactivado: no se envían fotografías. No se incorporaron servicios ni claves. Las pruebas automáticas cubren la lógica; la comprobación visual de esta entrega en Android queda pendiente.
 
 ## Datos de instalación y red domiciliaria de GAS
 
