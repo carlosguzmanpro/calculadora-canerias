@@ -2,18 +2,33 @@
 (function(root){
  const normal=s=>String(s||'').trim().toLocaleLowerCase('es');
  function detectar({tramos=[],artefactos=[],nodos=[],inventario={},opciones={}}){
-  const propuestas=[],avisos=[],mapa=new Map(),edges=[],conRed=tramos.some(t=>t.red),sinRed=tramos.some(t=>!t.red);
+  const propuestas=[],avisos=[],mapa=new Map(),edges=[];
   if(tramos.some(t=>!t.id||!Number.isFinite(t.metros)||t.metros<=0)||new Set(tramos.map(t=>t.id)).size!==tramos.length)return {propuestas:[],avisos:['Revisá identificadores y longitudes positivas de los tramos.']};
   const extras=inventario.extras||[],porId=new Map((inventario.tramos||[]).map(t=>[t.id,t]));
   const get=(id,nombre,nodo=null)=>{if(!mapa.has(id))mapa.set(id,{id,nombre,nodo,entradas:[],salidas:[]});return mapa.get(id);};
+  // Desde/Hasta son campos estructurados; nunca se separa el nombre visual.
+  // Los IDs opcionales sólo desambiguan puntos compatibles con esos campos.
+  function extremo(t,campo){
+   const nombre=String(t[campo]||'').trim(),clave=normal(nombre);
+   if(!clave){avisos.push('Tramo '+t.id+': falta '+(campo==='desde'?'Desde':'Hasta')+'.');return null;}
+   const candidatos=nodos.filter(n=>normal(n.nombre)===clave);
+   const ref=t.red?.[campo],referidos=ref?nodos.filter(n=>n.id===ref):[];
+   if(referidos.length>1){avisos.push(nombre+': identificador de nodo duplicado; conexión pendiente.');return null;}
+   const explicito=referidos[0];
+   if(explicito&&normal(explicito.nombre)!==clave){avisos.push('Tramo '+t.id+': '+campo+' «'+nombre+'» contradice el nodo «'+explicito.nombre+'»; revisar esta conexión.');return null;}
+   if(!explicito&&candidatos.length>1){avisos.push(nombre+': varios nodos tienen ese nombre; conexión pendiente de identificar.');return null;}
+   if(ref&&!explicito)avisos.push('Tramo '+t.id+': referencia interna no disponible; se utilizó '+campo+' «'+nombre+'» guardado.');
+   const nodo=explicito||candidatos[0]||null;
+   return get(nodo?'n:'+nodo.id:'e:'+clave,nombre,nodo);
+  }
+  const pendientes=new Set(),nombresPendientes=new Set();
   for(const t of tramos){
-   let a,b;
-   if(t.red){const x=nodos.find(n=>n.id===t.red.desde),y=nodos.find(n=>n.id===t.red.hasta);if(!x||!y){avisos.push('Conexiones pendientes en '+t.desde+'–'+t.hasta);continue;}a=get('n:'+x.id,x.nombre,x);b=get('n:'+y.id,y.nombre,y);}
-   else{if(conRed&&sinRed){avisos.push('Conectá explícitamente '+t.desde+'–'+t.hasta+': no se mezclaron nombres con nodos de la red.');continue;}if(!normal(t.desde)||!normal(t.hasta)){avisos.push('Extremos faltantes en un tramo.');continue;}a=get('e:'+normal(t.desde),t.desde);b=get('e:'+normal(t.hasta),t.hasta);}
+   const a=extremo(t,'desde'),b=extremo(t,'hasta');
+   if(!a||!b){for(const nombre of [t.desde,t.hasta])if(normal(nombre))nombresPendientes.add(normal(nombre));if(a)pendientes.add(a.id);if(b)pendientes.add(b.id);continue;}
    if(a===b||edges.some(e=>[e.a.id,e.b.id].includes(a.id)&&[e.a.id,e.b.id].includes(b.id))){avisos.push('Conexión circular o duplicada en '+t.desde+'–'+t.hasta+'. Revisá la red antes de detectar.');return {propuestas:[],avisos};}
    const e={t,a,b,datos:porId.get(t.id)||{}};edges.push(e);a.salidas.push(e);b.entradas.push(e);
   }
-  if(!conRed&&tramos.length)avisos.push('Conexiones por extremos escritos iguales; verificá que cada nombre corresponda al mismo punto físico.');
+  for(const n of mapa.values())if(nombresPendientes.has(normal(n.nombre)))pendientes.add(n.id);
   const padre=new Map([...mapa.keys()].map(k=>[k,k]));const raiz=k=>{while(padre.get(k)!==k)k=padre.get(k);return k;};for(const e of edges){const a=raiz(e.a.id),b=raiz(e.b.id);if(a===b)return {propuestas:[],avisos:[...avisos,'Circuito cerrado: revisar conexiones antes de sugerir accesorios.']};padre.set(a,b);}
   const incidencias=n=>[...n.entradas,...n.salidas].sort((a,b)=>(a.b===n?0:1)-(b.b===n?0:1)||String(a.t.id).localeCompare(String(b.t.id)));
   const medidasNodo=n=>incidencias(n).map(e=>e.b===n?(e.datos.diametroFinal||e.t.diametro||null):(e.t.diametro||null));
@@ -21,6 +36,7 @@
   function agregar(id,tipo,ubicacion,datos,afectados){propuestas.push({id,tipo,ubicacion,...datos,firma:JSON.stringify({datos,afectados:afectados.map(e=>e.t).sort((a,b)=>String(a.id).localeCompare(String(b.id))),largo:tipo==='cupla'?opciones.largoComercial:null})});}
   for(const n of mapa.values()){
    const ies=incidencias(n),piezas=piezasNodo(n),nodo=n.nodo?.id||'nombre:'+normal(n.nombre),ds=medidasNodo(n);
+   if(pendientes.has(n.id)){avisos.push(n.nombre+': accesorios pendientes por una conexión sin resolver.');continue;}
    if(n.nodo&&['medidor','artefacto'].includes(n.nodo.tipo)&&ies.length>1){avisos.push(n.nombre+': conexiones incompatibles con su tipo de punto; revisar manualmente.');continue;}
    if(ies.length>3){avisos.push(n.nombre+': más de tres conexiones; identificar manualmente la combinación de accesorios.');continue;}
    if(ies.length===3){
@@ -41,7 +57,7 @@
    const esArtefacto=e.b.nodo?e.b.nodo.tipo==='artefacto'&&artefactos.some(a=>a.id===e.b.nodo.artefactoId):coincide.length===1||!!t.artefacto;
    if(e.b.salidas.length===0&&!esArtefacto)avisos.push(e.b.nombre+': artefacto no identificado inequívocamente; no se dedujo una llave.');
    const manualesTramo=extras.filter(a=>a.ubicacion===t.id||normal(a.ubicacion)===normal(label)||a.tramo===t.id);
-   if(esArtefacto&&e.b.salidas.length===0&&e.b.entradas.length===1&&!t.llave&&!acc.some(a=>a.tipo==='llave')&&!enExtremo.some(a=>a.tipo==='llave')&&!manualesTramo.some(a=>a.tipo==='llave')){
+   if(!pendientes.has(e.b.id)&&esArtefacto&&e.b.salidas.length===0&&e.b.entradas.length===1&&!t.llave&&!acc.some(a=>a.tipo==='llave')&&!enExtremo.some(a=>a.tipo==='llave')&&!manualesTramo.some(a=>a.tipo==='llave')){
     const dudosa=extras.some(a=>a.tipo==='llave'&&!a.nodo&&!a.tramo&&!edges.some(x=>a.ubicacion===x.t.id||normal(a.ubicacion)===normal(x.t.desde+'–'+x.t.hasta)));
     agregar('llave:'+t.id,'llave',label+' · '+(e.b.nodo?e.b.nombre:t.artefacto||e.b.nombre),{tramo:t.id,nodo:e.b.nodo?.id||'nombre:'+normal(e.b.nombre),cantidad:1,medidas:[t.diametro||null],bloqueo:e.b.nodo&&nodos.filter(n=>n.tipo==='artefacto'&&n.artefactoId===e.b.nodo.artefactoId).length>1?'Un artefacto está conectado en varios puntos; revisá la conexión antes de añadir llaves.':dudosa?'Hay una llave manual sin ubicación inequívoca; ubicala o rechazá esta sugerencia para evitar duplicarla.':null,motivo:'Posible llave de paso del artefacto. Confirmar existencia, tipo y ubicación; no es una exigencia normativa verificada.'},[e]);
    }
@@ -60,7 +76,7 @@
    }
 
   }
-  return {propuestas,avisos:[...new Set(avisos)]};
+  return {propuestas,avisos:[...new Set(avisos)],conexiones:edges.map(e=>({tramo:e.t.id,desde:e.a.id,hasta:e.b.id}))};
  }
  const api={detectar};root.DetectorGas=api;if(typeof module!=='undefined')module.exports=api;
 })(typeof globalThis!=='undefined'?globalThis:this);
@@ -70,7 +86,15 @@ function actualizarSugerenciasGas(){
  if(modulo!=='gas'||!proyectoGasActual().deteccionGas?.activa)return;
  const d=datosDeteccionGas(),base=entradaMaterialesGas('proyecto',true),opciones={...opcionesMaterialesGas('proyecto'),uniones:{...datosPlanGas().opciones.uniones}},r=DetectorGas.detectar({tramos,artefactos,nodos:instalacionGas.nodos,inventario:base,opciones});
  for(const a of Object.values(d.registros))a.vigente=false;
- for(const p of r.propuestas){const a=d.registros[p.id];if(!a)d.registros[p.id]={propuesta:p,edicion:{},estado:'sugerido',vigente:true};else{if(a.propuesta.firma!==p.firma&&a.estado==='confirmado')a.estado='revisar';a.propuesta=p;a.vigente=true;}}
+ for(const p of r.propuestas){
+  // Conservar decisiones del detector anterior por nombres, sólo si las mismas
+  // conexiones identifican inequívocamente la misma pieza. El registro viejo
+  // queda de respaldo; una confirmación afectada debe revisarse nuevamente.
+  if(!d.registros[p.id]&&p.conexiones){
+   const iguales=Object.values(d.registros).filter(a=>a.propuesta.tipo===p.tipo&&a.propuesta.nodo==='nombre:'+String(p.ubicacion).trim().toLocaleLowerCase('es')&&JSON.stringify([...(a.propuesta.conexiones||[])].sort())===JSON.stringify([...p.conexiones].sort()));
+   if(iguales.length===1)d.registros[p.id]={...iguales[0],edicion:{...iguales[0].edicion}};
+  }
+  const a=d.registros[p.id];if(!a)d.registros[p.id]={propuesta:p,edicion:{},estado:'sugerido',vigente:true};else{if(a.propuesta.firma!==p.firma&&a.estado==='confirmado')a.estado='revisar';a.propuesta=p;a.vigente=true;}}
  d.avisos=r.avisos;renderSugerenciasGas();
 }
 function detectarAccesoriosGas(){if(modulo!=='gas')return;asegurarIdsGas();datosDeteccionGas().activa=true;actualizarSugerenciasGas();guardarDatos();$('panelDeteccionGas').classList.remove('oculto');if($('panelDeteccionGas').scrollIntoView)$('panelDeteccionGas').scrollIntoView({block:'start'});}

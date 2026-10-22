@@ -944,11 +944,11 @@ test('detección: filas retiradas se conservan como respaldo y dejan de incorpor
  const a=app();redDeteccion(a);a.run('detectarAccesoriosGas()');const r=registrosDeteccion(a,'llave')[0];confirmarDeteccion(a,r.propuesta.id);a.ctx.tramoRetirado=r.propuesta.tramo;a.run('tramos=tramos.filter(t=>t.id!==tramoRetirado);guardarDatos()');assert.equal(a.run('datosDeteccionGas().registros[idDetectado].vigente'),false);assert.equal(a.run('datosDeteccionGas().registros[idDetectado].estado'),'confirmado');assert.equal(a.run('accesoriosDeteccionConfirmadosGas().length'),0);
 });
 test('detección: no reconstruye conexiones inválidas, circuitos ni combinaciones de más de tres bocas',()=>{
- const a=app();redDeteccion(a);a.run('tramos[0].red={desde:"inexistente",hasta:"otro"};detectarAccesoriosGas()');assert.match(a.run('datosDeteccionGas().avisos.join(" ")'),/Conexiones pendientes|no se mezclaron/);assert.equal(registrosDeteccion(a).length,0);
+ const a=app();redDeteccion(a);a.run('tramos[0].red={desde:"inexistente",hasta:"otro"};detectarAccesoriosGas()');assert.match(a.run('datosDeteccionGas().avisos.join(" ")'),/referencia interna no disponible/);assert.equal(registrosDeteccion(a,'tee').length,2);
  const b=app();b.run("abrir('gas');tramos=[{id:'a',desde:'A',hasta:'B',metros:1},{id:'b',desde:'B',hasta:'C',metros:1},{id:'c',desde:'C',hasta:'A',metros:1}];detectarAccesoriosGas()");assert.equal(registrosDeteccion(b).length,0);assert.match(b.run('datosDeteccionGas().avisos.join(" ")'),/Circuito cerrado/);
 });
 test('detección: nodos explícitos con el mismo nombre no se fusionan por su texto',()=>{
- const a=app();redDeteccion(a);a.run("instalacionGas.nodos=[{id:'m',nombre:'M',tipo:'medidor'},{id:'a',nombre:'X',tipo:'derivacion'},{id:'b',nombre:'X',tipo:'derivacion'},...artefactos.map((x,i)=>({id:'art'+i,nombre:x.nombre,tipo:'artefacto',artefactoId:x.id}))];tramos.forEach((t,i)=>t.red=[{desde:'m',hasta:'a'},{desde:'a',hasta:'b'},{desde:'a',hasta:'art0'},{desde:'b',hasta:'art1'},{desde:'b',hasta:'art2'}][i]);detectarAccesoriosGas()");const r=registrosDeteccion(a,'tee');assert.equal(r.length,2);assert.notEqual(r[0].propuesta.nodo,r[1].propuesta.nodo);
+ const a=app();redDeteccion(a);a.run("instalacionGas.nodos=[{id:'m',nombre:'M',tipo:'medidor'},{id:'a',nombre:'X',tipo:'derivacion'},{id:'b',nombre:'X',tipo:'derivacion'},...artefactos.map((x,i)=>({id:'art'+i,nombre:x.nombre,tipo:'artefacto',artefactoId:x.id}))];tramos.forEach(t=>{if(['A','B'].includes(t.desde))t.desde='X';if(['A','B'].includes(t.hasta))t.hasta='X'});tramos.forEach((t,i)=>t.red=[{desde:'m',hasta:'a'},{desde:'a',hasta:'b'},{desde:'a',hasta:'art0'},{desde:'b',hasta:'art1'},{desde:'b',hasta:'art2'}][i]);detectarAccesoriosGas()");const r=registrosDeteccion(a,'tee');assert.equal(r.length,2);assert.notEqual(r[0].propuesta.nodo,r[1].propuesta.nodo);
 });
 test('detección: proyecto, demostración, foto, PDF y HTML autónomo permanecen aislados',()=>{
  const a=app(null,{embebido:true});redDeteccion(a);a.run("proyectos.gas.foto='data:image/png;base64,REAL';mostrarFotoLocal();detectarAccesoriosGas()");const r=registrosDeteccion(a,'tee')[0];confirmarDeteccion(a,r.propuesta.id);a.run('prepararInformeActual()');const doc=a.elements.get('informeImpresion').innerHTML;assert.match(doc,/REAL/);assert.doesNotMatch(doc,/<(?:input|button|select)\b/);a.run("seleccionarAmbitoGas('demostracion')");assert.equal(a.run('accesoriosDeteccionConfirmadosGas().length'),0);assert.equal(a.elements.get('panelDeteccionGas').classList.hidden,true);a.run("abrir('agua')");assert.equal(a.run('modeloInformeActual().filas.length'),0);
@@ -982,4 +982,69 @@ test('detección: tres bocas sin entrada definida no autorizan una tee reductora
 });
 test('detección: aprovecha el artefacto de destino ya elegido en el formulario del tramo',()=>{
  const a=app();a.run("abrir('gas');tramos=[{id:'destino',desde:'M',hasta:'A',metros:6,diametro:null,artefacto:'Cocina',detalle:{estado:'ninguno'}}];detectarAccesoriosGas()");const r=registrosDeteccion(a,'llave');assert.equal(r.length,1);assert.match(r[0].propuesta.ubicacion,/Cocina/);assert.equal(a.run('artefactos.length'),0);
+});
+
+function redAndroidEstructurada(a){
+ redDeteccion(a,{diametro:null,pendiente:true});
+ a.run("tramos.forEach((t,i)=>t.metros=[15,5,9,16,13][i]);instalacionGas.nodos=[{id:'n-m',nombre:'M',tipo:'medidor'},{id:'n-a',nombre:'A',tipo:'derivacion'}];tramos[0].red={desde:'n-m',hasta:'n-a'}");
+}
+test('Android: cinco tramos Desde/Hasta y referencias parciales comparten A y B sin recargar',()=>{
+ const a=app(null,{embebido:true});redAndroidEstructurada(a);
+ const antes=a.run('JSON.stringify({tramos,artefactos,instalacionGas})');
+ a.run('detectarAccesoriosGas()');
+ const resultado=a.run('DetectorGas.detectar({tramos,artefactos,nodos:instalacionGas.nodos})');
+ assert.equal(resultado.conexiones.length,5);
+ assert.equal(resultado.conexiones[0].hasta,resultado.conexiones[1].desde);
+ assert.equal(resultado.conexiones[1].desde,resultado.conexiones[2].desde);
+ assert.equal(resultado.conexiones[1].hasta,resultado.conexiones[3].desde);
+ assert.equal(resultado.conexiones[3].desde,resultado.conexiones[4].desde);
+ assert.deepEqual(Array.from(registrosDeteccion(a,'tee'),r=>r.propuesta.ubicacion).sort(),['A','B']);
+ assert.equal(a.run('accesoriosDeteccionConfirmadosGas().length'),0);
+ assert.ok(registrosDeteccion(a,'cupla').every(r=>r.propuesta.cantidad===null));
+ assert.ok(registrosDeteccion(a).every(r=>!['codo45','codo90','curva','reduccion'].includes(r.propuesta.tipo)));
+ assert.doesNotMatch(resultado.avisos.join(' '),/Conectá explícitamente|no se mezclaron/);
+ assert.equal(a.run('JSON.stringify({tramos,artefactos,instalacionGas})'),antes);
+});
+test('Android: referencias incompletas o inexistentes aprovechan Desde/Hasta guardados',()=>{
+ for(const red of [{},{desde:'n-m'},{desde:'viejo',hasta:'borrado'}]){
+  const a=app();redAndroidEstructurada(a);a.ctx.refAndroid=red;a.run('tramos[0].red=refAndroid;detectarAccesoriosGas()');
+  assert.equal(registrosDeteccion(a,'tee').length,2);
+ }
+});
+test('Android: un nombre visual no reemplaza Desde/Hasta y los espacios no separan nodos',()=>{
+ const a=app();redAndroidEstructurada(a);a.run("tramos[1].desde=' a ';tramos[1].nombre='OTRO–DESTINO';tramos[4].desde=' b ';detectarAccesoriosGas()");
+ assert.equal(registrosDeteccion(a,'tee').length,2);
+ a.run("tramos[1].desde='';detectarAccesoriosGas()");
+ assert.match(a.run('datosDeteccionGas().avisos.join(" ")'),/falta Desde/);
+ assert.equal(registrosDeteccion(a,'tee').length,0);
+});
+test('Android: referencias contradictorias y nombres ambiguos quedan pendientes',()=>{
+ const a=app();redAndroidEstructurada(a);a.run("tramos[1].red={desde:'n-m'};detectarAccesoriosGas()");
+ assert.match(a.run('datosDeteccionGas().avisos.join(" ")'),/contradice/);
+ assert.ok(registrosDeteccion(a,'tee').every(r=>r.propuesta.ubicacion!=='B'));
+ const b=app();redAndroidEstructurada(b);b.run("instalacionGas.nodos.push({id:'otro-a',nombre:'A',tipo:'derivacion'});detectarAccesoriosGas()");
+ assert.match(b.run('datosDeteccionGas().avisos.join(" ")'),/varios nodos/);
+ assert.ok(registrosDeteccion(b,'tee').every(r=>r.propuesta.ubicacion!=='A'));
+});
+test('Android: confirmar, corregir y rechazar con conexiones mixtas persiste sin duplicación',()=>{
+ const a=app();redAndroidEstructurada(a);a.run('detectarAccesoriosGas()');
+ const tees=registrosDeteccion(a,'tee');confirmarDeteccion(a,tees[0].propuesta.id);
+ a.ctx.idRechazo=tees[1].propuesta.id;a.run("resolverSugerenciaGas(idRechazo,'rechazado',{cantidad:2});detectarAccesoriosGas();detectarAccesoriosGas();guardarDatos()");
+ assert.equal(registrosDeteccion(a,'tee').length,2);
+ assert.equal(a.run('accesoriosDeteccionConfirmadosGas().filter(p=>p.tipo==="tee").length'),1);
+ const b=app(a.saved());b.run("abrir('gas');detectarAccesoriosGas()");b.ctx.idRechazo=tees[1].propuesta.id;
+ assert.equal(b.run('datosDeteccionGas().registros[idRechazo].estado'),'rechazado');
+ assert.equal(b.run('datosDeteccionGas().registros[idRechazo].edicion.cantidad'),2);
+ assert.equal(b.run('accesoriosDeteccionConfirmadosGas().filter(p=>p.tipo==="tee").length'),1);
+});
+test('Android: tee manual ubicada en A no se duplica al conciliar conexiones mixtas',()=>{
+ const a=app();redAndroidEstructurada(a);
+ a.run("tramos[0].detalle={estado:'pendiente',accesorios:[{tipo:'tee',nodo:'A',medidas:[null,null,null]}]};detectarAccesoriosGas()");
+ assert.deepEqual(Array.from(registrosDeteccion(a,'tee'),r=>r.propuesta.ubicacion),['B']);
+});
+test('Android: decisiones previas por nombres se conservan al resolver IDs únicos de la misma pieza',()=>{
+ const a=app();redDeteccion(a,{diametro:null});a.run('detectarAccesoriosGas()');const t=registrosDeteccion(a,'tee').find(r=>r.propuesta.ubicacion==='A');a.ctx.idAnterior=t.propuesta.id;
+ a.run("resolverSugerenciaGas(idAnterior,'rechazado',{cantidad:2});instalacionGas.nodos=[{id:'nuevo-a',nombre:'A',tipo:'derivacion'}];detectarAccesoriosGas()");
+ const actual=registrosDeteccion(a,'tee').find(r=>r.propuesta.ubicacion==='A');assert.equal(actual.estado,'rechazado');assert.equal(actual.edicion.cantidad,2);assert.equal(a.run('datosDeteccionGas().registros[idAnterior].vigente'),false);
+ assert.equal(registrosDeteccion(a,'tee').length,2);assert.equal(a.run('accesoriosDeteccionConfirmadosGas().length'),0);
 });
