@@ -2,6 +2,7 @@ let ultimoDocumentoPreparado=null;
 function modeloInformeActual(){
  const gas=modulo==='gas',d={titulo:({gas:'GAS',agua:'AGUA',cloacas:'CLOACAS'})[modulo]||'Sin proyecto seleccionado',ambito:gas&&ambitoGas==='demostracion'?'DEMOSTRACIÓN · datos de práctica separados':'MI PROYECTO',tramos:gas?tramos:[],artefactos:gas?artefactos:[],filas:[],resumen:[],observaciones:$('duda').value.trim(),advertencia:gas?'Diámetros automáticos definitivos BLOQUEADOS. Cantidades estimadas y datos pendientes conservan su condición. Informe de revisión; no aprueba una instalación real.':''};
  if(gas){
+  const avisoDeteccion=avisoDeteccionGas();if(avisoDeteccion)d.resumen.push(avisoDeteccion);
   const resultado=motorClaseAceroGas(tramos,artefactos,instalacionGas,catalogoParaGas(instalacionGas));
   const red=analizarRedGas();
   d.planilla=InformeProyecto.planilla(tramos,resultado,{caudalAplicable:instalacionGas.perfil.gas==='GN'&&Number(instalacionGas.perfil.poderCalorifico)===9300&&red.errores.length===0});

@@ -668,8 +668,8 @@ test('aislamiento: una lectura de foto demorada no escribe en el espacio recién
  a.ctx.evento={target:{files:[{type:'image/png',size:10}]}};a.run("cargarFoto(evento);seleccionarAmbitoGas('demostracion')");lector.result='data:image/png;base64,TARDÍA';lector.onload();assert.equal(a.run('proyectos.gas.demostracion.foto'),undefined);assert.equal(a.run('proyectos.gas.foto'),undefined);
 });
 
-test('Android: index autónomo contiene exactamente las diez fuentes locales, sin solicitudes de scripts',()=>{
- const bloques=[...html.matchAll(/<script data-local="([^"]+)">\n([\s\S]*?)\n<\/script>/g)];assert.equal(bloques.length,10);assert.doesNotMatch(html,/<script\s+src=/i);
+test('Android: index autónomo contiene exactamente las once fuentes locales, sin solicitudes de scripts',()=>{
+ const bloques=[...html.matchAll(/<script data-local="([^"]+)">\n([\s\S]*?)\n<\/script>/g)];assert.equal(bloques.length,11);assert.doesNotMatch(html,/<script\s+src=/i);
  for(const [,ruta,codigo]of bloques)assert.equal(codigo,fs.readFileSync(ruta,'utf8'),ruta);
 });
 test('Android: ejecuta los scripts incorporados y navega todas las especialidades sin archivos vecinos',()=>{
@@ -876,4 +876,110 @@ test('casilla Android: volver a elegir los mismos bytes como reemplazo exige con
 });
 test('casilla Android: cancelar reemplazo de foto conserva la confirmación existente',()=>{
  const a=app();a.run("abrir('gas');proyectos.gas.foto='data:image/png;base64,FOTO';mostrarFotoLocal()");a.elements.get('entregaCroquisConfirmado').checked=true;a.run('confirmarCroquisEntrega()');a.ctx.window.confirm=()=>false;a.ctx.evento={target:{files:[{type:'image/png',size:10}]}};a.run('cargarFoto(evento);actualizarVistaEntregaGas()');assert.equal(a.elements.get('entregaCroquisConfirmado').checked,true);assert.equal(a.run('fotoURL'),'data:image/png;base64,FOTO');
+});
+
+function redDeteccion(a,{diametro='1"',pendiente=false}={}){
+ a.run("abrir('gas')");a.ctx.rawDeteccion=[['M','A',19],['A','B',12],['A','Termo',18],['B','Calefactor',6],['B','Cocina',13]];
+ a.ctx.diametroDeteccion=diametro;a.ctx.pendienteDeteccion=pendiente;
+ a.run("artefactos=[{id:'art-t',nombre:'Termo',consumo:21950},{id:'art-c',nombre:'Calefactor',consumo:3000},{id:'art-k',nombre:'Cocina',consumo:10250}];tramos=rawDeteccion.map(([desde,hasta,metros],i)=>({id:'d'+i,desde,hasta,metros,diametro:diametroDeteccion,consumo:null,detalle:{estado:pendienteDeteccion?'pendiente':'ninguno',accesorios:[]}}));instalacionGas.perfil.material='Acero epoxi';instalacionGas.perfil.sistema='Roscado'");
+}
+function registrosDeteccion(a,tipo){return a.run('Object.values(datosDeteccionGas().registros).filter(a=>a.vigente'+(tipo?'&&a.propuesta.tipo==='+JSON.stringify(tipo):'')+')');}
+function confirmarDeteccion(a,id,edicion={}){a.ctx.idDetectado=id;a.ctx.edicionDetectada=edicion;a.run("resolverSugerenciaGas(idDetectado,'confirmado',edicionDetectada)");}
+test('detección: croquis M-A/B sugiere exactamente tees A y B y llaves de tres artefactos',()=>{
+ const a=app(null,{embebido:true});redDeteccion(a);a.run('detectarAccesoriosGas()');assert.deepEqual(Array.from(registrosDeteccion(a,'tee'),r=>r.propuesta.ubicacion).sort(),['A','B']);assert.equal(registrosDeteccion(a,'llave').length,3);assert.equal(a.run('accesoriosDeteccionConfirmadosGas().length'),0);assert.equal(a.run('entradaMaterialesGas().extras.length'),0);assert.match(a.run('modeloInformeActual().resumen.join(" ")'),/sugerencias sin confirmar/);assert.equal(a.run('CATALOGOS_GAS_VERIFICADOS.length'),0);
+});
+test('detección: nombres, fotos o cambios de dirección no inventan codos ni curvas',()=>{
+ const a=app();redDeteccion(a,{pendiente:true});a.run('detectarAccesoriosGas()');assert.ok(registrosDeteccion(a).every(r=>!['codo45','codo90','curva'].includes(r.propuesta.tipo)));assert.match(a.run('datosDeteccionGas().avisos.join(" ")'),/codos, curvas y posiciones pendientes/);assert.ok(registrosDeteccion(a,'cupla').every(r=>r.propuesta.cantidad===null));
+});
+test('detección: pendientes se pueden rechazar sin convertirse en cero ni perder decisión',()=>{
+ const a=app();redDeteccion(a,{pendiente:true});a.run('detectarAccesoriosGas()');const r=registrosDeteccion(a,'cupla')[0];a.ctx.idDetectado=r.propuesta.id;a.run("resolverSugerenciaGas(idDetectado,'rechazado',{});guardarDatos()");assert.equal(a.run('datosDeteccionGas().registros[idDetectado].estado'),'rechazado');assert.equal(a.run('datosDeteccionGas().registros[idDetectado].propuesta.cantidad'),null);assert.equal(a.run('accesoriosDeteccionConfirmadosGas().length'),0);
+});
+test('detección: no incorpora nada hasta confirmar y cada tee física se agrega una sola vez',()=>{
+ const a=app();redDeteccion(a);a.run('detectarAccesoriosGas()');const r=registrosDeteccion(a,'tee')[0];confirmarDeteccion(a,r.propuesta.id);assert.equal(a.run('accesoriosDeteccionConfirmadosGas().length'),1);a.run('detectarAccesoriosGas();detectarAccesoriosGas();generarPlanGas()');assert.equal(a.run('revisionMaterialesGas.plan.filas.filter(f=>f.tipo==="tee").reduce((n,f)=>n+f.cantidad,0)'),1);
+});
+test('detección: tee y llave manuales ya identificadas no se duplican',()=>{
+ const a=app();redDeteccion(a);a.run("tramos[0].detalle={estado:'completo',metrosFinal:0,accesorios:[{tipo:'tee',nodo:'A',metrosAntes:19,salida:'1\"',ramal:'1\"'}]};tramos[2].llave=true;detectarAccesoriosGas()");assert.deepEqual(Array.from(registrosDeteccion(a,'tee'),r=>r.propuesta.ubicacion),['B']);assert.equal(registrosDeteccion(a,'llave').length,2);
+});
+test('detección: una pieza manual nueva sustituye la sugerencia sin borrar su historial',()=>{
+ const a=app();redDeteccion(a);a.run('detectarAccesoriosGas()');const r=registrosDeteccion(a,'llave')[0];confirmarDeteccion(a,r.propuesta.id);a.ctx.tLlave=r.propuesta.tramo;a.run("tramos.find(t=>t.id===tLlave).llave=true;guardarDatos()");assert.equal(a.run('datosDeteccionGas().registros[idDetectado].vigente'),false);assert.equal(a.run('accesoriosDeteccionConfirmadosGas().filter(p=>p.tipo==="llave").length'),0);a.run('generarPlanGas()');assert.equal(a.run('revisionMaterialesGas.plan.filas.filter(f=>f.tipo==="llave").reduce((n,f)=>n+f.cantidad,0)'),1);
+});
+test('detección: llaves sin ubicación no habilitan otras llaves potencialmente duplicadas',()=>{
+ const a=app();redDeteccion(a);a.run("datosPlanGas().extras.push({tipo:'llave',cantidad:1,medidas:['1\"'],ubicacion:'Ubicación sin identificar',confirmado:true});detectarAccesoriosGas()");const r=registrosDeteccion(a,'llave')[0];assert.match(r.propuesta.bloqueo,/sin ubicación/);confirmarDeteccion(a,r.propuesta.id);assert.equal(a.run('accesoriosDeteccionConfirmadosGas().length'),0);
+});
+test('detección: límites de 6/12/18 m y largo comercial configurable calculan cuplas por segmento',()=>{
+ const a=app();redDeteccion(a);for(const [m,q]of [[6,0],[12,1],[18,2],[18.001,3]]){a.ctx.largoPrueba=m;a.run('tramos[0].metros=largoPrueba;detectarAccesoriosGas()');const r=registrosDeteccion(a,'cupla').find(r=>r.propuesta.tramo==='d0');assert.equal(r.propuesta.cantidad,q);}
+ a.run('datosPlanGas().opciones.largoComercial=3;tramos[0].metros=12;guardarDatos()');assert.equal(registrosDeteccion(a,'cupla').find(r=>r.propuesta.tramo==='d0').propuesta.cantidad,3);
+});
+test('detección: codo separa segmentos de 6 m, no se crea cupla en su conexión',()=>{
+ const a=app();redDeteccion(a);a.run("tramos[0].metros=12;tramos[0].detalle={estado:'completo',metrosFinal:6,accesorios:[{tipo:'codo90',metrosAntes:6,salida:'1\"'}]};detectarAccesoriosGas()");assert.equal(registrosDeteccion(a,'cupla').find(r=>r.propuesta.tramo==='d0').propuesta.cantidad,0);
+});
+test('detección: cuplas de segmentos con distinto diámetro se calculan por medida, sin mezclar',()=>{
+ const a=app();redDeteccion(a);a.run("tramos[0].metros=26;tramos[0].detalle={estado:'completo',metrosFinal:13,accesorios:[{tipo:'reduccion',metrosAntes:13,salida:'3/4\"'}]};detectarAccesoriosGas()");const r=registrosDeteccion(a,'cupla').filter(r=>r.propuesta.tramo==='d0');assert.equal(r.length,2);assert.deepEqual(Array.from(r,x=>x.propuesta.cantidad),[2,2]);assert.deepEqual(Array.from(r,x=>x.propuesta.medidas[0]),['1"','3/4"']);
+});
+test('detección: confirmar cero cuplas es distinto de pendiente y no añade piezas',()=>{
+ const a=app();redDeteccion(a);a.run('tramos[0].metros=6;detectarAccesoriosGas()');const r=registrosDeteccion(a,'cupla').find(r=>r.propuesta.tramo==='d0');confirmarDeteccion(a,r.propuesta.id);assert.equal(a.run('datosDeteccionGas().registros[idDetectado].estado'),'confirmado');assert.equal(a.run('accesoriosDeteccionConfirmadosGas().length'),0);
+});
+test('detección: confirmar cuplas no duplica la cantidad del plan de cortes',()=>{
+ const a=app();redDeteccion(a);a.run('detectarAccesoriosGas()');const r=registrosDeteccion(a,'cupla').find(r=>r.propuesta.tramo==='d0');assert.equal(r.propuesta.cantidad,3);confirmarDeteccion(a,r.propuesta.id);a.run('generarPlanGas()');assert.equal(a.run('revisionMaterialesGas.plan.filas.filter(f=>f.tipo==="cupla").reduce((n,f)=>n+f.cantidad,0)'),3);assert.ok(a.run('revisionMaterialesGas.plan.filas.filter(f=>f.tipo==="cupla-plan").every(f=>f.cantidad===null)'));
+});
+test('detección: uniones rectas con medidas conocidas sugieren reducción y las desconocidas no',()=>{
+ const a=app();a.run("abrir('gas');tramos=[{id:'r0',desde:'M',hasta:'A',metros:6,diametro:'1\"',detalle:{estado:'ninguno'}},{id:'r1',desde:'A',hasta:'Termo',metros:6,diametro:'3/4\"',detalle:{estado:'ninguno'}}];detectarAccesoriosGas()");let r=registrosDeteccion(a,'reduccion');assert.equal(r.length,1);assert.deepEqual(Array.from(r[0].propuesta.medidas),['1"','3/4"']);confirmarDeteccion(a,r[0].propuesta.id);assert.equal(a.run('accesoriosDeteccionConfirmadosGas().length'),0);confirmarDeteccion(a,r[0].propuesta.id,{configuracion:'reduccion'});assert.equal(a.run('accesoriosDeteccionConfirmadosGas().filter(x=>x.tipo==="reduccion").length'),1);a.run('tramos[1].diametro=null;guardarDatos()');assert.equal(registrosDeteccion(a,'reduccion').length,0);
+});
+test('detección: accesorio reductor existente cubre cambio de diámetro y no añade reducción',()=>{
+ const a=app();a.run("abrir('gas');tramos=[{id:'r0',desde:'M',hasta:'A',metros:6,diametro:'1\"',detalle:{estado:'completo',metrosFinal:0,accesorios:[{tipo:'codo90',metrosAntes:6,salida:'3/4\"'}]}},{id:'r1',desde:'A',hasta:'Termo',metros:6,diametro:'3/4\"',detalle:{estado:'ninguno'}}];detectarAccesoriosGas()");assert.equal(registrosDeteccion(a,'reduccion').length,0);
+});
+test('detección: tee reductora requiere elección explícita y no crea reducciones independientes',()=>{
+ const a=app();redDeteccion(a);a.run("tramos[2].diametro='3/4\"';detectarAccesoriosGas()");const r=registrosDeteccion(a,'tee').find(r=>r.propuesta.ubicacion==='A');confirmarDeteccion(a,r.propuesta.id);assert.equal(a.run('accesoriosDeteccionConfirmadosGas().length'),0);confirmarDeteccion(a,r.propuesta.id,{configuracion:'tee-reductora'});assert.equal(a.run('accesoriosDeteccionConfirmadosGas().filter(x=>x.tipo==="tee").length'),1);assert.equal(a.run('accesoriosDeteccionConfirmadosGas().filter(x=>x.tipo==="reduccion").length'),0);a.run('guardarDatos()');assert.equal(a.run('datosDeteccionGas().registros[idDetectado].estado'),'confirmado');
+});
+test('detección: tee igual y reducción elegidas generan una pieza por función física',()=>{
+ const a=app();redDeteccion(a);a.run("tramos[2].diametro='3/4\"';detectarAccesoriosGas()");const r=registrosDeteccion(a,'tee').find(r=>r.propuesta.ubicacion==='A');confirmarDeteccion(a,r.propuesta.id,{configuracion:'tee-igual-reduccion'});assert.equal(a.run('accesoriosDeteccionConfirmadosGas().filter(x=>x.tipo==="tee").length'),1);assert.equal(a.run('accesoriosDeteccionConfirmadosGas().filter(x=>x.tipo==="reduccion").length'),1);a.run('generarPlanGas()');assert.equal(a.run('revisionMaterialesGas.plan.filas.filter(x=>x.tipo==="reduccion").reduce((n,x)=>n+x.cantidad,0)'),1);
+});
+test('detección: cambios conservan correcciones manuales pero exigen revisar la sugerencia',()=>{
+ const a=app();redDeteccion(a);a.run('detectarAccesoriosGas()');const r=registrosDeteccion(a,'llave')[0];confirmarDeteccion(a,r.propuesta.id,{cantidad:2});a.ctx.tramoCorregido=r.propuesta.tramo;a.run('tramos.find(t=>t.id===tramoCorregido).metros+=1;guardarDatos()');assert.equal(a.run('datosDeteccionGas().registros[idDetectado].edicion.cantidad'),2);assert.equal(a.run('datosDeteccionGas().registros[idDetectado].estado'),'revisar');assert.equal(a.run('accesoriosDeteccionConfirmadosGas().length'),0);confirmarDeteccion(a,r.propuesta.id);assert.equal(a.run('accesoriosDeteccionConfirmadosGas()[0].cantidad'),2);
+});
+test('detección: rechazos y correcciones sobreviven a recarga sin aplicar sugerencias sin confirmar',()=>{
+ const a=app();redDeteccion(a);a.run('detectarAccesoriosGas()');const r=registrosDeteccion(a,'llave')[0];a.ctx.idDetectado=r.propuesta.id;a.run("resolverSugerenciaGas(idDetectado,'rechazado',{cantidad:2});guardarDatos()");const b=app(a.saved());b.run("abrir('gas')");b.ctx.idDetectado=r.propuesta.id;assert.equal(b.run('datosDeteccionGas().registros[idDetectado].estado'),'rechazado');assert.equal(b.run('datosDeteccionGas().registros[idDetectado].edicion.cantidad'),2);assert.equal(b.run('accesoriosDeteccionConfirmadosGas().length'),0);
+});
+test('detección: filas retiradas se conservan como respaldo y dejan de incorporarse',()=>{
+ const a=app();redDeteccion(a);a.run('detectarAccesoriosGas()');const r=registrosDeteccion(a,'llave')[0];confirmarDeteccion(a,r.propuesta.id);a.ctx.tramoRetirado=r.propuesta.tramo;a.run('tramos=tramos.filter(t=>t.id!==tramoRetirado);guardarDatos()');assert.equal(a.run('datosDeteccionGas().registros[idDetectado].vigente'),false);assert.equal(a.run('datosDeteccionGas().registros[idDetectado].estado'),'confirmado');assert.equal(a.run('accesoriosDeteccionConfirmadosGas().length'),0);
+});
+test('detección: no reconstruye conexiones inválidas, circuitos ni combinaciones de más de tres bocas',()=>{
+ const a=app();redDeteccion(a);a.run('tramos[0].red={desde:"inexistente",hasta:"otro"};detectarAccesoriosGas()');assert.match(a.run('datosDeteccionGas().avisos.join(" ")'),/Conexiones pendientes|no se mezclaron/);assert.equal(registrosDeteccion(a).length,0);
+ const b=app();b.run("abrir('gas');tramos=[{id:'a',desde:'A',hasta:'B',metros:1},{id:'b',desde:'B',hasta:'C',metros:1},{id:'c',desde:'C',hasta:'A',metros:1}];detectarAccesoriosGas()");assert.equal(registrosDeteccion(b).length,0);assert.match(b.run('datosDeteccionGas().avisos.join(" ")'),/Circuito cerrado/);
+});
+test('detección: nodos explícitos con el mismo nombre no se fusionan por su texto',()=>{
+ const a=app();redDeteccion(a);a.run("instalacionGas.nodos=[{id:'m',nombre:'M',tipo:'medidor'},{id:'a',nombre:'X',tipo:'derivacion'},{id:'b',nombre:'X',tipo:'derivacion'},...artefactos.map((x,i)=>({id:'art'+i,nombre:x.nombre,tipo:'artefacto',artefactoId:x.id}))];tramos.forEach((t,i)=>t.red=[{desde:'m',hasta:'a'},{desde:'a',hasta:'b'},{desde:'a',hasta:'art0'},{desde:'b',hasta:'art1'},{desde:'b',hasta:'art2'}][i]);detectarAccesoriosGas()");const r=registrosDeteccion(a,'tee');assert.equal(r.length,2);assert.notEqual(r[0].propuesta.nodo,r[1].propuesta.nodo);
+});
+test('detección: proyecto, demostración, foto, PDF y HTML autónomo permanecen aislados',()=>{
+ const a=app(null,{embebido:true});redDeteccion(a);a.run("proyectos.gas.foto='data:image/png;base64,REAL';mostrarFotoLocal();detectarAccesoriosGas()");const r=registrosDeteccion(a,'tee')[0];confirmarDeteccion(a,r.propuesta.id);a.run('prepararInformeActual()');const doc=a.elements.get('informeImpresion').innerHTML;assert.match(doc,/REAL/);assert.doesNotMatch(doc,/<(?:input|button|select)\b/);a.run("seleccionarAmbitoGas('demostracion')");assert.equal(a.run('accesoriosDeteccionConfirmadosGas().length'),0);assert.equal(a.elements.get('panelDeteccionGas').classList.hidden,true);a.run("abrir('agua')");assert.equal(a.run('modeloInformeActual().filas.length'),0);
+});
+test('detección: medidas sin informar permiten confirmar cantidad sin inventar diámetros',()=>{
+ const a=app();redDeteccion(a,{diametro:null});a.run('detectarAccesoriosGas()');const r=registrosDeteccion(a,'tee')[0];confirmarDeteccion(a,r.propuesta.id);a.run('generarPlanGas()');assert.equal(a.run('revisionMaterialesGas.plan.filas.find(f=>f.tipo==="tee").cantidad'),1);assert.match(a.run('revisionMaterialesGas.plan.filas.find(f=>f.tipo==="tee").diametro'),/Pendiente/);assert.ok(a.run('tramos.every(t=>t.diametro===null)'));
+});
+test('detección: reducción manual de posición incierta bloquea una nueva pieza potencialmente duplicada',()=>{
+ const a=app();a.run("abrir('gas');tramos=[{id:'r0',desde:'M',hasta:'A',metros:6,diametro:'1\"',detalle:{estado:'pendiente',accesorios:[{tipo:'reduccion',salida:'3/4\"'}]}},{id:'r1',desde:'A',hasta:'Termo',metros:6,diametro:'3/4\"',detalle:{estado:'ninguno'}}];detectarAccesoriosGas()");const r=registrosDeteccion(a,'reduccion')[0];assert.match(r.propuesta.bloqueo,/sin posición/);confirmarDeteccion(a,r.propuesta.id,{configuracion:'reduccion'});assert.equal(a.run('accesoriosDeteccionConfirmadosGas().length'),0);
+});
+test('detección: un nodo con cuatro conexiones queda pendiente sin inventar combinación de tees',()=>{
+ const a=app();redDeteccion(a);a.run("tramos.push({id:'extra',desde:'A',hasta:'Otro',metros:1,diametro:null,detalle:{estado:'pendiente'}});detectarAccesoriosGas()");assert.ok(registrosDeteccion(a,'tee').every(r=>r.propuesta.ubicacion!=='A'));assert.match(a.run('datosDeteccionGas().avisos.join(" ")'),/más de tres conexiones/);
+});
+test('detección: reordenar tramos no duplica tees ni descarta confirmaciones sin cambios físicos',()=>{
+ const a=app();redDeteccion(a);a.run('detectarAccesoriosGas()');const r=registrosDeteccion(a,'tee')[0];confirmarDeteccion(a,r.propuesta.id);a.run('tramos.reverse();guardarDatos()');assert.equal(a.run('datosDeteccionGas().registros[idDetectado].estado'),'confirmado');assert.equal(a.run('accesoriosDeteccionConfirmadosGas().length'),1);
+});
+test('detección: continúa localmente con guardado bloqueado, sin borrar entradas ni enviar fotos',()=>{
+ const a=app(null,{embebido:true,blocked:true});redDeteccion(a);a.run("proyectos.gas.foto='data:image/png;base64,LOCAL';mostrarFotoLocal();detectarAccesoriosGas()");const r=registrosDeteccion(a,'tee')[0];confirmarDeteccion(a,r.propuesta.id);assert.equal(a.saved(),undefined);assert.equal(a.run('fotoURL'),'data:image/png;base64,LOCAL');assert.equal(a.run('tramos.length'),5);assert.equal(a.run('accesoriosDeteccionConfirmadosGas().length'),1);
+});
+test('detección: controles de la tarjeta guardan una corrección y confirman en una sola acción',()=>{
+ const a=app();redDeteccion(a);a.run('detectarAccesoriosGas()');const card=a.elements.get('deteccionFilas').children.find(n=>n.className==='detalle'&&n.children[0].textContent.startsWith('Llave de paso'));const campos=card.children.filter(n=>n.children?.some(x=>x.type==='number'));campos[0].children[0].value='2';card.children.find(n=>n.textContent==='Confirmar sugerencia').onclick();assert.equal(a.run('accesoriosDeteccionConfirmadosGas().find(x=>x.tipo==="llave").cantidad'),2);
+});
+test('detección: conexiones de tee aportadas en revisión no se convierten en diámetros automáticos',()=>{
+ const a=app();redDeteccion(a,{diametro:null});a.run('detectarAccesoriosGas()');const r=registrosDeteccion(a,'tee').find(r=>r.propuesta.ubicacion==='A');confirmarDeteccion(a,r.propuesta.id,{medidas:['1"','1"','3/4"'],configuracion:'tee-igual-reduccion'});assert.equal(a.run('accesoriosDeteccionConfirmadosGas().filter(x=>x.tipo==="reduccion").length'),1);assert.ok(a.run('tramos.every(t=>t.diametro===null)'));assert.equal(a.run('CATALOGOS_GAS_VERIFICADOS.length'),0);
+});
+test('detección: tee reductora confirmada se identifica por nombre en la lista de materiales',()=>{
+ const a=app();redDeteccion(a);a.run("tramos[2].diametro='3/4\"';detectarAccesoriosGas()");const r=registrosDeteccion(a,'tee').find(r=>r.propuesta.ubicacion==='A');confirmarDeteccion(a,r.propuesta.id,{configuracion:'tee-reductora'});a.run('generarPlanGas()');assert.equal(a.run('revisionMaterialesGas.plan.filas.find(x=>x.tipo==="tee").material'),'Tee reductora');
+});
+test('detección: tres bocas sin entrada definida no autorizan una tee reductora por suposiciones',()=>{
+ const a=app();redDeteccion(a,{diametro:null});a.run("tramos[1].desde='B';tramos[1].hasta='A';detectarAccesoriosGas()");const r=registrosDeteccion(a,'tee').find(r=>r.propuesta.ubicacion==='A');assert.equal(r.propuesta.flujoDefinido,false);confirmarDeteccion(a,r.propuesta.id,{medidas:['1"','3/4"','1"'],configuracion:'tee-reductora'});assert.equal(a.run('accesoriosDeteccionConfirmadosGas().length'),0);assert.match(a.text('deteccionMensaje'),/entrada y las dos salidas/);
+});
+test('detección: aprovecha el artefacto de destino ya elegido en el formulario del tramo',()=>{
+ const a=app();a.run("abrir('gas');tramos=[{id:'destino',desde:'M',hasta:'A',metros:6,diametro:null,artefacto:'Cocina',detalle:{estado:'ninguno'}}];detectarAccesoriosGas()");const r=registrosDeteccion(a,'llave');assert.equal(r.length,1);assert.match(r[0].propuesta.ubicacion,/Cocina/);assert.equal(a.run('artefactos.length'),0);
 });

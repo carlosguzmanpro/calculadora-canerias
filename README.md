@@ -1,5 +1,12 @@
 # CAÑERÍAS
 
+## Detección básica de accesorios SIN IA (versión experimental actual)
+
+Rama `prueba/deteccion-accesorios-sin-ia`, base `474bbcf`. El botón **Detectar accesorios automáticamente** propone tees por conexiones, llaves de artefactos, cuplas por segmentos/largo comercial y reducciones con medidas conocidas. Permite corregir, confirmar o rechazar; solo las confirmadas se incorporan, sin duplicar piezas manuales. Cambios posteriores conservan correcciones y piden revisión. No lee fotos, inventa codos ni calcula diámetros.
+
+**319 pruebas aprobadas (287 anteriores + 32 nuevas).** Se mantienen el PDF, la confirmación táctil corregida, seis columnas, materiales, respaldos y los tres módulos. El HTML incorpora once fuentes para apertura local en Android. Motor, tablas y main intactos; sin publicación ni servicios. Prueba visual nueva en Android pendiente. Pasos y límites: [DETECCION-ACCESORIOS-SIN-IA.md](DETECCION-ACCESORIOS-SIN-IA.md).
+
+
 ## Confirmación del croquis en Android (corrección actual)
 
 Rama `prueba/confirmacion-croquis-android`, base `773b9a6`. La casilla de confirmación visual se habilita con una foto disponible aunque la red técnica esté incompleta, muestra su estado y permite marcar/desmarcar. Conserva la confirmación para la misma foto/datos y pide renovarla tras cambios. El botón de revisión abre la ampliación o dirige a la carga de foto con respuesta visible.

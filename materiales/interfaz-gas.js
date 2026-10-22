@@ -5,7 +5,7 @@ function datosPlanGas(){
  if(!p.planCompra||typeof p.planCompra!=='object'||Array.isArray(p.planCompra))p.planCompra={};
  const d=p.planCompra;if(!d.opciones||typeof d.opciones!=='object')d.opciones={};if(!Array.isArray(d.extras))d.extras=[];if(!d.revisiones||typeof d.revisiones!=='object')d.revisiones={};return d;
 }
-function entradaMaterialesGas(fuente='proyecto'){
+function entradaMaterialesGas(fuente='proyecto',sinSugerencias=false){
  if(fuente==='ejemplo')return {origen:'Ejemplo educativo calefón/cocina; no incorporado al proyecto',material:'Acero epoxi',sistema:'Roscado',nodos:[{id:'M'},{id:'A'},{id:'Calefón'},{id:'Cocina'}],tramos:[['M','A',19,5,0,'1"'],['A','Calefón',18,7,1,'1"'],['A','Cocina',12,5,1,'3/4"']].map(([desde,hasta,metros,codos,llaves,diametro])=>({id:desde+'-'+hasta,metros,diametro,medidasEstimadas:true,red:{desde,hasta},segmentos:null,accesorios:[{tipo:'codo90',cantidad:codos,medidas:[diametro,diametro],confirmado:true,medidasEstimadas:true,evidencia:'Cantidad aportada en el ejercicio; medidas del diagnóstico condicionado'},...(llaves?[{tipo:'llave',cantidad:llaves,medidas:[diametro],confirmado:true,medidasEstimadas:true}]:[]),...(hasta==='A'?[{tipo:'tee',cantidad:1,nodo:'A',medidas:['1"','1"','3/4"'],confirmado:true,medidasEstimadas:true}]:[])]}))};
  const nodos=instalacionGas.nodos||[];
  return {origen:'Proyecto manual actual',material:instalacionGas.perfil.material,sistema:instalacionGas.perfil.sistema,nodos,tramos:tramos.map((t,i)=>{
@@ -20,9 +20,9 @@ function entradaMaterialesGas(fuente='proyecto'){
   });
   if(t.llave&&!acc.some(a=>a.tipo==='llave'))acc.push({tipo:'llave',cantidad:1,medidas:[t.diametro],confirmado:true,evidencia:'Llave del tramo; no duplica la llave detallada'});
   return {id:t.id||'tramo-'+i,metros:t.metros,diametro:t.diametro,diametroFinal:r.segmentos?.at(-1)?.diametro==='Diámetro pendiente'?null:r.segmentos?.at(-1)?.diametro,red:t.red,segmentos:geometria&&!(t.llave&&!acc.some(a=>a.tipo==='llave'&&a.ubicacion))?r.segmentos.map(s=>({metros:s.metros,diametro:s.diametro==='Diámetro pendiente'?null:s.diametro})):null,accesorios:acc};
- }),extras:datosPlanGas().extras};
+ }),extras:[...datosPlanGas().extras,...(sinSugerencias?[]:accesoriosDeteccionConfirmadosGas())]};
 }
-function opcionesMaterialesGas(fuente=fuenteMaterialesGas){const o=datosPlanGas().opciones;return {largoComercial:o.largoComercial??6,reutilizar:!!o.reutilizar,minimoSobrante:o.minimoSobrante??.5,hipotesisSinPosiciones:!!o.hipotesisSinPosiciones,uniones:o[fuente==='ejemplo'?'unionesEjemplo':'uniones']||{}};}
+function opcionesMaterialesGas(fuente=fuenteMaterialesGas){const o=datosPlanGas().opciones;return {largoComercial:o.largoComercial??6,reutilizar:!!o.reutilizar,minimoSobrante:o.minimoSobrante??.5,hipotesisSinPosiciones:!!o.hipotesisSinPosiciones,uniones:{...(fuente==='proyecto'?unionesDeteccionConfirmadasGas():{}),...(o[fuente==='ejemplo'?'unionesEjemplo':'uniones']||{})}};}
 function firmaMaterialesGas(){return JSON.stringify({fuente:fuenteMaterialesGas,entrada:entradaMaterialesGas(fuenteMaterialesGas),opciones:opcionesMaterialesGas()});}
 function invalidarMaterialesGas(){if(modulo==='gas'&&revisionMaterialesGas)sincronizarMaterialesGas(fuenteMaterialesGas);}
 function abrirPlanGas(){
@@ -65,6 +65,7 @@ function renderPlanGas(){
  const out=$('matResultado');out.replaceChildren();if(!revisionMaterialesGas)return;const r=revisionMaterialesGas.plan;
  const texto=t=>{const p=document.createElement('p');p.textContent=t;out.append(p);};
  texto((fuenteMaterialesGas==='ejemplo'?'EJEMPLO SEPARADO: no reemplaza tus datos. ':'PROYECTO ACTUAL. ')+'Lista para revisión, no cantidades definitivas. Diámetros automáticos definitivos bloqueados.');
+ if(fuenteMaterialesGas==='proyecto'&&avisoDeteccionGas())texto(avisoDeteccionGas());
  r.supuestos.forEach(texto);r.avisos.forEach(texto);
  for(const g of r.planes){
   texto(g.diametro+' · '+(g.material||'material pendiente')+' / '+(g.sistema||'sistema pendiente')+' · '+g.metros+' m · mínimo teórico '+g.minimoTeorico+' caños de '+r.config.largoComercial+' m · compra estimada '+(g.compraEstimada??'PENDIENTE')+' · cuplas propuestas '+(g.cuplasPropuestas??'PENDIENTES'));
@@ -109,7 +110,7 @@ window.addEventListener('afterprint',()=>{$('resultadoMateriales').classList.rem
 // Revisiones anteriores: nunca se aplican cantidades por el índice material-N.
 function identidadFilaGas(f){return f.claveRevision||JSON.stringify([f.tipo,f.material,f.diametro,f.unidad,f.ubicacion]);}
 function anotarFilasRevisionGas(plan,entrada){
- for(const f of plan.filas){f.ubicacionNombre=ubicacionLegibleGas(f.ubicacion);const t=(entrada.tramos||[]).find(t=>String(f.ubicacion).startsWith(t.id+' · accesorio '));f.claveRevision=JSON.stringify([f.tipo,f.material,f.diametro,f.unidad,f.ubicacion,...(f.origen==='identificado'?[t?.accesorios||entrada.extras||[]]:[])]);}
+ for(const f of plan.filas){if(entrada.origen==='Proyecto manual actual')f.material=etiquetaAccesorioDetectadoGas(f);f.ubicacionNombre=ubicacionLegibleGas(f.ubicacion);const t=(entrada.tramos||[]).find(t=>String(f.ubicacion).startsWith(t.id+' · accesorio '));f.claveRevision=JSON.stringify([f.tipo,f.material,f.diametro,f.unidad,f.ubicacion,...(f.origen==='identificado'?[t?.accesorios||entrada.extras||[]]:[])]);}
  return plan;
 }
 function filasRevisionGas(revision){
@@ -150,6 +151,7 @@ function renderRespaldosGas(){
 }
 function actualizarDerivadosGas(){
  if(modulo!=='gas')return;
+ actualizarSugerenciasGas();
  const p=proyectoGasActual(),firma=JSON.stringify({tramos,artefactos,instalacion:instalacionGas,tipoGas:$('gt').value});
  const anterior=p.derivadosGas;
  if(!anterior&&!tramos.length&&!artefactos.length){$('informeClaseMiRed').replaceChildren();$('resultadoDimensionamiento').textContent='Pendiente: no hay datos de GAS en este espacio.';calcularConsumos();calcularMateriales();renderRespaldosGas();return;}
