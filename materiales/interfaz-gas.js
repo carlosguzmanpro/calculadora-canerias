@@ -5,10 +5,10 @@ function datosPlanGas(){
  if(!p.planCompra||typeof p.planCompra!=='object'||Array.isArray(p.planCompra))p.planCompra={};
  const d=p.planCompra;if(!d.opciones||typeof d.opciones!=='object')d.opciones={};if(!Array.isArray(d.extras))d.extras=[];if(!d.revisiones||typeof d.revisiones!=='object')d.revisiones={};return d;
 }
-function entradaMaterialesGas(fuente='proyecto',sinSugerencias=false){
+function entradaMaterialesGas(fuente='proyecto',sinSugerencias=false,sinConciliacion=false){
  if(fuente==='ejemplo')return {origen:'Ejemplo educativo calefón/cocina; no incorporado al proyecto',material:'Acero epoxi',sistema:'Roscado',nodos:[{id:'M'},{id:'A'},{id:'Calefón'},{id:'Cocina'}],tramos:[['M','A',19,5,0,'1"'],['A','Calefón',18,7,1,'1"'],['A','Cocina',12,5,1,'3/4"']].map(([desde,hasta,metros,codos,llaves,diametro])=>({id:desde+'-'+hasta,metros,diametro,medidasEstimadas:true,red:{desde,hasta},segmentos:null,accesorios:[{tipo:'codo90',cantidad:codos,medidas:[diametro,diametro],confirmado:true,medidasEstimadas:true,evidencia:'Cantidad aportada en el ejercicio; medidas del diagnóstico condicionado'},...(llaves?[{tipo:'llave',cantidad:llaves,medidas:[diametro],confirmado:true,medidasEstimadas:true}]:[]),...(hasta==='A'?[{tipo:'tee',cantidad:1,nodo:'A',medidas:['1"','1"','3/4"'],confirmado:true,medidasEstimadas:true}]:[])]}))};
  const nodos=instalacionGas.nodos||[];
- return {origen:'Proyecto manual actual',material:instalacionGas.perfil.material,sistema:instalacionGas.perfil.sistema,nodos,tramos:tramos.map((t,i)=>{
+ const entrada={origen:'Proyecto manual actual',material:instalacionGas.perfil.material,sistema:instalacionGas.perfil.sistema,nodos,tramos:tramos.map((t,i)=>{
   const r=evaluarTramo(t,tramos),d=t.detalle,geometria=d&&['completo','ninguno'].includes(d.estado)&&(!r.pendiente||r.soloMedidasPendientes);
   let posicion=0,posicionConocida=true,entradaActual=t.diametro;
   const registrados=geometria?r.accesorios:Array.isArray(d?.accesorios)?d.accesorios.filter(a=>a&&typeof a.tipo==='string'):[];
@@ -21,6 +21,12 @@ function entradaMaterialesGas(fuente='proyecto',sinSugerencias=false){
   if(t.llave&&!acc.some(a=>a.tipo==='llave'))acc.push({tipo:'llave',cantidad:1,medidas:[t.diametro],confirmado:true,evidencia:'Llave del tramo; no duplica la llave detallada'});
   return {id:t.id||'tramo-'+i,metros:t.metros,diametro:t.diametro,diametroFinal:r.segmentos?.at(-1)?.diametro==='Diámetro pendiente'?null:r.segmentos?.at(-1)?.diametro,red:t.red,segmentos:geometria&&!(t.llave&&!acc.some(a=>a.tipo==='llave'&&a.ubicacion))?r.segmentos.map(s=>({metros:s.metros,diametro:s.diametro==='Diámetro pendiente'?null:s.diametro})):null,accesorios:acc};
  }),extras:[...datosPlanGas().extras,...(sinSugerencias?[]:accesoriosDeteccionConfirmadosGas())]};
+ if(!sinSugerencias&&!sinConciliacion){
+  const adicionales=accesoriosRapidosConciliadosGas(entrada);entrada.extras.push(...adicionales);
+  // Una cantidad no determina segmentos continuos ni cuplas: conservar la geometría original sin darla por completa para compra.
+  for(const a of adicionales){const t=entrada.tramos.find(t=>t.id===a.tramo);if(t)t.segmentos=null;}
+ }
+ return entrada;
 }
 function opcionesMaterialesGas(fuente=fuenteMaterialesGas){const o=datosPlanGas().opciones;return {largoComercial:o.largoComercial??6,reutilizar:!!o.reutilizar,minimoSobrante:o.minimoSobrante??.5,hipotesisSinPosiciones:!!o.hipotesisSinPosiciones,uniones:{...(fuente==='proyecto'?unionesDeteccionConfirmadasGas():{}),...(o[fuente==='ejemplo'?'unionesEjemplo':'uniones']||{})}};}
 function firmaMaterialesGas(){return JSON.stringify({fuente:fuenteMaterialesGas,entrada:entradaMaterialesGas(fuenteMaterialesGas),opciones:opcionesMaterialesGas()});}
@@ -29,7 +35,7 @@ function abrirPlanGas(){
  if(modulo!=='gas')return;
  $('planCompraGas').classList.remove('oculto');const o=opcionesMaterialesGas();
  $('matLargo').value=o.largoComercial??6;$('matReusar').checked=!!o.reutilizar;$('matSobrante').value=o.minimoSobrante??.5;$('matHipotesis').checked=!!o.hipotesisSinPosiciones;
- renderUnionesMaterialesGas();
+ renderUnionesMaterialesGas();renderConciliacionRapidaGas();
 }
 function guardarOpcionesMaterialesGas(){
  Object.assign(datosPlanGas().opciones,{largoComercial:Number($('matLargo').value),reutilizar:$('matReusar').checked,minimoSobrante:Number($('matSobrante').value),hipotesisSinPosiciones:$('matHipotesis').checked});
@@ -72,6 +78,7 @@ function renderPlanGas(){
  const detalles=document.createElement('details'),resumen=document.createElement('summary');detalles.className='gas-detalles';resumen.textContent='Ver detalles técnicos';detalles.append(resumen);
  texto((fuenteMaterialesGas==='ejemplo'?'EJEMPLO SEPARADO: no reemplaza tus datos. ':'PROYECTO ACTUAL. ')+'Lista para revisión, no cantidades definitivas. Diámetros automáticos definitivos bloqueados.');
  if(fuenteMaterialesGas==='proyecto'&&avisoDeteccionGas())texto(avisoDeteccionGas());
+ if(fuenteMaterialesGas==='proyecto'){texto(avisoConciliacionRapidaGas());renderConciliacionRapidaGas();}
  r.supuestos.forEach(t=>texto(t,detalles));r.avisos.forEach(t=>texto(t,detalles));
  for(const g of r.planes){
   texto(g.diametro+' · '+(g.material||'material pendiente')+' / '+(g.sistema||'sistema pendiente')+' · '+g.metros+' m · mínimo teórico '+g.minimoTeorico+' caños de '+r.config.largoComercial+' m · compra estimada '+(g.compraEstimada??'PENDIENTE')+' · cuplas propuestas '+(g.cuplasPropuestas??'PENDIENTES'),detalles);
@@ -123,7 +130,8 @@ window.addEventListener('afterprint',()=>{$('resultadoMateriales').classList.rem
 // Revisiones anteriores: nunca se aplican cantidades por el índice material-N.
 function identidadFilaGas(f){return f.claveRevision||JSON.stringify([f.tipo,f.material,f.diametro,f.unidad,f.ubicacion]);}
 function anotarFilasRevisionGas(plan,entrada){
- for(const f of plan.filas){if(entrada.origen==='Proyecto manual actual')f.material=etiquetaAccesorioDetectadoGas(f);f.ubicacionNombre=ubicacionLegibleGas(f.ubicacion);const t=(entrada.tramos||[]).find(t=>String(f.ubicacion).startsWith(t.id+' · accesorio '));f.claveRevision=JSON.stringify([f.tipo,f.material,f.diametro,f.unidad,f.ubicacion,...(f.origen==='identificado'?[t?.accesorios||entrada.extras||[]]:[])]);}
+ if(entrada.origen==='Proyecto manual actual'&&(proyectoGasActual().conciliacionRapidaGas||tramos.some(t=>Object.keys(conteoRapidoDelTramoGas(t)).length)))plan.avisos.push(avisoConciliacionRapidaGas());
+ for(const f of plan.filas){if(entrada.origen==='Proyecto manual actual')f.material=etiquetaAccesorioDetectadoGas(f);f.ubicacionNombre=ubicacionLegibleGas(f.ubicacion);const t=(entrada.tramos||[]).find(t=>String(f.ubicacion).startsWith(t.id+' · accesorio '));f.claveRevision=JSON.stringify([f.tipo,f.material,f.diametro,f.unidad,f.ubicacion,...(f.origen==='identificado'?[t?.accesorios||(entrada.extras||[]).filter(a=>!a.idFisico?.startsWith('conciliacion:'))]:[])]);}
  return plan;
 }
 function filasRevisionGas(revision){
@@ -187,4 +195,127 @@ function descargarRespaldoCompleto(){
  $('estadoRespaldo').textContent=Object.values(lecturasFoto).some(x=>x.error&&!x.datos)?'El respaldo conserva los datos y la foto anterior leída. La foto temporal actual no pudo incluirse; conservá su archivo original.':'Respaldo completo con las fotografías leídas; guardalo fuera del navegador.';
  const blob=new Blob([JSON.stringify({formato:'canerias-respaldo-v1',proyectos},null,2)],{type:'application/json;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');
  a.href=url;a.download='canerias-respaldo-completo.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+
+// Conciliación del inventario físico. Nunca alimenta equivalentes ni dimensionamiento.
+function nodoConciliacionGas(valor){
+ const ns=instalacionGas.nodos||[],v=String(valor||''),normal=x=>String(x||'').trim().toLocaleLowerCase('es');
+ const porId=ns.filter(n=>n.id===v);if(porId.length===1)return 'n:'+v;
+ const nombre=v.startsWith('nombre:')?v.slice(7):v,porNombre=ns.filter(n=>normal(n.nombre)===normal(nombre));
+ return porNombre.length===1?'n:'+porNombre[0].id:'nombre:'+normal(nombre);
+}
+function piezasConciliacionGas(entrada){
+ const piezas=new Map(),normal=x=>String(x||'').trim().toLocaleLowerCase('es');
+ function agregar(a,tramo,indice){
+  const nodo=a.nodo?nodoConciliacionGas(a.nodo):null;
+  const id=a.tipo==='tee'&&nodo?'tee:'+nodo:a.idFisico||JSON.stringify([tramo?'detalle':'manual',tramo?.id||'',indice]);
+  const reductor=['tee','codo90','codo45'].includes(a.tipo)&&a.medidas?.filter(Boolean).length>1&&a.medidas.some(m=>m&&m!==a.medidas[0]);
+  const ubicaciones=[tramo?.id,a.tramo,a.ubicacion].filter(Boolean);
+  const pieza={id,nodoOriginal:a.nodo,tipo:a.tipo,cantidad:a.cantidad,nodo,medidas:a.medidas||[],ubicaciones,confirmado:!!a.confirmado,reductor,conflicto:false};
+  if(piezas.has(id)){const p=piezas.get(id);p.conflicto||=p.nodoOriginal!==pieza.nodoOriginal||p.tipo!==pieza.tipo||p.cantidad!==pieza.cantidad||JSON.stringify(p.medidas)!==JSON.stringify(pieza.medidas);p.ubicaciones.push(...ubicaciones);return;}
+  piezas.set(id,pieza);
+ }
+ for(const t of entrada.tramos)for(const [i,a]of (t.accesorios||[]).entries())agregar(a,t,i);
+ for(const [i,a]of (entrada.extras||[]).entries())agregar(a,null,i);
+ return [...piezas.values()].map(p=>({...p,etiqueta:(p.reductor?'Accesorio reductor integrado':({tee:'Tee',llave:'Llave de paso',codo90:'Codo 90°',codo45:'Codo 45°',reduccion:'Reducción'}[p.tipo]||p.tipo))+' · '+p.ubicaciones.map(x=>textoMaterialPantallaGas(x)).join(' / ')+(p.nodo?' · '+textoMaterialPantallaGas(p.nodo.replace(/^n:|^nombre:/,'')):'')+(p.confirmado?' · registrado confirmado':' · registrado por revisar')}));
+}
+function filasConciliacionGas(entrada=entradaMaterialesGas('proyecto',false,true)){
+ const piezas=piezasConciliacionGas(entrada),filas=[];
+ for(const t of tramos){
+  const datos=conteoRapidoDelTramoGas(t),extremos=[t.desde,t.hasta].map(nodoConciliacionGas);
+  for(const [tipo,nombre]of tiposRapidosGas){
+   const valor=Object.hasOwn(datos,tipo)?datos[tipo]:null,cantidad=Number.isSafeInteger(valor)&&valor>=0?valor:null;
+   const candidatos=piezas.filter(p=>p.tipo===tipo||(tipo==='reduccion'&&p.reductor)).map(p=>{
+    const directa=p.ubicaciones.some(u=>u===t.id||u===t.desde+'–'+t.hasta||u.startsWith(t.id+' · accesorio '));
+    const compartida=p.nodo&&extremos.includes(p.nodo);
+    const ubicada=p.nodo||p.ubicaciones.some(u=>tramos.some(x=>u===x.id||u===x.desde+'–'+x.hasta||u.startsWith(x.id+' · accesorio ')));
+    return {...p,directa,seleccionable:directa||compartida||!ubicada};
+   }).filter(p=>p.seleccionable);
+   const ajustes=(datosPlanGas().revisiones.proyecto?.filas||[]).filter(x=>x.editado&&x.tipo===tipo&&x.cantidad!==x.cantidadCalculada&&!String(x.ubicacion).includes('carga rápida conciliada')).map(x=>({tipo:x.tipo,cantidad:x.cantidad,calculada:x.cantidadCalculada,ubicacion:x.ubicacion}));
+   const clave=JSON.stringify([t.id,tipo]),firma=JSON.stringify({tramo:t,datos:tipo==='reduccion'?datos:datos[tipo],entrada,ajustes});
+   filas.push({clave,firma,tipo,nombre,tramo:t,cantidad,candidatos,ajustes});
+  }
+ }
+ return filas;
+}
+function validarConciliacionGas(f,r){
+ if(!Number.isSafeInteger(f.cantidad)||f.cantidad<0)return 'Cantidad pendiente: completá la carga rápida; vacío no es cero.';
+ if(!r||!r.confirmado)return 'Revisión pendiente.';
+ if(r.firma!==f.firma)return 'Datos cambiados: revisar los vínculos antes de incorporar adicionales.';
+ if(f.ajustes.length)return 'Hay cantidades de este tipo ajustadas manualmente en materiales. Revisalas antes de sumar piezas rápidas; los ajustes se conservan.';
+ if(!r.alcance)return 'Confirmá que el conteo es el total del tramo y revisaste todas las coincidencias.';
+ if(!Number.isSafeInteger(r.adicionales)||r.adicionales<0)return 'Confirmá cuántas piezas son adicionales, incluso si son cero.';
+ let cubiertas=0;
+ for(const p of f.candidatos){
+  if(p.conflicto||!Number.isSafeInteger(p.cantidad)||p.cantidad<=0)return 'Hay datos contradictorios para una pieza registrada. Corregilos antes de conciliar.';
+  const relacion=r.vinculos?.[p.id];
+  if(!['incluido','fuera'].includes(relacion))return 'Coincidencia ambigua: indicá si cada pieza ya está incluida o queda fuera del conteo.';
+  if(relacion==='fuera'&&p.directa)return 'La pieza está registrada dentro del tramo: revisá el conteo o su registro original.';
+  if(relacion==='incluido')cubiertas+=p.cantidad;
+ }
+ if(cubiertas+r.adicionales!==f.cantidad)return 'El total rápido debe coincidir con las piezas ya representadas más las adicionales. No se sumó nada.';
+ if(r.adicionales&&['tee','reduccion'].includes(f.tipo)){
+  if(r.adicionales!==1)return 'Para varias tees o reducciones nuevas, identificá cada pieza en la carga detallada; esta conciliación permanece pendiente.';
+  if(!r.nodo||instalacionGas.nodos.filter(n=>n.id===r.nodo).length!==1)return 'Identificá el punto real de la nueva tee o reducción. No se inventa su ubicación.';
+  const nodo=nodoConciliacionGas(r.nodo);
+  if(f.candidatos.some(p=>p.nodo===nodo))return 'Ya existe una pieza en ese punto: vinculala como incluida o aclarala en la carga detallada; no se agregó otra.';
+  const extremos=[f.tramo.desde,f.tramo.hasta].map(nodoConciliacionGas);
+  if(!extremos.includes(nodo))return 'El punto no coincide con los extremos conocidos del tramo. Registrá la posición en la carga detallada.';
+ }
+ return null;
+}
+function estadoConciliacionGas(entrada=entradaMaterialesGas('proyecto',false,true)){
+ const registros=proyectoGasActual().conciliacionRapidaGas?.registros||{};
+ const filas=filasConciliacionGas(entrada).map(f=>{const revision=registros[f.clave];return {...f,revision,error:validarConciliacionGas(f,revision)};});
+ // Dos adicionales en el mismo punto no se resuelven eligiendo uno arbitrariamente.
+ const porPunto=new Map();for(const f of filas)if(!f.error&&f.revision.adicionales&&f.revision.nodo){const k=f.tipo+':'+nodoConciliacionGas(f.revision.nodo);if(!porPunto.has(k))porPunto.set(k,[]);porPunto.get(k).push(f);}
+ for(const grupo of porPunto.values())if(grupo.length>1)for(const f of grupo)f.error='Dos revisiones agregan la misma pieza en el mismo punto. Resolver antes de incorporar.';
+ return filas;
+}
+function accesoriosRapidosConciliadosGas(entrada){
+ return estadoConciliacionGas(entrada).filter(f=>!f.error&&f.revision.adicionales>0).map(f=>({
+  idFisico:'conciliacion:'+f.clave,tipo:f.tipo,cantidad:f.revision.adicionales,medidas:[],confirmado:true,
+  tramo:f.tramo.id,nodo:f.revision.nodo||null,
+  ubicacion:f.tramo.desde+'–'+f.tramo.hasta+' · carga rápida conciliada'+(f.revision.nodo?' · '+instalacionGas.nodos.find(n=>n.id===f.revision.nodo).nombre:' · posición pendiente'),
+  evidencia:'Cantidad conciliada por el usuario. Diámetros/conexiones pendientes. Sin equivalentes ni posiciones deducidas.'
+ }));
+}
+function avisoConciliacionRapidaGas(){
+ const filas=estadoConciliacionGas(),revisadas=filas.filter(f=>!f.error).length;
+ const pendientes=filas.filter(f=>f.error&&f.cantidad!==null).length;
+ return 'Carga rápida: '+revisadas+' conteos conciliados; '+pendientes+' conteos cargados pendientes de revisión. Sólo los adicionales conciliados participan en materiales; los campos vacíos siguen pendientes. Medidas y posiciones no se deducen.';
+}
+function guardarConciliacionGas(clave,edicion,confirmar){
+ const f=filasConciliacionGas().find(f=>f.clave===clave);if(!f){$('conciliacionMensaje').textContent='Tramo no disponible. Se conservó la revisión anterior.';return false;}
+ const revision={...edicion,confirmado:!!confirmar,firma:f.firma};
+ const error=confirmar?validarConciliacionGas(f,revision):null;
+ if(error){$('conciliacionMensaje').textContent=error;return false;}
+ const p=proyectoGasActual();if(p.conciliacionRapidaGas&&(p.conciliacionRapidaGas.version!==1||!p.conciliacionRapidaGas.registros||typeof p.conciliacionRapidaGas.registros!=='object'||Array.isArray(p.conciliacionRapidaGas.registros)||!Array.isArray(p.conciliacionRapidaGas.historial))){$('conciliacionMensaje').textContent='Formato de revisión no reconocido: se conservó sin sobrescribir. Revisá el respaldo.';return false;}
+ if(!p.conciliacionRapidaGas)p.conciliacionRapidaGas={version:1,registros:{},historial:[]};
+ const d=p.conciliacionRapidaGas;if(d.registros[clave])d.historial.push({clave,revision:d.registros[clave]});d.registros[clave]=revision;
+ guardarDatos();generarPlanGas('proyecto');renderConciliacionRapidaGas();
+ const actual=estadoConciliacionGas().find(x=>x.clave===clave);
+ const almacenado=ambitoGas==='demostracion'?ultimoGuardadoValido?.gas?.demostracion:ultimoGuardadoValido?.gas;
+ $('conciliacionMensaje').textContent=JSON.stringify(almacenado?.conciliacionRapidaGas)!==JSON.stringify(d)?'Revisión sólo en sesión: descargá un respaldo antes de cerrar.':confirmar?(actual.error||'Revisión confirmada. Cantidades conciliadas; la revisión técnica sigue pendiente.'):'Vínculos guardados como pendientes; no se agregaron piezas.';
+ return true;
+}
+function renderConciliacionRapidaGas(){
+ const out=$('conciliacionFilas');if(!out||modulo!=='gas')return;out.replaceChildren();
+ const texto=(padre,t)=>{const p=document.createElement('p');p.textContent=textoMaterialPantallaGas(t);padre.append(p);};
+ const filas=estadoConciliacionGas();
+ if(!filas.length){texto(out,'Registrá primero los tramos y sus cantidades rápidas.');return;}
+ let grupo=null,tramoAnterior=null;
+ for(const f of filas){
+  if(tramoAnterior!==f.tramo.id){grupo=document.createElement('details');grupo.className='gas-detalles';const resumen=document.createElement('summary');resumen.textContent=f.tramo.desde+'–'+f.tramo.hasta;grupo.append(resumen);out.append(grupo);tramoAnterior=f.tramo.id;}
+  const card=document.createElement('details');card.className='detalle';const titulo=document.createElement('summary');titulo.textContent=f.tramo.desde+'–'+f.tramo.hasta+' · '+f.nombre+' · '+(f.cantidad===null?'Pendiente':f.cantidad===0?'0 confirmado':f.cantidad+' confirmados')+' · '+(f.error?'Por revisar':'Conciliado');card.append(titulo);grupo.append(card);
+  const r=f.revision||{};if(f.error)texto(card,f.error);
+  if(f.cantidad===null){texto(card,'Completá este dato en Revisar accesorios → Carga rápida. No equivale a cero.');continue;}
+  const controles=[];
+  for(const p of f.candidatos){const label=document.createElement('label');label.textContent=p.etiqueta+' · cantidad '+p.cantidad;const select=document.createElement('select');for(const [v,t]of [['','Pendiente: no sé si es la misma pieza'],['incluido','Ya está incluida en este total'],['fuera','Fuera de este conteo (requiere revisión)']]){const option=document.createElement('option');option.value=v;option.textContent=t;select.append(option);}select.value=r.vinculos?.[p.id]||'';label.append(select);card.append(label);controles.push([p.id,select]);}
+  if(!f.candidatos.length)texto(card,'No se encontraron piezas registradas del mismo tipo para este alcance. Revisá el croquis antes de confirmar adicionales.');
+  const label=document.createElement('label'),cantidad=document.createElement('input');label.textContent='Piezas adicionales (0 si ya están todas representadas)';cantidad.type='number';cantidad.min='0';cantidad.step='1';cantidad.inputMode='numeric';cantidad.placeholder='Pendiente';cantidad.value=r.adicionales??'';label.append(cantidad);card.append(label);
+  const punto=document.createElement('select');if(['tee','reduccion'].includes(f.tipo)){const l=document.createElement('label');l.textContent='Punto real de la pieza adicional (si hay una)';const vacio=document.createElement('option');vacio.value='';vacio.textContent='Pendiente: no inventar posición';punto.append(vacio);for(const n of instalacionGas.nodos||[]){const o=document.createElement('option');o.value=n.id;o.textContent=n.nombre;punto.append(o);}punto.value=r.nodo||'';l.append(punto);card.append(l);}
+  const l=document.createElement('label'),alcance=document.createElement('input');l.className='gas-revision-check';l.textContent='Confirmo el total del tramo y revisé todas las coincidencias';alcance.type='checkbox';alcance.checked=!!r.alcance;l.append(alcance);card.append(l);
+  for(const [confirmar,titulo]of [[false,'Guardar revisión pendiente'],[true,'Confirmar para materiales']]){const b=document.createElement('button');b.className='alt';b.textContent=titulo;b.onclick=()=>guardarConciliacionGas(f.clave,{vinculos:Object.fromEntries(controles.map(([id,c])=>[id,c.value])),adicionales:cantidad.value===''?null:Number(cantidad.value),nodo:punto.value||null,alcance:alcance.checked},confirmar);card.append(b);}
+ }
 }
