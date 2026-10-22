@@ -1072,3 +1072,31 @@ test('presentación: sugerencias conservan tres acciones y explicación técnica
 test('presentación: tees A y B confirmadas persisten sin duplicación y PDF mantiene tablas limpias',()=>{
  const a=app();redAndroidEstructurada(a);a.run('detectarAccesoriosGas()');for(const t of registrosDeteccion(a,'tee'))confirmarDeteccion(a,t.propuesta.id);a.run('generarPlanGas();renderPlanGas();renderSugerenciasGas();guardarDatos()');const b=app(a.saved());b.run("abrir('gas');generarPlanGas();renderPlanGas();prepararInformeActual()");assert.equal(b.run('accesoriosDeteccionConfirmadosGas().filter(p=>p.tipo==="tee").length'),2);const doc=b.elements.get('informeImpresion').innerHTML;assert.match(doc,/<table/);assert.match(doc,/DEFINITIVO/);assert.doesNotMatch(doc,/<(?:input|button|details|summary)\b/);assert.equal(b.run('CATALOGOS_GAS_VERIFICADOS.length'),0);
 });
+
+test('tarjetas compactas: IDs internos se traducen también en diámetro, evidencias y cortes',()=>{
+ const a=app(null,{embebido:true});redAndroidEstructurada(a);a.run("tramos.forEach((t,i)=>t.id='tramo-mvgzumer-'+(i+1));detectarAccesoriosGas();generarPlanGas()");
+ const antes=a.run('JSON.stringify({tramos,revisionMaterialesGas})');
+ a.run('renderPlanGas();renderSugerenciasGas()');
+ const pantalla=descendientesPresentacion(a.elements.get('matResultado')).concat(descendientesPresentacion(a.elements.get('deteccionFilas'))).map(n=>n.textContent).join(' ');
+ assert.doesNotMatch(pantalla,/tramo-mvgzumer-\d/);assert.match(pantalla,/M–A/);assert.match(pantalla,/A–B/);
+ assert.match(a.run('JSON.stringify(tramos)'),/tramo-mvgzumer-1/);assert.equal(a.run('JSON.stringify({tramos,revisionMaterialesGas})'),antes);
+ assert.equal(a.run("textoMaterialPantallaGas('tramo-olvidado-99')"),'Tramo sin ubicación identificada');
+});
+test('tarjetas compactas: cantidad desconocida se muestra Pendiente y cero sigue siendo cero',()=>{
+ const a=app();proyectoPlan(a);a.run('revisionMaterialesGas.plan.filas[0].cantidad=null;renderPlanGas()');let ns=descendientesPresentacion(tarjetasMateriales(a)[0]);assert.ok(ns.some(n=>n.textContent==='Pendiente'));assert.equal(ns.find(n=>n.type==='number').value,'');assert.equal(ns.find(n=>n.type==='number').placeholder,'Pendiente');
+ a.run('revisionMaterialesGas.plan.filas[0].cantidad=0;renderPlanGas()');ns=descendientesPresentacion(tarjetasMateriales(a)[0]);assert.equal(ns.find(n=>n.type==='number').value,0);assert.ok(!ns.some(n=>n.className==='gas-cantidad-pendiente'));
+});
+test('tarjetas compactas: confirmar tees no confirma revisión de diámetros ni conexiones',()=>{
+ const a=app();redAndroidEstructurada(a);a.run('detectarAccesoriosGas()');for(const t of registrosDeteccion(a,'tee'))confirmarDeteccion(a,t.propuesta.id);a.run('generarPlanGas()');
+ const filas=a.run('revisionMaterialesGas.plan.filas');const i=filas.findIndex(f=>f.tipo==='tee');assert.ok(i>=0);assert.equal(filas[i].revisado,false);
+ let ns=descendientesPresentacion(tarjetasMateriales(a)[i]);assert.ok(ns.some(n=>n.textContent.includes('Accesorio confirmado')));assert.ok(ns.some(n=>n.textContent==='Revisión técnica pendiente · diámetros y conexiones'));assert.equal(ns.find(n=>n.type==='checkbox').checked,false);
+ const check=ns.find(n=>n.type==='checkbox');check.checked=true;check.onchange();a.run('renderPlanGas()');ns=descendientesPresentacion(tarjetasMateriales(a)[i]);assert.ok(ns.some(n=>n.textContent.includes('Revisión técnica pendiente')));assert.equal(a.run('accesoriosDeteccionConfirmadosGas().filter(x=>x.tipo==="tee").length'),2);
+});
+test('tarjetas compactas: revisión táctil conserva su control asociado y aclaración',()=>{
+ const a=app();proyectoPlan(a);const label=descendientesPresentacion(tarjetasMateriales(a)[0]).find(n=>n.className==='gas-revision-check');assert.equal(label.tagName,'LABEL');assert.equal(label.textContent,'Revisado');assert.match(label.title,/no valida diámetros ni conexiones/);assert.equal(label.children[0].type,'checkbox');
+ const qty=descendientesPresentacion(tarjetasMateriales(a)[0]).find(n=>n.type==='number');assert.match(qty.ariaLabel,/Cantidad de/);assert.equal(typeof qty.onchange,'function');
+});
+test('tarjetas compactas: recargar datos previos y abrir detalles no cambia respaldo ni decisiones',()=>{
+ const a=app();redAndroidEstructurada(a);a.run('detectarAccesoriosGas()');for(const t of registrosDeteccion(a,'tee'))confirmarDeteccion(a,t.propuesta.id);a.run('generarPlanGas();guardarDatos()');const b=app(a.saved());b.run("abrir('gas');generarPlanGas();guardarDatos()");const datos=b.saved();const antes=b.run('JSON.stringify({tramos,artefactos,instalacionGas,revisionMaterialesGas,d:datosDeteccionGas()})');
+ const detalle=descendientesPresentacion(tarjetasMateriales(b)[0]).find(n=>n.tagName==='DETAILS');detalle.open=true;assert.equal(detalle.open,true);detalle.open=false;b.run('renderPlanGas();renderSugerenciasGas()');assert.equal(b.saved(),datos);assert.equal(b.run('JSON.stringify({tramos,artefactos,instalacionGas,revisionMaterialesGas,d:datosDeteccionGas()})'),antes);assert.equal(registrosDeteccion(b,'tee').filter(t=>t.estado==='confirmado').length,2);
+});

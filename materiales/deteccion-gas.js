@@ -132,12 +132,12 @@ function resolverSugerenciaGas(id,accion,edicion){
 function renderSugerenciasGas(){
  const panel=$('panelDeteccionGas'),out=$('deteccionFilas');if(!panel||!out)return;out.replaceChildren();const d=proyectoGasActual().deteccionGas;
  panel.classList.toggle('oculto',!d?.activa);if(!d?.activa)return;
- const texto=(t,padre=out)=>{const p=document.createElement('p');p.textContent=t;padre.append(p);};
+ const texto=(t,padre=out)=>{const p=document.createElement('p');p.textContent=textoMaterialPantallaGas(t);padre.append(p);};
  if(d.avisos?.length){const avisos=document.createElement('details'),sum=document.createElement('summary');avisos.className='gas-detalles';sum.textContent='Ver observaciones pendientes ('+d.avisos.length+')';avisos.append(sum);for(const aviso of d.avisos)texto(aviso,avisos);out.append(avisos);}
  for(const [id,a]of Object.entries(d.registros||{})){
   const p=accesorioSugeridoGas(a),card=document.createElement('div');card.className='detalle gas-sugerencia';out.append(card);
   const detalles=document.createElement('details'),sum=document.createElement('summary');detalles.className='gas-detalles';sum.textContent='Ver detalles técnicos';detalles.append(sum);
-  texto(({'tee':'Tee','llave':'Llave de paso','cupla':'Cuplas','reduccion':'Reducción'}[p.tipo]||p.tipo)+' · '+p.ubicacion+' · '+(!a.vigente?'RESPALDO: YA NO PROCEDE':a.estado==='rechazado'?'RECHAZADO':p.bloqueo||p.cantidad===null?'PENDIENTE':a.estado.toUpperCase()+(a.estado==='confirmado'&&p.medidas.some(m=>!m)?' · MEDIDAS PENDIENTES':'')),card);texto(p.motivo,detalles);if(p.bloqueo)texto(p.bloqueo,card);
+  texto(({'tee':'Tee','llave':'Llave de paso','cupla':'Cuplas','reduccion':'Reducción'}[p.tipo]||p.tipo)+' · '+p.ubicacion+' · '+(!a.vigente?'RESPALDO: YA NO PROCEDE':a.estado==='rechazado'?'RECHAZADO':p.bloqueo||p.cantidad===null?'PENDIENTE':a.estado.toUpperCase()+(a.estado==='confirmado'&&p.medidas.some(m=>!m)?' · MEDIDAS PENDIENTES':'')),card);if(a.vigente&&a.estado==='confirmado')texto('Accesorio confirmado · Revisión técnica pendiente (diámetros y conexiones).',card);texto(p.motivo,detalles);if(p.bloqueo)texto(p.bloqueo,card);
   if(Object.hasOwn(a.edicion,'cantidad')&&a.edicion.cantidad!==a.propuesta.cantidad)texto('Cantidad calculada actual: '+(a.propuesta.cantidad??'PENDIENTE')+'. Corrección manual conservada: '+(a.edicion.cantidad??'PENDIENTE')+'. Revisar antes de confirmar.',card);
   if(a.edicion.medidas&&JSON.stringify(a.edicion.medidas)!==JSON.stringify(a.propuesta.medidas))texto('Medidas actuales de los tramos: '+a.propuesta.medidas.map(m=>m||'Pendiente').join(' / ')+'. Las correcciones ingresadas se conservan abajo.',card);
   const label=document.createElement('label'),qty=document.createElement('input');label.textContent='Cantidad · vacío = pendiente';qty.type='number';qty.min='0';qty.step='1';qty.disabled=!a.vigente;qty.value=p.cantidad??'';label.append(qty);card.append(label);
