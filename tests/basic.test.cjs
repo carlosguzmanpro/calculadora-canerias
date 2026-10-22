@@ -665,7 +665,7 @@ test('aislamiento: perfiles y editor de nodos cambian junto con el espacio activ
 });
 test('aislamiento: una lectura de foto demorada no escribe en el espacio recién seleccionado',()=>{
  const a=app();a.run("abrir('gas')");let lector;a.ctx.URL.createObjectURL=()=> 'blob:foto';a.ctx.FileReader=class{constructor(){lector=this;}readAsDataURL(){}};
- a.ctx.evento={target:{files:[{type:'image/png',size:10}]}};a.run("cargarFoto(evento);seleccionarAmbitoGas('demostracion')");lector.result='data:image/png;base64,TARDÍA';lector.onload();assert.equal(a.run('proyectos.gas.demostracion.foto'),undefined);assert.equal(a.run('proyectos.gas.foto'),undefined);
+ a.ctx.evento={target:{files:[{type:'image/png',size:10}]}};a.run("cargarFoto(evento);seleccionarAmbitoGas('demostracion')");lector.result='data:image/png;base64,TARDÍA';lector.onload();assert.equal(a.run('proyectos.gas.demostracion.foto'),undefined);assert.equal(a.run('proyectos.gas.foto'),'data:image/png;base64,TARDÍA');
 });
 
 test('Android: index autónomo contiene exactamente las once fuentes locales, sin solicitudes de scripts',()=>{
@@ -1117,4 +1117,57 @@ test('PDF GAS: ubicaciones agrupadas se distribuyen por líneas conservando cant
 });
 test('PDF: la presentación de AGUA y CLOACAS se conserva sin clases ni traducciones de GAS',()=>{
  const {documento}=require('../informes/documento-proyecto.js');for(const titulo of ['AGUA','CLOACAS']){const d={titulo,ambito:'MI PROYECTO',tramos:[],artefactos:[],filas:[],resumen:['Referencia tramo-externo-1'],advertencia:''};const doc=documento(d);assert.match(doc,/Referencia tramo-externo-1/);assert.doesNotMatch(doc,/materiales-entrega/);}
+});
+
+function lectorFotosPrueba(a){
+ const lectores=[];let url=0;a.ctx.URL.createObjectURL=()=> 'blob:foto-'+(++url);a.ctx.FileReader=class{constructor(){lectores.push(this)}readAsDataURL(){}readAsText(){}};
+ return {lectores,cargar({type='image/jpeg',size=2*1024*1024}={}){a.ctx.archivoFoto={target:{files:[{type,size}]}};a.run('cargarFoto(archivoFoto)');return lectores[lectores.length-1];},terminar(lector,datos){lector.result=datos;lector.onload();}};
+}
+test('foto persistente: galería de más de 1 MB sobrevive cierre simulado con cinco tramos y PDF',()=>{
+ const a=app(null,{embebido:true});redAndroidEstructurada(a);const antes=a.run('JSON.stringify(tramos)');const io=lectorFotosPrueba(a),r=io.cargar();assert.match(a.text('estadoFoto'),/Leyendo/);io.terminar(r,'data:image/jpeg;base64,ORIGINAL_ANDROID');assert.match(a.text('estadoFoto'),/Foto guardada/);assert.equal(JSON.parse(a.saved()).gas.foto,'data:image/jpeg;base64,ORIGINAL_ANDROID');
+ const b=app(a.saved(),{embebido:true});b.run("abrir('gas');prepararInformeActual()");assert.equal(b.run('fotoURL'),'data:image/jpeg;base64,ORIGINAL_ANDROID');assert.equal(b.run('JSON.stringify(tramos)'),antes);assert.match(b.elements.get('informeImpresion').innerHTML,/src="data:image\/jpeg;base64,ORIGINAL_ANDROID"/);assert.match(b.text('estadoFoto'),/Foto guardada/);
+});
+test('foto persistente: cuota insuficiente no aparenta guardado y conserva foto anterior y tramos',()=>{
+ const a=app();redAndroidEstructurada(a);a.run("proyectos.gas.foto='data:image/jpeg;base64,ANTERIOR';guardarDatos()");const b=app(a.saved(),{quota:a.saved().length+2000});b.run("abrir('gas')");const io=lectorFotosPrueba(b),r=io.cargar();io.terminar(r,'data:image/jpeg;base64,'+'x'.repeat(15000));assert.match(b.text('estadoFoto'),/NO guardada/);assert.doesNotMatch(b.text('estadoFoto'),/^Foto guardada/);assert.equal(JSON.parse(b.saved()).gas.foto,'data:image/jpeg;base64,ANTERIOR');assert.equal(JSON.parse(b.saved()).gas.tramos.length,5);b.run('guardarDatos();mostrarFotoLocal()');assert.match(b.text('estadoFoto'),/NO guardada/);assert.equal(b.run('fotoURL'),'data:image/jpeg;base64,'+'x'.repeat(15000));
+ const c=app(b.saved());c.run("abrir('gas')");assert.equal(c.run('fotoURL'),'data:image/jpeg;base64,ANTERIOR');
+});
+test('foto persistente: error de lectura conserva la foto guardada sin reemplazarla por blob',()=>{
+ const a=app();a.run("abrir('gas');proyectos.gas.foto='data:image/png;base64,ANTERIOR';guardarDatos();mostrarFotoLocal()");const io=lectorFotosPrueba(a),r=io.cargar();r.onerror();assert.match(a.text('estadoFoto'),/NO guardada.*No se pudo leer/);assert.equal(JSON.parse(a.saved()).gas.foto,'data:image/png;base64,ANTERIOR');a.run('guardarDatos()');assert.equal(JSON.parse(a.saved()).gas.foto,'data:image/png;base64,ANTERIOR');
+});
+test('foto persistente: tamaño o formato no persistible deja aviso estable sin perder foto previa',()=>{
+ for(const opciones of [{size:13*1024*1024},{type:'image/heic'}]){const a=app();a.run("abrir('gas');proyectos.gas.foto='data:image/png;base64,ANTERIOR';guardarDatos()");const io=lectorFotosPrueba(a);io.cargar(opciones);assert.equal(io.lectores.length,0);assert.match(a.text('estadoFoto'),/NO guardada.*12 MB/);a.run('guardarDatos()');assert.match(a.text('estadoFoto'),/NO guardada/);assert.equal(JSON.parse(a.saved()).gas.foto,'data:image/png;base64,ANTERIOR');}
+});
+test('foto persistente: lecturas fuera de orden o quitadas no restauran imágenes descartadas',()=>{
+ const a=app();a.run("abrir('gas')");const io=lectorFotosPrueba(a),primera=io.cargar(),segunda=io.cargar();io.terminar(primera,'data:image/jpeg;base64,VIEJA');assert.equal(a.run('proyectos.gas.foto'),undefined);io.terminar(segunda,'data:image/jpeg;base64,NUEVA');assert.equal(JSON.parse(a.saved()).gas.foto,'data:image/jpeg;base64,NUEVA');const tercera=io.cargar();a.run('quitarFoto()');io.terminar(tercera,'data:image/jpeg;base64,QUITADA');assert.equal(JSON.parse(a.saved()).gas.foto,undefined);assert.equal(a.run('fotoURL'),null);
+});
+test('foto persistente: lecturas al cambiar especialidad y demostración guardan en su destino original',()=>{
+ const a=app();a.run("abrir('gas')");const io=lectorFotosPrueba(a),r=io.cargar();a.run("seleccionarAmbitoGas('demostracion')");const demo=io.cargar();a.run("abrir('agua')");io.terminar(r,'data:image/jpeg;base64,REAL');io.terminar(demo,'data:image/jpeg;base64,DEMO');assert.equal(JSON.parse(a.saved()).gas.foto,'data:image/jpeg;base64,REAL');assert.equal(JSON.parse(a.saved()).gas.demostracion.foto,'data:image/jpeg;base64,DEMO');assert.equal(JSON.parse(a.saved()).agua.foto,undefined);a.run("abrir('gas');seleccionarAmbitoGas('proyecto')");assert.equal(a.run('fotoURL'),'data:image/jpeg;base64,REAL');a.run("seleccionarAmbitoGas('demostracion')");assert.equal(a.run('fotoURL'),'data:image/jpeg;base64,DEMO');assert.match(a.text('estadoFoto'),/Foto guardada/);
+});
+test('foto persistente: almacenamiento bloqueado mantiene navegación y aviso sin afirmar guardado',()=>{
+ const a=app(null,{blocked:true});a.run("abrir('gas')");const io=lectorFotosPrueba(a),r=io.cargar();io.terminar(r,'data:image/jpeg;base64,SESION');assert.match(a.text('estadoFoto'),/NO guardada/);assert.equal(a.saved(),undefined);a.run("abrir('agua');abrir('gas')");assert.equal(a.run('fotoURL'),'data:image/jpeg;base64,SESION');assert.match(a.text('estadoFoto'),/NO guardada/);
+});
+function respaldoPrueba(a,datos){
+ const io=lectorFotosPrueba(a);a.ctx.eventoRespaldo={target:{files:[{size:JSON.stringify(datos).length}],value:'respaldo.json'}};a.run('importarRespaldoCompleto(eventoRespaldo)');io.terminar(io.lectores[0],JSON.stringify(datos));
+}
+test('respaldo v1: exporta fotografía y recupera cinco tramos, materiales y foto para PDF',()=>{
+ const a=app();redAndroidEstructurada(a);const io=lectorFotosPrueba(a),r=io.cargar();io.terminar(r,'data:image/jpeg;base64,RESPALDADA');a.run('generarPlanGas()');let contenido;a.ctx.Blob=class{constructor(partes){contenido=partes.join('')}};a.ctx.setTimeout=()=>{};a.ctx.document.createElement=()=>({click(){}});a.run('descargarRespaldoCompleto()');const x=JSON.parse(contenido);assert.equal(x.formato,'canerias-respaldo-v1');assert.equal(x.proyectos.gas.foto,'data:image/jpeg;base64,RESPALDADA');
+ const b=app();b.run("abrir('gas')");respaldoPrueba(b,x);assert.match(b.text('estadoRespaldo'),/recuperado/);assert.equal(b.run('tramos.length'),5);assert.equal(b.run('fotoURL'),'data:image/jpeg;base64,RESPALDADA');assert.ok(b.run('!!proyectos.gas.planCompra'));b.run('prepararInformeActual()');assert.match(b.elements.get('informeImpresion').innerHTML,/RESPALDADA/);const c=app(b.saved());c.run("abrir('gas')");assert.equal(c.run('fotoURL'),'data:image/jpeg;base64,RESPALDADA');
+});
+test('respaldo v1: cancelar o rechazar formato inválido conserva los proyectos anteriores',()=>{
+ for(const caso of ['cancelar','formato','blob']){const a=app();redAndroidEstructurada(a);a.run('guardarDatos()');const antes=a.saved();const d={formato:'canerias-respaldo-v1',proyectos:{gas:{foto:'data:image/png;base64,FOTO'},agua:{},cloacas:{}}};if(caso==='cancelar')a.ctx.window.confirm=()=>false;if(caso==='formato')d.formato='otro';if(caso==='blob')d.proyectos.gas.foto='blob:temporal';respaldoPrueba(a,d);assert.equal(a.saved(),antes);assert.equal(a.run('tramos.length'),5);assert.match(a.text('estadoRespaldo'),/cancelada|No se importó/);}
+});
+test('respaldo v1: importación que supera cuota no reemplaza datos ni fotos existentes',()=>{
+ const a=app();redAndroidEstructurada(a);a.run('guardarDatos()');const b=app(a.saved(),{quota:a.saved().length+100});b.run("abrir('gas')");const antes=b.saved();respaldoPrueba(b,{formato:'canerias-respaldo-v1',proyectos:{gas:{foto:'data:image/png;base64,'+'x'.repeat(15000)},agua:{},cloacas:{}}});assert.equal(b.saved(),antes);assert.equal(b.run('tramos.length'),5);assert.match(b.text('estadoRespaldo'),/No se importó/);
+});
+test('respaldo v1: no exporta mientras la fotografía sigue leyéndose',()=>{
+ const a=app();a.run("abrir('gas')");const io=lectorFotosPrueba(a);io.cargar();a.run('descargarRespaldoCompleto()');assert.match(a.text('estadoRespaldo'),/Esperá/);
+});
+test('foto persistente: aviso de cuota se elimina si luego se logra guardar la misma imagen',()=>{
+ const a=app(null,{quota:4000});a.run("abrir('gas')");const io=lectorFotosPrueba(a),r=io.cargar();io.terminar(r,'data:image/jpeg;base64,'+'x'.repeat(6000));assert.match(a.text('estadoFoto'),/NO guardada/);let guardado;a.ctx.localStorage.setItem=(clave,valor)=>{guardado=valor};a.run('guardarDatos()');assert.ok(guardado.includes('data:image/jpeg'));assert.match(a.text('estadoFoto'),/^Foto guardada/);
+});
+test('respaldo v1: conserva confirmación de fotografía y medidas manuales tras importar y reabrir',()=>{
+ const a=app();redAndroidEstructurada(a);const io=lectorFotosPrueba(a),r=io.cargar();io.terminar(r,'data:image/jpeg;base64,CONFIRMADA');a.elements.get('entregaCroquisConfirmado').checked=true;a.run('confirmarCroquisEntrega();guardarDatos()');const respaldo={formato:'canerias-respaldo-v1',proyectos:JSON.parse(a.saved())};const b=app();b.run("abrir('gas')");respaldoPrueba(b,respaldo);assert.equal(b.elements.get('entregaCroquisConfirmado').checked,true);assert.equal(b.run('tramos.length'),5);const c=app(b.saved());c.run("abrir('gas');prepararInformeActual()");assert.equal(c.elements.get('entregaCroquisConfirmado').checked,true);assert.match(c.elements.get('informeImpresion').innerHTML,/CONFIRMADA/);
+});
+test('respaldo v1: importar no sobrescribe aclaraciones recuperadas con el formulario anterior',()=>{
+ const a=app();a.run("abrir('gas')");a.elements.get('duda').value='Texto de la sesión anterior';a.run('guardarDatos()');const proyectos={gas:{aclaracion:'Aclaración recuperada',tramos:[],artefactos:[],foto:'data:image/png;base64,FOTO'},agua:{aclaracion:'AGUA recuperada'},cloacas:{aclaracion:'CLOACAS recuperada'}};respaldoPrueba(a,{formato:'canerias-respaldo-v1',proyectos});assert.equal(a.elements.get('duda').value,'Aclaración recuperada');assert.equal(JSON.parse(a.saved()).gas.aclaracion,'Aclaración recuperada');a.run("abrir('agua')");assert.equal(a.elements.get('duda').value,'AGUA recuperada');
 });

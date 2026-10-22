@@ -360,7 +360,7 @@ section{box-shadow:none}
 Estimación de compra sin reutilizar sobrantes: tiras de 6 m por segmento continuo y cuplas solo entre tiras del mismo segmento. Tees, codos y reducciones se cuentan según los datos revisados. Los tramos pendientes conservan la estimación anterior por longitud, marcada como provisoria; no confirman ausencia de accesorios. No verifica diámetros ni incluye conexiones adicionales exigidas por el sistema constructivo. Antes de construir, un profesional habilitado debe comprobar el diseño y la normativa de gas.
 </div>
 </div>
-<details class="solo-pantalla"><summary>Respaldos y ajustes de resultados anteriores</summary><button class="alt" onclick="descargarRespaldoCompleto()">Descargar respaldo completo JSON</button><div id="respaldosGas"></div></details>
+<details class="solo-pantalla"><summary>Respaldos y ajustes de resultados anteriores</summary><button class="alt" onclick="descargarRespaldoCompleto()">Descargar respaldo completo JSON</button><label>Recuperar respaldo completo JSON<input id="importarRespaldo" type="file" accept="application/json,.json"></label><p id="estadoRespaldo" role="status"></p><div id="respaldosGas"></div></details>
 <h3>Documento de entrega de GAS</h3>
 <button id="revisarEntrega" class="alt" onclick="revisarCroquisParaEntrega()">Revisar croquis para entrega</button>
 <label class="confirmacion-entrega" for="entregaCroquisConfirmado"><input id="entregaCroquisConfirmado" type="checkbox" aria-describedby="entregaEstado" onchange="confirmarCroquisEntrega()"><span>Confirmo que la foto es legible y muestra los tramos, artefactos y posiciones de esta red actual.</span></label>
@@ -909,6 +909,8 @@ function actualizarDerivadosGas(){
  sincronizarMaterialesGas('proyecto');renderRespaldosGas();
 }
 function descargarRespaldoCompleto(){
+ if(Object.values(lecturasFoto).some(x=>x.pendiente)){$('estadoRespaldo').textContent='Esperá a que termine la lectura de la fotografía antes de descargar el respaldo.';return;}
+ $('estadoRespaldo').textContent=Object.values(lecturasFoto).some(x=>x.error&&!x.datos)?'El respaldo conserva los datos y la foto anterior leída. La foto temporal actual no pudo incluirse; conservá su archivo original.':'Respaldo completo con las fotografías leídas; guardalo fuera del navegador.';
  const blob=new Blob([JSON.stringify({formato:'canerias-respaldo-v1',proyectos},null,2)],{type:'application/json;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');
  a.href=url;a.download='canerias-respaldo-completo.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
@@ -3392,7 +3394,7 @@ function avisoDeteccionGas(){
 const $=id=>document.getElementById(id);
 let modulo='',fotoURL=null,artefactos=[],tramos=[];
 let editandoTramo=-1,editandoAccesorios=-1,borradorAccesorios=[];
-const fotosSesion={};
+const fotosSesion={},lecturasFoto={};
 const CLAVE='canerias-proyectos-v1';
 let persistenciaHabilitada=false,ultimoGuardadoValido=null;
 const especialidades=['gas','agua','cloacas'];
@@ -4003,7 +4005,7 @@ function guardarDatos(){
  if(modulo==='gas')actualizarSugerenciasGas();
  if(typeof invalidarMaterialesGas==='function')invalidarMaterialesGas();
  if(modulo==='gas'){actualizarDerivadosGas();actualizarVistaEntregaGas();}
- if(!persistenciaHabilitada){$('estadoGuardado').textContent='No se pudo guardar: no se pudo leer con seguridad el almacenamiento anterior. Seguís trabajando en esta sesión, sin sobrescribir proyectos existentes. Conservá un PDF o respaldo antes de cerrar.';return;}
+ if(!persistenciaHabilitada){$('estadoGuardado').textContent='No se pudo guardar: no se pudo leer con seguridad el almacenamiento anterior. Seguís trabajando en esta sesión, sin sobrescribir proyectos existentes. Conservá un PDF o respaldo antes de cerrar.';actualizarEstadoFoto();return;}
  try{
   const serializado=JSON.stringify(proyectos);
   localStorage.setItem(CLAVE,serializado);ultimoGuardadoValido=JSON.parse(serializado);
@@ -4022,6 +4024,7 @@ function guardarDatos(){
    $('estadoGuardado').textContent='No se pudo guardar: almacenamiento bloqueado o lleno. Conservá una impresión antes de cerrar.';
   }
  }
+ actualizarEstadoFoto();
 }
 function restaurarDatos(){
  let datos=null;
@@ -4053,16 +4056,50 @@ function restaurarDatos(){
  }
  renderTramos();renderGas();renderRevisionCroquis();
 }
-function actualizarEstadoFoto(){
- $('estadoFoto').textContent=datosEspecialidadActual().foto?
-  'Foto guardada en este navegador. No se sube a ningún servidor.':
-  (fotoURL?'Foto disponible solo en esta sesión. Para guardarla: PNG, JPEG o WebP de hasta 1 MB y espacio disponible.':'No hay foto cargada en esta especialidad.');
+function importarRespaldoCompleto(e){
+ const archivo=e.target.files?.[0];if(!archivo)return;
+ const mensaje=t=>$('estadoRespaldo').textContent=t;
+ if(archivo.size>40*1024*1024){mensaje('Respaldo demasiado grande: máximo 40 MB. No se modificaron los proyectos.');return;}
+ try{const lector=new FileReader();lector.onload=()=>{
+  try{
+   const x=JSON.parse(lector.result);
+   if(x.formato!=='canerias-respaldo-v1'||!x.proyectos||!especialidades.every(m=>x.proyectos[m]&&typeof x.proyectos[m]==='object'&&!Array.isArray(x.proyectos[m])))throw Error('Formato de respaldo no reconocido');
+   for(const p of [...especialidades.map(m=>x.proyectos[m]),x.proyectos.gas.demostracion].filter(Boolean)){
+    if(typeof p!=='object'||Array.isArray(p)||['tramos','artefactos'].some(k=>p[k]!==undefined&&!Array.isArray(p[k])))throw Error('Proyecto con estructura no reconocida');
+    if(p.foto!==undefined&&(typeof p.foto!=='string'||!/^data:image\/(png|jpeg|webp);base64,/.test(p.foto)))throw Error('Fotografía no recuperable: el respaldo debe incluir la imagen, no una URL temporal');
+   }
+   if(!persistenciaHabilitada)throw Error('Almacenamiento restringido; no se sobrescriben los datos anteriores');
+   if(!window.confirm('¿Restaurar este respaldo completo y reemplazar los proyectos actuales? Exportá primero un respaldo si querés conservarlos.')){mensaje('Importación cancelada. Datos conservados.');return;}
+   const serializado=JSON.stringify(x.proyectos);localStorage.setItem(CLAVE,serializado);
+   // setItem es atómico: si falla por cuota, no se toca la sesión actual.
+   for(const clave of Object.keys(fotosSesion))delete fotosSesion[clave];
+   for(const clave of Object.keys(lecturasFoto))delete lecturasFoto[clave];
+   ultimoDocumentoPreparado=null;ambitoGas='proyecto';modulo='';restaurarDatos();abrir('gas');
+   mensaje('Respaldo recuperado con sus fotografías. Verificá el proyecto y el PDF.');
+  }catch(error){mensaje('No se importó el respaldo: '+error.message+'. Los proyectos anteriores se conservaron.');}
+  e.target.value='';
+ };lector.onerror=()=>mensaje('No se pudo leer el respaldo. Datos anteriores conservados.');lector.readAsText(archivo);
+ }catch(error){mensaje('No se pudo abrir el respaldo. Datos anteriores conservados.');}
 }
+$('importarRespaldo').addEventListener('change',importarRespaldoCompleto);
+
+function actualizarEstadoFoto(){
+ if(!modulo)return;
+ const clave=claveFotoActual(),actual=datosEspecialidadActual(),lectura=lecturasFoto[clave];
+ const guardada=modulo==='gas'&&ambitoGas==='demostracion'?ultimoGuardadoValido?.gas?.demostracion:ultimoGuardadoValido?.[modulo];
+ const coincide=actual.foto&&actual.foto===guardada?.foto;
+ if(lectura?.datos&&lectura.datos===guardada?.foto)lectura.error=null;
+ $('estadoFoto').textContent=lectura?.pendiente?'Leyendo fotografía para guardarla. No cierres Chrome todavía.':
+  lectura?.error?'Foto actual NO guardada: '+lectura.error+' Conservá el respaldo JSON o la imagen original antes de cerrar.':
+  coincide?'Foto guardada en este navegador. No se sube a ningún servidor.':
+  fotoURL?'Foto actual solo en esta sesión: no se confirmó su guardado local. Conservá un respaldo antes de cerrar.':'No hay foto cargada en esta especialidad.';
+}
+
 function mostrarFotoLocal(){
  fotoURL=null;
- if(fotosSesion[claveFotoActual()])fotoURL=fotosSesion[claveFotoActual()];
  const foto=datosEspecialidadActual().foto;
  if(typeof foto==='string' && /^data:image\/(png|jpeg|webp);base64,/.test(foto))fotoURL=foto;
+ if(fotosSesion[claveFotoActual()])fotoURL=fotosSesion[claveFotoActual()];
  $('imagen').classList.toggle('oculto',!fotoURL);
  $('accionesFoto').classList.toggle('oculto',!fotoURL);
  actualizarEstadoFoto();
@@ -4120,42 +4157,39 @@ function mostrarVista(v){
 
 function cargarFoto(e){
  if(!modulo)return;
- const f=e.target.files&&e.target.files[0];
- if(!f)return;
- if(!f.type.startsWith('image/')){
-  alert('Elegí una imagen válida.');
-  return;
- }
+ const f=e.target.files&&e.target.files[0];if(!f)return;
+ if(!f.type.startsWith('image/')){alert('Elegí una imagen válida.');return;}
  if(fotoURL&&!window.confirm('¿Reemplazar la fotografía de este espacio por la imagen seleccionada?'))return;
- if(modulo==='gas'&&datosEspecialidadActual().entregaGas?.firmaCroquis)datosEspecialidadActual().entregaGas.requiereConfirmacion=true;
+ const clave=claveFotoActual(),destino=datosEspecialidadActual();
+ if(modulo==='gas'&&destino.entregaGas?.firmaCroquis)destino.entregaGas.requiereConfirmacion=true;
  if(fotoURL)URL.revokeObjectURL(fotoURL);
- fotoURL=URL.createObjectURL(f);
- fotosSesion[claveFotoActual()]=fotoURL;
- delete datosEspecialidadActual().foto;
+ const temporal=URL.createObjectURL(f);fotoURL=temporal;fotosSesion[clave]=temporal;
+ const lectura=lecturasFoto[clave]={pendiente:true,error:null};
+ // La foto anterior permanece en el proyecto/disco hasta leer la nueva.
  guardarDatos();
- const proyecto=modulo,claveFoto=claveFotoActual(),destinoFoto=datosEspecialidadActual();
- const urlActual=fotoURL;
- if(['image/png','image/jpeg','image/webp'].includes(f.type) && f.size<=1024*1024){
-  const lector=new FileReader();
-  lector.onload=()=>{
-   if(modulo!==proyecto || claveFotoActual()!==claveFoto || fotoURL!==urlActual)return;
-   const confirmacionMismaFoto=modulo==='gas'&&croquisEntregaDisponible()&&!destinoFoto.entregaGas?.requiereConfirmacion&&destinoFoto.entregaGas?.firmaCroquis===firmaCroquisEntrega();
-   destinoFoto.foto=lector.result;
-   if(confirmacionMismaFoto)destinoFoto.entregaGas.firmaCroquis=firmaCroquisEntrega();
-   guardarDatos();
-   actualizarEstadoFoto();
-  };
-  lector.onerror=()=>{$('estadoGuardado').textContent='La foto solo está disponible en esta sesión: no se pudo leer para guardarla.';};
-  lector.readAsDataURL(f);
- }else{
-  $('estadoGuardado').textContent='Foto solo en esta sesión. Para guardarla localmente usá PNG, JPEG o WebP de hasta 1 MB. Los demás datos sí se guardan.';
- }
- $('imagen').src=fotoURL;
- $('imagen').classList.remove('oculto');
- $('accionesFoto').classList.remove('oculto');
- $('camara').value='';
- $('galeria').value='';
- actualizarEstadoFoto();
+ const fallar=mensaje=>{lectura.pendiente=false;lectura.error=mensaje;if(claveFotoActual()===clave)actualizarEstadoFoto();};
+ if(['image/png','image/jpeg','image/webp'].includes(f.type)&&f.size<=12*1024*1024){
+  try{
+   const lector=new FileReader();
+   lector.onload=()=>{
+    if(fotosSesion[clave]!==temporal||lecturasFoto[clave]!==lectura)return;
+    if(typeof lector.result!=='string'||!/^data:image\/(png|jpeg|webp);base64,/.test(lector.result)){fallar('La lectura no produjo una imagen compatible.');return;}
+    const visible=claveFotoActual()===clave;
+    const confirmada=visible&&modulo==='gas'&&croquisEntregaDisponible()&&!destino.entregaGas?.requiereConfirmacion&&destino.entregaGas?.firmaCroquis===firmaCroquisEntrega();
+    destino.foto=lector.result;fotosSesion[clave]=lector.result;lectura.datos=lector.result;lectura.pendiente=false;
+    if(visible)fotoURL=lector.result;
+    if(confirmada)destino.entregaGas.firmaCroquis=firmaCroquisEntrega();
+    URL.revokeObjectURL(temporal);guardarDatos();
+    const guardada=clave==='gas-demostracion'?ultimoGuardadoValido?.gas?.demostracion:ultimoGuardadoValido?.[clave];
+    if(guardada?.foto!==destino.foto)lectura.error='El navegador no pudo almacenar la imagen (cuota o acceso restringido). La fotografía anterior guardada se conserva.';
+    if(visible){$('imagen').src=fotoURL;actualizarEstadoFoto();}
+   };
+   lector.onerror=()=>{if(lecturasFoto[clave]===lectura)fallar('No se pudo leer la fotografía. La anterior guardada se conserva.');};
+   lector.onabort=lector.onerror;lector.readAsDataURL(f);
+  }catch(error){fallar('No se pudo iniciar la lectura de la imagen.');}
+ }else fallar('Para guardar se admite PNG, JPEG o WebP de hasta 12 MB; la cuota real del navegador puede ser menor.');
+ $('imagen').src=fotoURL;$('imagen').classList.remove('oculto');$('accionesFoto').classList.remove('oculto');
+ $('camara').value='';$('galeria').value='';actualizarEstadoFoto();
 }
 $('camara').addEventListener('change',cargarFoto);
 $('galeria').addEventListener('change',cargarFoto);
@@ -4164,6 +4198,7 @@ function quitarFoto(){
  if(!window.confirm('¿Quitar la fotografía de este espacio?'))return;
  delete datosEspecialidadActual().foto;
  delete fotosSesion[claveFotoActual()];
+ delete lecturasFoto[claveFotoActual()];
  guardarDatos();
  if(fotoURL)URL.revokeObjectURL(fotoURL);
  fotoURL=null;
