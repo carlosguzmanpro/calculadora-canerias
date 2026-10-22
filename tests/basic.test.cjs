@@ -8,7 +8,7 @@ const script=html.match(/<script>([\s\S]*?)<\/script>/)[1];
 // La maquetación, cámara e impresión visual requieren la prueba de navegador.
 function app(saved=null,{blocked=false,quota=Infinity,tablasLegadas=false,tablasFotoBase=false,embebido=false,storageGetter=false,soloLectura=false}={}){
  const elements=new Map();const store=new Map(saved?[['canerias-proyectos-v1',saved]]:[]);
- function element(){return {value:'',textContent:'',checked:false,style:{},children:[],className:'',classList:{hidden:false,add(c){if(c==='oculto')this.hidden=true;},remove(c){if(c==='oculto')this.hidden=false;},toggle(c,b){if(c==='oculto')this.hidden=b;}},append(...x){this.children.push(...x)},replaceChildren(){this.children=[];this.textContent=''},removeAttribute(k){delete this[k]},addEventListener(k,fn){this[k]=fn}};}
+ function element(tag='div'){return {tagName:String(tag).toUpperCase(),value:'',textContent:'',checked:false,style:{},children:[],className:'',classList:{hidden:false,add(c){if(c==='oculto')this.hidden=true;},remove(c){if(c==='oculto')this.hidden=false;},toggle(c,b){if(c==='oculto')this.hidden=b;}},append(...x){this.children.push(...x)},replaceChildren(){this.children=[];this.textContent=''},removeAttribute(k){delete this[k]},addEventListener(k,fn){this[k]=fn}};}
  for(const m of html.matchAll(/id="([^"]+)"/g))elements.set(m[1],element());
  elements.get('gt').value='9300';elements.get('ga').value='Cocina';
  const ctx=vm.createContext({document:{getElementById:id=>elements.get(id),createElement:element,createTextNode:text=>({textContent:text})},window:{confirm(){return true},scrollTo(){},addEventListener(k,fn){this[k]=fn}},localStorage:{getItem:k=>{if(blocked)throw Error('blocked');return store.get(k)||null},setItem(k,v){if(blocked||soloLectura||v.length>quota)throw Error('quota');store.set(k,v)}},URL:{revokeObjectURL(){}},alert(){}});
@@ -588,7 +588,7 @@ test('plan materiales: largo comercial persiste sin cambiar el cálculo anterior
  const b=app(a.saved());b.run("abrir('gas');abrirPlanGas();generarPlanGas()");assert.equal(b.elements.get('matLargo').value,5);assert.equal(b.run('revisionMaterialesGas.plan.planes[0].cuplasPropuestas'),2);
 });
 test('plan materiales: revisar, ajustar cantidad y recargar conserva revisión sin alterar tramos',()=>{
- const a=app();proyectoPlan(a);let tabla=a.elements.get('matResultado').children.find(n=>n.className==='tabla-wrap').children[0];const qty=tabla.children[1].children[2].children[0];qty.value='4';qty.onchange();
+ const a=app();proyectoPlan(a);const card=a.elements.get('matResultado').children.find(n=>n.className==='gas-materiales-tarjetas').children[0];const qty=descendientesPresentacion(card).find(n=>n.type==='number');qty.value='4';qty.onchange();
  assert.equal(a.run('revisionMaterialesGas.plan.filas[0].cantidad'),4);assert.equal(a.run('revisionMaterialesGas.plan.filas[0].estado'),'estimado');assert.equal(a.run('tramos[0].metros'),12);
  a.run('revisionMaterialesGas.plan.filas.forEach(f=>f.revisado=true);guardarRevisionMaterialesGas()');const b=app(a.saved());b.run("abrir('gas');generarPlanGas()");assert.equal(b.run('revisionMaterialesGas.plan.filas[0].cantidad'),4);assert.equal(b.run('revisionMaterialesGas.plan.filas[0].cantidadCalculada'),2);assert.ok(b.run('revisionMaterialesGas.plan.filas.every(f=>f.revisado)'));
 });
@@ -969,7 +969,7 @@ test('detección: continúa localmente con guardado bloqueado, sin borrar entrad
  const a=app(null,{embebido:true,blocked:true});redDeteccion(a);a.run("proyectos.gas.foto='data:image/png;base64,LOCAL';mostrarFotoLocal();detectarAccesoriosGas()");const r=registrosDeteccion(a,'tee')[0];confirmarDeteccion(a,r.propuesta.id);assert.equal(a.saved(),undefined);assert.equal(a.run('fotoURL'),'data:image/png;base64,LOCAL');assert.equal(a.run('tramos.length'),5);assert.equal(a.run('accesoriosDeteccionConfirmadosGas().length'),1);
 });
 test('detección: controles de la tarjeta guardan una corrección y confirman en una sola acción',()=>{
- const a=app();redDeteccion(a);a.run('detectarAccesoriosGas()');const card=a.elements.get('deteccionFilas').children.find(n=>n.className==='detalle'&&n.children[0].textContent.startsWith('Llave de paso'));const campos=card.children.filter(n=>n.children?.some(x=>x.type==='number'));campos[0].children[0].value='2';card.children.find(n=>n.textContent==='Confirmar sugerencia').onclick();assert.equal(a.run('accesoriosDeteccionConfirmadosGas().find(x=>x.tipo==="llave").cantidad'),2);
+ const a=app();redDeteccion(a);a.run('detectarAccesoriosGas()');const card=a.elements.get('deteccionFilas').children.find(n=>n.className==='detalle gas-sugerencia'&&n.children[0].textContent.startsWith('Llave de paso'));const campos=card.children.filter(n=>n.children?.some(x=>x.type==='number'));campos[0].children[0].value='2';descendientesPresentacion(card).find(n=>n.textContent==='Confirmar sugerencia').onclick();assert.equal(a.run('accesoriosDeteccionConfirmadosGas().find(x=>x.tipo==="llave").cantidad'),2);
 });
 test('detección: conexiones de tee aportadas en revisión no se convierten en diámetros automáticos',()=>{
  const a=app();redDeteccion(a,{diametro:null});a.run('detectarAccesoriosGas()');const r=registrosDeteccion(a,'tee').find(r=>r.propuesta.ubicacion==='A');confirmarDeteccion(a,r.propuesta.id,{medidas:['1"','1"','3/4"'],configuracion:'tee-igual-reduccion'});assert.equal(a.run('accesoriosDeteccionConfirmadosGas().filter(x=>x.tipo==="reduccion").length'),1);assert.ok(a.run('tramos.every(t=>t.diametro===null)'));assert.equal(a.run('CATALOGOS_GAS_VERIFICADOS.length'),0);
@@ -1047,4 +1047,28 @@ test('Android: decisiones previas por nombres se conservan al resolver IDs únic
  a.run("resolverSugerenciaGas(idAnterior,'rechazado',{cantidad:2});instalacionGas.nodos=[{id:'nuevo-a',nombre:'A',tipo:'derivacion'}];detectarAccesoriosGas()");
  const actual=registrosDeteccion(a,'tee').find(r=>r.propuesta.ubicacion==='A');assert.equal(actual.estado,'rechazado');assert.equal(actual.edicion.cantidad,2);assert.equal(a.run('datosDeteccionGas().registros[idAnterior].vigente'),false);
  assert.equal(registrosDeteccion(a,'tee').length,2);assert.equal(a.run('accesoriosDeteccionConfirmadosGas().length'),0);
+});
+
+
+function descendientesPresentacion(n){return [n,...(n.children||[]).flatMap(descendientesPresentacion)];}
+function tarjetasMateriales(a){return a.elements.get('matResultado').children.find(n=>n.className==='gas-materiales-tarjetas').children;}
+test('presentación: una tarjeta por material con seis datos y detalles técnicos cerrados',()=>{
+ const a=app(null,{embebido:true});proyectoPlan(a);const tarjetas=tarjetasMateriales(a),filas=a.run('revisionMaterialesGas.plan.filas');assert.equal(tarjetas.length,filas.length);
+ tarjetas.forEach((card,i)=>{const ns=descendientesPresentacion(card);assert.equal(card.tagName,'ARTICLE');assert.ok(ns.some(n=>n.textContent===filas[i].material));assert.ok(ns.some(n=>n.textContent==='Diámetro: '+filas[i].diametro));assert.ok(ns.some(n=>n.textContent.startsWith('Ubicación: ')));assert.ok(ns.some(n=>n.textContent.startsWith('Estado: ')));assert.ok(ns.some(n=>n.textContent==='Cantidad · '+filas[i].unidad));assert.equal(ns.find(n=>n.type==='number').value,filas[i].cantidad??'');assert.ok(ns.some(n=>n.tagName==='SUMMARY'&&n.textContent==='Ver detalles técnicos'));assert.ok(ns.filter(n=>n.tagName==='DETAILS').every(n=>!n.open));});
+ assert.ok(!descendientesPresentacion(a.elements.get('matResultado')).some(n=>n.tagName==='TABLE'));
+});
+test('presentación: renderizar tarjetas y sugerencias no cambia datos, cálculos ni decisiones',()=>{
+ const a=app();redAndroidEstructurada(a);a.run('detectarAccesoriosGas();generarPlanGas()');const antes=a.run('JSON.stringify({tramos,artefactos,instalacionGas,revisionMaterialesGas,d:datosDeteccionGas()})');a.run('renderPlanGas();renderSugerenciasGas();renderPlanGas()');assert.equal(a.run('JSON.stringify({tramos,artefactos,instalacionGas,revisionMaterialesGas,d:datosDeteccionGas()})'),antes);
+});
+test('presentación: cantidad cero y pendiente son distintas y el control rechaza negativos',()=>{
+ const a=app();proyectoPlan(a);const qty=()=>descendientesPresentacion(tarjetasMateriales(a)[0]).find(n=>n.type==='number');let q=qty();q.value='0';q.onchange();assert.equal(a.run('revisionMaterialesGas.plan.filas[0].cantidad'),0);q=qty();q.value='';q.onchange();assert.equal(a.run('revisionMaterialesGas.plan.filas[0].cantidad'),null);q=qty();q.value='-1';q.onchange();assert.equal(a.run('revisionMaterialesGas.plan.filas[0].cantidad'),null);assert.match(a.text('matMensaje'),/no negativa/);
+});
+test('presentación: casilla de tarjeta guarda revisión y modificación vuelve a requerir revisión',()=>{
+ const a=app();proyectoPlan(a);let ns=descendientesPresentacion(tarjetasMateriales(a)[0]);const check=ns.find(n=>n.type==='checkbox');check.checked=true;check.onchange();assert.equal(a.run('revisionMaterialesGas.plan.filas[0].revisado'),true);const qty=ns.find(n=>n.type==='number');qty.value='8';qty.onchange();assert.equal(a.run('revisionMaterialesGas.plan.filas[0].revisado'),false);assert.equal(a.run('revisionMaterialesGas.plan.filas[0].cantidad'),8);assert.ok(descendientesPresentacion(tarjetasMateriales(a)[0]).some(n=>String(n.textContent).includes('calculada originalmente')));
+});
+test('presentación: sugerencias conservan tres acciones y explicación técnica sin estado repetido',()=>{
+ const a=app();redAndroidEstructurada(a);a.run('detectarAccesoriosGas()');const card=a.elements.get('deteccionFilas').children.find(n=>n.className==='detalle gas-sugerencia');const ns=descendientesPresentacion(card);assert.deepEqual(ns.filter(n=>n.tagName==='BUTTON').map(n=>n.textContent),['Guardar correcciones','Confirmar sugerencia','Rechazar']);assert.ok(ns.some(n=>n.tagName==='SUMMARY'&&n.textContent==='Ver detalles técnicos'));assert.ok(!ns.some(n=>n.textContent.startsWith('Estado de revisión:')));
+});
+test('presentación: tees A y B confirmadas persisten sin duplicación y PDF mantiene tablas limpias',()=>{
+ const a=app();redAndroidEstructurada(a);a.run('detectarAccesoriosGas()');for(const t of registrosDeteccion(a,'tee'))confirmarDeteccion(a,t.propuesta.id);a.run('generarPlanGas();renderPlanGas();renderSugerenciasGas();guardarDatos()');const b=app(a.saved());b.run("abrir('gas');generarPlanGas();renderPlanGas();prepararInformeActual()");assert.equal(b.run('accesoriosDeteccionConfirmadosGas().filter(p=>p.tipo==="tee").length'),2);const doc=b.elements.get('informeImpresion').innerHTML;assert.match(doc,/<table/);assert.match(doc,/DEFINITIVO/);assert.doesNotMatch(doc,/<(?:input|button|details|summary)\b/);assert.equal(b.run('CATALOGOS_GAS_VERIFICADOS.length'),0);
 });
