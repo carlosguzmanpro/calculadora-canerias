@@ -7,7 +7,7 @@ test('persistencia, consumos, especialidades, impresión y foto local',async()=>
  const carpeta=fs.mkdtempSync(require('node:path').join(require('node:os').tmpdir(),'canerias-html-solo-'));fs.copyFileSync('index.html',require('node:path').join(carpeta,'index.html'));
  const browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||'/usr/bin/chromium',headless:true,args:['--no-sandbox']});
  try{
- const page=await browser.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ const page=await browser.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true});const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto(require('node:url').pathToFileURL(require('node:path').join(carpeta,'index.html')).href);await page.evaluate(()=>localStorage.clear());await page.reload();
  await page.getByRole('button',{name:'🔥 Gas',exact:true}).click();
  await page.locator('#duda').fill('Revisar tramo A-B');await page.getByRole('button',{name:'Guardar aclaración',exact:true}).click();
@@ -18,6 +18,11 @@ test('persistencia, consumos, especialidades, impresión y foto local',async()=>
  assert.match(await page.locator('#resultadoMateriales').innerText(),/3 tiras.*18 m a comprar.*2 cuplas/s);
  await page.locator('#galeria').setInputFiles({name:'foto.png',mimeType:'image/png',buffer:Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jXioAAAAASUVORK5CYII=','base64')});
  await page.waitForFunction(()=>JSON.parse(localStorage.getItem('canerias-proyectos-v1')).gas.foto);
+ await page.getByRole('button',{name:'Revisar croquis para entrega',exact:true}).click();assert.equal(await page.locator('#visor').isVisible(),true);await page.getByRole('button',{name:'Cerrar imagen',exact:true}).click();
+ const confirmar=page.locator('label[for="entregaCroquisConfirmado"]');await confirmar.tap();assert.equal(await page.locator('#entregaCroquisConfirmado').isChecked(),true);assert.match(await page.locator('#entregaEstado').innerText(),/CONFIRMADO:/);
+ await confirmar.tap();assert.equal(await page.locator('#entregaCroquisConfirmado').isChecked(),false);await confirmar.tap();
+ await page.reload();await page.getByRole('button',{name:'🔥 Gas',exact:true}).click();assert.equal(await page.locator('#entregaCroquisConfirmado').isChecked(),true);await confirmar.tap();assert.equal(await page.locator('#entregaCroquisConfirmado').isChecked(),false);
+
  await page.getByRole('button',{name:'🧮 Consulta de consumos de gas',exact:true}).click();
  await page.locator('#gp').fill('9300');await page.getByRole('button',{name:'Agregar artefacto',exact:true}).click();
  await page.getByRole('button',{name:'CALCULAR CONSUMO TOTAL',exact:true}).click();assert.match(await page.locator('#resultadoGas').innerText(),/1 m³\/h/);

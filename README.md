@@ -1,5 +1,12 @@
 # CAÑERÍAS
 
+## Confirmación del croquis en Android (corrección actual)
+
+Rama `prueba/confirmacion-croquis-android`, base `773b9a6`. La casilla de confirmación visual se habilita con una foto disponible aunque la red técnica esté incompleta, muestra su estado y permite marcar/desmarcar. Conserva la confirmación para la misma foto/datos y pide renovarla tras cambios. El botón de revisión abre la ampliación o dirige a la carga de foto con respuesta visible.
+
+**287 pruebas aprobadas (274 anteriores + 13 nuevas).** El PDF, materiales, respaldos, recálculo, motor y tablas se conservan. Prueba táctil real en Android pendiente. Instrucciones en [CONFIRMACION-CROQUIS-ANDROID.md](CONFIRMACION-CROQUIS-ANDROID.md).
+
+
 ## PDF y actualización automática (versión experimental actual)
 
 Rama `prueba/pdf-actualizacion-gas`, base `5c7af4e`. El PDF incluye la foto original como referencia, mantiene las seis columnas y materiales por estado, y usa nombres legibles. Al guardar cambios se recalculan consumos, materiales y diagnósticos; las revisiones previas quedan como respaldos desactualizados. Los ajustes manuales se conservan si la asociación es segura y, en otro caso, quedan en el respaldo para revisión. Se confirman borrados y puede descargarse un JSON completo.

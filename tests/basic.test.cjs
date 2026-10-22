@@ -746,7 +746,7 @@ test('entrega: ajustes manuales agrupados no mutan la revisión, el CSV o el pro
 });
 test('entrega: sin foto, red válida o confirmación explícita no incluye un croquis supuesto',()=>{
  const a=app();redEjemplo(a);assert.equal(a.run('modeloInformeActual().croquis'),undefined);a.run("proyectos.gas.foto='data:image/png;base64,CROQUIS';mostrarFotoLocal();actualizarVistaEntregaGas()");assert.equal(a.run('croquisEntregaDisponible()'),true);assert.equal(a.run('modeloInformeActual().croquis.confirmado'),false);assert.equal(a.elements.get('entregaCroquisConfirmado').checked,false);
- a.run("tramos[0].red.hasta='desconectado';actualizarVistaEntregaGas()");assert.equal(a.elements.get('entregaCroquisConfirmado').disabled,true);
+ a.run("tramos[0].red.hasta='desconectado';actualizarVistaEntregaGas()");assert.equal(a.elements.get('entregaCroquisConfirmado').disabled,false);
 });
 test('entrega: croquis confirmado se imprime sin inventar geometría y se conserva al recargar',()=>{
  const a=app();redEjemplo(a);a.run("proyectos.gas.foto='data:image/png;base64,CROQUIS';mostrarFotoLocal()");a.elements.get('entregaCroquisConfirmado').checked=true;a.run('confirmarCroquisEntrega();prepararInformeActual()');const doc=a.elements.get('informeImpresion').innerHTML;assert.match(doc,/<img src="data:image\/png;base64,CROQUIS"/);assert.match(doc,/Sin escala verificada/);assert.doesNotMatch(doc,/<svg|<canvas/);
@@ -833,4 +833,47 @@ test('datos manuales: declarar sin accesorios requiere confirmar la eliminación
 test('respaldo: descarga JSON conserva originales, ajustes y demostraciones sin escribir ni enviar datos',()=>{
  const a=app();proyectoPlan(a);a.run('guardarDatos();tramos[0].metros=13;guardarDatos()');const antes=a.saved();let json='',clicks=0;const crear=a.ctx.document.createElement;
  a.ctx.Blob=class{constructor(p){json=p.join('')}};a.ctx.URL.createObjectURL=()=> 'blob:backup';a.ctx.setTimeout=fn=>fn();a.ctx.document.createElement=()=>{const e=crear();e.click=()=>clicks++;return e;};a.run('descargarRespaldoCompleto()');const d=JSON.parse(json);assert.equal(clicks,1);assert.equal(d.formato,'canerias-respaldo-v1');assert.equal(d.proyectos.gas.tramos[0].metros,13);assert.ok(d.proyectos.gas.planCompra.respaldos.length>0);assert.equal(a.saved(),antes);
+});
+
+test('casilla Android: con foto y red incompleta permite marcar, desmarcar y ver el estado',()=>{
+ const a=app(null,{embebido:true});a.run("abrir('gas');proyectos.gas.foto='data:image/png;base64,FOTO';mostrarFotoLocal()");assert.equal(a.elements.get('entregaCroquisConfirmado').disabled,false);
+ a.elements.get('entregaCroquisConfirmado').checked=true;a.run('confirmarCroquisEntrega()');assert.equal(a.elements.get('entregaCroquisConfirmado').checked,true);assert.match(a.text('entregaEstado'),/^CONFIRMADO:/);assert.equal(a.run('CATALOGOS_GAS_VERIFICADOS.length'),0);
+ a.elements.get('entregaCroquisConfirmado').checked=false;a.run('confirmarCroquisEntrega()');assert.equal(a.elements.get('entregaCroquisConfirmado').checked,false);assert.match(a.text('entregaEstado'),/^SIN CONFIRMAR:/);const b=app(a.saved());b.run("abrir('gas')");assert.equal(b.elements.get('entregaCroquisConfirmado').checked,false);
+});
+test('casilla Android: confirmación se guarda y se restaura sin exigir red técnica completa',()=>{
+ const a=app();a.run("abrir('gas');proyectos.gas.foto='data:image/png;base64,FOTO';mostrarFotoLocal()");a.elements.get('entregaCroquisConfirmado').checked=true;a.run('confirmarCroquisEntrega()');const b=app(a.saved());b.run("abrir('gas');guardarDatos();actualizarVistaEntregaGas()");assert.equal(b.elements.get('entregaCroquisConfirmado').checked,true);assert.match(b.text('entregaEstado'),/^CONFIRMADO:/);
+});
+test('casilla Android: asignar IDs al guardar no revoca la confirmación recién dada',()=>{
+ const a=app();a.run("abrir('gas');tramos=[{desde:'M',hasta:'A',metros:6,diametro:null,consumo:null,detalle:{estado:'ninguno'}}];proyectos.gas.foto='data:image/png;base64,FOTO';mostrarFotoLocal()");a.elements.get('entregaCroquisConfirmado').checked=true;a.run('confirmarCroquisEntrega()');assert.equal(a.elements.get('entregaCroquisConfirmado').checked,true);assert.ok(a.run('tramos[0].id'));const b=app(a.saved());b.run("abrir('gas')");assert.equal(b.elements.get('entregaCroquisConfirmado').checked,true);
+});
+test('casilla Android: nuevos datos solicitan reconfirmar sin borrar foto ni la firma anterior',()=>{
+ const a=app();proyectoPlan(a);a.run("proyectos.gas.foto='data:image/png;base64,FOTO';mostrarFotoLocal()");a.elements.get('entregaCroquisConfirmado').checked=true;a.run('confirmarCroquisEntrega()');const firma=a.run('proyectos.gas.entregaGas.firmaCroquis');a.run('tramos[0].metros=13;guardarDatos()');assert.equal(a.elements.get('entregaCroquisConfirmado').checked,false);assert.equal(a.elements.get('entregaCroquisConfirmado').disabled,false);assert.match(a.text('entregaEstado'),/^NUEVA CONFIRMACIÓN NECESARIA:/);assert.equal(a.run('proyectos.gas.entregaGas.firmaCroquis'),firma);assert.equal(a.run('modeloInformeActual().croquis.confirmado'),false);
+});
+test('casilla Android: lectura diferida de la misma foto conserva la confirmación al guardar sus bytes',()=>{
+ const a=app();a.run("abrir('gas')");let lector;a.ctx.URL.createObjectURL=()=> 'blob:misma-foto';a.ctx.FileReader=class{constructor(){lector=this}readAsDataURL(){}};a.ctx.evento={target:{files:[{type:'image/png',size:10}]}};
+ a.run('cargarFoto(evento)');a.elements.get('entregaCroquisConfirmado').checked=true;a.run('confirmarCroquisEntrega()');lector.result='data:image/png;base64,FOTO';lector.onload();assert.equal(a.elements.get('entregaCroquisConfirmado').checked,true);const b=app(a.saved());b.run("abrir('gas')");assert.equal(b.elements.get('entregaCroquisConfirmado').checked,true);
+});
+test('casilla Android: desmarcar durante la lectura de foto no se revierte al terminar FileReader',()=>{
+ const a=app();a.run("abrir('gas')");let lector;a.ctx.URL.createObjectURL=()=> 'blob:foto';a.ctx.FileReader=class{constructor(){lector=this}readAsDataURL(){}};a.ctx.evento={target:{files:[{type:'image/png',size:10}]}};a.run('cargarFoto(evento)');a.elements.get('entregaCroquisConfirmado').checked=true;a.run('confirmarCroquisEntrega()');a.elements.get('entregaCroquisConfirmado').checked=false;a.run('confirmarCroquisEntrega()');lector.result='data:image/png;base64,FOTO';lector.onload();assert.equal(a.elements.get('entregaCroquisConfirmado').checked,false);
+});
+test('casilla Android: reemplazar foto requiere confirmación nueva aunque la red no cambie',()=>{
+ const a=app();a.run("abrir('gas');proyectos.gas.foto='data:image/png;base64,ANTERIOR';mostrarFotoLocal()");a.elements.get('entregaCroquisConfirmado').checked=true;a.run('confirmarCroquisEntrega()');let lector;a.ctx.URL.createObjectURL=()=> 'blob:nueva';a.ctx.FileReader=class{constructor(){lector=this}readAsDataURL(){}};a.ctx.evento={target:{files:[{type:'image/png',size:10}]}};a.run('cargarFoto(evento)');assert.equal(a.elements.get('entregaCroquisConfirmado').checked,false);lector.result='data:image/png;base64,NUEVA';lector.onload();assert.equal(a.elements.get('entregaCroquisConfirmado').checked,false);assert.match(a.text('entregaEstado'),/NUEVA CONFIRMACIÓN/);
+});
+test('casilla Android: revisar abre foto ampliada y responde visiblemente sin confirmar automáticamente',()=>{
+ const a=app();a.run("abrir('gas');proyectos.gas.foto='data:image/png;base64,FOTO';mostrarFotoLocal()");let abierto=0,scroll=0;a.elements.get('visor').showModal=()=>abierto++;a.elements.get('entregaCroquisConfirmado').scrollIntoView=()=>scroll++;a.run("mostrarVista('consumos');revisarCroquisParaEntrega()");assert.equal(abierto,1);assert.equal(scroll,1);assert.equal(a.elements.get('croquis').classList.hidden,false);assert.equal(a.elements.get('imagenGrande').src,'data:image/png;base64,FOTO');assert.match(a.text('entregaAccion'),/Foto abierta/);assert.match(a.text('visorEntregaAyuda'),/Revisá la foto/);assert.equal(a.elements.get('entregaCroquisConfirmado').checked,false);
+});
+test('casilla Android: sin foto explica bloqueo y dirige al área de carga, sin lanzar error',()=>{
+ const a=app();a.run("abrir('gas')");let scroll=0,focus=0;a.elements.get('cargaFotoEntrega').scrollIntoView=()=>scroll++;a.elements.get('cargaFotoEntrega').focus=()=>focus++;a.run('revisarCroquisParaEntrega()');assert.equal(scroll,1);assert.equal(focus,1);assert.equal(a.elements.get('entregaCroquisConfirmado').disabled,true);assert.match(a.text('entregaEstado'),/^SIN FOTO:/);assert.match(a.text('entregaAccion'),/Sacar foto o Galería/);
+});
+test('casilla Android: sin diálogo disponible ofrece revisión en la imagen existente',()=>{
+ const a=app();a.run("abrir('gas');proyectos.gas.foto='data:image/png;base64,FOTO';mostrarFotoLocal()");let scroll=0;a.elements.get('imagen').scrollIntoView=()=>scroll++;a.run('revisarCroquisParaEntrega()');assert.equal(scroll,1);assert.match(a.text('entregaAccion'),/Fotografía localizada/);
+});
+test('casilla Android: objetivo táctil nativo, etiqueta asociada y avisos accesibles',()=>{
+ assert.match(html,/label class="confirmacion-entrega" for="entregaCroquisConfirmado"/);assert.match(html,/id="entregaCroquisConfirmado" type="checkbox" aria-describedby="entregaEstado" onchange="confirmarCroquisEntrega\(\)"/);assert.match(html,/min-height:48px/);assert.match(html,/appearance:auto;width:28px;height:28px/);assert.match(html,/id="entregaEstado" role="status" aria-live="polite"/);
+});
+test('casilla Android: volver a elegir los mismos bytes como reemplazo exige confirmar de nuevo',()=>{
+ const a=app();a.run("abrir('gas');proyectos.gas.foto='data:image/png;base64,MISMA';mostrarFotoLocal()");a.elements.get('entregaCroquisConfirmado').checked=true;a.run('confirmarCroquisEntrega()');let lector;a.ctx.URL.createObjectURL=()=> 'blob:reemplazo';a.ctx.FileReader=class{constructor(){lector=this}readAsDataURL(){}};a.ctx.evento={target:{files:[{type:'image/png',size:10}]}};a.run('cargarFoto(evento)');lector.result='data:image/png;base64,MISMA';lector.onload();assert.equal(a.elements.get('entregaCroquisConfirmado').checked,false);assert.equal(a.run('modeloInformeActual().croquis.confirmado'),false);const b=app(a.saved());b.run("abrir('gas')");assert.equal(b.elements.get('entregaCroquisConfirmado').checked,false);b.elements.get('entregaCroquisConfirmado').checked=true;b.run('confirmarCroquisEntrega()');assert.equal(b.elements.get('entregaCroquisConfirmado').checked,true);
+});
+test('casilla Android: cancelar reemplazo de foto conserva la confirmación existente',()=>{
+ const a=app();a.run("abrir('gas');proyectos.gas.foto='data:image/png;base64,FOTO';mostrarFotoLocal()");a.elements.get('entregaCroquisConfirmado').checked=true;a.run('confirmarCroquisEntrega()');a.ctx.window.confirm=()=>false;a.ctx.evento={target:{files:[{type:'image/png',size:10}]}};a.run('cargarFoto(evento);actualizarVistaEntregaGas()');assert.equal(a.elements.get('entregaCroquisConfirmado').checked,true);assert.equal(a.run('fotoURL'),'data:image/png;base64,FOTO');
 });

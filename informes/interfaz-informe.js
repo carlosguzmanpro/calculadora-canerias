@@ -5,7 +5,7 @@ function modeloInformeActual(){
   const resultado=motorClaseAceroGas(tramos,artefactos,instalacionGas,catalogoParaGas(instalacionGas));
   const red=analizarRedGas();
   d.planilla=InformeProyecto.planilla(tramos,resultado,{caudalAplicable:instalacionGas.perfil.gas==='GN'&&Number(instalacionGas.perfil.poderCalorifico)===9300&&red.errores.length===0});
-  if(fotoURL&&/^(data:image\/(?:png|jpeg|webp);base64,|blob:)/.test(fotoURL))d.croquis={url:fotoURL,confirmado:croquisEntregaDisponible()&&proyectoGasActual().entregaGas?.firmaCroquis===firmaCroquisEntrega()};
+  if(fotoURL&&/^(data:image\/(?:png|jpeg|webp);base64,|blob:)/.test(fotoURL))d.croquis={url:fotoURL,confirmado:croquisEntregaDisponible()&&!proyectoGasActual().entregaGas?.requiereConfirmacion&&proyectoGasActual().entregaGas?.firmaCroquis===firmaCroquisEntrega()};
   else d.resumen.push('Fotografía original: Pendiente.');
  }
  if(gas&&tramos.length){
@@ -39,19 +39,46 @@ function imprimirInformeActual(){
 
 function firmaCroquisEntrega(){return JSON.stringify({foto:proyectoGasActual().foto||fotoURL,tramos,artefactos,instalacion:instalacionGas});}
 function croquisEntregaDisponible(){
- if(modulo!=='gas'||!fotoURL||!/^(data:image\/(?:png|jpeg|webp);base64,|blob:)/.test(fotoURL)||!tramos.length||!artefactos.length)return false;
- const r=analizarRedGas();return r.errores.length===0&&r.total!==null;
+ // Confirmación visual voluntaria: no depende de completar ni dimensionar la red.
+ return modulo==='gas'&&typeof fotoURL==='string'&&/^(data:image\/(?:png|jpeg|webp);base64,|blob:)/.test(fotoURL);
 }
 function actualizarVistaEntregaGas(){
- const valido=croquisEntregaDisponible();
- $('entregaCroquisConfirmado').disabled=!valido;
- $('entregaCroquisConfirmado').checked=valido&&proyectoGasActual().entregaGas?.firmaCroquis===firmaCroquisEntrega();
- $('entregaEstado').textContent=valido?'Revisá la imagen ampliada antes de confirmar su legibilidad y correspondencia. No se dibujarán posiciones automáticas.':'Croquis pendiente: se necesita una foto legible y una red conectada con artefactos, consumos y accesorios revisados. La foto original disponible se imprime como referencia, con correspondencia pendiente.';
+ const disponible=croquisEntregaDisponible(),casilla=$('entregaCroquisConfirmado');
+ const firma=proyectoGasActual().entregaGas?.firmaCroquis;
+ casilla.disabled=!disponible;
+ casilla.checked=disponible&&!proyectoGasActual().entregaGas?.requiereConfirmacion&&firma===firmaCroquisEntrega();
+ $('entregaEstado').textContent=!disponible?'SIN FOTO: cargá una fotografía para poder confirmar su revisión.':casilla.checked?
+  'CONFIRMADO: revisaste visualmente este croquis para los datos actuales. Podés desmarcar la casilla. Esto no valida cálculos ni habilita diámetros.':
+  firma?'NUEVA CONFIRMACIÓN NECESARIA: cambió la fotografía o algún dato de la instalación. La foto se conserva como referencia.':
+  'SIN CONFIRMAR: tocá la casilla después de revisar la foto. No hace falta completar la red para registrar esta confirmación visual.';
 }
 function confirmarCroquisEntrega(){
+ if(modulo!=='gas')return;
+ const marcado=$('entregaCroquisConfirmado').checked;
+ // Estabilizar IDs antes de capturar la firma evita que el guardado la invalide.
+ asegurarIdsGas();
  const p=proyectoGasActual();if(!p.entregaGas||typeof p.entregaGas!=='object')p.entregaGas={};
- p.entregaGas.firmaCroquis=$('entregaCroquisConfirmado').checked&&croquisEntregaDisponible()?firmaCroquisEntrega():null;
+ p.entregaGas.requiereConfirmacion=false;
+ p.entregaGas.firmaCroquis=marcado&&croquisEntregaDisponible()?firmaCroquisEntrega():null;
  guardarDatos();actualizarVistaEntregaGas();
+}
+function revisarCroquisParaEntrega(){
+ if(modulo!=='gas')return;
+ mostrarVista('croquis');actualizarVistaEntregaGas();
+ if(!croquisEntregaDisponible()){
+  $('entregaAccion').textContent='No hay foto disponible. Usá Sacar foto o Galería en la carga de croquis.';
+  const carga=$('cargaFotoEntrega');if(carga.scrollIntoView)carga.scrollIntoView({block:'start'});if(carga.focus)carga.focus({preventScroll:true});return;
+ }
+ const visor=$('visor');$('imagenGrande').src=fotoURL;
+ $('visorEntregaAyuda').textContent='Revisá la foto. Al cerrar la ampliación podés marcar o desmarcar la confirmación visual; no valida cálculos.';
+ const casilla=$('entregaCroquisConfirmado');if(casilla.scrollIntoView)casilla.scrollIntoView({block:'center'});
+ if(typeof visor.showModal==='function'){
+  if(!visor.open)visor.showModal();
+  $('entregaAccion').textContent='Foto abierta para revisión. Cerrá la ampliación y marcá o desmarcá la confirmación debajo.';
+ }else{
+  $('entregaAccion').textContent='Fotografía localizada. Revisala y volvé a la casilla de confirmación debajo.';
+  const imagen=$('imagen');if(imagen.scrollIntoView)imagen.scrollIntoView({block:'center'});
+ }
 }
 
 function ubicacionLegibleGas(texto,contexto=null){
