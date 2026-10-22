@@ -21,7 +21,7 @@ test('persistencia, consumos, especialidades, impresión y foto local',async()=>
  await page.getByRole('button',{name:'🧮 Consulta de consumos de gas',exact:true}).click();
  await page.locator('#gp').fill('9300');await page.getByRole('button',{name:'Agregar artefacto',exact:true}).click();
  await page.getByRole('button',{name:'CALCULAR CONSUMO TOTAL',exact:true}).click();assert.match(await page.locator('#resultadoGas').innerText(),/1 m³\/h/);
- await page.locator('#gt').selectOption('22300');assert.match(await page.locator('#resultadoGas').innerText(),/Datos actualizados/);
+ await page.locator('#gt').selectOption('22300');assert.match(await page.locator('#resultadoGas').innerText(),/0,42 m³\/h/);
  await page.reload();await page.getByRole('button',{name:'🔥 Gas',exact:true}).click();
  assert.equal(await page.locator('#duda').inputValue(),'Revisar tramo A-B');assert.match(await page.locator('#listaTramos').innerText(),/15 m/);assert.match(await page.locator('#imagen').getAttribute('src'),/^data:image\/png/);
  await page.getByRole('button',{name:'← Cambiar especialidad',exact:true}).click();await page.getByRole('button',{name:'💧 Agua',exact:true}).click();await page.getByRole('button',{name:'Cargar croquis de referencia',exact:true}).click();assert.equal(await page.locator('#formularioGas').isVisible(),false);assert.equal(await page.locator('#duda').inputValue(),'');

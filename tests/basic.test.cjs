@@ -11,7 +11,7 @@ function app(saved=null,{blocked=false,quota=Infinity,tablasLegadas=false,tablas
  function element(){return {value:'',textContent:'',checked:false,style:{},children:[],className:'',classList:{hidden:false,add(c){if(c==='oculto')this.hidden=true;},remove(c){if(c==='oculto')this.hidden=false;},toggle(c,b){if(c==='oculto')this.hidden=b;}},append(...x){this.children.push(...x)},replaceChildren(){this.children=[];this.textContent=''},removeAttribute(k){delete this[k]},addEventListener(k,fn){this[k]=fn}};}
  for(const m of html.matchAll(/id="([^"]+)"/g))elements.set(m[1],element());
  elements.get('gt').value='9300';elements.get('ga').value='Cocina';
- const ctx=vm.createContext({document:{getElementById:id=>elements.get(id),createElement:element,createTextNode:text=>({textContent:text})},window:{scrollTo(){},addEventListener(k,fn){this[k]=fn}},localStorage:{getItem:k=>{if(blocked)throw Error('blocked');return store.get(k)||null},setItem(k,v){if(blocked||soloLectura||v.length>quota)throw Error('quota');store.set(k,v)}},URL:{revokeObjectURL(){}},alert(){}});
+ const ctx=vm.createContext({document:{getElementById:id=>elements.get(id),createElement:element,createTextNode:text=>({textContent:text})},window:{confirm(){return true},scrollTo(){},addEventListener(k,fn){this[k]=fn}},localStorage:{getItem:k=>{if(blocked)throw Error('blocked');return store.get(k)||null},setItem(k,v){if(blocked||soloLectura||v.length>quota)throw Error('quota');store.set(k,v)}},URL:{revokeObjectURL(){}},alert(){}});
  if(storageGetter)vm.runInContext("Object.defineProperty(globalThis,'localStorage',{get(){const e=new Error('Acceso restringido');e.name='SecurityError';throw e;}})",ctx);
  for(const m of html.matchAll(/<script (?:src|data-local)="([^"]+)">([\s\S]*?)<\/script>/g)){const ruta=tablasFotoBase&&/^datos\/tabla-(3|18)\.js$/.test(m[1])?m[1].replace('datos/tabla-','tests/fixtures/tabla-').replace('.js','-1e99313.cjs'):tablasLegadas&&/^datos\/tabla-(3|18)\.js$/.test(m[1])?m[1].replace('datos/tabla-','tests/fixtures/tabla-').replace('.js','-22028c8.cjs'):m[1];vm.runInContext(embebido?m[2]:fs.readFileSync(ruta,'utf8'),ctx);}
  vm.runInContext(script,ctx);
@@ -26,9 +26,9 @@ test('tramos, artefactos y aclaraciones sobreviven a una recarga',()=>{
 });
 test('cambios y eliminación invalidan el resultado de consumo',()=>{
  const a=app();a.run("abrir('gas')");a.elements.get('gp').value='9300';a.run('agregarArtefacto();calcularConsumos()');assert.match(a.text('resultadoGas'),/1 m³\/h/);
- a.elements.get('gp').value='1000';a.run('agregarArtefacto()');assert.match(a.text('resultadoGas'),/Datos actualizados/);
- a.run('calcularConsumos()');a.elements.get('listaGas').children[0].children[1].onclick();assert.match(a.text('resultadoGas'),/Datos actualizados/);
- a.elements.get('gt').change();assert.match(a.text('resultadoGas'),/Datos actualizados/);
+ a.elements.get('gp').value='1000';a.run('agregarArtefacto()');assert.doesNotMatch(a.text('resultadoGas'),/Tocá CALCULAR/);
+ a.run('calcularConsumos()');a.elements.get('listaGas').children[0].children[1].onclick();assert.doesNotMatch(a.text('resultadoGas'),/Tocá CALCULAR/);
+ a.elements.get('gt').change();assert.doesNotMatch(a.text('resultadoGas'),/Tocá CALCULAR/);
 });
 test('agua y cloacas no muestran GAS y conservan aclaraciones separadas',()=>{
  const a=app();for(const m of ['gas','agua','cloacas']){a.run(`abrir('${m}')`);a.elements.get('duda').value=m;a.run('guardarRevision()');a.run("mostrarVista('croquis')");assert.equal(a.elements.get('formularioGas').classList.hidden,m!=='gas');}
@@ -517,7 +517,7 @@ test('clase: límite de iteración y oscilación no dan solución parcial',()=>{
 });
 test('clase: cambiar datos invalida informe de mi red, ejemplo no modifica proyecto',()=>{
  const a=app();fixtureClase(a);a.run("guardarDatos()");const anterior=a.saved();a.run('probarMetodoClaseGas()');assert.equal(a.saved(),anterior);
- a.run("ejecutarClaseMiRedGas();guardarDatos()");assert.equal(a.elements.get('informeClaseMiRed').children.length,0);assert.match(a.text('informeClaseMiRed'),/actualizados/);
+ a.run("ejecutarClaseMiRedGas();guardarDatos()");assert.ok(a.elements.get('informeClaseMiRed').children.length>0);assert.equal(a.run('proyectos.gas.derivadosGas.resultado.estado'),'bloqueado');
 });
 test('clase: tee reductora absorbe el cambio sin duplicar reducciones',()=>{
  const a=app();fixtureClase(a);a.run("packMotor.candidatos[0].filas=[{longitud:100,caudal:1}]");
@@ -593,7 +593,7 @@ test('plan materiales: revisar, ajustar cantidad y recargar conserva revisión s
  a.run('revisionMaterialesGas.plan.filas.forEach(f=>f.revisado=true);guardarRevisionMaterialesGas()');const b=app(a.saved());b.run("abrir('gas');generarPlanGas()");assert.equal(b.run('revisionMaterialesGas.plan.filas[0].cantidad'),4);assert.equal(b.run('revisionMaterialesGas.plan.filas[0].cantidadCalculada'),2);assert.ok(b.run('revisionMaterialesGas.plan.filas.every(f=>f.revisado)'));
 });
 test('plan materiales: cambio de datos invalida revisión y evita salida desactualizada',()=>{
- const a=app();proyectoPlan(a);a.run('revisionMaterialesGas.plan.filas.forEach(f=>f.revisado=true);guardarRevisionMaterialesGas();tramos[0].metros=13;guardarDatos()');assert.equal(a.run('revisionMaterialesGas'),null);assert.equal(a.run('prepararSalidaMaterialesGas()'),null);assert.match(a.text('matResultado'),/actualizados/);
+ const a=app();proyectoPlan(a);a.run('revisionMaterialesGas.plan.filas.forEach(f=>f.revisado=true);guardarRevisionMaterialesGas();tramos[0].metros=13;guardarDatos()');assert.equal(a.run('revisionMaterialesGas.plan.filas[0].cantidad'),3);assert.equal(a.run('prepararSalidaMaterialesGas()'),null);assert.ok(a.run('datosPlanGas().respaldos.length')>0);assert.match(a.text('matMensaje'),/Revisá/);
 });
 test('plan materiales: impresión y exportación exigen revisión explícita',()=>{
  const a=app();proyectoPlan(a);let prints=0;a.ctx.window.print=()=>prints++;assert.equal(a.run('prepararSalidaMaterialesGas()'),null);a.run('imprimirMaterialesGas()');assert.equal(prints,0);
@@ -745,7 +745,7 @@ test('entrega: ajustes manuales agrupados no mutan la revisión, el CSV o el pro
  const a=app();proyectoPlan(a);a.run('revisionMaterialesGas.plan.filas[0].cantidad=4;revisionMaterialesGas.plan.filas[0].editado=true;revisionMaterialesGas.plan.filas[0].revisado=true;guardarRevisionMaterialesGas()');const antes=a.saved();const d=a.run('modeloInformeActual()');assert.equal(d.materialesAgrupados.find(f=>f.material.startsWith('Caño')).cantidad,4);assert.equal(d.materialesAgrupados.find(f=>f.material.startsWith('Caño')).estado,'estimado');assert.equal(a.saved(),antes);assert.equal(a.run('revisionMaterialesGas.plan.filas[0].cantidad'),4);
 });
 test('entrega: sin foto, red válida o confirmación explícita no incluye un croquis supuesto',()=>{
- const a=app();redEjemplo(a);assert.equal(a.run('modeloInformeActual().croquis'),undefined);a.run("proyectos.gas.foto='data:image/png;base64,CROQUIS';mostrarFotoLocal();actualizarVistaEntregaGas()");assert.equal(a.run('croquisEntregaDisponible()'),true);assert.equal(a.run('modeloInformeActual().croquis'),undefined);assert.equal(a.elements.get('entregaCroquisConfirmado').checked,false);
+ const a=app();redEjemplo(a);assert.equal(a.run('modeloInformeActual().croquis'),undefined);a.run("proyectos.gas.foto='data:image/png;base64,CROQUIS';mostrarFotoLocal();actualizarVistaEntregaGas()");assert.equal(a.run('croquisEntregaDisponible()'),true);assert.equal(a.run('modeloInformeActual().croquis.confirmado'),false);assert.equal(a.elements.get('entregaCroquisConfirmado').checked,false);
  a.run("tramos[0].red.hasta='desconectado';actualizarVistaEntregaGas()");assert.equal(a.elements.get('entregaCroquisConfirmado').disabled,true);
 });
 test('entrega: croquis confirmado se imprime sin inventar geometría y se conserva al recargar',()=>{
@@ -754,7 +754,7 @@ test('entrega: croquis confirmado se imprime sin inventar geometría y se conser
 });
 test('entrega: cambio de foto, tramo o artefacto invalida la confirmación gráfica',()=>{
  for(const cambio of ["tramos[0].metros=7","artefactos[0].consumo=10000","proyectos.gas.foto='data:image/png;base64,OTRA';mostrarFotoLocal()"]){
-  const a=app();redEjemplo(a);a.run("proyectos.gas.foto='data:image/png;base64,CROQUIS';mostrarFotoLocal()");a.elements.get('entregaCroquisConfirmado').checked=true;a.run('confirmarCroquisEntrega();'+cambio);assert.equal(a.run('modeloInformeActual().croquis'),undefined);
+  const a=app();redEjemplo(a);a.run("proyectos.gas.foto='data:image/png;base64,CROQUIS';mostrarFotoLocal()");a.elements.get('entregaCroquisConfirmado').checked=true;a.run('confirmarCroquisEntrega();'+cambio);assert.equal(a.run('modeloInformeActual().croquis.confirmado'),false);
  }
 });
 test('entrega: imagen confirmada del proyecto no pasa a demostración, AGUA ni CLOACAS',()=>{
@@ -768,7 +768,7 @@ test('entrega: confirmación usa la foto persistida y sobrevive al reemplazo del
  const a=app();redEjemplo(a);a.run("proyectos.gas.foto='data:image/png;base64,PERSISTIDA';fotoURL='blob:foto-sesion'");a.elements.get('entregaCroquisConfirmado').checked=true;a.run('confirmarCroquisEntrega()');assert.equal(a.run('modeloInformeActual().croquis.url'),'blob:foto-sesion');const b=app(a.saved());b.run("abrir('gas')");assert.equal(b.run('modeloInformeActual().croquis.url'),'data:image/png;base64,PERSISTIDA');
 });
 test('entrega: guardar cambios quita la confirmación visual sin borrar la foto ni la firma anterior',()=>{
- const a=app();redEjemplo(a);a.run("proyectos.gas.foto='data:image/png;base64,CROQUIS';mostrarFotoLocal()");a.elements.get('entregaCroquisConfirmado').checked=true;a.run('confirmarCroquisEntrega();tramos[0].metros=7;guardarDatos()');assert.equal(a.elements.get('entregaCroquisConfirmado').checked,false);assert.equal(a.run('proyectos.gas.foto'),'data:image/png;base64,CROQUIS');assert.ok(a.run('proyectos.gas.entregaGas.firmaCroquis'));assert.equal(a.run('modeloInformeActual().croquis'),undefined);
+ const a=app();redEjemplo(a);a.run("proyectos.gas.foto='data:image/png;base64,CROQUIS';mostrarFotoLocal()");a.elements.get('entregaCroquisConfirmado').checked=true;a.run('confirmarCroquisEntrega();tramos[0].metros=7;guardarDatos()');assert.equal(a.elements.get('entregaCroquisConfirmado').checked,false);assert.equal(a.run('proyectos.gas.foto'),'data:image/png;base64,CROQUIS');assert.ok(a.run('proyectos.gas.entregaGas.firmaCroquis'));assert.equal(a.run('modeloInformeActual().croquis.confirmado'),false);
 });
 test('entrega: espera a decodificar el croquis antes de abrir la impresión',async()=>{
  const a=app();redEjemplo(a);a.run("proyectos.gas.foto='data:image/png;base64,CROQUIS';mostrarFotoLocal()");a.elements.get('entregaCroquisConfirmado').checked=true;a.run('confirmarCroquisEntrega()');let resolver,n=0;
@@ -776,4 +776,61 @@ test('entrega: espera a decodificar el croquis antes de abrir la impresión',asy
 });
 test('entrega: una imagen que no puede prepararse no genera silenciosamente un PDF incompleto',async()=>{
  const a=app();proyectoPlan(a);let n=0;a.elements.get('informeImpresion').querySelector=()=>({decode:()=>Promise.reject(Error('Imagen inválida'))});a.ctx.window.print=()=>n++;await a.run('imprimirInformeActual()');assert.equal(n,0);assert.match(a.text('entregaEstado'),/No se pudo preparar la imagen/);
+});
+
+test('actualización: agregar, modificar y quitar artefactos recalcula consumos sin otro botón',()=>{
+ const a=app();a.run("abrir('gas')");a.elements.get('gp').value='9300';a.run('agregarArtefacto()');assert.match(a.text('resultadoGas'),/1 m³\/h/);a.elements.get('gp').value='18600';a.run('agregarArtefacto()');assert.match(a.text('resultadoGas'),/3 m³\/h/);a.elements.get('listaGas').children[0].children[1].onclick();assert.match(a.text('resultadoGas'),/2 m³\/h/);
+});
+test('actualización: cambio de longitud recalcula lista y conserva la anterior marcada como respaldo',()=>{
+ const a=app();proyectoPlan(a);a.run('guardarDatos();tramos[0].metros=13;guardarDatos()');assert.equal(a.run('revisionMaterialesGas.plan.filas[0].cantidad'),3);const b=a.run('datosPlanGas().respaldos');assert.ok(b.some(r=>r.filas.some(f=>f.tipo==='cano'&&f.cantidad===2)));assert.match(a.elements.get('respaldosGas').children.map(p=>p.textContent).join(' '),/DESACTUALIZADO/);
+});
+test('actualización: cantidad manual se mantiene, se desconfirma y se persiste con su respaldo',()=>{
+ const a=app();proyectoPlan(a);a.run('revisionMaterialesGas.plan.filas[0].cantidad=4;revisionMaterialesGas.plan.filas[0].editado=true;revisionMaterialesGas.plan.filas[0].revisado=true;guardarRevisionMaterialesGas();tramos[0].metros=13;guardarDatos()');assert.equal(a.run('revisionMaterialesGas.plan.filas[0].cantidad'),4);assert.equal(a.run('revisionMaterialesGas.plan.filas[0].cantidadCalculada'),3);assert.equal(a.run('revisionMaterialesGas.plan.filas[0].revisado'),false);assert.equal(a.run('modeloInformeActual().materialesAgrupados.find(f=>f.material.startsWith("Caño")).cantidad'),4);
+ const b=app(a.saved());b.run("abrir('gas');generarPlanGas()");assert.equal(b.run('revisionMaterialesGas.plan.filas[0].cantidad'),4);assert.ok(b.run('datosPlanGas().respaldos.some(r=>r.filas.some(f=>f.editado&&f.cantidad===4))'));
+});
+test('actualización: eliminar un tramo conserva ajustes huérfanos en el respaldo, sin mezclarlos en compra',()=>{
+ const a=app();proyectoPlan(a);a.run('revisionMaterialesGas.plan.filas[0].cantidad=8;revisionMaterialesGas.plan.filas[0].editado=true;guardarRevisionMaterialesGas();tramos=[];actualizarTramos()');assert.equal(a.run('modeloInformeActual().filas.length'),0);assert.ok(a.run('datosPlanGas().respaldos.some(r=>r.filas.some(f=>f.editado&&f.cantidad===8))'));assert.match(a.elements.get('respaldosGas').children.map(p=>p.textContent).join(' '),/M–A.*ajuste manual/);
+});
+test('actualización: un accesorio nuevo no hereda ajustes de otro por reutilizar material-N',()=>{
+ const a=app();proyectoPlan(a);a.run("tramos[0].detalle={estado:'completo',metrosFinal:6,accesorios:[{tipo:'codo90',metrosAntes:6,salida:'1\"'}]};guardarDatos();generarPlanGas()");a.run("revisionMaterialesGas.plan.filas.find(f=>f.tipo==='codo90').cantidad=9;revisionMaterialesGas.plan.filas.find(f=>f.tipo==='codo90').editado=true;guardarRevisionMaterialesGas();tramos[0].detalle.accesorios=[{tipo:'codo45',metrosAntes:6,salida:'1\"'}];guardarDatos()");assert.equal(a.run("revisionMaterialesGas.plan.filas.find(f=>f.tipo==='codo45').cantidad"),1);assert.ok(a.run("datosPlanGas().respaldos.some(r=>r.filas.some(f=>f.tipo==='codo90'&&f.cantidad===9))"));
+});
+test('actualización: cambios de accesorios invalidan la asociación manual aunque coincida índice y tipo',()=>{
+ const a=app();proyectoPlan(a);a.run("tramos[0].detalle={estado:'completo',metrosFinal:6,accesorios:[{tipo:'codo90',metrosAntes:6,salida:'1\"'}]};guardarDatos();generarPlanGas();revisionMaterialesGas.plan.filas.find(f=>f.tipo==='codo90').cantidad=9;revisionMaterialesGas.plan.filas.find(f=>f.tipo==='codo90').editado=true;guardarRevisionMaterialesGas();tramos[0].detalle.accesorios[0].metrosAntes=3;tramos[0].detalle.metrosFinal=9;guardarDatos()");
+ // Cambio geométrico conservador: la revisión actual exige revisar; originales siguen respaldados.
+ assert.ok(a.run('datosPlanGas().respaldos.length')>0);assert.equal(a.run("revisionMaterialesGas.plan.filas.find(f=>f.tipo==='codo90').revisado"),false);
+});
+test('actualización: entradas inválidas no muestran el último resultado como vigente',()=>{
+ const a=app();proyectoPlan(a);a.run('guardarDatos();datosPlanGas().opciones.largoComercial=0;guardarDatos()');assert.equal(a.run('revisionMaterialesGas'),null);assert.match(a.text('matResultado'),/no vigente/);assert.ok(a.run('datosPlanGas().respaldos.length')>0);assert.equal(a.run('prepararSalidaMaterialesGas()'),null);a.run('prepararInformeActual()');assert.match(a.elements.get('informeImpresion').innerHTML,/Materiales: Pendiente/);
+});
+test('actualización: conserva último resultado válido del motor si la nueva red queda bloqueada',()=>{
+ const a=app();redEjemplo(a);a.run("guardarDatos();proyectos.gas.derivadosGas.ultimoValido={firma:'ANTERIOR',resultado:{estado:'calculado',nota:'Respaldo de prueba; no resultado técnico'}};tramos[0].red.hasta='falta';guardarDatos()");assert.equal(a.run('proyectos.gas.derivadosGas.resultado.estado'),'bloqueado');assert.equal(a.run('proyectos.gas.derivadosGas.ultimoValido.firma'),'ANTERIOR');assert.match(a.elements.get('respaldosGas').children.map(x=>x.textContent).join(' '),/DESACTUALIZADO/);
+});
+test('actualización: respaldos y ajustes están aislados entre proyecto, demostración y otras especialidades',()=>{
+ const a=app();proyectoPlan(a);a.run("guardarDatos();tramos[0].metros=13;guardarDatos();seleccionarAmbitoGas('demostracion')");assert.equal(a.run('(datosPlanGas().respaldos||[]).length'),0);assert.doesNotMatch(a.elements.get('respaldosGas').children.map(x=>x.textContent).join(' '),/M–A/);a.run("abrir('agua')");assert.equal(a.run('modeloInformeActual().filas.length'),0);a.run("abrir('gas');seleccionarAmbitoGas('proyecto')");assert.ok(a.run('datosPlanGas().respaldos.length')>0);
+});
+test('PDF: foto original se incluye sin afirmar que la red fue confirmada',()=>{
+ const a=app();a.run("abrir('gas');proyectos.gas.foto='data:image/png;base64,ORIGINAL';mostrarFotoLocal();prepararInformeActual()");const doc=a.elements.get('informeImpresion').innerHTML;assert.match(doc,/Fotografía original del croquis/);assert.match(doc,/data:image\/png;base64,ORIGINAL/);assert.match(doc,/pendiente de confirmar/);assert.doesNotMatch(doc,/Legibilidad y correspondencia confirmadas/);
+});
+test('PDF: ubicaciones legibles sustituyen IDs sin modificar los identificadores almacenados',()=>{
+ const a=app();proyectoPlan(a);a.run('guardarDatos();prepararInformeActual()');const doc=a.elements.get('informeImpresion').innerHTML;assert.match(doc,/M–A/);assert.doesNotMatch(doc,/<td>t<\/td>/);assert.equal(a.run('tramos[0].id'),'t');assert.equal(a.run('datosPlanGas().revisiones.proyecto.filas[0].ubicacion'),'t');assert.equal(a.run("ubicacionLegibleGas('t · accesorio 1, t:0')"),'M–A · accesorio 1, M–A:0');
+});
+test('PDF: nombres con caracteres especiales e IDs similares no sustituyen fragmentos ajenos',()=>{
+ const a=app();proyectoPlan(a);a.run("tramos[0].id='t.1';tramos[0].desde='M<&';tramos[0].hasta='A'");assert.equal(a.run("ubicacionLegibleGas('t.1 · accesorio 1; xt.1; t.10')"),'M<&–A · accesorio 1; xt.1; t.10');a.run('prepararInformeActual()');assert.match(a.elements.get('informeImpresion').innerHTML,/M&lt;&amp;–A/);
+});
+test('PDF: estados provisionales, confirmados y pendientes siguen separados y sin controles',()=>{
+ const a=app();proyectoPlan(a);a.run('guardarDatos();prepararInformeActual()');const doc=a.elements.get('informeImpresion').innerHTML;assert.match(doc,/PROVISIONAL \(ESTIMADO\)/);assert.match(doc,/BLOQUEADOS/);assert.doesNotMatch(doc,/<(?:button|input|select|textarea|details)\b|RESPALDO.*ANTERIOR/);assert.match(doc,/<th>DEFINITIVO \(m\)<\/th>/);
+});
+test('actualización: HTML autónomo conserva cálculo local con almacenamiento restringido',()=>{
+ const a=app(null,{embebido:true,blocked:true});proyectoPlan(a);a.run('guardarDatos();tramos[0].metros=13;guardarDatos()');assert.equal(a.run('revisionMaterialesGas.plan.filas[0].cantidad'),3);assert.ok(a.run('datosPlanGas().respaldos.length')>0);assert.equal(a.saved(),undefined);a.run('prepararInformeActual()');assert.match(a.elements.get('informeImpresion').innerHTML,/>13<\/td>/);
+});
+test('datos manuales: cancelar el borrado conserva tramo, artefacto y fotografía',()=>{
+ const a=app();proyectoPlan(a);a.run("artefactos=[{nombre:'Cocina',consumo:9300}];proyectos.gas.foto='data:image/png;base64,FOTO';renderGas();renderTramos()");a.ctx.window.confirm=()=>false;
+ a.elements.get('listaTramos').children[0].children.at(-1).onclick();a.elements.get('listaGas').children[0].children[1].onclick();a.run('quitarFoto()');assert.equal(a.run('tramos.length'),1);assert.equal(a.run('artefactos.length'),1);assert.equal(a.run('proyectos.gas.foto'),'data:image/png;base64,FOTO');
+});
+test('datos manuales: declarar sin accesorios requiere confirmar la eliminación de los anteriores',()=>{
+ const a=app();proyectoPlan(a);a.run("tramos[0].detalle={estado:'completo',metrosFinal:6,accesorios:[{tipo:'codo90',metrosAntes:6,salida:'1\"'}]};abrirAccesorios(0)");a.elements.get('estadoAccesorios').value='ninguno';a.ctx.window.confirm=()=>false;a.run('guardarAccesorios()');assert.equal(a.run('tramos[0].detalle.accesorios.length'),1);
+});
+test('respaldo: descarga JSON conserva originales, ajustes y demostraciones sin escribir ni enviar datos',()=>{
+ const a=app();proyectoPlan(a);a.run('guardarDatos();tramos[0].metros=13;guardarDatos()');const antes=a.saved();let json='',clicks=0;const crear=a.ctx.document.createElement;
+ a.ctx.Blob=class{constructor(p){json=p.join('')}};a.ctx.URL.createObjectURL=()=> 'blob:backup';a.ctx.setTimeout=fn=>fn();a.ctx.document.createElement=()=>{const e=crear();e.click=()=>clicks++;return e;};a.run('descargarRespaldoCompleto()');const d=JSON.parse(json);assert.equal(clicks,1);assert.equal(d.formato,'canerias-respaldo-v1');assert.equal(d.proyectos.gas.tramos[0].metros,13);assert.ok(d.proyectos.gas.planCompra.respaldos.length>0);assert.equal(a.saved(),antes);
 });

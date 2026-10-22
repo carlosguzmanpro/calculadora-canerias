@@ -39,5 +39,5 @@ function seleccionarAmbitoGas(destino){
  $('duda').value=g.aclaracion||'';$('revision').textContent=g.revision||'Todavía no hay una revisión registrada.';
  $('gt').value=g.tipoGas||'9300';cancelarEdicionTramo();cerrarAccesorios();renderTramos();renderGas();renderRevisionCroquis();renderRedGas();mostrarFotoLocal();renderAmbitoGas();
  $('resultadoMateriales').replaceChildren();$('resultadoMateriales').textContent='Datos del espacio seleccionado. Recalculá materiales para revisar.';
- invalidarConsumos();mostrarVista('croquis');
+ actualizarDerivadosGas();mostrarVista('croquis');
 }

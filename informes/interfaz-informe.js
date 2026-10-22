@@ -5,18 +5,21 @@ function modeloInformeActual(){
   const resultado=motorClaseAceroGas(tramos,artefactos,instalacionGas,catalogoParaGas(instalacionGas));
   const red=analizarRedGas();
   d.planilla=InformeProyecto.planilla(tramos,resultado,{caudalAplicable:instalacionGas.perfil.gas==='GN'&&Number(instalacionGas.perfil.poderCalorifico)===9300&&red.errores.length===0});
-  if(croquisEntregaDisponible()&&proyectoGasActual().entregaGas?.firmaCroquis===firmaCroquisEntrega())d.croquis={url:fotoURL};
-  else d.resumen.push('Croquis: Pendiente de información gráfica suficiente y confirmación.');
+  if(fotoURL&&/^(data:image\/(?:png|jpeg|webp);base64,|blob:)/.test(fotoURL))d.croquis={url:fotoURL,confirmado:croquisEntregaDisponible()&&proyectoGasActual().entregaGas?.firmaCroquis===firmaCroquisEntrega()};
+  else d.resumen.push('Fotografía original: Pendiente.');
  }
  if(gas&&tramos.length){
+  try{
   const entrada=entradaMaterialesGas('proyecto'),opciones=opcionesMaterialesGas('proyecto');
   const firma=JSON.stringify({fuente:'proyecto',entrada,opciones});
-  const plan=MaterialesGas.planificarMateriales(entrada,opciones),previa=datosPlanGas().revisiones.proyecto;
-  const actuales=fuenteMaterialesGas==='proyecto'&&revisionMaterialesGas?.firma===firma?revisionMaterialesGas.plan.filas:previa?.firma===firma?previa.filas:[];
-  for(const f of plan.filas){const r=actuales.find(r=>r.id===f.id);if(r){f.cantidad=r.cantidad;f.revisado=!!r.revisado;if(r.editado){f.editado=true;f.estado='estimado';}}}
-  d.filas=plan.filas;d.materialesAgrupados=InformeProyecto.agruparMateriales(plan.filas);
+  const plan=anotarFilasRevisionGas(MaterialesGas.planificarMateriales(entrada,opciones),entrada),previa=datosPlanGas().revisiones.proyecto;
+  const base=fuenteMaterialesGas==='proyecto'&&revisionMaterialesGas?revisionMaterialesGas:previa;
+  const mismos=base?.firma===firma,actuales=filasRevisionGas(base);
+  for(const f of plan.filas){const r=actuales.find(r=>mismos?r.id===f.id:r.editado&&identidadFilaGas(r)===identidadFilaGas(f));if(r){f.cantidad=r.cantidad;f.revisado=mismos&&!!r.revisado;if(r.editado){f.editado=true;f.estado='estimado';}}}
+  d.filas=plan.filas.map(f=>({...f,ubicacion:ubicacionLegibleGas(f.ubicacion)}));d.materialesAgrupados=InformeProyecto.agruparMateriales(d.filas);
   d.resumen.push('Materiales: largo comercial '+plan.config.largoComercial+' m; reutilización de sobrantes '+(plan.config.reutilizar?'selectiva estimada':'no prevista')+'. Cantidades sujetas a revisión; pendiente no significa cero.');
   d.resumen.push('Método de clase: reducciones en materiales, excluidas de equivalentes. Una instalación real puede requerir pérdidas adicionales.');
+  }catch(e){d.resumen.push('Materiales: Pendiente de corregir los datos actuales. '+e.message+'. El respaldo anterior no es una lista de compra vigente.');}
  }
  return d;
 }
@@ -43,10 +46,20 @@ function actualizarVistaEntregaGas(){
  const valido=croquisEntregaDisponible();
  $('entregaCroquisConfirmado').disabled=!valido;
  $('entregaCroquisConfirmado').checked=valido&&proyectoGasActual().entregaGas?.firmaCroquis===firmaCroquisEntrega();
- $('entregaEstado').textContent=valido?'Revisá la imagen ampliada antes de confirmar su legibilidad y correspondencia. No se dibujarán posiciones automáticas.':'Croquis pendiente: se necesita una foto legible y una red conectada con artefactos, consumos y accesorios revisados. El informe puede imprimirse con los demás datos.';
+ $('entregaEstado').textContent=valido?'Revisá la imagen ampliada antes de confirmar su legibilidad y correspondencia. No se dibujarán posiciones automáticas.':'Croquis pendiente: se necesita una foto legible y una red conectada con artefactos, consumos y accesorios revisados. La foto original disponible se imprime como referencia, con correspondencia pendiente.';
 }
 function confirmarCroquisEntrega(){
  const p=proyectoGasActual();if(!p.entregaGas||typeof p.entregaGas!=='object')p.entregaGas={};
  p.entregaGas.firmaCroquis=$('entregaCroquisConfirmado').checked&&croquisEntregaDisponible()?firmaCroquisEntrega():null;
  guardarDatos();actualizarVistaEntregaGas();
+}
+
+function ubicacionLegibleGas(texto,contexto=null){
+ const ns=contexto?.nodos||instalacionGas.nodos||[],ts=contexto?.tramos||tramos,mapa=new Map();
+ for(const n of ns)if(n.id&&n.nombre)mapa.set(n.id,n.nombre);
+ ts.forEach((t,i)=>{const desde=t.desde||ns.find(n=>n.id===t.red?.desde)?.nombre,hasta=t.hasta||ns.find(n=>n.id===t.red?.hasta)?.nombre;if(desde&&hasta){mapa.set(t.id||'tramo-'+i,desde+'–'+hasta);mapa.set('tramo-'+i,desde+'–'+hasta);}});
+ const escapar=x=>Array.from(x,c=>/[a-zA-Z0-9_-]/.test(c)?c:String.fromCharCode(92)+c).join('');
+ if(!mapa.size)return String(texto||'Ubicación pendiente');
+ const rx=new RegExp('(^|[^A-Za-z0-9_-])('+[...mapa.keys()].sort((a,b)=>b.length-a.length).map(escapar).join('|')+')(?=$|[^A-Za-z0-9_-])','g');
+ return String(texto||'Ubicación pendiente').replace(rx,(_,sep,id)=>sep+mapa.get(id));
 }

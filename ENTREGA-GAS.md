@@ -1,5 +1,7 @@
 # Formato de entrega de GAS
 
+Documento de la etapa anterior. Para la inclusión actual de foto original y recálculo con respaldos, ver [PDF-ACTUALIZACION-GAS.md](PDF-ACTUALIZACION-GAS.md).
+
 Base: `prueba/android-inicio-local`, commit `2e10235`.
 Rama experimental: `prueba/formato-entrega-gas`.
 

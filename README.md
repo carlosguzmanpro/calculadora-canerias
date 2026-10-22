@@ -1,5 +1,12 @@
 # CAÑERÍAS
 
+## PDF y actualización automática (versión experimental actual)
+
+Rama `prueba/pdf-actualizacion-gas`, base `5c7af4e`. El PDF incluye la foto original como referencia, mantiene las seis columnas y materiales por estado, y usa nombres legibles. Al guardar cambios se recalculan consumos, materiales y diagnósticos; las revisiones previas quedan como respaldos desactualizados. Los ajustes manuales se conservan si la asociación es segura y, en otro caso, quedan en el respaldo para revisión. Se confirman borrados y puede descargarse un JSON completo.
+
+**274 pruebas aprobadas (257 anteriores + 17 nuevas).** Tablas y motor intactos; diámetros automáticos bloqueados. Comprobación visual nueva en Android pendiente. Pasos y límites en [PDF-ACTUALIZACION-GAS.md](PDF-ACTUALIZACION-GAS.md). [Mi empresa](MI-EMPRESA-FUTURO.md) está solamente documentada, sin implementarse ni incorporar pagos.
+
+
 ## Formato de entrega GAS (versión experimental actual)
 
 Rama `prueba/formato-entrega-gas`, base `2e10235`. Documento A4 con croquis aportado y confirmado cuando hay información suficiente, planilla de seis columnas, materiales agrupados por tipo/diámetro/estado y observaciones breves. No dibuja recorridos ni posiciones. DEFINITIVO utiliza la longitud de cálculo del recorrido más desfavorable del motor; los datos no disponibles dicen «Pendiente». Diámetros automáticos bloqueados; tablas y motor intactos.
