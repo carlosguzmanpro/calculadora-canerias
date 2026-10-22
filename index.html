@@ -308,6 +308,13 @@ section{box-shadow:none}
 <option value="ninguno">Revisado: sin tees, codos ni reducciones</option>
 <option value="completo">Revisado: registrar todos los accesorios</option>
 </select>
+<section id="cargaRapidaGas" class="detalle" aria-label="Carga rápida de accesorios">
+<h4>Carga rápida · cantidades sin distancias</h4>
+<p>Registrá cantidades conocidas sin inventar posiciones. Estas cantidades son informativas: NO se suman al cálculo técnico ni a la lista de compra. Los accesorios detallados se conservan por separado. Vacío = pendiente; 0 = ausencia confirmada.</p>
+<div id="camposRapidosGas"></div>
+<button class="alt" onclick="guardarConteoRapidoGas()">Guardar cantidades rápidas del tramo</button>
+<p id="mensajeRapidoGas" role="status"></p>
+</section>
 <div id="detalleAccesorios">
 <p>Usá el mismo formato para cada diámetro, por ejemplo 1/2&quot;, 3/4&quot; o 1&quot;. Un cambio de texto no verifica un cambio real de medida.</p>
 <p>2. Agregá los accesorios en orden. El diámetro de entrada se toma del segmento anterior. Si cambia el de salida en un codo o tee, se cuenta como accesorio reductor, sin sumar otra reducción.</p>
@@ -4593,6 +4600,49 @@ function editarTramo(i){
  $('guardarTramo').textContent='Guardar cambios del tramo';$('cancelarTramo').classList.remove('oculto');
  $('desde').focus();
 }
+const tiposRapidosGas=[['codo90','Codos de 90°'],['codo45','Codos de 45°'],['tee','Tees'],['reduccion','Reducciones'],['llave','Llaves de paso']];
+function conteoRapidoDelTramoGas(t){
+ const mapa=proyectoGasActual().conteosRapidosGas;
+ const datos=mapa&&Object.hasOwn(mapa,t.id)?mapa[t.id]:t.detalle?.conteoRapido;
+ return datos&&typeof datos==='object'&&!Array.isArray(datos)?datos:{};
+}
+function mostrarConteoRapidoGas(){
+ const cont=$('camposRapidosGas');cont.replaceChildren();
+ if(modulo!=='gas'||editandoAccesorios<0||!tramos[editandoAccesorios])return;
+ const datos=conteoRapidoDelTramoGas(tramos[editandoAccesorios]);let invalido=false;
+ for(const [clave,nombre] of tiposRapidosGas){
+  const etiqueta=document.createElement('label');etiqueta.textContent=nombre;
+  const campo=document.createElement('input');campo.type='number';campo.min='0';campo.step='1';campo.inputMode='numeric';campo.id='rapidoGas_'+clave;
+  const valido=Number.isSafeInteger(datos[clave])&&datos[clave]>=0;
+  campo.value=valido?datos[clave]:'';campo.placeholder='Pendiente';
+  if(datos[clave]!==undefined&&datos[clave]!==null&&!valido)invalido=true;
+  etiqueta.append(campo);cont.append(etiqueta);
+ }
+ $('mensajeRapidoGas').textContent=invalido?'Hay cantidades anteriores no válidas. Revisalas; no se reemplazaron en los datos guardados.':'Vacío = pendiente. Cero = confirmaste que no hay. Sin integración al cálculo ni a materiales.';
+}
+function guardarConteoRapidoGas(){
+ if(modulo!=='gas'||editandoAccesorios<0||!tramos[editandoAccesorios])return;
+ const conteo={};
+ for(const [clave] of tiposRapidosGas){
+  const valor=String($('rapidoGas_'+clave).value).trim();if(valor==='')continue;
+  const numero=Number(valor);
+  if(!Number.isSafeInteger(numero)||numero<0){$('mensajeRapidoGas').textContent='Ingresá cantidades enteras mayores o iguales a cero, o dejá pendiente.';return;}
+  conteo[clave]=numero;
+ }
+ asegurarIdsGas();const t=tramos[editandoAccesorios],p=proyectoGasActual();
+ const anterior=p.conteosRapidosGas&&typeof p.conteosRapidosGas==='object'&&!Array.isArray(p.conteosRapidosGas)?p.conteosRapidosGas:{};
+ // Metadatos independientes: no alterar detalle, firmas técnicas ni accesorios confirmados.
+ p.conteosRapidosGas={...anterior,[t.id]:conteo};
+ guardarDatos();renderTramos();
+ const guardado=ambitoGas==='demostracion'?ultimoGuardadoValido?.gas?.demostracion:ultimoGuardadoValido?.gas;
+ const persistido=JSON.stringify(guardado?.conteosRapidosGas?.[t.id])===JSON.stringify(conteo);
+ $('mensajeRapidoGas').textContent=persistido?'Cantidades rápidas guardadas. No alteran cálculos ni materiales.':'Cantidades rápidas sólo en esta sesión: no se pudieron guardar. Descargá un respaldo antes de cerrar.';
+}
+function resumenConteoRapidoGas(t){
+ const datos=conteoRapidoDelTramoGas(t);
+ if(!Object.keys(datos).length)return '';
+ return 'Carga rápida · NO incluida en materiales: '+tiposRapidosGas.map(([k,n])=>n+': '+(Number.isSafeInteger(datos[k])&&datos[k]>=0?(datos[k]===0?'0 (ausencia confirmada)':datos[k]):'Pendiente')).join(' · ');
+}
 function abrirAccesorios(i){
  cancelarEdicionTramo();editandoAccesorios=i;
  const t=tramos[i],d=t.detalle||{estado:'pendiente'};
@@ -4602,7 +4652,8 @@ function abrirAccesorios(i){
  $('metrosFinal').value=d.metrosFinal??'';
  $('editorAccesorios').classList.remove('oculto');
  $('errorAccesorios').textContent='Si faltan datos, guardá como pendiente. «Sin tees, codos ni reducciones» confirma cero de esas piezas y descarta la lista de este tramo. Las cuplas se calculan por longitud.';
- cambiarEstadoAccesorios();
+ cambiarEstadoAccesorios();mostrarConteoRapidoGas();
+ if(typeof $('editorAccesorios').scrollIntoView==='function')$('editorAccesorios').scrollIntoView({block:'start'});
 }
 function cerrarAccesorios(){editandoAccesorios=-1;borradorAccesorios=[];$('editorAccesorios').classList.add('oculto');}
 function cambiarEstadoAccesorios(){
@@ -4650,7 +4701,8 @@ function guardarAccesorios(){
  const original=tramos[editandoAccesorios];
  const estado=$('estadoAccesorios').value;
  if(estado==='ninguno'&&original.detalle?.accesorios?.length&&!window.confirm('¿Quitar los accesorios registrados de este tramo?'))return;
- const detalle=estado==='ninguno'?{estado,accesorios:[]}:{estado,accesorios:borradorAccesorios,
+ const conteoAnterior=original.detalle?.conteoRapido;
+ const detalle=estado==='ninguno'?{estado,accesorios:[],...(conteoAnterior?{conteoRapido:conteoAnterior}:{})}:{estado,accesorios:borradorAccesorios,...(conteoAnterior?{conteoRapido:conteoAnterior}:{}),
   metrosFinal:$('metrosFinal').value===''?'':Number($('metrosFinal').value)};
  const candidato={...original,detalle};
  // Sustituir temporalmente evita interpretar su propia tee como duplicada.
@@ -4727,6 +4779,7 @@ function renderTramos(){
   const accesorios=document.createElement('button');accesorios.className='peq alt';
   accesorios.textContent='Revisar accesorios';accesorios.onclick=()=>abrirAccesorios(i);
   d.append(s,estado,editar,accesorios);
+  const rapido=resumenConteoRapidoGas(t);if(rapido){const resumen=document.createElement('p');resumen.className='nota';resumen.textContent=rapido;d.append(resumen);}
   const b=document.createElement('button');
   b.className='peq alt';
   b.textContent='Quitar tramo';
