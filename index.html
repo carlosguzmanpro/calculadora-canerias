@@ -997,7 +997,7 @@ function validarConciliacionGas(f,r){
   if(p.conflicto||!Number.isSafeInteger(p.cantidad)||p.cantidad<=0)return 'Hay datos contradictorios para una pieza registrada. Corregilos antes de conciliar.';
   const relacion=r.vinculos?.[p.id];
   if(!['incluido','fuera'].includes(relacion))return 'Coincidencia ambigua: indicá si cada pieza ya está incluida o queda fuera del conteo.';
-  if(relacion==='fuera'&&p.directa)return 'La pieza está registrada dentro del tramo: revisá el conteo o su registro original.';
+  if(relacion==='fuera'&&p.directa)return 'No conciliado: '+p.etiqueta+' está registrado dentro de '+f.tramo.desde+'–'+f.tramo.hasta+'. «Fuera de este conteo» no elimina esa pieza. Abrí «Editar detalle '+f.tramo.desde+'–'+f.tramo.hasta+'»: si la pieza es una tee, corregí su tipo y punto real; si es otro codo, revisá el total rápido. No se modificó ninguna cantidad ni se agregó material.';
   if(relacion==='incluido')cubiertas+=p.cantidad;
  }
  if(cubiertas+r.adicionales!==f.cantidad)return 'El total rápido debe coincidir con las piezas ya representadas más las adicionales. No se sumó nada.';
@@ -1033,20 +1033,30 @@ function avisoConciliacionRapidaGas(){
  return 'Carga rápida: '+revisadas+' conteos conciliados; '+pendientes+' conteos cargados pendientes de revisión. Sólo los adicionales conciliados participan en materiales; los campos vacíos siguen pendientes. Medidas y posiciones no se deducen.';
 }
 function guardarConciliacionGas(clave,edicion,confirmar){
- const f=filasConciliacionGas().find(f=>f.clave===clave);if(!f){$('conciliacionMensaje').textContent='Tramo no disponible. Se conservó la revisión anterior.';return false;}
+ const f=filasConciliacionGas().find(f=>f.clave===clave);if(!f){mostrarRespuestaConciliacionGas(clave,'Tramo no disponible. Se conservó la revisión anterior.',true);return false;}
  const revision={...edicion,confirmado:!!confirmar,firma:f.firma};
  const error=confirmar?validarConciliacionGas(f,revision):null;
- if(error){$('conciliacionMensaje').textContent=error;return false;}
- const p=proyectoGasActual();if(p.conciliacionRapidaGas&&(p.conciliacionRapidaGas.version!==1||!p.conciliacionRapidaGas.registros||typeof p.conciliacionRapidaGas.registros!=='object'||Array.isArray(p.conciliacionRapidaGas.registros)||!Array.isArray(p.conciliacionRapidaGas.historial))){$('conciliacionMensaje').textContent='Formato de revisión no reconocido: se conservó sin sobrescribir. Revisá el respaldo.';return false;}
+ if(error){mostrarRespuestaConciliacionGas(clave,error,true);return false;}
+ const p=proyectoGasActual();if(p.conciliacionRapidaGas&&(p.conciliacionRapidaGas.version!==1||!p.conciliacionRapidaGas.registros||typeof p.conciliacionRapidaGas.registros!=='object'||Array.isArray(p.conciliacionRapidaGas.registros)||!Array.isArray(p.conciliacionRapidaGas.historial))){mostrarRespuestaConciliacionGas(clave,'Formato de revisión no reconocido: se conservó sin sobrescribir. Revisá el respaldo.',true);return false;}
  if(!p.conciliacionRapidaGas)p.conciliacionRapidaGas={version:1,registros:{},historial:[]};
  const d=p.conciliacionRapidaGas;if(d.registros[clave])d.historial.push({clave,revision:d.registros[clave]});d.registros[clave]=revision;
  guardarDatos();generarPlanGas('proyecto');renderConciliacionRapidaGas();
  const actual=estadoConciliacionGas().find(x=>x.clave===clave);
  const almacenado=ambitoGas==='demostracion'?ultimoGuardadoValido?.gas?.demostracion:ultimoGuardadoValido?.gas;
- $('conciliacionMensaje').textContent=JSON.stringify(almacenado?.conciliacionRapidaGas)!==JSON.stringify(d)?'Revisión sólo en sesión: descargá un respaldo antes de cerrar.':confirmar?(actual.error||'Revisión confirmada. Cantidades conciliadas; la revisión técnica sigue pendiente.'):'Vínculos guardados como pendientes; no se agregaron piezas.';
+ const mensaje=JSON.stringify(almacenado?.conciliacionRapidaGas)!==JSON.stringify(d)?'Revisión sólo en sesión: descargá un respaldo antes de cerrar.':confirmar?(actual.error||'Revisión confirmada. Cantidades conciliadas; la revisión técnica sigue pendiente.'):'Vínculos guardados como pendientes; no se agregaron piezas.';
+ mostrarRespuestaConciliacionGas(clave,mensaje,!!(confirmar&&actual.error));
  return true;
 }
 let vistaConciliacionGas=[];
+function mostrarRespuestaConciliacionGas(clave,mensaje,error=false){
+ $('conciliacionMensaje').textContent=mensaje;
+ const vista=vistaConciliacionGas.find(v=>v.clave===clave&&v.proyecto===proyectoGasActual());
+ if(!vista?.respuesta)return;
+ const respuesta=vista.respuesta;respuesta.textContent=textoMaterialPantallaGas(mensaje);respuesta.hidden=false;
+ respuesta.className=(error?'aviso':'nota')+' conciliacion-respuesta';respuesta.role=error?'alert':'status';respuesta.ariaLive=error?'assertive':'polite';
+ vista.grupo.open=true;vista.card.open=true;
+ if(error){if(respuesta.focus)respuesta.focus({preventScroll:true});if(respuesta.scrollIntoView)respuesta.scrollIntoView({block:'nearest'});}
+}
 function renderConciliacionRapidaGas(){
  const out=$('conciliacionFilas');if(!out||modulo!=='gas')return;
  const proyecto=proyectoGasActual(),previas=vistaConciliacionGas.filter(v=>v.proyecto===proyecto),anteriores=new Map(previas.map(v=>[v.clave,v]));
@@ -1065,14 +1075,17 @@ function renderConciliacionRapidaGas(){
   if(f.error)texto(card,f.error);
   if(f.cantidad===null){texto(card,'Completá este dato en Revisar accesorios → Carga rápida. No equivale a cero.');continue;}
   const controles=[];
-  for(const p of f.candidatos){const label=document.createElement('label');label.textContent=p.etiqueta+' · cantidad '+p.cantidad;const select=document.createElement('select');for(const [v,t]of [['','Pendiente: no sé si es la misma pieza'],['incluido','Ya está incluida en este total'],['fuera','Fuera de este conteo (requiere revisión)']]){const option=document.createElement('option');option.value=v;option.textContent=t;select.append(option);}select.value=r.vinculos?.[p.id]||'';label.append(select);card.append(label);controles.push([p.id,select]);}
+  for(const p of f.candidatos){const label=document.createElement('label');label.textContent=p.etiqueta+' · cantidad '+p.cantidad;const select=document.createElement('select');for(const [v,t]of [['','Pendiente: no sé si es la misma pieza'],['incluido','Ya está incluida en este total'],['fuera','Fuera de este conteo (requiere revisión)']]){const option=document.createElement('option');option.value=v;option.textContent=t;select.append(option);}select.value=r.vinculos?.[p.id]||'';label.append(select);if(p.directa){const ayuda=document.createElement('small');ayuda.textContent='Registrada dentro de este tramo: elegir Fuera bloqueará la confirmación. Corregí el detalle si el tipo es incorrecto.';label.append(ayuda);}select.onchange=()=>{if(select.value==='fuera'&&p.directa)mostrarRespuestaConciliacionGas(f.clave,'Esta pieza figura dentro de '+f.tramo.desde+'–'+f.tramo.hasta+'. «Fuera de este conteo» no la elimina: revisá «Editar detalle '+f.tramo.desde+'–'+f.tramo.hasta+'» antes de confirmar.',true);else mostrarRespuestaConciliacionGas(f.clave,'Coincidencia modificada. Revisá el total y confirmá; aún no se guardó este cambio.');};card.append(label);controles.push([p.id,select]);}
   if(!f.candidatos.length)texto(card,'No se encontraron piezas registradas del mismo tipo para este alcance. Revisá el croquis antes de confirmar adicionales.');
   const label=document.createElement('label'),cantidad=document.createElement('input');label.textContent='Piezas adicionales (0 si ya están todas representadas)';cantidad.type='number';cantidad.min='0';cantidad.step='1';cantidad.inputMode='numeric';cantidad.placeholder='Pendiente';cantidad.value=r.adicionales??'';label.append(cantidad);card.append(label);
   const punto=document.createElement('select');if(['tee','reduccion'].includes(f.tipo)){const l=document.createElement('label');l.textContent='Punto real de la pieza adicional (si hay una)';const vacio=document.createElement('option');vacio.value='';vacio.textContent='Pendiente: no inventar posición';punto.append(vacio);for(const n of instalacionGas.nodos||[]){const o=document.createElement('option');o.value=n.id;o.textContent=n.nombre;punto.append(o);}punto.value=r.nodo||'';l.append(punto);card.append(l);}
   const l=document.createElement('label'),alcance=document.createElement('input');l.className='gas-revision-check';l.textContent='Confirmo el total del tramo y revisé todas las coincidencias';alcance.type='checkbox';alcance.checked=!!r.alcance;l.append(alcance);card.append(l);
-  Object.assign(vista,{controles,cantidad,punto,alcance});
+  const respuesta=document.createElement('p');respuesta.className='nota conciliacion-respuesta';respuesta.role='status';respuesta.ariaLive='polite';respuesta.tabIndex=-1;respuesta.hidden=true;
+  if(anterior?.firma===f.firma&&anterior.revision===f.revision&&anterior.respuesta&&!anterior.respuesta.hidden){respuesta.textContent=anterior.respuesta.textContent;respuesta.className=anterior.respuesta.className;respuesta.role=anterior.respuesta.role;respuesta.ariaLive=anterior.respuesta.ariaLive;respuesta.hidden=false;}
+  card.append(respuesta);Object.assign(vista,{controles,cantidad,punto,alcance,respuesta});
+  if(f.candidatos.length){const editar=document.createElement('button');editar.className='alt';editar.textContent='Revisar detalle '+f.tramo.desde+'–'+f.tramo.hasta;editar.onclick=()=>editarDetalleDesdeConciliacionGas(f.tramo.id);card.append(editar);}
   const incluidas=()=>controles.filter(([,c])=>c.value==='incluido').reduce((s,[id])=>s+(f.candidatos.find(p=>p.id===id)?.cantidad||0),0);
-  const sugerir=document.createElement('button');sugerir.className='alt';sugerir.textContent='Calcular adicionales según mis coincidencias';sugerir.onclick=()=>{if(controles.some(([,c])=>!['incluido','fuera'].includes(c.value))||incluidas()>f.cantidad){$('conciliacionMensaje').textContent='Resolvé las coincidencias antes de calcular adicionales; no se cambió ningún dato.';return;}cantidad.value=f.cantidad-incluidas();$('conciliacionMensaje').textContent='Adicionales propuestos según tus vínculos. Revisá y confirmá; aún no se incorporaron.';};card.append(sugerir);
+  const sugerir=document.createElement('button');sugerir.className='alt';sugerir.textContent='Calcular adicionales según mis coincidencias';sugerir.onclick=()=>{if(controles.some(([,c])=>!['incluido','fuera'].includes(c.value))||incluidas()>f.cantidad){mostrarRespuestaConciliacionGas(f.clave,'Resolvé las coincidencias antes de calcular adicionales; no se cambió ningún dato.',true);return;}cantidad.value=f.cantidad-incluidas();mostrarRespuestaConciliacionGas(f.clave,'Adicionales propuestos según tus vínculos. Revisá y confirmá; aún no se incorporaron.');};card.append(sugerir);
   for(const [confirmar,titulo]of [[false,'Guardar revisión pendiente'],[true,'Confirmar para materiales']]){const b=document.createElement('button');b.className='alt';b.textContent=titulo;b.onclick=()=>guardarConciliacionGas(f.clave,{vinculos:Object.fromEntries(controles.map(([id,c])=>[id,c.value])),adicionales:cantidad.value===''?null:Number(cantidad.value),nodo:punto.value||null,alcance:alcance.checked},confirmar);card.append(b);}
  }
 }
