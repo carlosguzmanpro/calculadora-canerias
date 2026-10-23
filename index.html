@@ -131,6 +131,11 @@ section{box-shadow:none}
 
 <div id="menuGas" class="oculto">
 <label>Espacio de trabajo <select id="ambitoGas" onchange="seleccionarAmbitoGas(this.value)"><option value="proyecto">Mi proyecto</option><option value="demostracion">Demostración separada</option></select></label><p id="estadoAmbitoGas"></p>
+<nav class="opciones solo-pantalla" aria-label="Accesos directos de GAS">
+<button class="alt" onclick="irSeccionGas('tramos')">Ir a tramos</button><button class="alt" onclick="irSeccionGas('foto')">Ir a fotografía</button>
+<button class="alt" onclick="irSeccionGas('conciliacion')">Revisar coincidencias</button><button class="alt" onclick="irSeccionGas('materiales')">Ver materiales</button>
+<button class="alt" onclick="irSeccionGas('pdf')">Documento PDF</button>
+</nav>
 <button onclick="mostrarVista('dimensionGas')">Calcular diámetros · diagnóstico</button>
 <button class="alt" onclick="mostrarVista('redGas')">Instalación: datos y conexiones de GAS</button>
 <button class="alt" onclick="mostrarVista('revisionCroquis')">Revisar croquis y ejemplos</button>
@@ -308,14 +313,15 @@ section{box-shadow:none}
 <option value="ninguno">Revisado: sin tees, codos ni reducciones</option>
 <option value="completo">Revisado: registrar todos los accesorios</option>
 </select>
-<section id="cargaRapidaGas" class="detalle" aria-label="Carga rápida de accesorios">
-<h4>Carga rápida · cantidades sin distancias</h4>
+<details id="cargaRapidaGas" class="detalle" aria-label="Carga rápida de accesorios" open>
+<summary>Carga rápida · cantidades sin distancias</summary>
 <p>Registrá cantidades conocidas sin inventar posiciones. Estas cantidades no se suman al cálculo técnico. Para incluir adicionales en materiales usá «Revisar cantidades rápidas para materiales» en el plan de compra. Los accesorios detallados se conservan por separado. Vacío = pendiente; 0 = ausencia confirmada.</p>
 <div id="camposRapidosGas"></div>
 <button class="alt" onclick="guardarConteoRapidoGas()">Guardar cantidades rápidas del tramo</button>
 <p id="mensajeRapidoGas" role="status"></p>
-</section>
-<div id="detalleAccesorios">
+</details>
+<details id="detalleAccesorios" open><summary>Editar tipos y distancias del detalle</summary>
+<p class="aviso">Una tee sigue siendo una sola pieza aunque su ramal gire 90°. No registres también un codo por ese mismo giro; sólo agregá un codo si existe como pieza independiente en el croquis.</p>
 <p>Usá el mismo formato para cada diámetro, por ejemplo 1/2&quot;, 3/4&quot; o 1&quot;. Un cambio de texto no verifica un cambio real de medida.</p>
 <p>2. Agregá los accesorios en orden. El diámetro de entrada se toma del segmento anterior. Si cambia el de salida en un codo o tee, se cuenta como accesorio reductor, sin sumar otra reducción.</p>
 <p>Registrá cada tee una sola vez en el tramo principal, con un nombre único de derivación. El tramo del ramal comienza después de esa tee; identificá su origen con ese nombre.</p>
@@ -324,9 +330,9 @@ section{box-shadow:none}
 <label for="metrosFinal">Metros desde el último accesorio hasta el final</label>
 <input id="metrosFinal" type="number" min="0" step="any">
 <p>Un segmento puede medir 0 m si dos accesorios están conectados directamente o el accesorio está en un extremo. No se cuentan cuplas en ese espacio. Las longitudes deben sumar los metros del tramo.</p>
-</div>
+</details>
 <p id="errorAccesorios" role="status" class="aviso"></p>
-<button onclick="guardarAccesorios()">Guardar accesorios del tramo</button>
+<button onclick="guardarAccesorios()">Guardar accesorios del tramo</button><button class="alt" onclick="guardarDetalleYConciliarGas()">Guardar detalle y volver a conciliación</button>
 <button class="alt" onclick="cerrarAccesorios()">Cancelar</button>
 </section>
 <button onclick="detectarAccesoriosGas()">Detectar accesorios automáticamente</button>
@@ -350,8 +356,10 @@ section{box-shadow:none}
 <summary>Revisar cantidades rápidas para materiales</summary>
 <p>Revisá cada conteo como total del tramo, incluyendo las piezas ya registradas. Identificá coincidencias antes de confirmar adicionales. Las sugerencias sin confirmar siguen separadas.</p>
 <button class="alt" onclick="renderConciliacionRapidaGas()">Actualizar revisión de cantidades rápidas</button>
+<label><input id="conciliacionSoloCargados" type="checkbox" checked style="width:auto" onchange="renderConciliacionRapidaGas()"> Mostrar solo tipos con cantidades cargadas (desmarcar para ver pendientes)</label>
+<p class="nota">1. Revisá el detalle. 2. Indicá qué piezas ya están incluidas. 3. Confirmá sólo las adicionales. Cambiar la carga rápida no cambia los tipos del detalle.</p>
 <p id="conciliacionMensaje" role="status"></p><div id="conciliacionFilas"></div>
-</details><div id="matUniones"></div>
+</details><details class="gas-detalles"><summary>Criterios de conexiones que requieren verificación</summary><p>Verificar la conexión final de cada artefacto y la entrada lateral o superior del medidor contra el croquis, el montaje real y la documentación aplicable. Son criterios pendientes de comprobación, no cantidades fijas de accesorios. Una pieza compartida o una tee que gira no debe contarse dos veces. No se agregan codos, llaves ni otras piezas sólo por estos criterios.</p></details><div id="matUniones"></div>
 <button onclick="generarPlanGas('proyecto')">Generar lista de mi proyecto</button>
 <button class="alt" onclick="generarPlanGas('ejemplo')">Probar materiales: calefón y cocina</button>
 <details><summary>Agregar otro accesorio identificado manualmente</summary>
@@ -373,7 +381,7 @@ Estimación de compra sin reutilizar sobrantes: tiras de 6 m por segmento contin
 </div>
 </div>
 <details class="solo-pantalla"><summary>Respaldos y ajustes de resultados anteriores</summary><button class="alt" onclick="descargarRespaldoCompleto()">Descargar respaldo completo JSON</button><label>Recuperar respaldo completo JSON<input id="importarRespaldo" type="file" accept="application/json,.json"></label><p id="estadoRespaldo" role="status"></p><div id="respaldosGas"></div></details>
-<h3>Documento de entrega de GAS</h3>
+<h3 id="documentoEntregaGas">Documento de entrega de GAS</h3>
 <button id="revisarEntrega" class="alt" onclick="revisarCroquisParaEntrega()">Revisar croquis para entrega</button>
 <label class="confirmacion-entrega" for="entregaCroquisConfirmado"><input id="entregaCroquisConfirmado" type="checkbox" aria-describedby="entregaEstado" onchange="confirmarCroquisEntrega()"><span>Confirmo que la foto es legible y muestra los tramos, artefactos y posiciones de esta red actual.</span></label>
 <p id="entregaAccion" role="status" aria-live="polite"></p>
@@ -1038,16 +1046,23 @@ function guardarConciliacionGas(clave,edicion,confirmar){
  $('conciliacionMensaje').textContent=JSON.stringify(almacenado?.conciliacionRapidaGas)!==JSON.stringify(d)?'Revisión sólo en sesión: descargá un respaldo antes de cerrar.':confirmar?(actual.error||'Revisión confirmada. Cantidades conciliadas; la revisión técnica sigue pendiente.'):'Vínculos guardados como pendientes; no se agregaron piezas.';
  return true;
 }
+let vistaConciliacionGas=[];
 function renderConciliacionRapidaGas(){
- const out=$('conciliacionFilas');if(!out||modulo!=='gas')return;out.replaceChildren();
+ const out=$('conciliacionFilas');if(!out||modulo!=='gas')return;
+ const proyecto=proyectoGasActual(),previas=vistaConciliacionGas.filter(v=>v.proyecto===proyecto),anteriores=new Map(previas.map(v=>[v.clave,v]));
+ out.replaceChildren();vistaConciliacionGas=[];
  const texto=(padre,t)=>{const p=document.createElement('p');p.textContent=textoMaterialPantallaGas(t);padre.append(p);};
- const filas=estadoConciliacionGas();
- if(!filas.length){texto(out,'Registrá primero los tramos y sus cantidades rápidas.');return;}
+ const filas=estadoConciliacionGas().filter(f=>!$('conciliacionSoloCargados').checked||f.cantidad!==null||f.revision);
+ if(!filas.length){texto(out,'No hay cantidades cargadas para revisar. Registralas en el detalle del tramo o desmarcá el filtro para ver los pendientes.');return;}
  let grupo=null,tramoAnterior=null;
  for(const f of filas){
-  if(tramoAnterior!==f.tramo.id){grupo=document.createElement('details');grupo.className='gas-detalles';const resumen=document.createElement('summary');resumen.textContent=f.tramo.desde+'–'+f.tramo.hasta;grupo.append(resumen);out.append(grupo);tramoAnterior=f.tramo.id;}
+  if(tramoAnterior!==f.tramo.id){grupo=document.createElement('details');grupo.className='gas-detalles';grupo.open=previas.find(v=>v.tramo===f.tramo.id)?.grupo.open||false;const resumen=document.createElement('summary');resumen.textContent=f.tramo.desde+'–'+f.tramo.hasta;grupo.append(resumen);const editar=document.createElement('button');editar.className='alt';editar.textContent='Editar detalle '+f.tramo.desde+'–'+f.tramo.hasta;editar.onclick=()=>editarDetalleDesdeConciliacionGas(f.tramo.id);grupo.append(editar);out.append(grupo);tramoAnterior=f.tramo.id;}
   const card=document.createElement('details');card.className='detalle';const titulo=document.createElement('summary');titulo.textContent=f.tramo.desde+'–'+f.tramo.hasta+' · '+f.nombre+' · '+(f.cantidad===null?'Pendiente':f.cantidad===0?'0 confirmado':f.cantidad+' confirmados')+' · '+(f.error?'Por revisar':'Conciliado');card.append(titulo);grupo.append(card);
-  const r=f.revision||{};if(f.error)texto(card,f.error);
+  const anterior=anteriores.get(f.clave);card.open=anterior?.card.open||false;
+  let r=f.revision||{};
+  if(anterior?.firma===f.firma&&anterior.revision===f.revision&&anterior.cantidad)r={...r,vinculos:Object.fromEntries(anterior.controles.map(([id,c])=>[id,c.value])),adicionales:anterior.cantidad.value===''?null:Number(anterior.cantidad.value),nodo:anterior.punto.value||null,alcance:anterior.alcance.checked};
+  const vista={clave:f.clave,firma:f.firma,revision:f.revision,proyecto,tramo:f.tramo.id,grupo,card};vistaConciliacionGas.push(vista);
+  if(f.error)texto(card,f.error);
   if(f.cantidad===null){texto(card,'Completá este dato en Revisar accesorios → Carga rápida. No equivale a cero.');continue;}
   const controles=[];
   for(const p of f.candidatos){const label=document.createElement('label');label.textContent=p.etiqueta+' · cantidad '+p.cantidad;const select=document.createElement('select');for(const [v,t]of [['','Pendiente: no sé si es la misma pieza'],['incluido','Ya está incluida en este total'],['fuera','Fuera de este conteo (requiere revisión)']]){const option=document.createElement('option');option.value=v;option.textContent=t;select.append(option);}select.value=r.vinculos?.[p.id]||'';label.append(select);card.append(label);controles.push([p.id,select]);}
@@ -1055,6 +1070,9 @@ function renderConciliacionRapidaGas(){
   const label=document.createElement('label'),cantidad=document.createElement('input');label.textContent='Piezas adicionales (0 si ya están todas representadas)';cantidad.type='number';cantidad.min='0';cantidad.step='1';cantidad.inputMode='numeric';cantidad.placeholder='Pendiente';cantidad.value=r.adicionales??'';label.append(cantidad);card.append(label);
   const punto=document.createElement('select');if(['tee','reduccion'].includes(f.tipo)){const l=document.createElement('label');l.textContent='Punto real de la pieza adicional (si hay una)';const vacio=document.createElement('option');vacio.value='';vacio.textContent='Pendiente: no inventar posición';punto.append(vacio);for(const n of instalacionGas.nodos||[]){const o=document.createElement('option');o.value=n.id;o.textContent=n.nombre;punto.append(o);}punto.value=r.nodo||'';l.append(punto);card.append(l);}
   const l=document.createElement('label'),alcance=document.createElement('input');l.className='gas-revision-check';l.textContent='Confirmo el total del tramo y revisé todas las coincidencias';alcance.type='checkbox';alcance.checked=!!r.alcance;l.append(alcance);card.append(l);
+  Object.assign(vista,{controles,cantidad,punto,alcance});
+  const incluidas=()=>controles.filter(([,c])=>c.value==='incluido').reduce((s,[id])=>s+(f.candidatos.find(p=>p.id===id)?.cantidad||0),0);
+  const sugerir=document.createElement('button');sugerir.className='alt';sugerir.textContent='Calcular adicionales según mis coincidencias';sugerir.onclick=()=>{if(controles.some(([,c])=>!['incluido','fuera'].includes(c.value))||incluidas()>f.cantidad){$('conciliacionMensaje').textContent='Resolvé las coincidencias antes de calcular adicionales; no se cambió ningún dato.';return;}cantidad.value=f.cantidad-incluidas();$('conciliacionMensaje').textContent='Adicionales propuestos según tus vínculos. Revisá y confirmá; aún no se incorporaron.';};card.append(sugerir);
   for(const [confirmar,titulo]of [[false,'Guardar revisión pendiente'],[true,'Confirmar para materiales']]){const b=document.createElement('button');b.className='alt';b.textContent=titulo;b.onclick=()=>guardarConciliacionGas(f.clave,{vinculos:Object.fromEntries(controles.map(([id,c])=>[id,c.value])),adicionales:cantidad.value===''?null:Number(cantidad.value),nodo:punto.value||null,alcance:alcance.checked},confirmar);card.append(b);}
  }
 }
@@ -4148,7 +4166,7 @@ function guardarDatos(){
  proyectoGasActual().tipoGas=$('gt').value;
  if(modulo==='gas')actualizarSugerenciasGas();
  if(typeof invalidarMaterialesGas==='function')invalidarMaterialesGas();
- if(modulo==='gas'){actualizarDerivadosGas();actualizarVistaEntregaGas();}
+ if(modulo==='gas'){actualizarDerivadosGas();actualizarVistaEntregaGas();renderConciliacionRapidaGas();}
  if(!persistenciaHabilitada){$('estadoGuardado').textContent='No se pudo guardar: no se pudo leer con seguridad el almacenamiento anterior. Seguís trabajando en esta sesión, sin sobrescribir proyectos existentes. Conservá un PDF o respaldo antes de cerrar.';actualizarEstadoFoto();return;}
  try{
   const serializado=JSON.stringify(proyectos);
@@ -4280,6 +4298,21 @@ function volver(){
  window.scrollTo(0,0);
 }
 
+function irSeccionGas(destino){
+ if(modulo!=='gas')return;
+ mostrarVista('croquis');
+ const ids={tramos:'listaTramos',foto:'cargaFotoEntrega',conciliacion:'conciliacionRapidaGas',materiales:'planCompraGas',pdf:'documentoEntregaGas'};
+ if(['conciliacion','materiales'].includes(destino))abrirPlanGas();
+ const elemento=$(ids[destino]);if(!elemento)return;
+ if(destino==='conciliacion')elemento.open=true;
+ if(elemento.scrollIntoView)elemento.scrollIntoView({block:'start'});
+}
+function editarDetalleDesdeConciliacionGas(id){
+ if(modulo!=='gas')return;const i=tramos.findIndex(t=>t.id===id);if(i<0)return;
+ mostrarVista('croquis');abrirAccesorios(i);$('detalleAccesorios').open=true;
+ $('errorAccesorios').textContent='Editá el tipo de cada pieza real. Una tee con giro no es otro codo. Guardá el detalle para actualizar la conciliación.';
+}
+function guardarDetalleYConciliarGas(){if(guardarAccesorios())irSeccionGas('conciliacion');}
 function mostrarVista(v){
  if(['revisionCroquis','redGas','dimensionGas'].includes(v) && modulo!=='gas')return;
  $('redGas').classList.toggle('oculto',v!=='redGas');
@@ -4773,7 +4806,7 @@ function guardarConteoRapidoGas(){
  guardarDatos();renderTramos();
  const guardado=ambitoGas==='demostracion'?ultimoGuardadoValido?.gas?.demostracion:ultimoGuardadoValido?.gas;
  const persistido=JSON.stringify(guardado?.conteosRapidosGas?.[t.id])===JSON.stringify(conteo);
- $('mensajeRapidoGas').textContent=persistido?'Cantidades rápidas guardadas. Revisá su conciliación antes de incorporarlas a materiales.':'Cantidades rápidas sólo en esta sesión: no se pudieron guardar. Descargá un respaldo antes de cerrar.';
+ $('mensajeRapidoGas').textContent=persistido?'Cantidades rápidas guardadas. El detalle no cambió: usá Editar tipos y distancias para corregir codo/tee. Revisá coincidencias antes de sumar materiales.':'Cantidades rápidas sólo en esta sesión: no se pudieron guardar. Descargá un respaldo antes de cerrar.';
 }
 function resumenConteoRapidoGas(t){
  const datos=conteoRapidoDelTramoGas(t);
@@ -4834,10 +4867,10 @@ function renderAccesorios(){
  });
 }
 function guardarAccesorios(){
- if(editandoAccesorios<0)return;
+ if(editandoAccesorios<0)return false;
  const original=tramos[editandoAccesorios];
  const estado=$('estadoAccesorios').value;
- if(estado==='ninguno'&&original.detalle?.accesorios?.length&&!window.confirm('¿Quitar los accesorios registrados de este tramo?'))return;
+ if(estado==='ninguno'&&original.detalle?.accesorios?.length&&!window.confirm('¿Quitar los accesorios registrados de este tramo?'))return false;
  const conteoAnterior=original.detalle?.conteoRapido;
  const detalle=estado==='ninguno'?{estado,accesorios:[],...(conteoAnterior?{conteoRapido:conteoAnterior}:{})}:{estado,accesorios:borradorAccesorios,...(conteoAnterior?{conteoRapido:conteoAnterior}:{}),
   metrosFinal:$('metrosFinal').value===''?'':Number($('metrosFinal').value)};
@@ -4851,13 +4884,15 @@ function guardarAccesorios(){
    if(!['tee','codo45','codo90','reduccion','llave'].includes(a.tipo)||!Number.isFinite(a.metrosAntes)||a.metrosAntes<0)return false;
    suma+=a.metrosAntes;return a.tipo!=='tee'||(typeof a.nodo==='string'&&a.nodo.trim());
   });
-  if(!geometriaValida||Math.abs(suma-original.metros)>1e-8){tramos[editandoAccesorios]=original;$('errorAccesorios').textContent='Completá tipo, posiciones y longitudes; una tee también necesita su nombre de derivación. Las medidas de conexión quedan para el cálculo.';return;}
+  if(!geometriaValida||Math.abs(suma-original.metros)>1e-8){tramos[editandoAccesorios]=original;$('errorAccesorios').textContent='Completá tipo, posiciones y longitudes; una tee también necesita su nombre de derivación. Las medidas de conexión quedan para el cálculo.';return false;}
  }
  if(estado==='completo' && evaluado.pendiente && original.diametro){
   tramos[editandoAccesorios]=original;
-  $('errorAccesorios').textContent=evaluado.motivo+' Podés corregirlo o guardar como pendiente.';return;
+  $('errorAccesorios').textContent=evaluado.motivo+' Podés corregirlo o guardar como pendiente.';return false;
  }
  cerrarAccesorios();actualizarTramos();
+ $('conciliacionMensaje').textContent='Detalle actualizado; se revisaron las coincidencias. Comprobá el estado de guardado local.';
+ return true;
 }
 
 function agregarTramo(){
