@@ -40,6 +40,27 @@ dialog img{max-height:78vh;max-width:90vw}
 .tabla th,.tabla td{border-bottom:1px solid #dce7e9;padding:8px 5px;text-align:left}
 .tabla-wrap{overflow-x:auto}
 .resumen{font-weight:bold;margin-top:10px}
+/* La misma tabla y los mismos valores: tarjetas solo en GAS y en pantalla móvil. */
+#resumenPrincipalMaterialesGas,#matResultado{scroll-margin-top:16px}
+@media screen and (max-width:640px){
+ .gas-calculo-tramos{display:block;min-width:0}
+ .gas-calculo-tramos thead{position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip-path:inset(50%)}
+ .gas-calculo-tramos tbody{display:grid;gap:10px}
+ .gas-calculo-tramos tr{display:block;min-width:0;padding:10px;border:1px solid #bdccd4;border-radius:10px;background:white}
+ .gas-calculo-tramos td{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;padding:6px 0;overflow-wrap:anywhere}
+ .gas-calculo-tramos td::before{font-weight:bold;color:#126458}
+ .gas-calculo-tramos td:nth-child(1)::before{content:'Tramo'}
+ .gas-calculo-tramos td:nth-child(2)::before{content:'Metros reales'}
+ .gas-calculo-tramos td:nth-child(3)::before{content:'Diámetro registrado'}
+ .gas-calculo-tramos td:nth-child(4)::before{content:'Tiras estimadas'}
+ .gas-calculo-tramos td:nth-child(5)::before{content:'Compra estimada'}
+ .gas-calculo-tramos td:nth-child(6)::before{content:'Cuplas estimadas'}
+ .gas-calculo-tramos td:nth-child(7)::before{content:'Llaves registradas'}
+ .gas-calculo-tramos td:last-child{border-bottom:0}
+ .gas-calculo-tramos tr::after{content:'Cantidades estimadas · verificar antes de comprar';display:block;margin-top:6px;font-size:12px;color:#526675}
+ .gas-calculo-tramos tr.gas-calculo-pendiente::after{content:'Provisorio · hay datos pendientes de revisar';color:#795000}
+}
+
 /* Presentación GAS: controles únicos, sin alterar datos ni cálculos. */
 .gas-materiales-tarjetas{display:grid;gap:8px;min-width:0}
 .gas-material-card{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:5px 10px;align-content:start;border:1px solid #cbdcdd;border-radius:10px;padding:10px;background:#fff;min-width:0;overflow-wrap:anywhere}
@@ -361,7 +382,7 @@ section{box-shadow:none}
 <p class="nota">1. Revisá el detalle. 2. Indicá qué piezas ya están incluidas. 3. Confirmá sólo las adicionales. Cambiar la carga rápida no cambia los tipos del detalle.</p>
 <div id="propuestasCoincidenciaGas"></div><p id="conciliacionMensaje" role="status"></p><div id="conciliacionFilas"></div>
 </details><details class="gas-detalles"><summary>Criterios de conexiones que requieren verificación</summary><p>Verificar la conexión final de cada artefacto y la entrada lateral o superior del medidor contra el croquis, el montaje real y la documentación aplicable. Son criterios pendientes de comprobación, no cantidades fijas de accesorios. Una pieza compartida o una tee que gira no debe contarse dos veces. No se agregan codos, llaves ni otras piezas sólo por estos criterios.</p></details><div id="matUniones"></div>
-<button onclick="generarPlanGas('proyecto')">Generar lista de mi proyecto</button>
+<button onclick="generarPlanGas('proyecto',true)">Generar lista de mi proyecto</button>
 <button class="alt" onclick="generarPlanGas('ejemplo')">Probar materiales: calefón y cocina</button>
 <details><summary>Agregar otro accesorio identificado manualmente</summary>
 <label>Nombre / tipo<input id="matExtraNombre" maxlength="100"></label>
@@ -800,7 +821,14 @@ function renderUnionesMaterialesGas(){
   select.onchange=()=>{const o=datosPlanGas().opciones;const k=fuenteMaterialesGas==='ejemplo'?'unionesEjemplo':'uniones';o[k]={...o[k],[n.id]:select.value};invalidarMaterialesGas();guardarDatos();};label.append(select);out.append(label);
  }
 }
-function generarPlanGas(fuente='proyecto'){
+// Solo una acción explícita desplaza la pantalla; los recálculos conservan la posición.
+function desplazarResultadoMaterialesGas(id='resumenPrincipalMaterialesGas'){
+ const destino=$(id);if(!destino?.scrollIntoView)return;
+ const reducido=typeof window.matchMedia==='function'&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+ try{destino.scrollIntoView({behavior:reducido?'auto':'smooth',block:'start',inline:'nearest'});}
+ catch(e){destino.scrollIntoView();}
+}
+function generarPlanGas(fuente='proyecto',desplazar=false){
  if(modulo!=='gas')return;
  fuenteMaterialesGas=fuente;abrirPlanGas();
  try{
@@ -809,8 +837,8 @@ function generarPlanGas(fuente='proyecto'){
   const firma=firmaMaterialesGas(),previa=datosPlanGas().revisiones[fuente];
   revisionMaterialesGas={firma,fuente,plan:anotarFilasRevisionGas(MaterialesGas.planificarMateriales(entrada,opcionesMaterialesGas()),entrada)};
   if(previa?.firma===firma&&Array.isArray(previa.filas))for(const f of revisionMaterialesGas.plan.filas){const r=previa.filas.find(r=>r.id===f.id);if(r&&(r.cantidad===null||(Number.isInteger(r.cantidad)&&r.cantidad>=0))){if(r.editado)f.cantidadCalculada=f.cantidad;f.cantidad=r.cantidad;f.revisado=!!r.revisado;if(r.editado){f.estado='estimado';f.editado=true;f.cantidadConfirmada=false;}}}
-  renderPlanGas();
- }catch(e){revisionMaterialesGas=null;$('matResultado').replaceChildren();$('matResultado').textContent=e.message;}
+  renderPlanGas();if(desplazar)desplazarResultadoMaterialesGas();
+ }catch(e){revisionMaterialesGas=null;$('matResultado').replaceChildren();$('matResultado').textContent=e.message;if(desplazar)desplazarResultadoMaterialesGas('matResultado');}
 }
 function guardarRevisionMaterialesGas(){
  if(!revisionMaterialesGas)return;
@@ -1170,7 +1198,7 @@ function renderResumenPrincipalGas(){
 function mostrarMaterialesPrincipalGas(){
  if(modulo!=='gas')return;mostrarVista('croquis');
  if(!tramos.length){irSeccionGas('tramos');$('resultadoMateriales').textContent='Cargá primero los tramos. La fotografía y el plano son opcionales.';return;}
- generarPlanGas('proyecto');const out=$('resumenPrincipalMaterialesGas');if(out.scrollIntoView)out.scrollIntoView({block:'start'});
+ generarPlanGas('proyecto',true);
 }
 function mostrarPlanoOpcionalGas(){
  if(modulo!=='gas')return;mostrarVista('croquis');const out=$('estadoPlanoOpcionalGas');out.replaceChildren();
@@ -5091,7 +5119,7 @@ function calcularMateriales(){
  }
  if(tramos.some(t=>esOrigenSimulado(t.origen))){const aviso=document.createElement('p');aviso.className='aviso';aviso.textContent='Este cálculo incluye datos SIMULADOS incorporados desde la demostración. No describe un croquis reconocido ni una instalación real.';out.append(aviso);}
  const tabla=document.createElement('table');
- tabla.className='tabla';
+ tabla.className=modulo==='gas'?'tabla gas-calculo-tramos':'tabla';
  const head=document.createElement('thead');
  const hr=document.createElement('tr');
  ['Tramo','Metros','Caño','Tiras','Compra','Cuplas','Llaves'].forEach(x=>{
@@ -5127,8 +5155,9 @@ function calcularMateriales(){
    grupos[seg.diametro].tiras+=tirasPara(seg.metros);
   });
   const r=document.createElement('tr');
+  if(modulo==='gas'&&calculo.pendiente)r.className='gas-calculo-pendiente';
   [(esOrigenSimulado(t.origen)?'[SIMULADO] ':(t.origen?.tipo==='gemini'?'[IA revisada] ':''))+t.desde+'–'+t.hasta+(calculo.pendiente?' (provisorio)':''),fmt(t.metros),
-   calculo.segmentos.map(s=>s.diametro).filter((d,i,a)=>a.indexOf(d)===i).join(' → '),
+   calculo.segmentos.map(s=>s.diametro).filter((d,i,a)=>a.indexOf(d)===i).join(' → ')||(modulo==='gas'?'Pendiente':''),
    String(n),fmt(compra)+' m',String(uniones),
    String(llavesTramo)].forEach(x=>{
    const td=document.createElement('td');

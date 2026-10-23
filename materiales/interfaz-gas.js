@@ -51,7 +51,14 @@ function renderUnionesMaterialesGas(){
   select.onchange=()=>{const o=datosPlanGas().opciones;const k=fuenteMaterialesGas==='ejemplo'?'unionesEjemplo':'uniones';o[k]={...o[k],[n.id]:select.value};invalidarMaterialesGas();guardarDatos();};label.append(select);out.append(label);
  }
 }
-function generarPlanGas(fuente='proyecto'){
+// Solo una acción explícita desplaza la pantalla; los recálculos conservan la posición.
+function desplazarResultadoMaterialesGas(id='resumenPrincipalMaterialesGas'){
+ const destino=$(id);if(!destino?.scrollIntoView)return;
+ const reducido=typeof window.matchMedia==='function'&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+ try{destino.scrollIntoView({behavior:reducido?'auto':'smooth',block:'start',inline:'nearest'});}
+ catch(e){destino.scrollIntoView();}
+}
+function generarPlanGas(fuente='proyecto',desplazar=false){
  if(modulo!=='gas')return;
  fuenteMaterialesGas=fuente;abrirPlanGas();
  try{
@@ -60,8 +67,8 @@ function generarPlanGas(fuente='proyecto'){
   const firma=firmaMaterialesGas(),previa=datosPlanGas().revisiones[fuente];
   revisionMaterialesGas={firma,fuente,plan:anotarFilasRevisionGas(MaterialesGas.planificarMateriales(entrada,opcionesMaterialesGas()),entrada)};
   if(previa?.firma===firma&&Array.isArray(previa.filas))for(const f of revisionMaterialesGas.plan.filas){const r=previa.filas.find(r=>r.id===f.id);if(r&&(r.cantidad===null||(Number.isInteger(r.cantidad)&&r.cantidad>=0))){if(r.editado)f.cantidadCalculada=f.cantidad;f.cantidad=r.cantidad;f.revisado=!!r.revisado;if(r.editado){f.estado='estimado';f.editado=true;f.cantidadConfirmada=false;}}}
-  renderPlanGas();
- }catch(e){revisionMaterialesGas=null;$('matResultado').replaceChildren();$('matResultado').textContent=e.message;}
+  renderPlanGas();if(desplazar)desplazarResultadoMaterialesGas();
+ }catch(e){revisionMaterialesGas=null;$('matResultado').replaceChildren();$('matResultado').textContent=e.message;if(desplazar)desplazarResultadoMaterialesGas('matResultado');}
 }
 function guardarRevisionMaterialesGas(){
  if(!revisionMaterialesGas)return;
@@ -421,7 +428,7 @@ function renderResumenPrincipalGas(){
 function mostrarMaterialesPrincipalGas(){
  if(modulo!=='gas')return;mostrarVista('croquis');
  if(!tramos.length){irSeccionGas('tramos');$('resultadoMateriales').textContent='Cargá primero los tramos. La fotografía y el plano son opcionales.';return;}
- generarPlanGas('proyecto');const out=$('resumenPrincipalMaterialesGas');if(out.scrollIntoView)out.scrollIntoView({block:'start'});
+ generarPlanGas('proyecto',true);
 }
 function mostrarPlanoOpcionalGas(){
  if(modulo!=='gas')return;mostrarVista('croquis');const out=$('estadoPlanoOpcionalGas');out.replaceChildren();
