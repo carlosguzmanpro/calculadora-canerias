@@ -1,0 +1,1888 @@
+{
+  "base": "73cf0ec",
+  "dimensionamientoDefinitivo": false,
+  "entrada": {
+    "origen": "Ejemplo educativo calefón/cocina; no incorporado al proyecto",
+    "material": "Acero epoxi",
+    "sistema": "Roscado",
+    "nodos": [
+      {
+        "id": "M"
+      },
+      {
+        "id": "A"
+      },
+      {
+        "id": "Calefón"
+      },
+      {
+        "id": "Cocina"
+      }
+    ],
+    "tramos": [
+      {
+        "id": "M-A",
+        "metros": 19,
+        "diametro": "1\"",
+        "medidasEstimadas": true,
+        "red": {
+          "desde": "M",
+          "hasta": "A"
+        },
+        "segmentos": null,
+        "accesorios": [
+          {
+            "tipo": "codo90",
+            "cantidad": 5,
+            "medidas": [
+              "1\"",
+              "1\""
+            ],
+            "confirmado": true,
+            "medidasEstimadas": true,
+            "evidencia": "Cantidad aportada en el ejercicio; medidas del diagnóstico condicionado"
+          },
+          {
+            "tipo": "tee",
+            "cantidad": 1,
+            "nodo": "A",
+            "medidas": [
+              "1\"",
+              "1\"",
+              "3/4\""
+            ],
+            "confirmado": true,
+            "medidasEstimadas": true
+          }
+        ]
+      },
+      {
+        "id": "A-Calefón",
+        "metros": 18,
+        "diametro": "1\"",
+        "medidasEstimadas": true,
+        "red": {
+          "desde": "A",
+          "hasta": "Calefón"
+        },
+        "segmentos": null,
+        "accesorios": [
+          {
+            "tipo": "codo90",
+            "cantidad": 7,
+            "medidas": [
+              "1\"",
+              "1\""
+            ],
+            "confirmado": true,
+            "medidasEstimadas": true,
+            "evidencia": "Cantidad aportada en el ejercicio; medidas del diagnóstico condicionado"
+          },
+          {
+            "tipo": "llave",
+            "cantidad": 1,
+            "medidas": [
+              "1\""
+            ],
+            "confirmado": true,
+            "medidasEstimadas": true
+          }
+        ]
+      },
+      {
+        "id": "A-Cocina",
+        "metros": 12,
+        "diametro": "3/4\"",
+        "medidasEstimadas": true,
+        "red": {
+          "desde": "A",
+          "hasta": "Cocina"
+        },
+        "segmentos": null,
+        "accesorios": [
+          {
+            "tipo": "codo90",
+            "cantidad": 5,
+            "medidas": [
+              "3/4\"",
+              "3/4\""
+            ],
+            "confirmado": true,
+            "medidasEstimadas": true,
+            "evidencia": "Cantidad aportada en el ejercicio; medidas del diagnóstico condicionado"
+          },
+          {
+            "tipo": "llave",
+            "cantidad": 1,
+            "medidas": [
+              "3/4\""
+            ],
+            "confirmado": true,
+            "medidasEstimadas": true
+          }
+        ]
+      }
+    ]
+  },
+  "casos": [
+    {
+      "nombre": "Piezas de cambio pendientes",
+      "opciones": {},
+      "resultado": {
+        "filas": [
+          {
+            "id": "material-0",
+            "unidad": "unidad",
+            "estado": "estimado",
+            "revisado": false,
+            "material": "Codo 90°",
+            "tipo": "codo90",
+            "medidas": [
+              "1\"",
+              "1\""
+            ],
+            "diametro": "1\"",
+            "cantidad": 5,
+            "ubicacion": "M-A",
+            "cantidadConfirmada": true,
+            "evidencia": "Cantidad aportada en el ejercicio; medidas del diagnóstico condicionado",
+            "nodo": null,
+            "origen": "identificado",
+            "equivalentes": "No se calculan en este plan físico"
+          },
+          {
+            "id": "material-1",
+            "unidad": "unidad",
+            "estado": "estimado",
+            "revisado": false,
+            "material": "Tee",
+            "tipo": "tee",
+            "medidas": [
+              "1\"",
+              "1\"",
+              "3/4\""
+            ],
+            "diametro": "1\" / 1\" / 3/4\"",
+            "cantidad": 1,
+            "ubicacion": "M-A",
+            "cantidadConfirmada": true,
+            "evidencia": " Confirmar tee reductora o tee igual con reducción.",
+            "nodo": "A",
+            "origen": "identificado",
+            "equivalentes": "No se calculan en este plan físico"
+          },
+          {
+            "id": "material-2",
+            "unidad": "unidad",
+            "estado": "estimado",
+            "revisado": false,
+            "material": "Codo 90°",
+            "tipo": "codo90",
+            "medidas": [
+              "1\"",
+              "1\""
+            ],
+            "diametro": "1\"",
+            "cantidad": 7,
+            "ubicacion": "A-Calefón",
+            "cantidadConfirmada": true,
+            "evidencia": "Cantidad aportada en el ejercicio; medidas del diagnóstico condicionado",
+            "nodo": null,
+            "origen": "identificado",
+            "equivalentes": "No se calculan en este plan físico"
+          },
+          {
+            "id": "material-3",
+            "unidad": "unidad",
+            "estado": "estimado",
+            "revisado": false,
+            "material": "Llave de paso",
+            "tipo": "llave",
+            "medidas": [
+              "1\""
+            ],
+            "diametro": "1\"",
+            "cantidad": 1,
+            "ubicacion": "A-Calefón",
+            "cantidadConfirmada": true,
+            "evidencia": "",
+            "nodo": null,
+            "origen": "identificado",
+            "equivalentes": "No se calculan en este plan físico"
+          },
+          {
+            "id": "material-4",
+            "unidad": "unidad",
+            "estado": "estimado",
+            "revisado": false,
+            "material": "Codo 90°",
+            "tipo": "codo90",
+            "medidas": [
+              "3/4\"",
+              "3/4\""
+            ],
+            "diametro": "3/4\"",
+            "cantidad": 5,
+            "ubicacion": "A-Cocina",
+            "cantidadConfirmada": true,
+            "evidencia": "Cantidad aportada en el ejercicio; medidas del diagnóstico condicionado",
+            "nodo": null,
+            "origen": "identificado",
+            "equivalentes": "No se calculan en este plan físico"
+          },
+          {
+            "id": "material-5",
+            "unidad": "unidad",
+            "estado": "estimado",
+            "revisado": false,
+            "material": "Llave de paso",
+            "tipo": "llave",
+            "medidas": [
+              "3/4\""
+            ],
+            "diametro": "3/4\"",
+            "cantidad": 1,
+            "ubicacion": "A-Cocina",
+            "cantidadConfirmada": true,
+            "evidencia": "",
+            "nodo": null,
+            "origen": "identificado",
+            "equivalentes": "No se calculan en este plan físico"
+          },
+          {
+            "id": "material-6",
+            "unidad": "unidad",
+            "estado": "estimado",
+            "revisado": false,
+            "tipo": "reduccion-pendiente",
+            "material": "Cambio de diámetro: pieza por confirmar",
+            "diametro": "1\" / 1\" / 3/4\"",
+            "cantidad": null,
+            "ubicacion": "A",
+            "origen": "union-pendiente",
+            "equivalentes": "No incorporado a equivalentes ni cantidad de compra"
+          },
+          {
+            "id": "material-7",
+            "unidad": "unidad",
+            "estado": "estimado",
+            "revisado": false,
+            "tipo": "cano",
+            "material": "Caño Acero epoxi / Roscado · comercial de 6 m",
+            "diametro": "1\"",
+            "cantidad": null,
+            "ubicacion": "M-A, A-Calefón",
+            "origen": "plan-cortes",
+            "minimoTeorico": 7,
+            "evidencia": "Compra pendiente: faltan posiciones. Mínimo por longitud, no lista definitiva."
+          },
+          {
+            "id": "material-8",
+            "unidad": "unidad",
+            "estado": "estimado",
+            "revisado": false,
+            "tipo": "cupla-plan",
+            "material": "Cuplas dentro de segmentos continuos",
+            "diametro": "1\"",
+            "cantidad": null,
+            "ubicacion": "M-A, A-Calefón",
+            "origen": "plan-cortes",
+            "evidencia": "Cuplas pendientes, no cero."
+          },
+          {
+            "id": "material-9",
+            "unidad": "unidad",
+            "estado": "estimado",
+            "revisado": false,
+            "tipo": "cano",
+            "material": "Caño Acero epoxi / Roscado · comercial de 6 m",
+            "diametro": "3/4\"",
+            "cantidad": null,
+            "ubicacion": "A-Cocina",
+            "origen": "plan-cortes",
+            "minimoTeorico": 2,
+            "evidencia": "Compra pendiente: faltan posiciones. Mínimo por longitud, no lista definitiva."
+          },
+          {
+            "id": "material-10",
+            "unidad": "unidad",
+            "estado": "estimado",
+            "revisado": false,
+            "tipo": "cupla-plan",
+            "material": "Cuplas dentro de segmentos continuos",
+            "diametro": "3/4\"",
+            "cantidad": null,
+            "ubicacion": "A-Cocina",
+            "origen": "plan-cortes",
+            "evidencia": "Cuplas pendientes, no cero."
+          }
+        ],
+        "planes": [
+          {
+            "diametro": "1\"",
+            "material": "Acero epoxi",
+            "sistema": "Roscado",
+            "metros": 37,
+            "segmentos": [],
+            "faltantes": [
+              "M-A",
+              "A-Calefón"
+            ],
+            "ubicaciones": [
+              "M-A",
+              "A-Calefón"
+            ],
+            "medidasEstimadas": true,
+            "minimoTeorico": 7,
+            "compraEstimada": null,
+            "cuplasPropuestas": null,
+            "plan": null,
+            "hipotesis": false
+          },
+          {
+            "diametro": "3/4\"",
+            "material": "Acero epoxi",
+            "sistema": "Roscado",
+            "metros": 12,
+            "segmentos": [],
+            "faltantes": [
+              "A-Cocina"
+            ],
+            "ubicaciones": [
+              "A-Cocina"
+            ],
+            "medidasEstimadas": true,
+            "minimoTeorico": 2,
+            "compraEstimada": null,
+            "cuplasPropuestas": null,
+            "plan": null,
+            "hipotesis": false
+          }
+        ],
+        "avisos": [
+          "Faltan segmentos entre accesorios en M-A, A-Calefón: compra y cuplas reales pendientes.",
+          "Faltan segmentos entre accesorios en A-Cocina: compra y cuplas reales pendientes."
+        ],
+        "config": {
+          "largoComercial": 6,
+          "reutilizar": false,
+          "minimoSobrante": 0.5,
+          "hipotesisSinPosiciones": false
+        },
+        "dimensionamientoDefinitivo": false,
+        "supuestos": [
+          "Configuración usada: largo comercial 6 m; reutilización no propuesta (escenario conservador); sobrante mínimo 0.5 m.",
+          "Plan físico independiente del dimensionamiento. Los diámetros propuestos no se convierten en definitivos.",
+          "Mínimo teórico = techo de longitud total por medida/material/sistema dividido por largo comercial: solo cota inferior, sin geometría ni desperdicio.",
+          "Compra estimada por cortes FFD, no optimización garantizada. Solo se proponen sobrantes del mismo grupo y que cumplan longitud mínima, si se habilita reutilizar.",
+          "No se suman sobrantes para fabricar una pieza; esa alternativa requeriría otras cuplas y revisión. No se incluyeron roscas, pérdidas de corte, reserva ni sobrantes preexistentes.",
+          "Una cupla por unión propuesta dentro de cada segmento. Posiciones desconocidas producen pendientes. Los accesorios compartidos se cuentan una sola vez por identificación física.",
+          "Las reducciones se listan en materiales y no se agregan a equivalentes del método de clase."
+        ]
+      }
+    },
+    {
+      "nombre": "Tee reductora integrada (hipótesis)",
+      "opciones": {
+        "uniones": {
+          "A": "tee-reductora"
+        }
+      },
+      "resultado": {
+        "filas": [
+          {
+            "id": "material-0",
+            "unidad": "unidad",
+            "estado": "estimado",
+            "revisado": false,
+            "material": "Codo 90°",
+            "tipo": "codo90",
+            "medidas": [
+              "1\"",
+              "1\""
+            ],
+            "diametro": "1\"",
+            "cantidad": 5,
+            "ubicacion": "M-A",
+            "cantidadConfirmada": true,
+            "evidencia": "Cantidad aportada en el ejercicio; medidas del diagnóstico condicionado",
+            "nodo": null,
+            "origen": "identificado",
+            "equivalentes": "No se calculan en este plan físico"
+          },
+          {
+            "id": "material-1",
+            "unidad": "unidad",
+            "estado": "estimado",
+            "revisado": false,
+            "material": "Tee reductora",
+            "tipo": "tee",
+            "medidas": [
+              "1\"",
+              "1\"",
+              "3/4\""
+            ],
+            "diametro": "1\" / 1\" / 3/4\"",
+            "cantidad": 1,
+            "ubicacion": "M-A",
+            "cantidadConfirmada": true,
+            "evidencia": " Pieza integrada elegida para revisión; no se duplica reducción.",
+            "nodo": "A",
+            "origen": "identificado",
+            "equivalentes": "No se calculan en este plan físico"
+          },
+          {
+            "id": "material-2",
+            "unidad": "unidad",
+            "estado": "estimado",
+            "revisado": false,
+            "material": "Codo 90°",
+            "tipo": "codo90",
+            "medidas": [
+              "1\"",
+              "1\""
+            ],
+            "diametro": "1\"",
+            "cantidad": 7,
+            "ubicacion": "A-Calefón",
+            "cantidadConfirmada": true,
+            "evidencia": "Cantidad aportada en el ejercicio; medidas del diagnóstico condicionado",
+            "nodo": null,
+            "origen": "identificado",
+            "equivalentes": "No se calculan en este plan físico"
+          },
+          {
+            "id": "material-3",
+            "unidad": "unidad",
+            "estado": "estimado",
+            "revisado": false,
+            "material": "Llave de paso",
+            "tipo": "llave",
+            "medidas": [
+              "1\""
+            ],
+            "diametro": "1\"",
+            "cantidad": 1,
+            "ubicacion": "A-Calefón",
+            "cantidadConfirmada": true,
+            "evidencia": "",
+            "nodo": null,
+            "origen": "identificado",
+            "equivalentes": "No se calculan en este plan físico"
+          },
+          {
+            "id": "material-4",
+            "unidad": "unidad",
+            "estado": "estimado",
+            "revisado": false,
+            "material": "Codo 90°",
+            "tipo": "codo90",
+            "medidas": [
+              "3/4\"",
+              "3/4\""
+            ],
+            "diametro": "3/4\"",
+            "cantidad": 5,
+            "ubicacion": "A-Cocina",
+            "cantidadConfirmada": true,
+            "evidencia": "Cantidad aportada en el ejercicio; medidas del diagnóstico condicionado",
+            "nodo": null,
+            "origen": "identificado",
+            "equivalentes": "No se calculan en este plan físico"
+          },
+          {
+            "id": "material-5",
+            "unidad": "unidad",
+            "estado": "estimado",
+            "revisado": false,
+            "material": "Llave de paso",
+            "tipo": "llave",
+            "medidas": [
+              "3/4\""
+            ],
+            "diametro": "3/4\"",
+            "cantidad": 1,
+            "ubicacion": "A-Cocina",
+            "cantidadConfirmada": true,
+            "evidencia": "",
+            "nodo": null,
+            "origen": "identificado",
+            "equivalentes": "No se calculan en este plan físico"
+          },
+          {
+            "id": "material-6",
+            "unidad": "unidad",
+            "estado": "estimado",
+            "revisado": false,
+            "tipo": "cano",
+            "material": "Caño Acero epoxi / Roscado · comercial de 6 m",
+            "diametro": "1\"",
+            "cantidad": null,
+            "ubicacion": "M-A, A-Calefón",
+            "origen": "plan-cortes",
+            "minimoTeorico": 7,
+            "evidencia": "Compra pendiente: faltan posiciones. Mínimo por longitud, no lista definitiva."
+          },
+          {
+            "id": "material-7",
+            "unidad": "unidad",
+            "estado": "estimado",
+            "revisado": false,
+            "tipo": "cupla-plan",
+            "material": "Cuplas dentro de segmentos continuos",
+            "diametro": "1\"",
+            "cantidad": null,
+            "ubicacion": "M-A, A-Calefón",
+            "origen": "plan-cortes",
+            "evidencia": "Cuplas pendientes, no cero."
+          },
+          {
+            "id": "material-8",
+            "unidad": "unidad",
+            "estado": "estimado",
+            "revisado": false,
+            "tipo": "cano",
+            "material": "Caño Acero epoxi / Roscado · comercial de 6 m",
+            "diametro": "3/4\"",
+            "cantidad": null,
+            "ubicacion": "A-Cocina",
+            "origen": "plan-cortes",
+            "minimoTeorico": 2,
+            "evidencia": "Compra pendiente: faltan posiciones. Mínimo por longitud, no lista definitiva."
+          },
+          {
+            "id": "material-9",
+            "unidad": "unidad",
+            "estado": "estimado",
+            "revisado": false,
+            "tipo": "cupla-plan",
+            "material": "Cuplas dentro de segmentos continuos",
+            "diametro": "3/4\"",
+            "cantidad": null,
+            "ubicacion": "A-Cocina",
+            "origen": "plan-cortes",
+            "evidencia": "Cuplas pendientes, no cero."
+          }
+        ],
+        "planes": [
+          {
+            "diametro": "1\"",
+            "material": "Acero epoxi",
+            "sistema": "Roscado",
+            "metros": 37,
+            "segmentos": [],
+            "faltantes": [
+              "M-A",
+              "A-Calefón"
+            ],
+            "ubicaciones": [
+              "M-A",
+              "A-Calefón"
+            ],
+            "medidasEstimadas": true,
+            "minimoTeorico": 7,
+            "compraEstimada": null,
+            "cuplasPropuestas": null,
+            "plan": null,
+            "hipotesis": false
+          },
+          {
+            "diametro": "3/4\"",
+            "material": "Acero epoxi",
+            "sistema": "Roscado",
+            "metros": 12,
+            "segmentos": [],
+            "faltantes": [
+              "A-Cocina"
+            ],
+            "ubicaciones": [
+              "A-Cocina"
+            ],
+            "medidasEstimadas": true,
+            "minimoTeorico": 2,
+            "compraEstimada": null,
+            "cuplasPropuestas": null,
+            "plan": null,
+            "hipotesis": false
+          }
+        ],
+        "avisos": [
+          "Faltan segmentos entre accesorios en M-A, A-Calefón: compra y cuplas reales pendientes.",
+          "Faltan segmentos entre accesorios en A-Cocina: compra y cuplas reales pendientes."
+        ],
+        "config": {
+          "largoComercial": 6,
+          "reutilizar": false,
+          "minimoSobrante": 0.5,
+          "hipotesisSinPosiciones": false,
+          "uniones": {
+            "A": "tee-reductora"
+          }
+        },
+        "dimensionamientoDefinitivo": false,
+        "supuestos": [
+          "Configuración usada: largo comercial 6 m; reutilización no propuesta (escenario conservador); sobrante mínimo 0.5 m.",
+          "Plan físico independiente del dimensionamiento. Los diámetros propuestos no se convierten en definitivos.",
+          "Mínimo teórico = techo de longitud total por medida/material/sistema dividido por largo comercial: solo cota inferior, sin geometría ni desperdicio.",
+          "Compra estimada por cortes FFD, no optimización garantizada. Solo se proponen sobrantes del mismo grupo y que cumplan longitud mínima, si se habilita reutilizar.",
+          "No se suman sobrantes para fabricar una pieza; esa alternativa requeriría otras cuplas y revisión. No se incluyeron roscas, pérdidas de corte, reserva ni sobrantes preexistentes.",
+          "Una cupla por unión propuesta dentro de cada segmento. Posiciones desconocidas producen pendientes. Los accesorios compartidos se cuentan una sola vez por identificación física.",
+          "Las reducciones se listan en materiales y no se agregan a equivalentes del método de clase."
+        ]
+      }
+    },
+    {
+      "nombre": "Tee igual más reducción (hipótesis)",
+      "opciones": {
+        "uniones": {
+          "A": "tee-igual-reduccion"
+        }
+      },
+      "resultado": {
+        "filas": [
+          {
+            "id": "material-0",
+            "unidad": "unidad",
+            "estado": "estimado",
+            "revisado": false,
+            "material": "Codo 90°",
+            "tipo": "codo90",
+            "medidas": [
+              "1\"",
+              "1\""
+            ],
+            "diametro": "1\"",
+            "cantidad": 5,
+            "ubicacion": "M-A",
+            "cantidadConfirmada": true,
+            "evidencia": "Cantidad aportada en el ejercicio; medidas del diagnóstico condicionado",
+            "nodo": null,
+            "origen": "identificado",
+            "equivalentes": "No se calculan en este plan físico"
+          },
+          {
+            "id": "material-1",
+            "unidad": "unidad",
+            "estado": "estimado",
+            "revisado": false,
+            "material": "Tee igual",
+            "tipo": "tee",
+            "medidas": [
+              "1\"",
+              "1\"",
+              "3/4\""
+            ],
+            "diametro": "1\" / 1\" / 1\"",
+            "cantidad": 1,
+            "ubicacion": "M-A",
+            "cantidadConfirmada": true,
+            "evidencia": "",
+            "nodo": "A",
+            "origen": "identificado",
+            "equivalentes": "No se calculan en este plan físico"
+          },
+          {
+            "id": "material-2",
+            "unidad": "unidad",
+            "estado": "estimado",
+            "revisado": false,
+            "material": "Codo 90°",
+            "tipo": "codo90",
+            "medidas": [
+              "1\"",
+              "1\""
+            ],
+            "diametro": "1\"",
+            "cantidad": 7,
+            "ubicacion": "A-Calefón",
+            "cantidadConfirmada": true,
+            "evidencia": "Cantidad aportada en el ejercicio; medidas del diagnóstico condicionado",
+            "nodo": null,
+            "origen": "identificado",
+            "equivalentes": "No se calculan en este plan físico"
+          },
+          {
+            "id": "material-3",
+            "unidad": "unidad",
+            "estado": "estimado",
+            "revisado": false,
+            "material": "Llave de paso",
+            "tipo": "llave",
+            "medidas": [
+              "1\""
+            ],
+            "diametro": "1\"",
+            "cantidad": 1,
+            "ubicacion": "A-Calefón",
+            "cantidadConfirmada": true,
+            "evidencia": "",
+            "nodo": null,
+            "origen": "identificado",
+            "equivalentes": "No se calculan en este plan físico"
+          },
+          {
+            "id": "material-4",
+            "unidad": "unidad",
+            "estado": "estimado",
+            "revisado": false,
+            "material": "Codo 90°",
+            "tipo": "codo90",
+            "medidas": [
+              "3/4\"",
+              "3/4\""
+            ],
+            "diametro": "3/4\"",
+            "cantidad": 5,
+            "ubicacion": "A-Cocina",
+            "cantidadConfirmada": true,
+            "evidencia": "Cantidad aportada en el ejercicio; medidas del diagnóstico condicionado",
+            "nodo": null,
+            "origen": "identificado",
+            "equivalentes": "No se calculan en este plan físico"
+          },
+          {
+            "id": "material-5",
+            "unidad": "unidad",
+            "estado": "estimado",
+            "revisado": false,
+            "material": "Llave de paso",
+            "tipo": "llave",
+            "medidas": [
+              "3/4\""
+            ],
+            "diametro": "3/4\"",
+            "cantidad": 1,
+            "ubicacion": "A-Cocina",
+            "cantidadConfirmada": true,
+            "evidencia": "",
+            "nodo": null,
+            "origen": "identificado",
+            "equivalentes": "No se calculan en este plan físico"
+          },
+          {
+            "id": "material-6",
+            "unidad": "unidad",
+            "estado": "estimado",
+            "revisado": false,
+            "tipo": "reduccion",
+            "material": "Reducción independiente",
+            "diametro": "1\" / 3/4\"",
+            "cantidad": 1,
+            "ubicacion": "A · salida a A-Cocina",
+            "origen": "union-propuesta",
+            "equivalentes": "Excluida del método de clase; no significa pérdida nula"
+          },
+          {
+            "id": "material-7",
+            "unidad": "unidad",
+            "estado": "estimado",
+            "revisado": false,
+            "tipo": "cano",
+            "material": "Caño Acero epoxi / Roscado · comercial de 6 m",
+            "diametro": "1\"",
+            "cantidad": null,
+            "ubicacion": "M-A, A-Calefón",
+            "origen": "plan-cortes",
+            "minimoTeorico": 7,
+            "evidencia": "Compra pendiente: faltan posiciones. Mínimo por longitud, no lista definitiva."
+          },
+          {
+            "id": "material-8",
+            "unidad": "unidad",
+            "estado": "estimado",
+            "revisado": false,
+            "tipo": "cupla-plan",
+            "material": "Cuplas dentro de segmentos continuos",
+            "diametro": "1\"",
+            "cantidad": null,
+            "ubicacion": "M-A, A-Calefón",
+            "origen": "plan-cortes",
+            "evidencia": "Cuplas pendientes, no cero."
+          },
+          {
+            "id": "material-9",
+            "unidad": "unidad",
+            "estado": "estimado",
+            "revisado": false,
+            "tipo": "cano",
+            "material": "Caño Acero epoxi / Roscado · comercial de 6 m",
+            "diametro": "3/4\"",
+            "cantidad": null,
+            "ubicacion": "A-Cocina",
+            "origen": "plan-cortes",
+            "minimoTeorico": 2,
+            "evidencia": "Compra pendiente: faltan posiciones. Mínimo por longitud, no lista definitiva."
+          },
+          {
+            "id": "material-10",
+            "unidad": "unidad",
+            "estado": "estimado",
+            "revisado": false,
+            "tipo": "cupla-plan",
+            "material": "Cuplas dentro de segmentos continuos",
+            "diametro": "3/4\"",
+            "cantidad": null,
+            "ubicacion": "A-Cocina",
+            "origen": "plan-cortes",
+            "evidencia": "Cuplas pendientes, no cero."
+          }
+        ],
+        "planes": [
+          {
+            "diametro": "1\"",
+            "material": "Acero epoxi",
+            "sistema": "Roscado",
+            "metros": 37,
+            "segmentos": [],
+            "faltantes": [
+              "M-A",
+              "A-Calefón"
+            ],
+            "ubicaciones": [
+              "M-A",
+              "A-Calefón"
+            ],
+            "medidasEstimadas": true,
+            "minimoTeorico": 7,
+            "compraEstimada": null,
+            "cuplasPropuestas": null,
+            "plan": null,
+            "hipotesis": false
+          },
+          {
+            "diametro": "3/4\"",
+            "material": "Acero epoxi",
+            "sistema": "Roscado",
+            "metros": 12,
+            "segmentos": [],
+            "faltantes": [
+              "A-Cocina"
+            ],
+            "ubicaciones": [
+              "A-Cocina"
+            ],
+            "medidasEstimadas": true,
+            "minimoTeorico": 2,
+            "compraEstimada": null,
+            "cuplasPropuestas": null,
+            "plan": null,
+            "hipotesis": false
+          }
+        ],
+        "avisos": [
+          "Faltan segmentos entre accesorios en M-A, A-Calefón: compra y cuplas reales pendientes.",
+          "Faltan segmentos entre accesorios en A-Cocina: compra y cuplas reales pendientes."
+        ],
+        "config": {
+          "largoComercial": 6,
+          "reutilizar": false,
+          "minimoSobrante": 0.5,
+          "hipotesisSinPosiciones": false,
+          "uniones": {
+            "A": "tee-igual-reduccion"
+          }
+        },
+        "dimensionamientoDefinitivo": false,
+        "supuestos": [
+          "Configuración usada: largo comercial 6 m; reutilización no propuesta (escenario conservador); sobrante mínimo 0.5 m.",
+          "Plan físico independiente del dimensionamiento. Los diámetros propuestos no se convierten en definitivos.",
+          "Mínimo teórico = techo de longitud total por medida/material/sistema dividido por largo comercial: solo cota inferior, sin geometría ni desperdicio.",
+          "Compra estimada por cortes FFD, no optimización garantizada. Solo se proponen sobrantes del mismo grupo y que cumplan longitud mínima, si se habilita reutilizar.",
+          "No se suman sobrantes para fabricar una pieza; esa alternativa requeriría otras cuplas y revisión. No se incluyeron roscas, pérdidas de corte, reserva ni sobrantes preexistentes.",
+          "Una cupla por unión propuesta dentro de cada segmento. Posiciones desconocidas producen pendientes. Los accesorios compartidos se cuentan una sola vez por identificación física.",
+          "Las reducciones se listan en materiales y no se agregan a equivalentes del método de clase."
+        ]
+      }
+    },
+    {
+      "nombre": "Hipótesis por longitud SIN reutilizar",
+      "opciones": {
+        "uniones": {
+          "A": "tee-reductora"
+        },
+        "hipotesisSinPosiciones": true
+      },
+      "resultado": {
+        "filas": [
+          {
+            "id": "material-0",
+            "unidad": "unidad",
+            "estado": "estimado",
+            "revisado": false,
+            "material": "Codo 90°",
+            "tipo": "codo90",
+            "medidas": [
+              "1\"",
+              "1\""
+            ],
+            "diametro": "1\"",
+            "cantidad": 5,
+            "ubicacion": "M-A",
+            "cantidadConfirmada": true,
+            "evidencia": "Cantidad aportada en el ejercicio; medidas del diagnóstico condicionado",
+            "nodo": null,
+            "origen": "identificado",
+            "equivalentes": "No se calculan en este plan físico"
+          },
+          {
+            "id": "material-1",
+            "unidad": "unidad",
+            "estado": "estimado",
+            "revisado": false,
+            "material": "Tee reductora",
+            "tipo": "tee",
+            "medidas": [
+              "1\"",
+              "1\"",
+              "3/4\""
+            ],
+            "diametro": "1\" / 1\" / 3/4\"",
+            "cantidad": 1,
+            "ubicacion": "M-A",
+            "cantidadConfirmada": true,
+            "evidencia": " Pieza integrada elegida para revisión; no se duplica reducción.",
+            "nodo": "A",
+            "origen": "identificado",
+            "equivalentes": "No se calculan en este plan físico"
+          },
+          {
+            "id": "material-2",
+            "unidad": "unidad",
+            "estado": "estimado",
+            "revisado": false,
+            "material": "Codo 90°",
+            "tipo": "codo90",
+            "medidas": [
+              "1\"",
+              "1\""
+            ],
+            "diametro": "1\"",
+            "cantidad": 7,
+            "ubicacion": "A-Calefón",
+            "cantidadConfirmada": true,
+            "evidencia": "Cantidad aportada en el ejercicio; medidas del diagnóstico condicionado",
+            "nodo": null,
+            "origen": "identificado",
+            "equivalentes": "No se calculan en este plan físico"
+          },
+          {
+            "id": "material-3",
+            "unidad": "unidad",
+            "estado": "estimado",
+            "revisado": false,
+            "material": "Llave de paso",
+            "tipo": "llave",
+            "medidas": [
+              "1\""
+            ],
+            "diametro": "1\"",
+            "cantidad": 1,
+            "ubicacion": "A-Calefón",
+            "cantidadConfirmada": true,
+            "evidencia": "",
+            "nodo": null,
+            "origen": "identificado",
+            "equivalentes": "No se calculan en este plan físico"
+          },
+          {
+            "id": "material-4",
+            "unidad": "unidad",
+            "estado": "estimado",
+            "revisado": false,
+            "material": "Codo 90°",
+            "tipo": "codo90",
+            "medidas": [
+              "3/4\"",
+              "3/4\""
+            ],
+            "diametro": "3/4\"",
+            "cantidad": 5,
+            "ubicacion": "A-Cocina",
+            "cantidadConfirmada": true,
+            "evidencia": "Cantidad aportada en el ejercicio; medidas del diagnóstico condicionado",
+            "nodo": null,
+            "origen": "identificado",
+            "equivalentes": "No se calculan en este plan físico"
+          },
+          {
+            "id": "material-5",
+            "unidad": "unidad",
+            "estado": "estimado",
+            "revisado": false,
+            "material": "Llave de paso",
+            "tipo": "llave",
+            "medidas": [
+              "3/4\""
+            ],
+            "diametro": "3/4\"",
+            "cantidad": 1,
+            "ubicacion": "A-Cocina",
+            "cantidadConfirmada": true,
+            "evidencia": "",
+            "nodo": null,
+            "origen": "identificado",
+            "equivalentes": "No se calculan en este plan físico"
+          },
+          {
+            "id": "material-6",
+            "unidad": "unidad",
+            "estado": "estimado",
+            "revisado": false,
+            "tipo": "cano",
+            "material": "Caño Acero epoxi / Roscado · comercial de 6 m",
+            "diametro": "1\"",
+            "cantidad": null,
+            "ubicacion": "M-A, A-Calefón",
+            "origen": "plan-cortes",
+            "minimoTeorico": 7,
+            "evidencia": "Compra pendiente: faltan posiciones. Mínimo por longitud, no lista definitiva."
+          },
+          {
+            "id": "material-7",
+            "unidad": "unidad",
+            "estado": "estimado",
+            "revisado": false,
+            "tipo": "cupla-plan",
+            "material": "Cuplas dentro de segmentos continuos",
+            "diametro": "1\"",
+            "cantidad": null,
+            "ubicacion": "M-A, A-Calefón",
+            "origen": "plan-cortes",
+            "evidencia": "Cuplas pendientes, no cero."
+          },
+          {
+            "id": "material-8",
+            "unidad": "unidad",
+            "estado": "estimado",
+            "revisado": false,
+            "tipo": "cano",
+            "material": "Caño Acero epoxi / Roscado · comercial de 6 m",
+            "diametro": "3/4\"",
+            "cantidad": null,
+            "ubicacion": "A-Cocina",
+            "origen": "plan-cortes",
+            "minimoTeorico": 2,
+            "evidencia": "Compra pendiente: faltan posiciones. Mínimo por longitud, no lista definitiva."
+          },
+          {
+            "id": "material-9",
+            "unidad": "unidad",
+            "estado": "estimado",
+            "revisado": false,
+            "tipo": "cupla-plan",
+            "material": "Cuplas dentro de segmentos continuos",
+            "diametro": "3/4\"",
+            "cantidad": null,
+            "ubicacion": "A-Cocina",
+            "origen": "plan-cortes",
+            "evidencia": "Cuplas pendientes, no cero."
+          }
+        ],
+        "planes": [
+          {
+            "diametro": "1\"",
+            "material": "Acero epoxi",
+            "sistema": "Roscado",
+            "metros": 37,
+            "segmentos": [],
+            "faltantes": [
+              "M-A",
+              "A-Calefón"
+            ],
+            "ubicaciones": [
+              "M-A",
+              "A-Calefón"
+            ],
+            "medidasEstimadas": true,
+            "minimoTeorico": 7,
+            "compraEstimada": null,
+            "cuplasPropuestas": null,
+            "plan": {
+              "metros": 37,
+              "minimoTeorico": 7,
+              "compraEstimada": 7,
+              "cuplasPropuestas": 5,
+              "barras": [
+                {
+                  "id": "barra-1",
+                  "metros": 6,
+                  "cortes": [
+                    {
+                      "segmento": "A-Calefón:HIPOTESIS",
+                      "metros": 6
+                    }
+                  ],
+                  "sobrante": 0
+                },
+                {
+                  "id": "barra-2",
+                  "metros": 6,
+                  "cortes": [
+                    {
+                      "segmento": "A-Calefón:HIPOTESIS",
+                      "metros": 6
+                    }
+                  ],
+                  "sobrante": 0
+                },
+                {
+                  "id": "barra-3",
+                  "metros": 6,
+                  "cortes": [
+                    {
+                      "segmento": "A-Calefón:HIPOTESIS",
+                      "metros": 6
+                    }
+                  ],
+                  "sobrante": 0
+                },
+                {
+                  "id": "barra-4",
+                  "metros": 6,
+                  "cortes": [
+                    {
+                      "segmento": "M-A:HIPOTESIS",
+                      "metros": 6
+                    }
+                  ],
+                  "sobrante": 0
+                },
+                {
+                  "id": "barra-5",
+                  "metros": 6,
+                  "cortes": [
+                    {
+                      "segmento": "M-A:HIPOTESIS",
+                      "metros": 6
+                    }
+                  ],
+                  "sobrante": 0
+                },
+                {
+                  "id": "barra-6",
+                  "metros": 6,
+                  "cortes": [
+                    {
+                      "segmento": "M-A:HIPOTESIS",
+                      "metros": 6
+                    }
+                  ],
+                  "sobrante": 0
+                },
+                {
+                  "id": "barra-7",
+                  "metros": 6,
+                  "cortes": [
+                    {
+                      "segmento": "M-A:HIPOTESIS",
+                      "metros": 1
+                    }
+                  ],
+                  "sobrante": 5
+                }
+              ],
+              "porSegmento": {
+                "M-A:HIPOTESIS": {
+                  "metros": 19,
+                  "piezas": [
+                    {
+                      "barra": "barra-4",
+                      "metros": 6
+                    },
+                    {
+                      "barra": "barra-5",
+                      "metros": 6
+                    },
+                    {
+                      "barra": "barra-6",
+                      "metros": 6
+                    },
+                    {
+                      "barra": "barra-7",
+                      "metros": 1
+                    }
+                  ],
+                  "cuplas": 3,
+                  "ubicacion": "M-A"
+                },
+                "A-Calefón:HIPOTESIS": {
+                  "metros": 18,
+                  "piezas": [
+                    {
+                      "barra": "barra-1",
+                      "metros": 6
+                    },
+                    {
+                      "barra": "barra-2",
+                      "metros": 6
+                    },
+                    {
+                      "barra": "barra-3",
+                      "metros": 6
+                    }
+                  ],
+                  "cuplas": 2,
+                  "ubicacion": "A-Calefón"
+                }
+              },
+              "sobrantes": [
+                {
+                  "barra": "barra-7",
+                  "metros": 5,
+                  "reutilizable": false
+                }
+              ],
+              "garantiaOptimo": false
+            },
+            "hipotesis": true
+          },
+          {
+            "diametro": "3/4\"",
+            "material": "Acero epoxi",
+            "sistema": "Roscado",
+            "metros": 12,
+            "segmentos": [],
+            "faltantes": [
+              "A-Cocina"
+            ],
+            "ubicaciones": [
+              "A-Cocina"
+            ],
+            "medidasEstimadas": true,
+            "minimoTeorico": 2,
+            "compraEstimada": null,
+            "cuplasPropuestas": null,
+            "plan": {
+              "metros": 12,
+              "minimoTeorico": 2,
+              "compraEstimada": 2,
+              "cuplasPropuestas": 1,
+              "barras": [
+                {
+                  "id": "barra-1",
+                  "metros": 6,
+                  "cortes": [
+                    {
+                      "segmento": "A-Cocina:HIPOTESIS",
+                      "metros": 6
+                    }
+                  ],
+                  "sobrante": 0
+                },
+                {
+                  "id": "barra-2",
+                  "metros": 6,
+                  "cortes": [
+                    {
+                      "segmento": "A-Cocina:HIPOTESIS",
+                      "metros": 6
+                    }
+                  ],
+                  "sobrante": 0
+                }
+              ],
+              "porSegmento": {
+                "A-Cocina:HIPOTESIS": {
+                  "metros": 12,
+                  "piezas": [
+                    {
+                      "barra": "barra-1",
+                      "metros": 6
+                    },
+                    {
+                      "barra": "barra-2",
+                      "metros": 6
+                    }
+                  ],
+                  "cuplas": 1,
+                  "ubicacion": "A-Cocina"
+                }
+              },
+              "sobrantes": [],
+              "garantiaOptimo": false
+            },
+            "hipotesis": true
+          }
+        ],
+        "avisos": [
+          "Faltan segmentos entre accesorios en M-A, A-Calefón: compra y cuplas reales pendientes.",
+          "Faltan segmentos entre accesorios en A-Cocina: compra y cuplas reales pendientes."
+        ],
+        "config": {
+          "largoComercial": 6,
+          "reutilizar": false,
+          "minimoSobrante": 0.5,
+          "hipotesisSinPosiciones": true,
+          "uniones": {
+            "A": "tee-reductora"
+          }
+        },
+        "dimensionamientoDefinitivo": false,
+        "supuestos": [
+          "Configuración usada: largo comercial 6 m; reutilización no propuesta (escenario conservador); sobrante mínimo 0.5 m.",
+          "Plan físico independiente del dimensionamiento. Los diámetros propuestos no se convierten en definitivos.",
+          "Mínimo teórico = techo de longitud total por medida/material/sistema dividido por largo comercial: solo cota inferior, sin geometría ni desperdicio.",
+          "Compra estimada por cortes FFD, no optimización garantizada. Solo se proponen sobrantes del mismo grupo y que cumplan longitud mínima, si se habilita reutilizar.",
+          "No se suman sobrantes para fabricar una pieza; esa alternativa requeriría otras cuplas y revisión. No se incluyeron roscas, pérdidas de corte, reserva ni sobrantes preexistentes.",
+          "Una cupla por unión propuesta dentro de cada segmento. Posiciones desconocidas producen pendientes. Los accesorios compartidos se cuentan una sola vez por identificación física.",
+          "Las reducciones se listan en materiales y no se agregan a equivalentes del método de clase."
+        ]
+      }
+    },
+    {
+      "nombre": "Hipótesis por longitud CON reutilización",
+      "opciones": {
+        "uniones": {
+          "A": "tee-reductora"
+        },
+        "hipotesisSinPosiciones": true,
+        "reutilizar": true
+      },
+      "resultado": {
+        "filas": [
+          {
+            "id": "material-0",
+            "unidad": "unidad",
+            "estado": "estimado",
+            "revisado": false,
+            "material": "Codo 90°",
+            "tipo": "codo90",
+            "medidas": [
+              "1\"",
+              "1\""
+            ],
+            "diametro": "1\"",
+            "cantidad": 5,
+            "ubicacion": "M-A",
+            "cantidadConfirmada": true,
+            "evidencia": "Cantidad aportada en el ejercicio; medidas del diagnóstico condicionado",
+            "nodo": null,
+            "origen": "identificado",
+            "equivalentes": "No se calculan en este plan físico"
+          },
+          {
+            "id": "material-1",
+            "unidad": "unidad",
+            "estado": "estimado",
+            "revisado": false,
+            "material": "Tee reductora",
+            "tipo": "tee",
+            "medidas": [
+              "1\"",
+              "1\"",
+              "3/4\""
+            ],
+            "diametro": "1\" / 1\" / 3/4\"",
+            "cantidad": 1,
+            "ubicacion": "M-A",
+            "cantidadConfirmada": true,
+            "evidencia": " Pieza integrada elegida para revisión; no se duplica reducción.",
+            "nodo": "A",
+            "origen": "identificado",
+            "equivalentes": "No se calculan en este plan físico"
+          },
+          {
+            "id": "material-2",
+            "unidad": "unidad",
+            "estado": "estimado",
+            "revisado": false,
+            "material": "Codo 90°",
+            "tipo": "codo90",
+            "medidas": [
+              "1\"",
+              "1\""
+            ],
+            "diametro": "1\"",
+            "cantidad": 7,
+            "ubicacion": "A-Calefón",
+            "cantidadConfirmada": true,
+            "evidencia": "Cantidad aportada en el ejercicio; medidas del diagnóstico condicionado",
+            "nodo": null,
+            "origen": "identificado",
+            "equivalentes": "No se calculan en este plan físico"
+          },
+          {
+            "id": "material-3",
+            "unidad": "unidad",
+            "estado": "estimado",
+            "revisado": false,
+            "material": "Llave de paso",
+            "tipo": "llave",
+            "medidas": [
+              "1\""
+            ],
+            "diametro": "1\"",
+            "cantidad": 1,
+            "ubicacion": "A-Calefón",
+            "cantidadConfirmada": true,
+            "evidencia": "",
+            "nodo": null,
+            "origen": "identificado",
+            "equivalentes": "No se calculan en este plan físico"
+          },
+          {
+            "id": "material-4",
+            "unidad": "unidad",
+            "estado": "estimado",
+            "revisado": false,
+            "material": "Codo 90°",
+            "tipo": "codo90",
+            "medidas": [
+              "3/4\"",
+              "3/4\""
+            ],
+            "diametro": "3/4\"",
+            "cantidad": 5,
+            "ubicacion": "A-Cocina",
+            "cantidadConfirmada": true,
+            "evidencia": "Cantidad aportada en el ejercicio; medidas del diagnóstico condicionado",
+            "nodo": null,
+            "origen": "identificado",
+            "equivalentes": "No se calculan en este plan físico"
+          },
+          {
+            "id": "material-5",
+            "unidad": "unidad",
+            "estado": "estimado",
+            "revisado": false,
+            "material": "Llave de paso",
+            "tipo": "llave",
+            "medidas": [
+              "3/4\""
+            ],
+            "diametro": "3/4\"",
+            "cantidad": 1,
+            "ubicacion": "A-Cocina",
+            "cantidadConfirmada": true,
+            "evidencia": "",
+            "nodo": null,
+            "origen": "identificado",
+            "equivalentes": "No se calculan en este plan físico"
+          },
+          {
+            "id": "material-6",
+            "unidad": "unidad",
+            "estado": "estimado",
+            "revisado": false,
+            "tipo": "cano",
+            "material": "Caño Acero epoxi / Roscado · comercial de 6 m",
+            "diametro": "1\"",
+            "cantidad": null,
+            "ubicacion": "M-A, A-Calefón",
+            "origen": "plan-cortes",
+            "minimoTeorico": 7,
+            "evidencia": "Compra pendiente: faltan posiciones. Mínimo por longitud, no lista definitiva."
+          },
+          {
+            "id": "material-7",
+            "unidad": "unidad",
+            "estado": "estimado",
+            "revisado": false,
+            "tipo": "cupla-plan",
+            "material": "Cuplas dentro de segmentos continuos",
+            "diametro": "1\"",
+            "cantidad": null,
+            "ubicacion": "M-A, A-Calefón",
+            "origen": "plan-cortes",
+            "evidencia": "Cuplas pendientes, no cero."
+          },
+          {
+            "id": "material-8",
+            "unidad": "unidad",
+            "estado": "estimado",
+            "revisado": false,
+            "tipo": "cano",
+            "material": "Caño Acero epoxi / Roscado · comercial de 6 m",
+            "diametro": "3/4\"",
+            "cantidad": null,
+            "ubicacion": "A-Cocina",
+            "origen": "plan-cortes",
+            "minimoTeorico": 2,
+            "evidencia": "Compra pendiente: faltan posiciones. Mínimo por longitud, no lista definitiva."
+          },
+          {
+            "id": "material-9",
+            "unidad": "unidad",
+            "estado": "estimado",
+            "revisado": false,
+            "tipo": "cupla-plan",
+            "material": "Cuplas dentro de segmentos continuos",
+            "diametro": "3/4\"",
+            "cantidad": null,
+            "ubicacion": "A-Cocina",
+            "origen": "plan-cortes",
+            "evidencia": "Cuplas pendientes, no cero."
+          }
+        ],
+        "planes": [
+          {
+            "diametro": "1\"",
+            "material": "Acero epoxi",
+            "sistema": "Roscado",
+            "metros": 37,
+            "segmentos": [],
+            "faltantes": [
+              "M-A",
+              "A-Calefón"
+            ],
+            "ubicaciones": [
+              "M-A",
+              "A-Calefón"
+            ],
+            "medidasEstimadas": true,
+            "minimoTeorico": 7,
+            "compraEstimada": null,
+            "cuplasPropuestas": null,
+            "plan": {
+              "metros": 37,
+              "minimoTeorico": 7,
+              "compraEstimada": 7,
+              "cuplasPropuestas": 5,
+              "barras": [
+                {
+                  "id": "barra-1",
+                  "metros": 6,
+                  "cortes": [
+                    {
+                      "segmento": "A-Calefón:HIPOTESIS",
+                      "metros": 6
+                    }
+                  ],
+                  "sobrante": 0
+                },
+                {
+                  "id": "barra-2",
+                  "metros": 6,
+                  "cortes": [
+                    {
+                      "segmento": "A-Calefón:HIPOTESIS",
+                      "metros": 6
+                    }
+                  ],
+                  "sobrante": 0
+                },
+                {
+                  "id": "barra-3",
+                  "metros": 6,
+                  "cortes": [
+                    {
+                      "segmento": "A-Calefón:HIPOTESIS",
+                      "metros": 6
+                    }
+                  ],
+                  "sobrante": 0
+                },
+                {
+                  "id": "barra-4",
+                  "metros": 6,
+                  "cortes": [
+                    {
+                      "segmento": "M-A:HIPOTESIS",
+                      "metros": 6
+                    }
+                  ],
+                  "sobrante": 0
+                },
+                {
+                  "id": "barra-5",
+                  "metros": 6,
+                  "cortes": [
+                    {
+                      "segmento": "M-A:HIPOTESIS",
+                      "metros": 6
+                    }
+                  ],
+                  "sobrante": 0
+                },
+                {
+                  "id": "barra-6",
+                  "metros": 6,
+                  "cortes": [
+                    {
+                      "segmento": "M-A:HIPOTESIS",
+                      "metros": 6
+                    }
+                  ],
+                  "sobrante": 0
+                },
+                {
+                  "id": "barra-7",
+                  "metros": 6,
+                  "cortes": [
+                    {
+                      "segmento": "M-A:HIPOTESIS",
+                      "metros": 1
+                    }
+                  ],
+                  "sobrante": 5
+                }
+              ],
+              "porSegmento": {
+                "M-A:HIPOTESIS": {
+                  "metros": 19,
+                  "piezas": [
+                    {
+                      "barra": "barra-4",
+                      "metros": 6
+                    },
+                    {
+                      "barra": "barra-5",
+                      "metros": 6
+                    },
+                    {
+                      "barra": "barra-6",
+                      "metros": 6
+                    },
+                    {
+                      "barra": "barra-7",
+                      "metros": 1
+                    }
+                  ],
+                  "cuplas": 3,
+                  "ubicacion": "M-A"
+                },
+                "A-Calefón:HIPOTESIS": {
+                  "metros": 18,
+                  "piezas": [
+                    {
+                      "barra": "barra-1",
+                      "metros": 6
+                    },
+                    {
+                      "barra": "barra-2",
+                      "metros": 6
+                    },
+                    {
+                      "barra": "barra-3",
+                      "metros": 6
+                    }
+                  ],
+                  "cuplas": 2,
+                  "ubicacion": "A-Calefón"
+                }
+              },
+              "sobrantes": [
+                {
+                  "barra": "barra-7",
+                  "metros": 5,
+                  "reutilizable": true
+                }
+              ],
+              "garantiaOptimo": false
+            },
+            "hipotesis": true
+          },
+          {
+            "diametro": "3/4\"",
+            "material": "Acero epoxi",
+            "sistema": "Roscado",
+            "metros": 12,
+            "segmentos": [],
+            "faltantes": [
+              "A-Cocina"
+            ],
+            "ubicaciones": [
+              "A-Cocina"
+            ],
+            "medidasEstimadas": true,
+            "minimoTeorico": 2,
+            "compraEstimada": null,
+            "cuplasPropuestas": null,
+            "plan": {
+              "metros": 12,
+              "minimoTeorico": 2,
+              "compraEstimada": 2,
+              "cuplasPropuestas": 1,
+              "barras": [
+                {
+                  "id": "barra-1",
+                  "metros": 6,
+                  "cortes": [
+                    {
+                      "segmento": "A-Cocina:HIPOTESIS",
+                      "metros": 6
+                    }
+                  ],
+                  "sobrante": 0
+                },
+                {
+                  "id": "barra-2",
+                  "metros": 6,
+                  "cortes": [
+                    {
+                      "segmento": "A-Cocina:HIPOTESIS",
+                      "metros": 6
+                    }
+                  ],
+                  "sobrante": 0
+                }
+              ],
+              "porSegmento": {
+                "A-Cocina:HIPOTESIS": {
+                  "metros": 12,
+                  "piezas": [
+                    {
+                      "barra": "barra-1",
+                      "metros": 6
+                    },
+                    {
+                      "barra": "barra-2",
+                      "metros": 6
+                    }
+                  ],
+                  "cuplas": 1,
+                  "ubicacion": "A-Cocina"
+                }
+              },
+              "sobrantes": [],
+              "garantiaOptimo": false
+            },
+            "hipotesis": true
+          }
+        ],
+        "avisos": [
+          "Faltan segmentos entre accesorios en M-A, A-Calefón: compra y cuplas reales pendientes.",
+          "Faltan segmentos entre accesorios en A-Cocina: compra y cuplas reales pendientes."
+        ],
+        "config": {
+          "largoComercial": 6,
+          "reutilizar": true,
+          "minimoSobrante": 0.5,
+          "hipotesisSinPosiciones": true,
+          "uniones": {
+            "A": "tee-reductora"
+          }
+        },
+        "dimensionamientoDefinitivo": false,
+        "supuestos": [
+          "Configuración usada: largo comercial 6 m; reutilización selectiva propuesta; sobrante mínimo 0.5 m.",
+          "Plan físico independiente del dimensionamiento. Los diámetros propuestos no se convierten en definitivos.",
+          "Mínimo teórico = techo de longitud total por medida/material/sistema dividido por largo comercial: solo cota inferior, sin geometría ni desperdicio.",
+          "Compra estimada por cortes FFD, no optimización garantizada. Solo se proponen sobrantes del mismo grupo y que cumplan longitud mínima, si se habilita reutilizar.",
+          "No se suman sobrantes para fabricar una pieza; esa alternativa requeriría otras cuplas y revisión. No se incluyeron roscas, pérdidas de corte, reserva ni sobrantes preexistentes.",
+          "Una cupla por unión propuesta dentro de cada segmento. Posiciones desconocidas producen pendientes. Los accesorios compartidos se cuentan una sola vez por identificación física.",
+          "Las reducciones se listan en materiales y no se agregan a equivalentes del método de clase."
+        ]
+      }
+    }
+  ],
+  "demostracionSeparadaDeCortes": {
+    "aviso": "Dos segmentos ilustrativos conocidos, NO posiciones del ejercicio",
+    "sinReutilizar": {
+      "metros": 6,
+      "minimoTeorico": 1,
+      "compraEstimada": 2,
+      "cuplasPropuestas": 0,
+      "barras": [
+        {
+          "id": "barra-1",
+          "metros": 6,
+          "cortes": [
+            {
+              "segmento": "a",
+              "metros": 4
+            }
+          ],
+          "sobrante": 2
+        },
+        {
+          "id": "barra-2",
+          "metros": 6,
+          "cortes": [
+            {
+              "segmento": "b",
+              "metros": 2
+            }
+          ],
+          "sobrante": 4
+        }
+      ],
+      "porSegmento": {
+        "a": {
+          "metros": 4,
+          "piezas": [
+            {
+              "barra": "barra-1",
+              "metros": 4
+            }
+          ],
+          "cuplas": 0,
+          "ubicacion": "a"
+        },
+        "b": {
+          "metros": 2,
+          "piezas": [
+            {
+              "barra": "barra-2",
+              "metros": 2
+            }
+          ],
+          "cuplas": 0,
+          "ubicacion": "b"
+        }
+      },
+      "sobrantes": [
+        {
+          "barra": "barra-1",
+          "metros": 2,
+          "reutilizable": false
+        },
+        {
+          "barra": "barra-2",
+          "metros": 4,
+          "reutilizable": false
+        }
+      ],
+      "garantiaOptimo": false
+    },
+    "conReutilizar": {
+      "metros": 6,
+      "minimoTeorico": 1,
+      "compraEstimada": 1,
+      "cuplasPropuestas": 0,
+      "barras": [
+        {
+          "id": "barra-1",
+          "metros": 6,
+          "cortes": [
+            {
+              "segmento": "a",
+              "metros": 4
+            },
+            {
+              "segmento": "b",
+              "metros": 2
+            }
+          ],
+          "sobrante": 0
+        }
+      ],
+      "porSegmento": {
+        "a": {
+          "metros": 4,
+          "piezas": [
+            {
+              "barra": "barra-1",
+              "metros": 4
+            }
+          ],
+          "cuplas": 0,
+          "ubicacion": "a"
+        },
+        "b": {
+          "metros": 2,
+          "piezas": [
+            {
+              "barra": "barra-1",
+              "metros": 2
+            }
+          ],
+          "cuplas": 0,
+          "ubicacion": "b"
+        }
+      },
+      "sobrantes": [],
+      "garantiaOptimo": false
+    }
+  }
+}

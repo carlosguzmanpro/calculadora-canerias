@@ -1,0 +1,14 @@
+const {test}=require('node:test');
+const assert=require('node:assert/strict');
+const {chromium}=require('playwright');
+const fs=require('node:fs'),os=require('node:os'),path=require('node:path');
+const {pathToFileURL}=require('node:url');
+test('Android: vincular dos codos y confirmar tres adicionales, recargar y conservar foto/PDF',async()=>{
+ const carpeta=fs.mkdtempSync(path.join(os.tmpdir(),'canerias-conciliacion-'));const archivo=path.join(carpeta,'index.html');fs.copyFileSync('index.html',archivo);let browser;
+ try{
+  browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||'/usr/bin/chromium',headless:true,args:['--no-sandbox']});const page=await browser.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true});const errores=[];page.on('pageerror',e=>errores.push(e.message));await page.goto(pathToFileURL(archivo).href);await page.getByRole('button',{name:'🔥 Gas',exact:true}).click();
+  await page.evaluate(()=>{tramos=[{id:'t',desde:'M',hasta:'A',metros:12,diametro:'1"',consumo:null,detalle:{estado:'pendiente',accesorios:[{tipo:'codo90',metrosAntes:2},{tipo:'codo90',metrosAntes:3}]}}];proyectos.gas.conteosRapidosGas={t:{codo90:5}};proyectos.gas.foto='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jXioAAAAASUVORK5CYII=';mostrarFotoLocal();guardarDatos();abrirPlanGas();});
+  await page.locator('#conciliacionRapidaGas > summary').tap();await page.locator('#conciliacionFilas > details > summary').first().tap();let card=page.locator('#conciliacionFilas details.detalle').first();await card.locator('summary').tap();assert.equal(await card.locator('select').count(),2);for(const select of await card.locator('select').all())await select.selectOption('incluido');await card.locator('input[type=number]').fill('3');await card.locator('label.gas-revision-check').tap();await card.getByRole('button',{name:'Confirmar para materiales',exact:true}).tap();assert.match(await page.locator('#conciliacionMensaje').innerText(),/confirmada/);assert.equal(await page.evaluate(()=>revisionMaterialesGas.plan.filas.filter(x=>x.tipo==='codo90').reduce((s,x)=>s+x.cantidad,0)),5);await page.screenshot({path:'/tmp/canerias-conciliacion-android.png',fullPage:true});
+  await page.reload();await page.getByRole('button',{name:'🔥 Gas',exact:true}).click();await page.evaluate(()=>{generarPlanGas();prepararInformeActual();});assert.equal(await page.evaluate(()=>revisionMaterialesGas.plan.filas.filter(x=>x.tipo==='codo90').reduce((s,x)=>s+x.cantidad,0)),5);assert.equal(await page.locator('#informeImpresion img').count(),1);assert.equal(await page.locator('#informeImpresion input').count(),0);assert.deepEqual(errores,[]);
+ }finally{if(browser)await browser.close();fs.rmSync(carpeta,{recursive:true,force:true});}
+});

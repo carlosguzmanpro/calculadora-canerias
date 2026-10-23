@@ -1,0 +1,10 @@
+accesorio;cantidad;diametro_nominal;impreso_m;calculado_m;diferencia_m;posible_explicacion;estado
+codo45;1;3/4";0.26;0.266;-0.006;Compatible con truncamiento a dos decimales en esta celda, hipótesis, no regla confirmada.;Impreso conservado, criterio técnico pendiente
+codo45;2;2";1.42;1.428;-0.008;Compatible con truncamiento a dos decimales en esta celda, hipótesis, no regla confirmada.;Impreso conservado, criterio técnico pendiente
+codo45;2;2 1/2";1.77;1.764;0.006;No coincide con truncamiento ni redondeo al centésimo usando d mostrado, posible errata o criterio/d interno diferente, sin evidencia suficiente.;Impreso conservado, criterio técnico pendiente
+codo45;3;1/2";0.54;0.546;-0.006;Compatible con truncamiento a dos decimales en esta celda, hipótesis, no regla confirmada.;Impreso conservado, criterio técnico pendiente
+codo45;3;3/4";0.79;0.798;-0.008;Compatible con truncamiento a dos decimales en esta celda, hipótesis, no regla confirmada.;Impreso conservado, criterio técnico pendiente
+codo45;3;1 1/2";1.59;1.596;-0.006;Compatible con truncamiento a dos decimales en esta celda, hipótesis, no regla confirmada.;Impreso conservado, criterio técnico pendiente
+codo45;4;1/2";0.72;0.728;-0.008;Compatible con truncamiento a dos decimales en esta celda, hipótesis, no regla confirmada.;Impreso conservado, criterio técnico pendiente
+codo45;4;1 1/2";2.12;2.128;-0.008;Compatible con truncamiento a dos decimales en esta celda, hipótesis, no regla confirmada.;Impreso conservado, criterio técnico pendiente
+codo45;4;2";2.85;2.856;-0.006;Compatible con truncamiento a dos decimales en esta celda, hipótesis, no regla confirmada.;Impreso conservado, criterio técnico pendiente
