@@ -1,0 +1,238 @@
+{
+  "alcance": "Auditoría, no habilitación ni certificación",
+  "base": "1e99313",
+  "tabla3": {
+    "integra": true,
+    "errores": [],
+    "alertas": [
+      "La referencia congela la transcripción de 1e99313: no prueba exactitud normativa ni sustituye cotejo independiente de cada cifra."
+    ],
+    "posiciones": 441,
+    "coincidencias": 441,
+    "coincidenciasBase": 436,
+    "correccionesDocumentadas": [
+      {
+        "longitud": 10,
+        "diametro": "4\"",
+        "anterior": 287190,
+        "corregido": 287189,
+        "motivo": "Error de transcripción de 1e99313; corrección cotejada en ampliación de fotografía original, sin alterar la imagen",
+        "fuente": "fuentes/tabla-3-347520.jpg",
+        "estado": "Cotejo visual; pendiente revisión técnica independiente"
+      },
+      {
+        "longitud": 12,
+        "diametro": "4\"",
+        "anterior": 262151,
+        "corregido": 282151,
+        "motivo": "Error de transcripción de 1e99313; corrección cotejada en ampliación de fotografía original, sin alterar la imagen",
+        "fuente": "fuentes/tabla-3-347520.jpg",
+        "estado": "Cotejo visual; pendiente revisión técnica independiente"
+      },
+      {
+        "longitud": 16,
+        "diametro": "4\"",
+        "anterior": 227244,
+        "corregido": 227024,
+        "motivo": "Error de transcripción de 1e99313; corrección cotejada en ampliación de fotografía original, sin alterar la imagen",
+        "fuente": "fuentes/tabla-3-347520.jpg",
+        "estado": "Cotejo visual; pendiente revisión técnica independiente"
+      },
+      {
+        "longitud": 55,
+        "diametro": "3\"",
+        "anterior": 59612,
+        "corregido": 59650,
+        "motivo": "Error de transcripción de 1e99313; corrección cotejada en ampliación de fotografía original, sin alterar la imagen",
+        "fuente": "fuentes/tabla-3-347520.jpg",
+        "estado": "Cotejo visual; pendiente revisión técnica independiente"
+      },
+      {
+        "longitud": 85,
+        "diametro": "2\"",
+        "anterior": 17655,
+        "corregido": 17565,
+        "motivo": "Error de transcripción de 1e99313; corrección cotejada en ampliación de fotografía original, sin alterar la imagen",
+        "fuente": "fuentes/tabla-3-347520.jpg",
+        "estado": "Cotejo visual; pendiente revisión técnica independiente"
+      }
+    ],
+    "diferencias": []
+  },
+  "celdasReexaminadas": [
+    {
+      "tipo": "codo90",
+      "cantidad": 5,
+      "nominal": "2\"",
+      "factor": 30,
+      "d": 0.051,
+      "impresoCotejado": 7.67,
+      "valorOriginal": 7.67,
+      "calculado": 7.65,
+      "diferencia": 0.02,
+      "lecturaConfirmada": true,
+      "estado": "Impreso cotejado; divergencia técnica NO resuelta",
+      "explicacion": "Se lee 7,67, pero 5 × 30 × 0,051 = 7,65 exactos; la diferencia de 0,02 m no es redondeo al centésimo. Posible errata o d distinto no documentado; ninguna hipótesis confirmada."
+    },
+    {
+      "tipo": "tee-directo",
+      "cantidad": 5,
+      "nominal": "3\"",
+      "factor": 20,
+      "d": 0.076,
+      "impresoCotejado": 7.6,
+      "valorOriginal": 7.6,
+      "calculado": 7.6,
+      "diferencia": 0,
+      "lecturaConfirmada": true,
+      "estado": "Impreso cotejado y aritmética coincidente; aplicabilidad técnica pendiente",
+      "explicacion": "7,60 coincide con 5 × 20 × 0,076. La lectura anterior 7,61 se descarta."
+    }
+  ],
+  "redondeos": {
+    "filas": [
+      {
+        "accesorio": "codo90",
+        "cantidad": 5,
+        "diametro": "2\"",
+        "impreso": 7.67,
+        "calculado": 7.65,
+        "redondeado": 7.65,
+        "diferencia": 0.02,
+        "diferenciaCentésimo": 0.02,
+        "posibleExplicacion": "No coincide con truncamiento ni redondeo al centésimo usando d mostrado; posible errata o criterio/d interno diferente, sin evidencia suficiente.",
+        "estado": "Impreso conservado; criterio técnico pendiente",
+        "origenImpreso": "Fotografía Tabla 18",
+        "origenCalculado": "cantidad × factor × d tabulado; valor derivado, no leído"
+      },
+      {
+        "accesorio": "codo45",
+        "cantidad": 1,
+        "diametro": "3/4\"",
+        "impreso": 0.26,
+        "calculado": 0.266,
+        "redondeado": 0.27,
+        "diferencia": -0.006,
+        "diferenciaCentésimo": -0.01,
+        "posibleExplicacion": "Compatible con truncamiento a dos decimales en esta celda; hipótesis, no regla confirmada.",
+        "estado": "Impreso conservado; criterio técnico pendiente",
+        "origenImpreso": "Fotografía Tabla 18",
+        "origenCalculado": "cantidad × factor × d tabulado; valor derivado, no leído"
+      },
+      {
+        "accesorio": "codo45",
+        "cantidad": 2,
+        "diametro": "2\"",
+        "impreso": 1.42,
+        "calculado": 1.428,
+        "redondeado": 1.43,
+        "diferencia": -0.008,
+        "diferenciaCentésimo": -0.01,
+        "posibleExplicacion": "Compatible con truncamiento a dos decimales en esta celda; hipótesis, no regla confirmada.",
+        "estado": "Impreso conservado; criterio técnico pendiente",
+        "origenImpreso": "Fotografía Tabla 18",
+        "origenCalculado": "cantidad × factor × d tabulado; valor derivado, no leído"
+      },
+      {
+        "accesorio": "codo45",
+        "cantidad": 2,
+        "diametro": "2 1/2\"",
+        "impreso": 1.77,
+        "calculado": 1.764,
+        "redondeado": 1.76,
+        "diferencia": 0.006,
+        "diferenciaCentésimo": 0.01,
+        "posibleExplicacion": "No coincide con truncamiento ni redondeo al centésimo usando d mostrado; posible errata o criterio/d interno diferente, sin evidencia suficiente.",
+        "estado": "Impreso conservado; criterio técnico pendiente",
+        "origenImpreso": "Fotografía Tabla 18",
+        "origenCalculado": "cantidad × factor × d tabulado; valor derivado, no leído"
+      },
+      {
+        "accesorio": "codo45",
+        "cantidad": 3,
+        "diametro": "1/2\"",
+        "impreso": 0.54,
+        "calculado": 0.546,
+        "redondeado": 0.55,
+        "diferencia": -0.006,
+        "diferenciaCentésimo": -0.01,
+        "posibleExplicacion": "Compatible con truncamiento a dos decimales en esta celda; hipótesis, no regla confirmada.",
+        "estado": "Impreso conservado; criterio técnico pendiente",
+        "origenImpreso": "Fotografía Tabla 18",
+        "origenCalculado": "cantidad × factor × d tabulado; valor derivado, no leído"
+      },
+      {
+        "accesorio": "codo45",
+        "cantidad": 3,
+        "diametro": "3/4\"",
+        "impreso": 0.79,
+        "calculado": 0.798,
+        "redondeado": 0.8,
+        "diferencia": -0.008,
+        "diferenciaCentésimo": -0.01,
+        "posibleExplicacion": "Compatible con truncamiento a dos decimales en esta celda; hipótesis, no regla confirmada.",
+        "estado": "Impreso conservado; criterio técnico pendiente",
+        "origenImpreso": "Fotografía Tabla 18",
+        "origenCalculado": "cantidad × factor × d tabulado; valor derivado, no leído"
+      },
+      {
+        "accesorio": "codo45",
+        "cantidad": 3,
+        "diametro": "1 1/2\"",
+        "impreso": 1.59,
+        "calculado": 1.596,
+        "redondeado": 1.6,
+        "diferencia": -0.006,
+        "diferenciaCentésimo": -0.01,
+        "posibleExplicacion": "Compatible con truncamiento a dos decimales en esta celda; hipótesis, no regla confirmada.",
+        "estado": "Impreso conservado; criterio técnico pendiente",
+        "origenImpreso": "Fotografía Tabla 18",
+        "origenCalculado": "cantidad × factor × d tabulado; valor derivado, no leído"
+      },
+      {
+        "accesorio": "codo45",
+        "cantidad": 4,
+        "diametro": "1/2\"",
+        "impreso": 0.72,
+        "calculado": 0.728,
+        "redondeado": 0.73,
+        "diferencia": -0.008,
+        "diferenciaCentésimo": -0.01,
+        "posibleExplicacion": "Compatible con truncamiento a dos decimales en esta celda; hipótesis, no regla confirmada.",
+        "estado": "Impreso conservado; criterio técnico pendiente",
+        "origenImpreso": "Fotografía Tabla 18",
+        "origenCalculado": "cantidad × factor × d tabulado; valor derivado, no leído"
+      },
+      {
+        "accesorio": "codo45",
+        "cantidad": 4,
+        "diametro": "1 1/2\"",
+        "impreso": 2.12,
+        "calculado": 2.128,
+        "redondeado": 2.13,
+        "diferencia": -0.008,
+        "diferenciaCentésimo": -0.01,
+        "posibleExplicacion": "Compatible con truncamiento a dos decimales en esta celda; hipótesis, no regla confirmada.",
+        "estado": "Impreso conservado; criterio técnico pendiente",
+        "origenImpreso": "Fotografía Tabla 18",
+        "origenCalculado": "cantidad × factor × d tabulado; valor derivado, no leído"
+      },
+      {
+        "accesorio": "codo45",
+        "cantidad": 4,
+        "diametro": "2\"",
+        "impreso": 2.85,
+        "calculado": 2.856,
+        "redondeado": 2.86,
+        "diferencia": -0.006,
+        "diferenciaCentésimo": -0.01,
+        "posibleExplicacion": "Compatible con truncamiento a dos decimales en esta celda; hipótesis, no regla confirmada.",
+        "estado": "Impreso conservado; criterio técnico pendiente",
+        "origenImpreso": "Fotografía Tabla 18",
+        "origenCalculado": "cantidad × factor × d tabulado; valor derivado, no leído"
+      }
+    ],
+    "errores": []
+  },
+  "habilitado": false
+}

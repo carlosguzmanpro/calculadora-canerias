@@ -1,0 +1,42 @@
+MATERIALES DE GAS · NUEVO PANEL DE REVISIÓN
+
+1. Descomprimí todo canerias-materiales-gas-revision.zip y abrí index.html conservando sus carpetas.
+2. GAS → Trabajar con croquis y tramos → Plan de compra y revisión de materiales.
+3. Elegí largo comercial, propuesta de reutilización y mínimo de sobrante. Tocá Probar materiales: calefón y cocina.
+4. Deben aparecer 17 codos, una tee y dos llaves. Las medidas siguen propuestas. A 6 m, el mínimo por longitud es 7 caños de 1 pulgada y 2 de 3/4; compra y cuplas reales pendientes.
+5. Seleccioná el tipo de pieza en A y generá de nuevo: tee reductora integrada sin reducción duplicada, o tee igual más reducción independiente. Por defecto queda pendiente.
+6. Ajustá cantidades y revisá cada fila antes de Imprimir lista revisada o Descargar lista revisada (CSV). Revisar no transforma estimaciones en definitivas. Cambiar tramos/configuración obliga a generar y revisar nuevamente.
+7. La casilla Hipótesis por longitud NO resuelve las posiciones del croquis. Si la activás se muestran 9 barras/6 uniones en un escenario matemático, NO cuplas ni compra confirmadas.
+8. Generar lista de mi proyecto usa tus tramos, sin incorporar el ejemplo. Completá posiciones en Revisar accesorios para un plan por segmentos reales. Ver MATERIALES-GAS.md.
+
+Los diámetros definitivos siguen bloqueados. No se modificaron tablas ni se activaron servicios. Se conservan todas las funciones anteriores.
+
+INSTRUCCIONES HISTÓRICAS PARA EL DIAGNÓSTICO PREVIO:
+
+PRUEBA INTEGRAL EDUCATIVA · CALEFÓN Y COCINA
+
+1. Descomprimí TODO canerias-materiales-gas-revision.zip.
+2. Abrí DIAGNOSTICO-CALEFON-COCINA.html: contiene el informe ya ejecutado y un botón para imprimir. No hace falta ejecutar comandos ni conectarse a Internet.
+3. Revisá los nueve escenarios y la traza de selección inicial y recálculo. El caso macho + dos giros da 50,00 y 40,64 m, pero es una hipótesis no confirmada.
+4. Falta confirmar orientación de tee, tipo de cada llave y criterio/posiciones de cuplas. Los candidatos NO son diámetros definitivos.
+5. La aplicación completa existente se abre con index.html. El informe no reemplaza tus datos ni habilita dimensionamiento normal.
+
+INSTRUCCIONES CONSERVADAS PARA REVISAR LA APLICACIÓN Y TABLAS:
+
+CAÑERÍAS · MÉTODO DE CLASE · ACERO ROSCADO EPOXI
+
+### Probar desde Android
+
+1. Descomprimí `canerias-materiales-gas-revision.zip` conservando las carpetas `datos` y `fuentes` junto a `index.html`, y abrí `index.html` con el navegador o visor HTML que usaste en las pruebas anteriores. No reemplaces la aplicación publicada. El guardado local puede estar separado al abrir desde otra ubicación: conservá la versión anterior y sus datos.
+2. Entrá en **Gas → Calcular diámetros · diagnóstico**. Tocá **Revisar tablas transcritas y pendientes**: deben aparecer 441 capacidades en L/h, 9 factores d y 225 equivalencias impresas; siguen pendientes criterios técnicos. Tocá VER AUDITORÍA FINAL DE TABLAS: debe mostrar cinco correcciones explícitas y una tabla de nueve diferencias originales, además del caso adicional 7,67 impreso frente a 7,65 calculado. Hay enlaces a las fotografías originales. El cotejo visual no equivale a validación técnica. Los diámetros definitivos siguen bloqueados.
+3. En **Ejercicio de clase M–A–B**, tocá **Probar método de clase M–A–B sin diámetros**. Es una copia separada: no reemplaza ni agrega datos a tu instalación.
+4. Marcá la casilla solo después de comprobar en el croquis que 15, 9, 8, 6 y 13 m son longitudes individuales. Sin confirmación el resultado queda bloqueado.
+5. Compará los recorridos: Cocina **36 m**, Calefactor **29 m**, Termotanque **24 m**; estimación inicial **51, 44 y 39 m**. Los 15 m extra nunca se presentan como equivalentes definitivos.
+6. Comprobá **29200 kcal/h** en M–A y **13200 kcal/h** en A–B. Los caudales se calculan dividiendo por **9300 kcal/m³**, sin redondear internamente.
+7. Diámetros, equivalentes definitivos y comprobación de capacidad deben seguir **PENDIENTES**. Se indican tablas y accesorios faltantes. Las pulgadas anotadas son referencias del ejercicio, no resultados comprobados del motor.
+8. Para revisar tu propia red, tocá **Analizar mi red con el método de clase**. El botón de selección de acero epoxi solicita confirmación antes de cambiar material y propiedades de tu red; no modifica presiones ni confirma condiciones de suministro. Registrá conexiones, accesorios y vías de tees en las pantallas existentes. No hace falta ingresar diámetros.
+9. Podés imprimir el informe desde **Imprimir diagnóstico y comparación**, conservando advertencias y resultados visibles. Comprobá también fotografías, carga manual, revisión de croquis y guardado como antes.
+
+Gemini sigue desactivado: no se envían fotografías. No se incorporaron servicios ni claves. Las pruebas automáticas cubren la lógica; la comprobación visual de esta entrega en Android queda pendiente.
+
+IMPORTANTE: descomprimí TODO el ZIP. Abrir únicamente index.html fuera de la carpeta puede impedir cargar los archivos de datos y fotografías. No requiere conexión ni envía fotos. Leé AUDITORIA-FINAL.md para los controles y pendientes.
