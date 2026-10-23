@@ -94,7 +94,7 @@ function actualizarSugerenciasGas(){
    const iguales=Object.values(d.registros).filter(a=>a.propuesta.tipo===p.tipo&&a.propuesta.nodo==='nombre:'+String(p.ubicacion).trim().toLocaleLowerCase('es')&&JSON.stringify([...(a.propuesta.conexiones||[])].sort())===JSON.stringify([...p.conexiones].sort()));
    if(iguales.length===1)d.registros[p.id]={...iguales[0],edicion:{...iguales[0].edicion}};
   }
-  const a=d.registros[p.id];if(!a)d.registros[p.id]={propuesta:p,edicion:{},estado:'sugerido',vigente:true};else{if(a.propuesta.firma!==p.firma&&a.estado==='confirmado')a.estado='revisar';a.propuesta=p;a.vigente=true;}}
+  const a=d.registros[p.id];if(!a)d.registros[p.id]={propuesta:p,edicion:{},estado:'sugerido',vigente:true};else{if(a.propuesta.firma!==p.firma&&a.estado==='confirmado'&&(p.tipo==='cupla'||!mismaSugerenciaConGeometriaGas(a.propuesta.firma,p.firma)))a.estado='revisar';a.propuesta=p;a.vigente=true;}}
  d.avisos=r.avisos;renderSugerenciasGas();
 }
 function detectarAccesoriosGas(){if(modulo!=='gas')return;asegurarIdsGas();datosDeteccionGas().activa=true;actualizarSugerenciasGas();guardarDatos();$('panelDeteccionGas').classList.remove('oculto');if($('panelDeteccionGas').scrollIntoView)$('panelDeteccionGas').scrollIntoView({block:'start'});}
@@ -133,7 +133,7 @@ function renderSugerenciasGas(){
  const panel=$('panelDeteccionGas'),out=$('deteccionFilas');if(!panel||!out)return;out.replaceChildren();const d=proyectoGasActual().deteccionGas;
  panel.classList.toggle('oculto',!d?.activa);if(!d?.activa)return;
  const texto=(t,padre=out)=>{const p=document.createElement('p');p.textContent=textoMaterialPantallaGas(t);padre.append(p);};
- if(d.avisos?.length){const avisos=document.createElement('details'),sum=document.createElement('summary');avisos.className='gas-detalles';sum.textContent='Ver observaciones pendientes ('+d.avisos.length+')';avisos.append(sum);for(const aviso of d.avisos)texto(aviso,avisos);out.append(avisos);}
+ if(d.avisos?.length){const avisos=document.createElement('details'),sum=document.createElement('summary');avisos.className='gas-detalles';sum.textContent='Ver observaciones pendientes ('+d.avisos.length+')';avisos.append(sum);for(const aviso of avisosDeteccionPresentacionGas(d.avisos))texto(aviso,avisos);out.append(avisos);}
  for(const [id,a]of Object.entries(d.registros||{})){
   const p=accesorioSugeridoGas(a),card=document.createElement('div');card.className='detalle gas-sugerencia';out.append(card);
   const detalles=document.createElement('details'),sum=document.createElement('summary');detalles.className='gas-detalles';sum.textContent='Ver detalles técnicos';detalles.append(sum);
