@@ -1,5 +1,11 @@
 # CAÑERÍAS
 
+## GAS manual: cierre local para revisión
+
+Rama `prueba/cierre-gas-manual`, base `68d09fb`. Sistema en la cabecera, una carga, un cálculo, una lista y estado técnico. Ejemplo comprobado en epoxi y SIGAS: **58 m, 18 codos90, 2 tees, 3 llaves y 29200 kcal/h**; recorridos 24/36/33 m. Corregido bloqueo de recálculo por respaldo técnico parcial.
+
+**595 pruebas de regresión + 1 prueba móvil Chromium aprobadas**. Origen documental de discrepancias SIGAS cotejado; aclaración técnica del fabricante pendiente, sin modificar tablas. **Diámetros definitivos bloqueados**; materiales manuales operativos. No se subió ni publicó nada. [Informe de cierre, resultados, pendientes y condiciones para publicar](CIERRE-GAS-MANUAL.md). Lo siguiente conserva antecedentes históricos.
+
 ## SIGAS Thermofusión · manual edición 15 / 2025 · prueba local
 
 Rama `prueba/sigas-manual-ed15-2025`, base `a363876`. PDF original de 48 páginas conservado, tablas 6/4/5/3 transcritas: **1080 capacidades, 202 accesorios, 360 diámetros de prolongaciones y 18 casillas vacías**. Diagnóstico documental conectado a la red manual y adaptador SIGAS para el motor, sin mezclar datos epoxi. **Diámetros definitivos bloqueados.**

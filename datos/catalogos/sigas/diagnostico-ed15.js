@@ -57,34 +57,8 @@
   const t=d.tablas[4];return {id:'sigas-ed15-gn-pendiente',verificado:false,fuente:d.fuente.archivo+' p.22 y pp.24–25',edicion:d.fuente.edicion,material:'Acero-polietileno SIGAS Thermofusión',sistema:'Thermofusión',gas:'GN',metodo:'longitud-maxima-tabular',reglaLongitud:null,redondeoSuperiorVerificado:false,condiciones:{densidadRelativa:.65,presionMinPa:null,presionMaxPa:null,caidaPa:null,referenciaImpresa:t.caidaPresionImpresa},candidatos:t.exterioresMm.map((de,j)=>({id:'SIGAS-'+de,exteriorMm:de,interiorMm:t.interioresTabuladosMm[j],filas:t.filas.map(f=>({longitud:f.longitudM,caudal:f.capacidadesM3h[j],pagina:22}))})),piezas:{},pendientes:['Método/regla de longitud y condiciones de suministro por verificar.','Asignar productos SIGAS exactos, vías de tees y equivalentes sin duplicar.']};
  }
  function prepararEntradaMotor(red,ts,arts,inst){
-  const faltantes=[...red.errores,...red.faltantes];
-  if(faltantes.length)return {entrada:null,faltantes};
-  const orientacion=red.orientacion,usados=ts.filter(t=>orientacion[t.id]&&!red.excluidos.includes(t.id)),entradas=new Set(Object.values(orientacion).map(o=>o.hasta)),salidas=new Set(Object.values(orientacion).map(o=>o.desde));
-  const raices=[...salidas].filter(id=>!entradas.has(id));if(raices.length!==1)return {entrada:null,faltantes:['Medidor único pendiente.']};
-  const formales=new Map(inst.nodos.map(n=>['id:'+n.id,n])),artefactos=[];
-  const nodos=red.puntos.map(p=>{
-   const original=formales.get(p.id)||{},n={...original,id:p.id,nombre:p.nombre};
-   if(p.id===raices[0])n.tipo='medidor';
-   else if(salidas.has(p.id))n.tipo='derivacion'; // Tipo de punto, nunca tipo de pieza/tee.
-   else{
-    n.tipo='artefacto';const t=usados.find(t=>orientacion[t.id].hasta===p.id),q=t?red.porTramo[t.id]:null;
-    const id='SIGAS-artefacto:'+p.id;n.artefactoId=id;
-    if(positivo(q))artefactos.push({id,nombre:p.nombre,consumo:q});else faltantes.push('Consumo conocido pendiente en '+p.nombre+'.');
-   }
-   return n;
-  });
-  const lista=usados.map(t=>{
-   const o=orientacion[t.id],a=red.puntos.find(p=>p.id===o.desde),b=red.puntos.find(p=>p.id===o.hasta),redNueva={desde:o.desde,hasta:o.hasta};
-   if(t.red&&('id:'+t.red.desde===o.desde||t.red.desde===o.desde)&&t.red.via)redNueva.via=t.red.via;
-   else if(t.red?.via)faltantes.push(t.desde+'–'+t.hasta+': vía de tee no trasladada sin confirmar su extremo de origen.');
-   const copia=JSON.parse(JSON.stringify(t));
-   if(o.invertido&&copia.detalle?.estado==='completo'){
-    // No invertir medidas/posiciones técnicas por suposición. La geometría original queda en el proyecto.
-    copia.detalle={estado:'pendiente',accesorios:[]};faltantes.push(t.desde+'–'+t.hasta+': revisar adaptación del detalle al sentido desde el medidor; cantidades conservadas por separado.');
-   }
-   return {...copia,desde:a.nombre,hasta:b.nombre,red:redNueva};
-  });
-  return {entrada:{tramos:lista,artefactos,instalacion:{version:1,perfil:{...inst.perfil},nodos}},faltantes};
+  const compartido=typeof module==='object'&&module.exports?require('../../preparacion-diametros-gas.js'):root.PreparacionDiametrosGas;
+  return compartido.prepararEntradaMotor(red,ts,arts,inst);
  }
  function diagnostico(d,preparacion,accesorios,perfil){
   const revision=validar(d),tabla=perfil.gas==='GN'?4:perfil.gas==='propano-gaseoso'?5:null,pendientes=[...revision.errores,...revision.alertas];

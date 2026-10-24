@@ -27,7 +27,7 @@ function separarLegadoSimuladoGas(){
 function renderAmbitoGas(){
  const select=$('ambitoGas');select.replaceChildren();
  for(const [id,nombre]of [['proyecto','Mi proyecto'],['demostracion','Demostración separada'],...registrosProyectosGas().map(p=>['proyecto:'+p.id,p.nombre])]){const option=document.createElement('option');option.value=id;const propio=id==='proyecto'?proyectos.gas.nombreProyecto:id==='demostracion'?proyectos.gas.demostracion?.nombreProyecto:null;option.textContent=nombre+(propio?' · '+propio:'');select.append(option);}select.value=ambitoGas;
- actualizarVistaEntregaGas();renderSugerenciasGas();renderResumenPrincipalGas();
+ sincronizarSistemaPrincipalGas();actualizarVistaEntregaGas();renderSugerenciasGas();renderResumenPrincipalGas();
  $('estadoAmbitoGas').textContent=ambitoGas==='demostracion'?'DEMOSTRACIÓN: datos de práctica separados. No es tu proyecto real.':ambitoGas==='proyecto'?('MI PROYECTO: ejemplos separados de los datos reales.'+(proyectos.gas.separacionDemostraciones?' Se conservaron los simulados antiguos en Demostración y una copia anterior a la separación.':'')):'PROYECTO: '+nombreProyectoGas()+'. Datos independientes; fotografía opcional.';
 }
 function seleccionarAmbitoGas(destino){

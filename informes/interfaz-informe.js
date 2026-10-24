@@ -71,7 +71,7 @@ function confirmarCroquisEntrega(){
 }
 function revisarCroquisParaEntrega(){
  if(modulo!=='gas')return;
- mostrarVista('croquis');actualizarVistaEntregaGas();
+ mostrarVista('croquis');$('referenciaOpcionalGas').open=true;actualizarVistaEntregaGas();
  if(!croquisEntregaDisponible()){
   $('entregaAccion').textContent='No hay foto disponible. Usá Sacar foto o Galería en la carga de croquis.';
   const carga=$('cargaFotoEntrega');if(carga.scrollIntoView)carga.scrollIntoView({block:'start'});if(carga.focus)carga.focus({preventScroll:true});return;

@@ -174,7 +174,7 @@ function renderRespaldosGas(){
  const out=$('respaldosGas');if(!out)return;out.replaceChildren();
  const datos=proyectoGasActual(),d=datosPlanGas(),r=datos.derivadosGas;
  const texto=t=>{const p=document.createElement('p');p.textContent=t;out.append(p);};
- if(r?.anterior)texto('DESACTUALIZADO · respaldo de dimensionamiento anterior ('+r.anterior.resultado.estado+'). No usar como resultado vigente.');
+ if(r?.anterior)texto('DESACTUALIZADO · respaldo de dimensionamiento anterior ('+(r.anterior.resultado?.estado||'estado pendiente de recuperar')+'). No usar como resultado vigente.');
  if(r?.ultimoValido&&r.ultimoValido.firma!==r.firma)texto('Último resultado calculado válido para los datos anteriores: DESACTUALIZADO. No implica aprobación técnica.');
  for(const b of Array.isArray(d.respaldos)?d.respaldos:[]){if(!b||!Array.isArray(b.filas))continue;texto((b.fuente==='ejemplo'?'EJEMPLO SEPARADO · ':'')+b.estado);for(const f of b.filas)texto((f.material||'Material')+' · '+(f.diametro||'Pendiente')+' · '+(f.cantidad??'PENDIENTE')+' · '+(f.ubicacionNombre||ubicacionLegibleGas(f.ubicacion||''))+(f.editado?' · ajuste manual conservado':''));}
 }
@@ -647,7 +647,7 @@ function renderListaManualSimpleGas(out,plan,modelo){
   cantidad.textContent=f.pendiente?(f.cantidad>0?fmt(f.cantidad)+' '+f.unidad+' conocidas · resto pendiente':'Pendiente'):fmt(f.cantidad)+' '+f.unidad+(f.estimado&&f.cantidad>0?' estimadas':'');tr.append(nombre,cantidad);body.append(tr);
  }
  tabla.append(body);out.append(tabla);
- const pendientes=document.createElement('details'),titulo=document.createElement('summary');pendientes.className='gas-detalles';titulo.textContent='Datos técnicos pendientes';pendientes.append(titulo);for(const s of avisosListaManualGas(plan))texto(pendientes,s);out.append(pendientes);
+ const pendientes=document.createElement('details'),titulo=document.createElement('summary');pendientes.className='gas-detalles';titulo.textContent='Datos técnicos pendientes';pendientes.append(titulo);for(const s of avisosListaManualGas(plan))texto(pendientes,s);renderEstadoCierreGas(out,pendientes);out.append(pendientes);
  const detalles=document.createElement('details'),sum=document.createElement('summary');sum.textContent='Ver detalle por tramo y consumos';detalles.append(sum);
  const red=plan.redManual;
  if(red)texto(detalles,red.total===null?'Consumo total conectado: Pendiente. Los consumos parciales conocidos se conservan.':'Consumo total conectado: '+fmt(red.total)+' kcal/h, sin simultaneidad. No dimensiona diámetros.');

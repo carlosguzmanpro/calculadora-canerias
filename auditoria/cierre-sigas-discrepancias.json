@@ -1,0 +1,591 @@
+{
+  "fechaRevision": "2026-10-24",
+  "fuenteLocal": {
+    "archivo": "fuentes/sigas-ed15-2025/manual-tecnico.pdf",
+    "sha256": "a7dc5dd90adec7d9db335100407d4748f306281b3917e2e52a8f2b707d35e2b1",
+    "paginas": 48,
+    "edicion": "15 - 2025",
+    "fechaEditorial": "Julio 2025",
+    "paginaEdicion": 46,
+    "portadaEdicion": 1,
+    "metadatosPDFCreacion": "2025-06-27",
+    "origen": "PDF original adjuntado por el usuario",
+    "validacionNormativa": false
+  },
+  "fuentesPublicasConsultadas": [
+    {
+      "url": "https://www.grupodema.com.ar/manuales",
+      "alcance": "Índice oficial enlaza al manual SIGAS"
+    },
+    {
+      "url": "https://www.grupodema.com.ar/bundles/app/front/images/Manual%20Sigas%2019-06-2025.pdf",
+      "alcance": "Edición 15; mismos valores cuestionados en pp.23–25. No se obtuvo una fe de erratas en las páginas consultadas."
+    },
+    {
+      "url": "https://www.grupodema.com.ar/productos/reductor-anular-sigas-thermofusion-604",
+      "alcance": "El producto 75–32 está identificado como 60243075032; la ficha no publica un equivalente que resuelva las dos filas del manual."
+    }
+  ],
+  "diferencias24": [
+    {
+      "id": "sigas-p24-izquierdo-07",
+      "pagina": 24,
+      "nombre": "Unión Normal 75 mm",
+      "equivalenteImpresoM": 0.103,
+      "diametroExteriorM": 0.075,
+      "numeroImpreso": 3,
+      "cocienteDerivado": 1.3733333333333333,
+      "estado": "Cotejo resuelto; criterio técnico pendiente del fabricante",
+      "bloque": "izquierdo",
+      "fila": 7,
+      "originales": {
+        "longitudEquivalente": "0,103",
+        "diametroExterior": "0,075",
+        "numeroDiametros": "3"
+      },
+      "redondeoCocienteExterior": 1,
+      "cocienteInteriorSigasDerivado": 1.6349206349206349,
+      "origenDiscrepancia": "Valores presentes en el manual, no error de transcripción detectado",
+      "accion": "Conservar las tres columnas originales. No elegir otro diámetro ni recalcular pérdidas por suposición."
+    },
+    {
+      "id": "sigas-p24-izquierdo-50",
+      "pagina": 24,
+      "nombre": "Codo 90º C/base H.larga 20x1/2\" St",
+      "equivalenteImpresoM": 0.7,
+      "diametroExteriorM": 0.02,
+      "numeroImpreso": 33,
+      "cocienteDerivado": 35,
+      "estado": "Cotejo resuelto; criterio técnico pendiente del fabricante",
+      "bloque": "izquierdo",
+      "fila": 50,
+      "originales": {
+        "longitudEquivalente": "0,700",
+        "diametroExterior": "0,020",
+        "numeroDiametros": "33"
+      },
+      "redondeoCocienteExterior": 35,
+      "cocienteInteriorSigasDerivado": 52.870090634441084,
+      "origenDiscrepancia": "Valores presentes en el manual, no error de transcripción detectado",
+      "accion": "Conservar las tres columnas originales. No elegir otro diámetro ni recalcular pérdidas por suposición."
+    },
+    {
+      "id": "sigas-p24-izquierdo-51",
+      "pagina": 24,
+      "nombre": "Codo 90º C/base H.larga 25x1/2\" St",
+      "equivalenteImpresoM": 0.5,
+      "diametroExteriorM": 0.025,
+      "numeroImpreso": 16,
+      "cocienteDerivado": 20,
+      "estado": "Cotejo resuelto; criterio técnico pendiente del fabricante",
+      "bloque": "izquierdo",
+      "fila": 51,
+      "originales": {
+        "longitudEquivalente": "0,500",
+        "diametroExterior": "0,025",
+        "numeroDiametros": "16"
+      },
+      "redondeoCocienteExterior": 20,
+      "cocienteInteriorSigasDerivado": 27.487630566245187,
+      "origenDiscrepancia": "Valores presentes en el manual, no error de transcripción detectado",
+      "accion": "Conservar las tres columnas originales. No elegir otro diámetro ni recalcular pérdidas por suposición."
+    },
+    {
+      "id": "sigas-p24-derecho-01",
+      "pagina": 24,
+      "nombre": "Codo 90º C/base H.extra Larga 20x1/2\" ST",
+      "equivalenteImpresoM": 0.7,
+      "diametroExteriorM": 0.02,
+      "numeroImpreso": 33,
+      "cocienteDerivado": 35,
+      "estado": "Cotejo resuelto; criterio técnico pendiente del fabricante",
+      "bloque": "derecho",
+      "fila": 1,
+      "originales": {
+        "longitudEquivalente": "0,700",
+        "diametroExterior": "0,020",
+        "numeroDiametros": "33"
+      },
+      "redondeoCocienteExterior": 35,
+      "cocienteInteriorSigasDerivado": 52.870090634441084,
+      "origenDiscrepancia": "Valores presentes en el manual, no error de transcripción detectado",
+      "accion": "Conservar las tres columnas originales. No elegir otro diámetro ni recalcular pérdidas por suposición."
+    },
+    {
+      "id": "sigas-p24-derecho-02",
+      "pagina": 24,
+      "nombre": "Codo 90º C/base H.extra Larga 25x1/2\" ST",
+      "equivalenteImpresoM": 0.5,
+      "diametroExteriorM": 0.025,
+      "numeroImpreso": 16,
+      "cocienteDerivado": 20,
+      "estado": "Cotejo resuelto; criterio técnico pendiente del fabricante",
+      "bloque": "derecho",
+      "fila": 2,
+      "originales": {
+        "longitudEquivalente": "0,500",
+        "diametroExterior": "0,025",
+        "numeroDiametros": "16"
+      },
+      "redondeoCocienteExterior": 20,
+      "cocienteInteriorSigasDerivado": 27.487630566245187,
+      "origenDiscrepancia": "Valores presentes en el manual, no error de transcripción detectado",
+      "accion": "Conservar las tres columnas originales. No elegir otro diámetro ni recalcular pérdidas por suposición."
+    },
+    {
+      "id": "sigas-p24-derecho-18",
+      "pagina": 24,
+      "nombre": "Buje Reducción 25-20",
+      "equivalenteImpresoM": 0.375,
+      "diametroExteriorM": 0.025,
+      "numeroImpreso": 13,
+      "cocienteDerivado": 15,
+      "estado": "Cotejo resuelto; criterio técnico pendiente del fabricante",
+      "bloque": "derecho",
+      "fila": 18,
+      "originales": {
+        "longitudEquivalente": "0,375",
+        "diametroExterior": "0,025",
+        "numeroDiametros": "13"
+      },
+      "redondeoCocienteExterior": 15,
+      "cocienteInteriorSigasDerivado": 20.61572292468389,
+      "origenDiscrepancia": "Valores presentes en el manual, no error de transcripción detectado",
+      "accion": "Conservar las tres columnas originales. No elegir otro diámetro ni recalcular pérdidas por suposición."
+    },
+    {
+      "id": "sigas-p24-derecho-19",
+      "pagina": 24,
+      "nombre": "Buje Reducción 32-25",
+      "equivalenteImpresoM": 0.576,
+      "diametroExteriorM": 0.032,
+      "numeroImpreso": 16,
+      "cocienteDerivado": 18,
+      "estado": "Cotejo resuelto; criterio técnico pendiente del fabricante",
+      "bloque": "derecho",
+      "fila": 19,
+      "originales": {
+        "longitudEquivalente": "0,576",
+        "diametroExterior": "0,032",
+        "numeroDiametros": "16"
+      },
+      "redondeoCocienteExterior": 18,
+      "cocienteInteriorSigasDerivado": 23.09542902967121,
+      "origenDiscrepancia": "Valores presentes en el manual, no error de transcripción detectado",
+      "accion": "Conservar las tres columnas originales. No elegir otro diámetro ni recalcular pérdidas por suposición."
+    },
+    {
+      "id": "sigas-p24-derecho-20",
+      "pagina": 24,
+      "nombre": "Buje Reducción 32-20",
+      "equivalenteImpresoM": 0.384,
+      "diametroExteriorM": 0.032,
+      "numeroImpreso": 10,
+      "cocienteDerivado": 12,
+      "estado": "Cotejo resuelto; criterio técnico pendiente del fabricante",
+      "bloque": "derecho",
+      "fila": 20,
+      "originales": {
+        "longitudEquivalente": "0,384",
+        "diametroExterior": "0,032",
+        "numeroDiametros": "10"
+      },
+      "redondeoCocienteExterior": 12,
+      "cocienteInteriorSigasDerivado": 15.396952686447474,
+      "origenDiscrepancia": "Valores presentes en el manual, no error de transcripción detectado",
+      "accion": "Conservar las tres columnas originales. No elegir otro diámetro ni recalcular pérdidas por suposición."
+    },
+    {
+      "id": "sigas-p25-izquierdo-50",
+      "pagina": 25,
+      "nombre": "Te Reduc. 20 Extr. 25 Te 25 X 20 X 20",
+      "equivalenteImpresoM": 0.4,
+      "diametroExteriorM": 0.025,
+      "numeroImpreso": 14,
+      "cocienteDerivado": 16,
+      "estado": "Cotejo resuelto; criterio técnico pendiente del fabricante",
+      "bloque": "izquierdo",
+      "fila": 50,
+      "originales": {
+        "longitudEquivalente": "0,400",
+        "diametroExterior": "0,025",
+        "numeroDiametros": "14"
+      },
+      "redondeoCocienteExterior": 16,
+      "cocienteInteriorSigasDerivado": 21.990104452996153,
+      "origenDiscrepancia": "Valores presentes en el manual, no error de transcripción detectado",
+      "accion": "Conservar las tres columnas originales. No elegir otro diámetro ni recalcular pérdidas por suposición."
+    },
+    {
+      "id": "sigas-p25-izquierdo-51",
+      "pagina": 25,
+      "nombre": "Te Reduc. 20 Extr. 32 Te 32 X 20 X 20",
+      "equivalenteImpresoM": 0.704,
+      "diametroExteriorM": 0.032,
+      "numeroImpreso": 19,
+      "cocienteDerivado": 22,
+      "estado": "Cotejo resuelto; criterio técnico pendiente del fabricante",
+      "bloque": "izquierdo",
+      "fila": 51,
+      "originales": {
+        "longitudEquivalente": "0,704",
+        "diametroExterior": "0,032",
+        "numeroDiametros": "19"
+      },
+      "redondeoCocienteExterior": 22,
+      "cocienteInteriorSigasDerivado": 28.227746591820367,
+      "origenDiscrepancia": "Valores presentes en el manual, no error de transcripción detectado",
+      "accion": "Conservar las tres columnas originales. No elegir otro diámetro ni recalcular pérdidas por suposición."
+    },
+    {
+      "id": "sigas-p25-derecho-01",
+      "pagina": 25,
+      "nombre": "Te Reduc. 25 Extr. 20 Te 25 X 25 X 20",
+      "equivalenteImpresoM": 0.4,
+      "diametroExteriorM": 0.025,
+      "numeroImpreso": 14,
+      "cocienteDerivado": 16,
+      "estado": "Cotejo resuelto; criterio técnico pendiente del fabricante",
+      "bloque": "derecho",
+      "fila": 1,
+      "originales": {
+        "longitudEquivalente": "0,400",
+        "diametroExterior": "0,025",
+        "numeroDiametros": "14"
+      },
+      "redondeoCocienteExterior": 16,
+      "cocienteInteriorSigasDerivado": 21.990104452996153,
+      "origenDiscrepancia": "Valores presentes en el manual, no error de transcripción detectado",
+      "accion": "Conservar las tres columnas originales. No elegir otro diámetro ni recalcular pérdidas por suposición."
+    },
+    {
+      "id": "sigas-p25-derecho-02",
+      "pagina": 25,
+      "nombre": "Te Reduc. 32 Extr. 20 Te 32 X 32 X 20",
+      "equivalenteImpresoM": 0.704,
+      "diametroExteriorM": 0.032,
+      "numeroImpreso": 19,
+      "cocienteDerivado": 22,
+      "estado": "Cotejo resuelto; criterio técnico pendiente del fabricante",
+      "bloque": "derecho",
+      "fila": 2,
+      "originales": {
+        "longitudEquivalente": "0,704",
+        "diametroExterior": "0,032",
+        "numeroDiametros": "19"
+      },
+      "redondeoCocienteExterior": 22,
+      "cocienteInteriorSigasDerivado": 28.227746591820367,
+      "origenDiscrepancia": "Valores presentes en el manual, no error de transcripción detectado",
+      "accion": "Conservar las tres columnas originales. No elegir otro diámetro ni recalcular pérdidas por suposición."
+    },
+    {
+      "id": "sigas-p25-derecho-38",
+      "pagina": 25,
+      "nombre": "Reductor Anular 90-63",
+      "equivalenteImpresoM": 0.99,
+      "diametroExteriorM": 0.09,
+      "numeroImpreso": 10,
+      "cocienteDerivado": 11,
+      "estado": "Cotejo resuelto; criterio técnico pendiente del fabricante",
+      "bloque": "derecho",
+      "fila": 38,
+      "originales": {
+        "longitudEquivalente": "0,990",
+        "diametroExterior": "0,090",
+        "numeroDiametros": "10"
+      },
+      "redondeoCocienteExterior": 11,
+      "cocienteInteriorSigasDerivado": 13.378378378378379,
+      "origenDiscrepancia": "Valores presentes en el manual, no error de transcripción detectado",
+      "accion": "Conservar las tres columnas originales. No elegir otro diámetro ni recalcular pérdidas por suposición."
+    },
+    {
+      "id": "sigas-p25-derecho-39",
+      "pagina": 25,
+      "nombre": "Reductor Anular 90-75",
+      "equivalenteImpresoM": 1.08,
+      "diametroExteriorM": 0.09,
+      "numeroImpreso": 11,
+      "cocienteDerivado": 12.000000000000002,
+      "estado": "Cotejo resuelto; criterio técnico pendiente del fabricante",
+      "bloque": "derecho",
+      "fila": 39,
+      "originales": {
+        "longitudEquivalente": "1,080",
+        "diametroExterior": "0,090",
+        "numeroDiametros": "11"
+      },
+      "redondeoCocienteExterior": 12,
+      "cocienteInteriorSigasDerivado": 14.594594594594597,
+      "origenDiscrepancia": "Valores presentes en el manual, no error de transcripción detectado",
+      "accion": "Conservar las tres columnas originales. No elegir otro diámetro ni recalcular pérdidas por suposición."
+    },
+    {
+      "id": "sigas-p25-derecho-40",
+      "pagina": 25,
+      "nombre": "Reductor Anular 75-32",
+      "equivalenteImpresoM": 0.75,
+      "diametroExteriorM": 0.075,
+      "numeroImpreso": 9,
+      "cocienteDerivado": 10,
+      "estado": "Cotejo resuelto; criterio técnico pendiente del fabricante",
+      "bloque": "derecho",
+      "fila": 40,
+      "originales": {
+        "longitudEquivalente": "0,750",
+        "diametroExterior": "0,075",
+        "numeroDiametros": "9"
+      },
+      "redondeoCocienteExterior": 10,
+      "cocienteInteriorSigasDerivado": 11.904761904761905,
+      "origenDiscrepancia": "Valores presentes en el manual, no error de transcripción detectado",
+      "accion": "Conservar las tres columnas originales. No elegir otro diámetro ni recalcular pérdidas por suposición."
+    },
+    {
+      "id": "sigas-p25-derecho-41",
+      "pagina": 25,
+      "nombre": "Reductor Anular 75-40",
+      "equivalenteImpresoM": 0.75,
+      "diametroExteriorM": 0.075,
+      "numeroImpreso": 9,
+      "cocienteDerivado": 10,
+      "estado": "Cotejo resuelto; criterio técnico pendiente del fabricante",
+      "bloque": "derecho",
+      "fila": 41,
+      "originales": {
+        "longitudEquivalente": "0,750",
+        "diametroExterior": "0,075",
+        "numeroDiametros": "9"
+      },
+      "redondeoCocienteExterior": 10,
+      "cocienteInteriorSigasDerivado": 11.904761904761905,
+      "origenDiscrepancia": "Valores presentes en el manual, no error de transcripción detectado",
+      "accion": "Conservar las tres columnas originales. No elegir otro diámetro ni recalcular pérdidas por suposición."
+    },
+    {
+      "id": "sigas-p25-derecho-42",
+      "pagina": 25,
+      "nombre": "Reductor Anular 75-50",
+      "equivalenteImpresoM": 0.75,
+      "diametroExteriorM": 0.075,
+      "numeroImpreso": 9,
+      "cocienteDerivado": 10,
+      "estado": "Cotejo resuelto; criterio técnico pendiente del fabricante",
+      "bloque": "derecho",
+      "fila": 42,
+      "originales": {
+        "longitudEquivalente": "0,750",
+        "diametroExterior": "0,075",
+        "numeroDiametros": "9"
+      },
+      "redondeoCocienteExterior": 10,
+      "cocienteInteriorSigasDerivado": 11.904761904761905,
+      "origenDiscrepancia": "Valores presentes en el manual, no error de transcripción detectado",
+      "accion": "Conservar las tres columnas originales. No elegir otro diámetro ni recalcular pérdidas por suposición."
+    },
+    {
+      "id": "sigas-p25-derecho-43",
+      "pagina": 25,
+      "nombre": "Montura Derivacion 63-25",
+      "equivalenteImpresoM": 0.315,
+      "diametroExteriorM": 0.063,
+      "numeroImpreso": 3,
+      "cocienteDerivado": 5,
+      "estado": "Cotejo resuelto; criterio técnico pendiente del fabricante",
+      "bloque": "derecho",
+      "fila": 43,
+      "originales": {
+        "longitudEquivalente": "0,315",
+        "diametroExterior": "0,063",
+        "numeroDiametros": "3"
+      },
+      "redondeoCocienteExterior": 5,
+      "cocienteInteriorSigasDerivado": 5.74398249452954,
+      "origenDiscrepancia": "Valores presentes en el manual, no error de transcripción detectado",
+      "accion": "Conservar las tres columnas originales. No elegir otro diámetro ni recalcular pérdidas por suposición."
+    },
+    {
+      "id": "sigas-p25-derecho-44",
+      "pagina": 25,
+      "nombre": "Montura Derivacion 75-25",
+      "equivalenteImpresoM": 0.3,
+      "diametroExteriorM": 0.075,
+      "numeroImpreso": 2,
+      "cocienteDerivado": 4,
+      "estado": "Cotejo resuelto; criterio técnico pendiente del fabricante",
+      "bloque": "derecho",
+      "fila": 44,
+      "originales": {
+        "longitudEquivalente": "0,300",
+        "diametroExterior": "0,075",
+        "numeroDiametros": "2"
+      },
+      "redondeoCocienteExterior": 4,
+      "cocienteInteriorSigasDerivado": 4.761904761904762,
+      "origenDiscrepancia": "Valores presentes en el manual, no error de transcripción detectado",
+      "accion": "Conservar las tres columnas originales. No elegir otro diámetro ni recalcular pérdidas por suposición."
+    },
+    {
+      "id": "sigas-p25-derecho-45",
+      "pagina": 25,
+      "nombre": "Montura Derivacion 75-32",
+      "equivalenteImpresoM": 0.3,
+      "diametroExteriorM": 0.075,
+      "numeroImpreso": 2,
+      "cocienteDerivado": 4,
+      "estado": "Cotejo resuelto; criterio técnico pendiente del fabricante",
+      "bloque": "derecho",
+      "fila": 45,
+      "originales": {
+        "longitudEquivalente": "0,300",
+        "diametroExterior": "0,075",
+        "numeroDiametros": "2"
+      },
+      "redondeoCocienteExterior": 4,
+      "cocienteInteriorSigasDerivado": 4.761904761904762,
+      "origenDiscrepancia": "Valores presentes en el manual, no error de transcripción detectado",
+      "accion": "Conservar las tres columnas originales. No elegir otro diámetro ni recalcular pérdidas por suposición."
+    },
+    {
+      "id": "sigas-p25-derecho-46",
+      "pagina": 25,
+      "nombre": "Montura Derivacion 90-25",
+      "equivalenteImpresoM": 0.54,
+      "diametroExteriorM": 0.09,
+      "numeroImpreso": 4,
+      "cocienteDerivado": 6.000000000000001,
+      "estado": "Cotejo resuelto; criterio técnico pendiente del fabricante",
+      "bloque": "derecho",
+      "fila": 46,
+      "originales": {
+        "longitudEquivalente": "0,540",
+        "diametroExterior": "0,090",
+        "numeroDiametros": "4"
+      },
+      "redondeoCocienteExterior": 6,
+      "cocienteInteriorSigasDerivado": 7.297297297297298,
+      "origenDiscrepancia": "Valores presentes en el manual, no error de transcripción detectado",
+      "accion": "Conservar las tres columnas originales. No elegir otro diámetro ni recalcular pérdidas por suposición."
+    },
+    {
+      "id": "sigas-p25-derecho-47",
+      "pagina": 25,
+      "nombre": "Montura Derivacion 90-32",
+      "equivalenteImpresoM": 0.54,
+      "diametroExteriorM": 0.09,
+      "numeroImpreso": 4,
+      "cocienteDerivado": 6.000000000000001,
+      "estado": "Cotejo resuelto; criterio técnico pendiente del fabricante",
+      "bloque": "derecho",
+      "fila": 47,
+      "originales": {
+        "longitudEquivalente": "0,540",
+        "diametroExterior": "0,090",
+        "numeroDiametros": "4"
+      },
+      "redondeoCocienteExterior": 6,
+      "cocienteInteriorSigasDerivado": 7.297297297297298,
+      "origenDiscrepancia": "Valores presentes en el manual, no error de transcripción detectado",
+      "accion": "Conservar las tres columnas originales. No elegir otro diámetro ni recalcular pérdidas por suposición."
+    },
+    {
+      "id": "sigas-p25-derecho-48",
+      "pagina": 25,
+      "nombre": "Montura Derivacion 110-25",
+      "equivalenteImpresoM": 0.88,
+      "diametroExteriorM": 0.11,
+      "numeroImpreso": 6,
+      "cocienteDerivado": 8,
+      "estado": "Cotejo resuelto; criterio técnico pendiente del fabricante",
+      "bloque": "derecho",
+      "fila": 48,
+      "originales": {
+        "longitudEquivalente": "0,880",
+        "diametroExterior": "0,110",
+        "numeroDiametros": "6"
+      },
+      "redondeoCocienteExterior": 8,
+      "cocienteInteriorSigasDerivado": 9.361702127659575,
+      "origenDiscrepancia": "Valores presentes en el manual, no error de transcripción detectado",
+      "accion": "Conservar las tres columnas originales. No elegir otro diámetro ni recalcular pérdidas por suposición."
+    },
+    {
+      "id": "sigas-p25-derecho-49",
+      "pagina": 25,
+      "nombre": "Montura Derivacion 110-32",
+      "equivalenteImpresoM": 0.88,
+      "diametroExteriorM": 0.11,
+      "numeroImpreso": 6,
+      "cocienteDerivado": 8,
+      "estado": "Cotejo resuelto; criterio técnico pendiente del fabricante",
+      "bloque": "derecho",
+      "fila": 49,
+      "originales": {
+        "longitudEquivalente": "0,880",
+        "diametroExterior": "0,110",
+        "numeroDiametros": "6"
+      },
+      "redondeoCocienteExterior": 8,
+      "cocienteInteriorSigasDerivado": 9.361702127659575,
+      "origenDiscrepancia": "Valores presentes en el manual, no error de transcripción detectado",
+      "accion": "Conservar las tres columnas originales. No elegir otro diámetro ni recalcular pérdidas por suposición."
+    }
+  ],
+  "reductor7532": {
+    "nombre": "Reductor Anular 75-32",
+    "ids": [
+      "sigas-p25-derecho-37",
+      "sigas-p25-derecho-40"
+    ],
+    "valores": [
+      0.78698,
+      0.75
+    ],
+    "pagina": 25,
+    "estado": "Duplicación del nombre confirmada en documento. Equivalente técnico sin resolver.",
+    "accion": "Mantener ambos IDs; consulta de equivalente bloqueada. La ficha del producto no permite decidir entre 0.78698 y 0.750."
+  },
+  "propano75": [
+    {
+      "pagina": 23,
+      "tabla": 5,
+      "longitudM": 75,
+      "exteriorMm": 75,
+      "anterior70m": 21.596,
+      "impreso75m": 21.443,
+      "siguiente80m": 20.201,
+      "origenDiscrepancia": "Lectura confirmada en el PDF; patrón numérico distinto, no transcripción corregible",
+      "estado": "Pendiente de aclaración del fabricante",
+      "accion": "Conservar valores. No interpolar ni extrapolar para sustituirlos."
+    },
+    {
+      "pagina": 23,
+      "tabla": 5,
+      "longitudM": 75,
+      "exteriorMm": 90,
+      "anterior70m": 32.292,
+      "impreso75m": 32.064,
+      "siguiente80m": 30.206,
+      "origenDiscrepancia": "Lectura confirmada en el PDF; patrón numérico distinto, no transcripción corregible",
+      "estado": "Pendiente de aclaración del fabricante",
+      "accion": "Conservar valores. No interpolar ni extrapolar para sustituirlos."
+    },
+    {
+      "pagina": 23,
+      "tabla": 5,
+      "longitudM": 75,
+      "exteriorMm": 110,
+      "anterior70m": 58.726,
+      "impreso75m": 58.311,
+      "siguiente80m": 54.934,
+      "origenDiscrepancia": "Lectura confirmada en el PDF; patrón numérico distinto, no transcripción corregible",
+      "estado": "Pendiente de aclaración del fabricante",
+      "accion": "Conservar valores. No interpolar ni extrapolar para sustituirlos."
+    }
+  ],
+  "transcripcionesCorregidas": 0,
+  "habilitado": false,
+  "contactoFabricanteRealizado": false,
+  "nota": "Se revisaron fuentes públicas y el manual. No se enviaron mensajes ni se obtuvo respuesta técnica del fabricante. Las hipótesis matemáticas no son erratas confirmadas."
+}

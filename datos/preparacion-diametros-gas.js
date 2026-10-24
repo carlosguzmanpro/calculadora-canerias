@@ -56,6 +56,36 @@
   if(recorridos.some(r=>!positivo(r.longitudReal)))errores.push('Longitud total de recorrido fuera de rango.');
   return {estado:'preparacion',listoParaDimensionar:false,diametros:null,errores:unicos(errores),pendientes:unicos(pendientes),avisos:red.avisos,recorridos:errores.length?[]:recorridos.sort((a,b)=>b.longitudReal-a.longitudReal||a.artefacto.localeCompare(b.artefacto)),porTramo:ts.filter(t=>!red.excluidos.includes(t.id)).map(t=>({id:t.id,nombre:t.desde+'–'+t.hasta,longitudReal:t.metros,consumoKcal:errores.length?null:red.porTramo[t.id]??null,caudal:errores.length?null:caudal(red.porTramo[t.id]),diametro:null})),poderCalorifico:pcs};
  }
- const api={inventario,revisarPaquete,seleccionar,prepararRed};
+ function prepararEntradaMotor(red,ts,arts,inst){
+  const faltantes=[...red.errores,...red.faltantes];
+  if(faltantes.length)return {entrada:null,faltantes};
+  const orientacion=red.orientacion,usados=ts.filter(t=>orientacion[t.id]&&!red.excluidos.includes(t.id)),entradas=new Set(Object.values(orientacion).map(o=>o.hasta)),salidas=new Set(Object.values(orientacion).map(o=>o.desde));
+  const raices=[...salidas].filter(id=>!entradas.has(id));if(raices.length!==1)return {entrada:null,faltantes:['Medidor único pendiente.']};
+  const formales=new Map(inst.nodos.map(n=>['id:'+n.id,n])),artefactos=[];
+  const nodos=red.puntos.map(p=>{
+   const original=formales.get(p.id)||{},n={...original,id:p.id,nombre:p.nombre};
+   if(p.id===raices[0])n.tipo='medidor';
+   else if(salidas.has(p.id))n.tipo='derivacion'; // Tipo de punto, nunca tipo de pieza/tee.
+   else{
+    n.tipo='artefacto';const t=usados.find(t=>orientacion[t.id].hasta===p.id),q=t?red.porTramo[t.id]:null;
+    const id='GAS-artefacto:'+p.id;n.artefactoId=id;
+    if(positivo(q))artefactos.push({id,nombre:p.nombre,consumo:q});else faltantes.push('Consumo conocido pendiente en '+p.nombre+'.');
+   }
+   return n;
+  });
+  const lista=usados.map(t=>{
+   const o=orientacion[t.id],a=red.puntos.find(p=>p.id===o.desde),b=red.puntos.find(p=>p.id===o.hasta),redNueva={desde:o.desde,hasta:o.hasta};
+   if(t.red&&('id:'+t.red.desde===o.desde||t.red.desde===o.desde)&&t.red.via)redNueva.via=t.red.via;
+   else if(t.red?.via)faltantes.push(t.desde+'–'+t.hasta+': vía de tee no trasladada sin confirmar su extremo de origen.');
+   const copia=JSON.parse(JSON.stringify(t));
+   if(o.invertido&&copia.detalle?.estado==='completo'){
+    // No invertir medidas/posiciones técnicas por suposición. La geometría original queda en el proyecto.
+    copia.detalle={estado:'pendiente',accesorios:[]};faltantes.push(t.desde+'–'+t.hasta+': revisar adaptación del detalle al sentido desde el medidor; cantidades conservadas por separado.');
+   }
+   return {...copia,desde:a.nombre,hasta:b.nombre,red:redNueva};
+  });
+  return {entrada:{tramos:lista,artefactos,instalacion:{version:1,perfil:{...inst.perfil},nodos}},faltantes};
+ }
+ const api={inventario,revisarPaquete,seleccionar,prepararRed,prepararEntradaMotor};
  if(typeof module==='object'&&module.exports)module.exports=api;else root.PreparacionDiametrosGas=api;
 })(globalThis);

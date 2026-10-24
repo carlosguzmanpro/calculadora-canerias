@@ -1,0 +1,190 @@
+[
+  {
+    "sistema": "acero-epoxi-roscado-gn",
+    "metros": 58,
+    "codos90": 18,
+    "tees": 2,
+    "llaves": 3,
+    "consumoTotalKcal": 29200,
+    "consumos": {
+      "B-CALEFACTOR": 3000,
+      "B-COCINA": 10200,
+      "A-B": 13200,
+      "A-TERMO": 16000,
+      "M-A": 29200
+    },
+    "recorridos": [
+      {
+        "artefacto": "CALEFACTOR",
+        "tramos": [
+          "M-A",
+          "A-B",
+          "B-CALEFACTOR"
+        ],
+        "longitudRealM": 36,
+        "consumoKcal": 3000,
+        "caudalM3h": 0.3225806451612903
+      },
+      {
+        "artefacto": "COCINA",
+        "tramos": [
+          "M-A",
+          "A-B",
+          "B-COCINA"
+        ],
+        "longitudRealM": 33,
+        "consumoKcal": 10200,
+        "caudalM3h": 1.096774193548387
+      },
+      {
+        "artefacto": "TERMO",
+        "tramos": [
+          "M-A",
+          "A-TERMO"
+        ],
+        "longitudRealM": 24,
+        "consumoKcal": 16000,
+        "caudalM3h": 1.7204301075268817
+      }
+    ],
+    "estadoDiametros": "pendiente-validacion-tecnica",
+    "diametros": null,
+    "faltantes": [
+      "Dato técnico del proyecto pendiente: provincia.",
+      "Dato técnico del proyecto pendiente: localidad.",
+      "Dato técnico del proyecto pendiente: distribuidora.",
+      "Dato técnico del proyecto pendiente: densidad relativa.",
+      "Dato técnico del proyecto pendiente: unidad de presión.",
+      "Dato técnico del proyecto pendiente: presión disponible.",
+      "Dato técnico del proyecto pendiente: presión mínima de los artefactos.",
+      "Dato técnico del proyecto pendiente: pérdida admisible.",
+      "Dato técnico del proyecto pendiente: fuente de presiones.",
+      "Dato técnico del proyecto pendiente: método y referencia normativa.",
+      "Derivación A: verificar pieza física y vía de paso/giro; no se infieren del nombre.",
+      "Derivación B: verificar pieza física y vía de paso/giro; no se infieren del nombre.",
+      "Equivalentes pendientes: reutilizar cantidades conocidas; verificar tipos de válvulas y vías de tees. Para cuplas hacen falta segmentos continuos y largo comercial, sin repetir la carga de cantidades.",
+      "Confirmar edición, aplicabilidad normativa, condiciones de suministro e interiores reales.",
+      "Resolver 7,67/7,65, redondeos y criterio de cuplas con documentación.",
+      "Completar Provincia.",
+      "Completar Localidad.",
+      "Completar Distribuidora.",
+      "Completar Unidad.",
+      "Completar Presion.",
+      "Completar Minima.",
+      "Completar Perdida.",
+      "Completar Fuente.",
+      "Completar Norma.",
+      "Completar Demanda.",
+      "Densidad relativa del gas, comprobada para las tablas.",
+      "Presiones en Pa para este motor tabular; no se reinterpretan mbar o mmca como Pa.",
+      "Tabla de capacidad/pérdida por diámetro y caudal, específica del material y sistema (Tabla N.º 3 del ejercicio pendiente de verificar).",
+      "Longitudes equivalentes de accesorios por medida y recorrido de tee (Tabla N.º 18 del ejercicio pendiente de verificar).",
+      "Catálogo de piezas compatibles: tees, codos, llaves, cuplas y reducciones.",
+      "Método y condiciones de aplicación verificados, con fuente y edición.",
+      "Revisar cantidad, tipo y posición de accesorios de M–A.",
+      "Revisar cantidad, tipo y posición de accesorios de A–B.",
+      "Revisar cantidad, tipo y posición de accesorios de A–TERMO.",
+      "Revisar cantidad, tipo y posición de accesorios de B–CALEFACTOR.",
+      "Revisar cantidad, tipo y posición de accesorios de B–COCINA.",
+      "Confirmá que A es una tee real de tres conexiones.",
+      "Identificá paso principal y ramal de la tee A.",
+      "Confirmá que B es una tee real de tres conexiones.",
+      "Identificá paso principal y ramal de la tee B."
+    ],
+    "datosDeUsuarioSinAccesoriosAutomaticos": true
+  },
+  {
+    "sistema": "sigas",
+    "metros": 58,
+    "codos90": 18,
+    "tees": 2,
+    "llaves": 3,
+    "consumoTotalKcal": 29200,
+    "consumos": {
+      "B-CALEFACTOR": 3000,
+      "B-COCINA": 10200,
+      "A-B": 13200,
+      "A-TERMO": 16000,
+      "M-A": 29200
+    },
+    "recorridos": [
+      {
+        "artefacto": "CALEFACTOR",
+        "tramos": [
+          "M-A",
+          "A-B",
+          "B-CALEFACTOR"
+        ],
+        "longitudRealM": 36,
+        "consumoKcal": 3000,
+        "caudalM3h": 0.3225806451612903
+      },
+      {
+        "artefacto": "COCINA",
+        "tramos": [
+          "M-A",
+          "A-B",
+          "B-COCINA"
+        ],
+        "longitudRealM": 33,
+        "consumoKcal": 10200,
+        "caudalM3h": 1.096774193548387
+      },
+      {
+        "artefacto": "TERMO",
+        "tramos": [
+          "M-A",
+          "A-TERMO"
+        ],
+        "longitudRealM": 24,
+        "consumoKcal": 16000,
+        "caudalM3h": 1.7204301075268817
+      }
+    ],
+    "estadoDiametros": "pendiente-validacion-tecnica",
+    "diametros": null,
+    "faltantes": [
+      "Dato técnico del proyecto pendiente: provincia.",
+      "Dato técnico del proyecto pendiente: localidad.",
+      "Dato técnico del proyecto pendiente: distribuidora.",
+      "Dato técnico del proyecto pendiente: densidad relativa.",
+      "Dato técnico del proyecto pendiente: unidad de presión.",
+      "Dato técnico del proyecto pendiente: presión disponible.",
+      "Dato técnico del proyecto pendiente: presión mínima de los artefactos.",
+      "Dato técnico del proyecto pendiente: pérdida admisible.",
+      "Dato técnico del proyecto pendiente: fuente de presiones.",
+      "Dato técnico del proyecto pendiente: método y referencia normativa.",
+      "Derivación A: verificar pieza física y vía de paso/giro; no se infieren del nombre.",
+      "Derivación B: verificar pieza física y vía de paso/giro; no se infieren del nombre.",
+      "Equivalentes pendientes: reutilizar cantidades conocidas; verificar tipos de válvulas y vías de tees. Para cuplas hacen falta segmentos continuos y largo comercial, sin repetir la carga de cantidades.",
+      "Manual identificado: verificar criterios de cálculo, discrepancias del original, accesorios exactos y condiciones de suministro.",
+      "Las tablas SIGAS no habilitan ni utilizan equivalencias de acero epoxi.",
+      "Completar Provincia.",
+      "Completar Localidad.",
+      "Completar Distribuidora.",
+      "Completar Unidad.",
+      "Completar Presion.",
+      "Completar Minima.",
+      "Completar Perdida.",
+      "Completar Fuente.",
+      "Completar Norma.",
+      "Completar Demanda.",
+      "Densidad relativa del gas, comprobada para las tablas.",
+      "Presiones en Pa para este motor tabular; no se reinterpretan mbar o mmca como Pa.",
+      "Falta un catálogo aprobado, método tabular verificado y alcance de aplicación.",
+      "Falta caída de presión y regla verificada para elegir longitud de cálculo en la tabla de capacidades.",
+      "Rango de presión, densidad del gas y aplicabilidad del redondeo conservador de caudal.",
+      "Las condiciones de presión o densidad no están cubiertas por el catálogo.",
+      "Revisar cantidad, tipo y posición de accesorios de M–A.",
+      "Revisar cantidad, tipo y posición de accesorios de A–B.",
+      "Revisar cantidad, tipo y posición de accesorios de A–TERMO.",
+      "Revisar cantidad, tipo y posición de accesorios de B–CALEFACTOR.",
+      "Revisar cantidad, tipo y posición de accesorios de B–COCINA.",
+      "Confirmá que A es una tee real de tres conexiones.",
+      "Identificá paso principal y ramal de la tee A.",
+      "Confirmá que B es una tee real de tres conexiones.",
+      "Identificá paso principal y ramal de la tee B."
+    ],
+    "datosDeUsuarioSinAccesoriosAutomaticos": true
+  }
+]
