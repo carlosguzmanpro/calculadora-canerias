@@ -1,10 +1,58 @@
 {
   "id": "sigas",
-  "nombre": "SIGAS",
+  "nombre": "SIGAS Thermofusión",
+  "manualDisponible": true,
   "fotografiasLocalizadas": false,
-  "tablas": [],
-  "edicion": null,
+  "edicion": "15 - 2025",
+  "fechaEditorial": "Julio 2025",
   "habilitado": false,
-  "faltantes": ["Fotografías originales completas de capacidades y equivalencias SIGAS, con encabezados, unidades, notas y edición", "Manual técnico del fabricante: familia exacta, materiales, sistema de unión, diámetros interiores y accesorios compatibles", "Método, gas, presiones, densidad, criterios de cuplas, redondeo y pérdidas aplicables"],
-  "nota": "El propietario informa que las aportó antes, pero no están localizadas en los archivos accesibles de este entorno. No se completan con tablas de acero epoxi."
+  "fuente": {
+    "archivo": "fuentes/sigas-ed15-2025/manual-tecnico.pdf",
+    "sha256": "a7dc5dd90adec7d9db335100407d4748f306281b3917e2e52a8f2b707d35e2b1",
+    "paginas": 48,
+    "edicion": "15 - 2025",
+    "fechaEditorial": "Julio 2025",
+    "paginaEdicion": 46,
+    "portadaEdicion": 1,
+    "metadatosPDFCreacion": "2025-06-27",
+    "origen": "PDF original adjuntado por el usuario",
+    "validacionNormativa": false
+  },
+  "tablas": [
+    {
+      "numero": 6,
+      "datos": "datos/catalogos/sigas/tablas-ed15-2025.js",
+      "paginas": [
+        21
+      ]
+    },
+    {
+      "numero": 4,
+      "datos": "datos/catalogos/sigas/tablas-ed15-2025.js",
+      "paginas": [
+        22
+      ]
+    },
+    {
+      "numero": 5,
+      "datos": "datos/catalogos/sigas/tablas-ed15-2025.js",
+      "paginas": [
+        23
+      ]
+    },
+    {
+      "numero": 3,
+      "datos": "datos/catalogos/sigas/tablas-ed15-2025.js",
+      "paginas": [
+        24,
+        25
+      ]
+    }
+  ],
+  "faltantes": [
+    "Revisión técnica independiente de la transcripción y de las discrepancias editoriales",
+    "Método/regla de longitud y condiciones de suministro por verificar",
+    "Productos exactos y vías de tees; tratamiento de uniones, cuplas y reducciones SIGAS"
+  ],
+  "nota": "Sustituye el estado histórico de manual no localizado. La edición identificada no certifica aplicabilidad normativa actual ni habilita diámetros."
 }

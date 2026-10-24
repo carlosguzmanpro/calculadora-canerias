@@ -1,0 +1,266 @@
+{
+  "habilitado": false,
+  "errores": [],
+  "alertas": [
+    "Nombres repetidos: no seleccionar por nombre ni resolver por promedio.",
+    "Longitud equivalente y Nº de Ø no coinciden por simple redondeo en 24 accesorios. No recalcular la columna impresa.",
+    "Tabla 5, 75 m / 75, 90 y 110 mm: descenso distinto del patrón de las otras columnas; cotejado con el PDF, pendiente aclaración del fabricante.",
+    "Ejemplos pp.26–27 remiten Tabla 6 a pp.24–25, pero está en p.21. Conservar la referencia literal como discrepancia editorial.",
+    "Edición identificada no equivale a condiciones de suministro ni validación normativa vigente."
+  ],
+  "duplicados": [
+    {
+      "nombre": "Reductor Anular 75-32",
+      "ids": [
+        "sigas-p25-derecho-37",
+        "sigas-p25-derecho-40"
+      ],
+      "valores": [
+        0.78698,
+        0.75
+      ]
+    }
+  ],
+  "diferencias": [
+    {
+      "id": "sigas-p24-izquierdo-07",
+      "pagina": 24,
+      "nombre": "Unión Normal 75 mm",
+      "equivalenteImpresoM": 0.103,
+      "diametroExteriorM": 0.075,
+      "numeroImpreso": 3,
+      "cocienteDerivado": 1.3733333333333333,
+      "estado": "Conservar impresos; pedir criterio al fabricante"
+    },
+    {
+      "id": "sigas-p24-izquierdo-50",
+      "pagina": 24,
+      "nombre": "Codo 90º C/base H.larga 20x1/2\" St",
+      "equivalenteImpresoM": 0.7,
+      "diametroExteriorM": 0.02,
+      "numeroImpreso": 33,
+      "cocienteDerivado": 35,
+      "estado": "Conservar impresos; pedir criterio al fabricante"
+    },
+    {
+      "id": "sigas-p24-izquierdo-51",
+      "pagina": 24,
+      "nombre": "Codo 90º C/base H.larga 25x1/2\" St",
+      "equivalenteImpresoM": 0.5,
+      "diametroExteriorM": 0.025,
+      "numeroImpreso": 16,
+      "cocienteDerivado": 20,
+      "estado": "Conservar impresos; pedir criterio al fabricante"
+    },
+    {
+      "id": "sigas-p24-derecho-01",
+      "pagina": 24,
+      "nombre": "Codo 90º C/base H.extra Larga 20x1/2\" ST",
+      "equivalenteImpresoM": 0.7,
+      "diametroExteriorM": 0.02,
+      "numeroImpreso": 33,
+      "cocienteDerivado": 35,
+      "estado": "Conservar impresos; pedir criterio al fabricante"
+    },
+    {
+      "id": "sigas-p24-derecho-02",
+      "pagina": 24,
+      "nombre": "Codo 90º C/base H.extra Larga 25x1/2\" ST",
+      "equivalenteImpresoM": 0.5,
+      "diametroExteriorM": 0.025,
+      "numeroImpreso": 16,
+      "cocienteDerivado": 20,
+      "estado": "Conservar impresos; pedir criterio al fabricante"
+    },
+    {
+      "id": "sigas-p24-derecho-18",
+      "pagina": 24,
+      "nombre": "Buje Reducción 25-20",
+      "equivalenteImpresoM": 0.375,
+      "diametroExteriorM": 0.025,
+      "numeroImpreso": 13,
+      "cocienteDerivado": 15,
+      "estado": "Conservar impresos; pedir criterio al fabricante"
+    },
+    {
+      "id": "sigas-p24-derecho-19",
+      "pagina": 24,
+      "nombre": "Buje Reducción 32-25",
+      "equivalenteImpresoM": 0.576,
+      "diametroExteriorM": 0.032,
+      "numeroImpreso": 16,
+      "cocienteDerivado": 18,
+      "estado": "Conservar impresos; pedir criterio al fabricante"
+    },
+    {
+      "id": "sigas-p24-derecho-20",
+      "pagina": 24,
+      "nombre": "Buje Reducción 32-20",
+      "equivalenteImpresoM": 0.384,
+      "diametroExteriorM": 0.032,
+      "numeroImpreso": 10,
+      "cocienteDerivado": 12,
+      "estado": "Conservar impresos; pedir criterio al fabricante"
+    },
+    {
+      "id": "sigas-p25-izquierdo-50",
+      "pagina": 25,
+      "nombre": "Te Reduc. 20 Extr. 25 Te 25 X 20 X 20",
+      "equivalenteImpresoM": 0.4,
+      "diametroExteriorM": 0.025,
+      "numeroImpreso": 14,
+      "cocienteDerivado": 16,
+      "estado": "Conservar impresos; pedir criterio al fabricante"
+    },
+    {
+      "id": "sigas-p25-izquierdo-51",
+      "pagina": 25,
+      "nombre": "Te Reduc. 20 Extr. 32 Te 32 X 20 X 20",
+      "equivalenteImpresoM": 0.704,
+      "diametroExteriorM": 0.032,
+      "numeroImpreso": 19,
+      "cocienteDerivado": 22,
+      "estado": "Conservar impresos; pedir criterio al fabricante"
+    },
+    {
+      "id": "sigas-p25-derecho-01",
+      "pagina": 25,
+      "nombre": "Te Reduc. 25 Extr. 20 Te 25 X 25 X 20",
+      "equivalenteImpresoM": 0.4,
+      "diametroExteriorM": 0.025,
+      "numeroImpreso": 14,
+      "cocienteDerivado": 16,
+      "estado": "Conservar impresos; pedir criterio al fabricante"
+    },
+    {
+      "id": "sigas-p25-derecho-02",
+      "pagina": 25,
+      "nombre": "Te Reduc. 32 Extr. 20 Te 32 X 32 X 20",
+      "equivalenteImpresoM": 0.704,
+      "diametroExteriorM": 0.032,
+      "numeroImpreso": 19,
+      "cocienteDerivado": 22,
+      "estado": "Conservar impresos; pedir criterio al fabricante"
+    },
+    {
+      "id": "sigas-p25-derecho-38",
+      "pagina": 25,
+      "nombre": "Reductor Anular 90-63",
+      "equivalenteImpresoM": 0.99,
+      "diametroExteriorM": 0.09,
+      "numeroImpreso": 10,
+      "cocienteDerivado": 11,
+      "estado": "Conservar impresos; pedir criterio al fabricante"
+    },
+    {
+      "id": "sigas-p25-derecho-39",
+      "pagina": 25,
+      "nombre": "Reductor Anular 90-75",
+      "equivalenteImpresoM": 1.08,
+      "diametroExteriorM": 0.09,
+      "numeroImpreso": 11,
+      "cocienteDerivado": 12.000000000000002,
+      "estado": "Conservar impresos; pedir criterio al fabricante"
+    },
+    {
+      "id": "sigas-p25-derecho-40",
+      "pagina": 25,
+      "nombre": "Reductor Anular 75-32",
+      "equivalenteImpresoM": 0.75,
+      "diametroExteriorM": 0.075,
+      "numeroImpreso": 9,
+      "cocienteDerivado": 10,
+      "estado": "Conservar impresos; pedir criterio al fabricante"
+    },
+    {
+      "id": "sigas-p25-derecho-41",
+      "pagina": 25,
+      "nombre": "Reductor Anular 75-40",
+      "equivalenteImpresoM": 0.75,
+      "diametroExteriorM": 0.075,
+      "numeroImpreso": 9,
+      "cocienteDerivado": 10,
+      "estado": "Conservar impresos; pedir criterio al fabricante"
+    },
+    {
+      "id": "sigas-p25-derecho-42",
+      "pagina": 25,
+      "nombre": "Reductor Anular 75-50",
+      "equivalenteImpresoM": 0.75,
+      "diametroExteriorM": 0.075,
+      "numeroImpreso": 9,
+      "cocienteDerivado": 10,
+      "estado": "Conservar impresos; pedir criterio al fabricante"
+    },
+    {
+      "id": "sigas-p25-derecho-43",
+      "pagina": 25,
+      "nombre": "Montura Derivacion 63-25",
+      "equivalenteImpresoM": 0.315,
+      "diametroExteriorM": 0.063,
+      "numeroImpreso": 3,
+      "cocienteDerivado": 5,
+      "estado": "Conservar impresos; pedir criterio al fabricante"
+    },
+    {
+      "id": "sigas-p25-derecho-44",
+      "pagina": 25,
+      "nombre": "Montura Derivacion 75-25",
+      "equivalenteImpresoM": 0.3,
+      "diametroExteriorM": 0.075,
+      "numeroImpreso": 2,
+      "cocienteDerivado": 4,
+      "estado": "Conservar impresos; pedir criterio al fabricante"
+    },
+    {
+      "id": "sigas-p25-derecho-45",
+      "pagina": 25,
+      "nombre": "Montura Derivacion 75-32",
+      "equivalenteImpresoM": 0.3,
+      "diametroExteriorM": 0.075,
+      "numeroImpreso": 2,
+      "cocienteDerivado": 4,
+      "estado": "Conservar impresos; pedir criterio al fabricante"
+    },
+    {
+      "id": "sigas-p25-derecho-46",
+      "pagina": 25,
+      "nombre": "Montura Derivacion 90-25",
+      "equivalenteImpresoM": 0.54,
+      "diametroExteriorM": 0.09,
+      "numeroImpreso": 4,
+      "cocienteDerivado": 6.000000000000001,
+      "estado": "Conservar impresos; pedir criterio al fabricante"
+    },
+    {
+      "id": "sigas-p25-derecho-47",
+      "pagina": 25,
+      "nombre": "Montura Derivacion 90-32",
+      "equivalenteImpresoM": 0.54,
+      "diametroExteriorM": 0.09,
+      "numeroImpreso": 4,
+      "cocienteDerivado": 6.000000000000001,
+      "estado": "Conservar impresos; pedir criterio al fabricante"
+    },
+    {
+      "id": "sigas-p25-derecho-48",
+      "pagina": 25,
+      "nombre": "Montura Derivacion 110-25",
+      "equivalenteImpresoM": 0.88,
+      "diametroExteriorM": 0.11,
+      "numeroImpreso": 6,
+      "cocienteDerivado": 8,
+      "estado": "Conservar impresos; pedir criterio al fabricante"
+    },
+    {
+      "id": "sigas-p25-derecho-49",
+      "pagina": 25,
+      "nombre": "Montura Derivacion 110-32",
+      "equivalenteImpresoM": 0.88,
+      "diametroExteriorM": 0.11,
+      "numeroImpreso": 6,
+      "cocienteDerivado": 8,
+      "estado": "Conservar impresos; pedir criterio al fabricante"
+    }
+  ]
+}

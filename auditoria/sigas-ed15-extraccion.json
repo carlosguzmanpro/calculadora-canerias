@@ -1,0 +1,56 @@
+{
+  "fuente": {
+    "archivo": "fuentes/sigas-ed15-2025/manual-tecnico.pdf",
+    "sha256": "a7dc5dd90adec7d9db335100407d4748f306281b3917e2e52a8f2b707d35e2b1",
+    "paginas": 48,
+    "edicion": "15 - 2025",
+    "fechaEditorial": "Julio 2025",
+    "paginaEdicion": 46,
+    "portadaEdicion": 1,
+    "metadatosPDFCreacion": "2025-06-27",
+    "origen": "PDF original adjuntado por el usuario",
+    "validacionNormativa": false
+  },
+  "metodoExtraccion": "Poppler pdftotext (layout/raw) y PyMuPDF por coordenadas; render visual de pp.21–25; no OCR ni interpolación",
+  "tablas": [
+    {
+      "numero": 6,
+      "pagina": 21,
+      "celdas": 378,
+      "valores": 360,
+      "vacias": 18
+    },
+    {
+      "numero": 4,
+      "pagina": 22,
+      "filas": 60,
+      "columnas": 9,
+      "capacidades": 540
+    },
+    {
+      "numero": 5,
+      "pagina": 23,
+      "filas": 60,
+      "columnas": 9,
+      "capacidades": 540
+    },
+    {
+      "numero": 3,
+      "paginas": [
+        24,
+        25
+      ],
+      "registros": 202,
+      "valoresNumericos": 606
+    }
+  ],
+  "posicionesRegistradas": 2064,
+  "valoresNumericos": 2046,
+  "celdasVacias": 18,
+  "habilitado": false,
+  "revisionTecnicaIndependiente": false,
+  "notas": [
+    "Se preservan originales decimales y páginas. Los tests y el cotejo automático no certifican técnicamente el catálogo.",
+    "La edición, los interiores tabulados y las densidades ya están identificados en este manual. Las condiciones reales de suministro y la aplicabilidad actual requieren verificación."
+  ]
+}

@@ -1,5 +1,11 @@
 # CAÑERÍAS
 
+## SIGAS Thermofusión · manual edición 15 / 2025 · prueba local
+
+Rama `prueba/sigas-manual-ed15-2025`, base `a363876`. PDF original de 48 páginas conservado, tablas 6/4/5/3 transcritas: **1080 capacidades, 202 accesorios, 360 diámetros de prolongaciones y 18 casillas vacías**. Diagnóstico documental conectado a la red manual y adaptador SIGAS para el motor, sin mezclar datos epoxi. **Diámetros definitivos bloqueados.**
+
+**575 pruebas aprobadas (545 anteriores + 30 nuevas)** y cotejo reproducible contra el PDF con dos extractores. [Fuente, condiciones, incidencias, controles y pendientes](SIGAS-MANUAL-ED15-2025.md). Sin publicación ni cambios en las vistas HTTPS; lo siguiente documenta estados históricos.
+
 ## GAS: acero epoxi y SIGAS separados · prueba local
 
 Rama `prueba/gas-catalogos-epoxi-sigas`, base `d7f03b8`. Origen epoxi confirmado por el propietario; cotejo de 441 capacidades y 225 equivalencias con una corrección explícita: **34 m / 4″ = 155735 L/h**. SIGAS no localizado tras revisar los archivos y 32 ZIP; catálogo independiente vacío. Elección conservada por proyecto y preparación de accesorios usando la misma carga manual, sin duplicarla. **Diámetros definitivos bloqueados.**

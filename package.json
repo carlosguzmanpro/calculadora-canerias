@@ -2,9 +2,10 @@
   "name": "calculadora-canerias",
   "private": true,
   "scripts": {
-    "test": "node scripts/empaquetar-local.cjs --check && node --test tests/basic.test.cjs tests/proxy.test.mjs tests/tablas.test.cjs tests/fotografias.test.cjs tests/auditoria-final.test.cjs tests/diagnostico-calefon-cocina.test.cjs tests/materiales-gas.test.cjs tests/preparacion-diametros-gas.test.cjs tests/catalogos-sistemas-gas.test.cjs",
+    "test": "node scripts/empaquetar-local.cjs --check && node --test tests/basic.test.cjs tests/proxy.test.mjs tests/tablas.test.cjs tests/fotografias.test.cjs tests/auditoria-final.test.cjs tests/diagnostico-calefon-cocina.test.cjs tests/materiales-gas.test.cjs tests/preparacion-diametros-gas.test.cjs tests/catalogos-sistemas-gas.test.cjs tests/sigas-ed15.test.cjs",
     "test:browser": "node --test tests/app.test.cjs",
-    "empaquetar:local": "node scripts/empaquetar-local.cjs"
+    "empaquetar:local": "node scripts/empaquetar-local.cjs",
+    "verificar:sigas:fuente": "python3 scripts/extraer-sigas-ed15.py --check"
   },
   "devDependencies": {
     "playwright": "^1.56.0"

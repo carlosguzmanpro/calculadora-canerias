@@ -7,11 +7,12 @@
   if(String(perfil.material||'').trim().toLowerCase()==='sigas'||String(perfil.sistema||'').trim().toLowerCase()==='sigas')return IDS.sigas;
   return null;
  }
- function obtener(id,t3,t18){
+ function obtener(id,t3,t18,sigas=null){
   if(id===IDS.epoxi){
    const fuentesCorrectas=t3?.tabla===3&&t18?.tabla===18&&t3.procedencia?.sha256==='ce11e42467d7a4f4aa31b96c0ca83a3c97b5e6ae0cea0cf62cdb5db9f6e6d4f5'&&t18.procedencia?.sha256==='d9f541eb091f705c0dead916066da755f9cf2cb9a5f449be025f7dae2bad41a0';
    return {id,nombre:'Acero epoxi · roscado · GN',habilitado:false,origenConfirmadoPorPropietario:true,edicion:null,tablas:fuentesCorrectas?[t3,t18]:[],documentacion:'datos/catalogos/acero-epoxi/procedencia.json',pendientes:[...(fuentesCorrectas?[]:['Faltan las fuentes originales identificadas de acero epoxi o sus metadatos no coinciden.']),'Confirmar edición, aplicabilidad normativa, condiciones de suministro e interiores reales.','Resolver 7,67/7,65, redondeos y criterio de cuplas con documentación.']};}
-  if(id===IDS.sigas)return {id,nombre:'SIGAS',habilitado:false,origenConfirmadoPorPropietario:false,edicion:null,tablas:[],documentacion:'datos/catalogos/sigas/procedencia.json',pendientes:['No se localizaron fotografías ni tablas originales SIGAS en el entorno.','Faltan capacidades y equivalencias completas, familia exacta, edición, manual y condiciones del fabricante. No se utilizarán tablas de acero epoxi.']};
+  if(id===IDS.sigas&&sigas?.id==='sigas'&&sigas.fuente?.sha256==='a7dc5dd90adec7d9db335100407d4748f306281b3917e2e52a8f2b707d35e2b1')return {id,nombre:'SIGAS Thermofusión · ed.15 / 2025',habilitado:false,origenConfirmadoPorPropietario:true,edicion:sigas.fuente.edicion,tablas:[6,4,5,3].map(n=>sigas.tablas[n]),documentacion:'datos/catalogos/sigas/procedencia.json',fuente:sigas.fuente,pendientes:['Manual identificado: verificar criterios de cálculo, discrepancias del original, accesorios exactos y condiciones de suministro.','Las tablas SIGAS no habilitan ni utilizan equivalencias de acero epoxi.']};
+  if(id===IDS.sigas)return {id,nombre:'SIGAS',habilitado:false,origenConfirmadoPorPropietario:false,edicion:null,tablas:[],documentacion:'datos/catalogos/sigas/procedencia.json',pendientes:['No se cargó un manual SIGAS identificado; no se usarán tablas de acero epoxi.','Faltan capacidades y equivalencias completas, familia exacta, edición, manual y condiciones del fabricante. No se utilizarán tablas de acero epoxi.']};
   return {id:null,nombre:'Sistema pendiente de seleccionar',habilitado:false,tablas:[],pendientes:['Elegí el catálogo del proyecto. No se asignan tablas por defecto.']};
  }
  function compatibilidad(perfil={},catalogo){

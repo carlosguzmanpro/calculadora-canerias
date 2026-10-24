@@ -6,13 +6,13 @@ test('catálogos: epoxi contiene únicamente las dos fuentes identificadas, sin 
  const c=epoxi();assert.deepEqual(c.tablas,[t3,t18]);assert.equal(c.origenConfirmadoPorPropietario,true);assert.equal(c.habilitado,false);assert.equal(c.edicion,null);
 });
 test('catálogos: SIGAS queda vacío aunque se entreguen las tablas epoxi a la función',()=>{
- const c=api.obtener(api.IDS.sigas,t3,t18);assert.deepEqual(c.tablas,[]);assert.equal(c.habilitado,false);assert.match(c.pendientes.join(' '),/No se localizaron/);
+ const c=api.obtener(api.IDS.sigas,t3,t18);assert.deepEqual(c.tablas,[]);assert.equal(c.habilitado,false);assert.match(c.pendientes.join(' '),/manual SIGAS/);
 });
 test('catálogos: fuente intercambiada, ausente o de otro origen nunca se asigna a epoxi',()=>{
  for(const [a,b]of [[t18,t3],[null,t18],[t3,null],[{...t3,procedencia:{sha256:'otra-foto'}},t18]]){const c=api.obtener(api.IDS.epoxi,a,b);assert.equal(c.tablas.length,0);assert.equal(c.habilitado,false);}
 });
 test('catálogos: las fichas separan origen declarado de aprobación normativa',()=>{
- const a=require('../datos/catalogos/acero-epoxi/procedencia.json'),b=require('../datos/catalogos/sigas/procedencia.json');assert.equal(a.origenConfirmadoPorPropietario,true);assert.equal(a.aplicabilidadNormativaVerificada,false);assert.equal(a.edicion,null);assert.equal(b.fotografiasLocalizadas,false);assert.deepEqual(b.tablas,[]);assert.equal(b.habilitado,false);for(const f of a.tablas){assert.ok(fs.existsSync(f.datos));assert.ok(fs.existsSync(f.fotografia));}
+ const a=require('../datos/catalogos/acero-epoxi/procedencia.json'),b=require('../datos/catalogos/sigas/procedencia.json');assert.equal(a.origenConfirmadoPorPropietario,true);assert.equal(a.aplicabilidadNormativaVerificada,false);assert.equal(a.edicion,null);assert.equal(b.fotografiasLocalizadas,false);assert.equal(b.manualDisponible,true);assert.deepEqual(b.tablas.map(t=>t.numero),[6,4,5,3]);assert.equal(b.habilitado,false);for(const f of a.tablas){assert.ok(fs.existsSync(f.datos));assert.ok(fs.existsSync(f.fotografia));}
 });
 test('catálogos: elección explícita prevalece y no hay fallback ante ID desconocido',()=>{
  const perfil={material:'Acero con revestimiento epoxi',sistema:'Roscado'};assert.equal(api.identificar(perfil),api.IDS.epoxi);assert.equal(api.identificar({...perfil,catalogoTecnicoGas:'sigas'}),'sigas');assert.equal(api.identificar({...perfil,catalogoTecnicoGas:'inventado'}),null);assert.equal(api.identificar({...perfil,catalogoTecnicoGas:''}),null);assert.equal(api.identificar({material:'Otro acero',sistema:'Roscado'}),null);
