@@ -26,6 +26,7 @@
  }
  function planificarMateriales(entrada,opciones={}){
   const config={largoComercial:6,reutilizar:false,minimoSobrante:.5,hipotesisSinPosiciones:false,...opciones};
+  const reglaReducciones=/epoxi/i.test(entrada.material||'')&&entrada.sistema==='Roscado'?'Excluida del método de clase; no significa pérdida nula':'Equivalente pendiente según producto y sistema; no se aplica la exclusión de acero epoxi';
   if(!valido(config.largoComercial)||!Number.isFinite(config.minimoSobrante)||config.minimoSobrante<0)throw Error('Configuración de caños inválida.');
   const ts=entrada.tramos||[],nodos=entrada.nodos||[],filas=[],avisos=[],grupos=new Map(),fisicos=new Map(),ubicaciones=new Map();
   const fila=(f)=>{const r={id:'material-'+filas.length,unidad:'unidad',estado:'estimado',revisado:false,...f};filas.push(r);return r;};
@@ -75,7 +76,7 @@
     }else if(eleccion==='tee-igual-reduccion'){
      tee.material='Tee igual';tee.diametro=[ds[0],ds[0],ds[0]].join(' / ');
      for(const t of sal.filter(t=>t.diametro!==ds[0])){
-      if(!piezas.some(p=>p.tipo==='reduccion'&&p.diametro===[ds[0],t.diametro].join(' / ')))fila({tipo:'reduccion',material:'Reducción independiente',diametro:[ds[0],t.diametro].join(' / '),cantidad:1,ubicacion:n.id+' · salida a '+t.id,origen:'union-propuesta',equivalentes:'Excluida del método de clase; no significa pérdida nula'});
+      if(!piezas.some(p=>p.tipo==='reduccion'&&p.diametro===[ds[0],t.diametro].join(' / ')))fila({tipo:'reduccion',material:'Reducción independiente',diametro:[ds[0],t.diametro].join(' / '),cantidad:1,ubicacion:n.id+' · salida a '+t.id,origen:'union-propuesta',equivalentes:reglaReducciones});
      }
     }else{
      tee.diametro=ds.join(' / ');tee.evidencia+=' Confirmar tee reductora o tee igual con reducción.';
@@ -84,7 +85,7 @@
    }else if(sal.length===1&&ds.every(Boolean)&&ds[0]!==ds[1]){
     if(piezas.some(p=>p.tipo==='reduccion'))continue;
     const tipo=opciones.uniones?.[n.id]||n.unionMateriales||n.unionDimensionamiento;
-    if(tipo==='union'||tipo==='reduccion')fila({tipo:'reduccion',material:'Reducción independiente',diametro:ds.join(' / '),cantidad:1,ubicacion:n.id,origen:'union-propuesta',equivalentes:'Excluida del método de clase; no significa pérdida nula'});
+    if(tipo==='union'||tipo==='reduccion')fila({tipo:'reduccion',material:'Reducción independiente',diametro:ds.join(' / '),cantidad:1,ubicacion:n.id,origen:'union-propuesta',equivalentes:reglaReducciones});
     else fila({tipo:'reduccion-pendiente',material:'Cambio de diámetro: confirmar pieza y posición',diametro:ds.join(' / '),cantidad:null,ubicacion:n.id,origen:'union-pendiente',equivalentes:'No incorporado a equivalentes ni cantidad de compra'});
    }else if(sal.length===1&&ds.every(Boolean)&&ds[0]===ds[1]&&(n.unionMateriales==='cupla'||n.unionDimensionamiento==='union')&&!piezas.some(p=>p.tipo==='cupla'))fila({tipo:'cupla',material:'Cupla en unión identificada',diametro:ds[0],cantidad:1,ubicacion:n.id,origen:'union-propuesta'});
   }
@@ -104,7 +105,7 @@
    fila({tipo:'cano',material:'Caño '+(g.material||'material pendiente')+' / '+(g.sistema||'sistema pendiente')+' · comercial de '+config.largoComercial+' m',diametro:g.diametro,cantidad:incompleto?null:plan.compraEstimada,ubicacion:g.ubicaciones.join(', '),origen:'plan-cortes',minimoTeorico:teorico,evidencia:incompleto?'Compra pendiente: faltan posiciones. Mínimo por longitud, no lista definitiva.':'Estimación por plan de cortes; no se garantiza óptimo ni cortes ejecutables sin revisar.'});
    fila({tipo:'cupla-plan',material:'Cuplas dentro de segmentos continuos',diametro:g.diametro,cantidad:incompleto||cuplasRegistradas?null:plan.cuplasPropuestas,ubicacion:g.ubicaciones.join(', '),origen:'plan-cortes',evidencia:incompleto?'Cuplas pendientes, no cero.':cuplasRegistradas?'Cotejar cuplas identificadas con las uniones propuestas; sin suma automática.':'Uniones propuestas entre piezas del mismo segmento; no cuenta conexiones de codos/tees como cuplas.'});
   }
-  return {filas,planes,avisos:[...new Set(avisos)],config,dimensionamientoDefinitivo:false,supuestos:['Configuración usada: largo comercial '+config.largoComercial+' m; reutilización '+(config.reutilizar?'selectiva propuesta':'no propuesta (escenario conservador)')+'; sobrante mínimo '+config.minimoSobrante+' m.','Plan físico independiente del dimensionamiento. Los diámetros propuestos no se convierten en definitivos.','Mínimo teórico = techo de longitud total por medida/material/sistema dividido por largo comercial: solo cota inferior, sin geometría ni desperdicio.','Compra estimada por cortes FFD, no optimización garantizada. Solo se proponen sobrantes del mismo grupo y que cumplan longitud mínima, si se habilita reutilizar.','No se suman sobrantes para fabricar una pieza; esa alternativa requeriría otras cuplas y revisión. No se incluyeron roscas, pérdidas de corte, reserva ni sobrantes preexistentes.','Una cupla por unión propuesta dentro de cada segmento. Posiciones desconocidas producen pendientes. Los accesorios compartidos se cuentan una sola vez por identificación física.','Las reducciones se listan en materiales y no se agregan a equivalentes del método de clase.']};
+  return {filas,planes,avisos:[...new Set(avisos)],config,dimensionamientoDefinitivo:false,supuestos:['Configuración usada: largo comercial '+config.largoComercial+' m; reutilización '+(config.reutilizar?'selectiva propuesta':'no propuesta (escenario conservador)')+'; sobrante mínimo '+config.minimoSobrante+' m.','Plan físico independiente del dimensionamiento. Los diámetros propuestos no se convierten en definitivos.','Mínimo teórico = techo de longitud total por medida/material/sistema dividido por largo comercial: solo cota inferior, sin geometría ni desperdicio.','Compra estimada por cortes FFD, no optimización garantizada. Solo se proponen sobrantes del mismo grupo y que cumplan longitud mínima, si se habilita reutilizar.','No se suman sobrantes para fabricar una pieza; esa alternativa requeriría otras cuplas y revisión. No se incluyeron roscas, pérdidas de corte, reserva ni sobrantes preexistentes.','Una cupla por unión propuesta dentro de cada segmento. Posiciones desconocidas producen pendientes. Los accesorios compartidos se cuentan una sola vez por identificación física.',(/epoxi/i.test(entrada.material||'')&&entrada.sistema==='Roscado'?'Las reducciones se listan en materiales y no se agregan a equivalentes del método de clase.':'Las reducciones se listan en materiales. '+reglaReducciones+'.')]};
  }
  const api={planificarCortes,planificarMateriales};if(typeof module==='object'&&module.exports)module.exports=api;else root.MaterialesGas=api;
 })(globalThis);

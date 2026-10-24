@@ -4,9 +4,11 @@ function modeloInformeActual(){
  if(gas){
   d.resumen.push(modoManualGasActivo()?'Cálculo manual: cantidades ingresadas una sola vez, sin segunda confirmación; revisión técnica pendiente.':avisoConciliacionRapidaGas());
   const avisoDeteccion=avisoDeteccionGas();if(avisoDeteccion)d.resumen.push(avisoDeteccion);
-  const resultado=motorClaseAceroGas(tramos,artefactos,instalacionGas,catalogoParaGas(instalacionGas));
+  const perfilInforme=perfilTecnicoActualGas(),instInforme={...instalacionGas,perfil:perfilInforme};
+  d.resumen.push('Sistema: '+(CatalogosSistemasGas.identificar(instalacionGas.perfil)||'Pendiente')+' · combustible: '+(perfilInforme.gas||'Pendiente')+'.',...combustibleTecnicoGas().pendientes);
+  const resultado=motorClaseAceroGas(tramos,artefactos,instInforme,catalogoParaGas(instInforme));
   const red=analizarRedGas();
-  d.planilla=InformeProyecto.planilla(tramos,resultado,{caudalAplicable:instalacionGas.perfil.gas==='GN'&&Number(instalacionGas.perfil.poderCalorifico)===9300&&red.errores.length===0});
+  d.planilla=InformeProyecto.planilla(tramos,resultado,{caudalAplicable:perfilInforme.gas==='GN'&&Number(perfilInforme.poderCalorifico)===9300&&red.errores.length===0});
   if(fotoURL&&/^(data:image\/(?:png|jpeg|webp);base64,|blob:)/.test(fotoURL))d.croquis={url:fotoURL,confirmado:croquisEntregaDisponible()&&!proyectoGasActual().entregaGas?.requiereConfirmacion&&proyectoGasActual().entregaGas?.firmaCroquis===firmaCroquisEntrega()};
   else d.resumen.push('Fotografía original: Pendiente.');
  }
@@ -20,12 +22,13 @@ function modeloInformeActual(){
   for(const f of plan.filas){const r=actuales.find(r=>mismos?r.id===f.id:r.editado&&identidadFilaGas(r)===identidadFilaGas(f));if(r){f.cantidad=r.cantidad;f.revisado=mismos&&!!r.revisado;if(r.editado){f.editado=true;f.estado='estimado';}}}
   if(plan.manualDirecto){
    d.resumen.push('Longitud '+(plan.longitudParcial?'parcial conocida':'total informada')+': '+plan.longitudInformada+' m.',...avisosListaManualGas(plan));
-   const redManual=plan.redManual,calor=Number(instalacionGas.perfil.poderCalorifico);
-   if(redManual){d.resumen.push(redManual.total===null?'Consumo conectado total: Pendiente.':'Consumo conectado total: '+redManual.total+' kcal/h.');for(const [i,t]of tramos.entries())if(instalacionGas.perfil.gas==='GN'&&Number.isFinite(calor)&&calor>0)d.planilla[i].consumo=Number.isFinite(redManual.porTramo[t.id])?redManual.porTramo[t.id]/calor:null;}
+   const redManual=plan.redManual,calor=Number(perfilTecnicoActualGas().poderCalorifico);
+   if(redManual){d.resumen.push(redManual.total===null?'Consumo conectado total: Pendiente.':'Consumo conectado total: '+redManual.total+' kcal/h.');for(const [i,t]of tramos.entries())if(['GN','GLP','propano-gaseoso'].includes(perfilTecnicoActualGas().gas)&&Number.isFinite(calor)&&calor>0)d.planilla[i].consumo=Number.isFinite(redManual.porTramo[t.id])?redManual.porTramo[t.id]/calor:null;}
   }
   d.filas=plan.filas.map(f=>({...f,ubicacion:ubicacionLegibleGas(f.ubicacion)}));d.materialesAgrupados=plan.manualDirecto?resumenListaManualGas(plan).map(f=>({...f,material:f.material+(f.pendiente&&f.cantidad>0?' · '+f.cantidad+' '+f.unidad+' conocidas; resto pendiente':''),diametro:f.diametro||'Pendiente',cantidad:f.pendiente?null:f.cantidad,estado:f.pendiente||!f.diametro?'pendiente':f.estimado?'estimado':'confirmado',revisado:false,ubicaciones:['Ver detalle por tramo']})):InformeProyecto.agruparMateriales(d.filas);
   d.resumen.push('Materiales: largo comercial '+plan.config.largoComercial+' m; reutilización de sobrantes '+(plan.config.reutilizar?'selectiva estimada':'no prevista')+'. Cantidades sujetas a revisión; pendiente no significa cero.');
-  d.resumen.push('Método de clase: reducciones en materiales, excluidas de equivalentes. Una instalación real puede requerir pérdidas adicionales.');
+  d.resumen.push(CatalogosSistemasGas.identificar(instalacionGas.perfil)===CatalogosSistemasGas.IDS.epoxi?'Método de clase: reducciones en materiales, excluidas de equivalentes. Una instalación real puede requerir pérdidas adicionales.':'Reducciones y cuplas: equivalentes pendientes del producto y sistema seleccionados; no se aplica la exclusión del método de clase epoxi.');
+  const largo=estadoLargoComercialGas();if(largo.pendiente)d.resumen.push('Largo comercial conservado '+largo.configurado+' m; manual del sistema '+largo.documentado+' m. Revisar antes de compra.');
   }catch(e){d.resumen.push('Materiales: Pendiente de corregir los datos actuales. '+e.message+'. El respaldo anterior no es una lista de compra vigente.');}
  }
  return d;

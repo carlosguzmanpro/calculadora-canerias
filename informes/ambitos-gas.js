@@ -67,7 +67,7 @@ function nombreProyectoValidoGas(nombre,actual=null){const n=String(nombre??'').
 function crearProyectoGas(nombre){
  if(modulo!=='gas')return null;
  try{validarRegistroProyectosGas(proyectos.gas);const n=nombreProyectoValidoGas(nombre);let id;do{id=idGas('proyecto');}while(registrosProyectosGas().some(p=>p.id===id));
- const nuevo={id,nombre:n,datos:{tramos:[],artefactos:[],instalacion:{version:1,perfil:{pais:'AR',uso:'domiciliario',gas:'GN'},nodos:[]},planCompra:{opciones:{cargaManualDirecta:true},extras:[],revisiones:{}}}};
+ const nuevo={id,nombre:n,datos:{tramos:[],artefactos:[],instalacion:{version:1,perfil:{pais:'AR',uso:'domiciliario',gas:'GN',largosDocumentados2026:true},nodos:[]},planCompra:{opciones:{cargaManualDirecta:true},extras:[],revisiones:{}}}};
  if(!proyectos.gas.proyectosGuardados)proyectos.gas.proyectosGuardados=[];proyectos.gas.proyectosGuardados.push(nuevo);seleccionarAmbitoGas('proyecto:'+id);
  $('mensajeProyectosGas').textContent='Proyecto vacío creado: '+n+'. '+(JSON.stringify(proyectoGuardadoGas())===JSON.stringify(proyectoGasActual())?'Guardado local confirmado.':'Guardado local no confirmado: conservá un respaldo antes de cerrar.');desplazarResultadoMaterialesGas('formularioGas');return id;
  }catch(e){$('mensajeProyectosGas').textContent=e.message;return null;}

@@ -1,0 +1,94 @@
+{
+  "fuente": {
+    "archivo": "fuentes/fusiogas-v1-2026/manual-tecnico.pdf",
+    "sha256": "727650ead31bf85522c8bd475bd759fdf6319c2f1a8e6bf1735124f0a93f57ed",
+    "edicion": "V.1.2026",
+    "paginas": 40,
+    "paginaEdicion": 1,
+    "origen": "Manual original adjuntado por el usuario",
+    "validacionNormativa": false
+  },
+  "habilitado": false,
+  "integridad": {
+    "integro": true,
+    "habilitado": false,
+    "capacidades": 720,
+    "equivalencias": 88,
+    "productos": 108,
+    "errores": [],
+    "alertas": [
+      "Verificar método de cálculo, condiciones de suministro, vigencia y aplicabilidad.",
+      "No heredar +15 m, exclusión de reducciones ni equivalencias de EPOXI/SIGAS.",
+      "P.18: cuatro diferencias respecto al redondeo usual del número de diámetros; se preservan ambos impresos.",
+      "P.20: GLP, 8 m / exterior 50 mm = 24,311 m³/h; no sustituir por 24,301 de SIGAS.",
+      "Sobrepasos, bujes y niples: no asignar equivalentes por semejanza. Llaves: confirmar variante/producto, catálogo pp.28–30 y pérdidas p.18 no tienen idéntico alcance."
+    ]
+  },
+  "diferenciasNumeroDiametros": [
+    {
+      "id": "fusiogas-p18-izquierdo-2",
+      "accesorio": "Transición hembra 25x1/2”",
+      "pagina": 18,
+      "bloque": "izquierdo",
+      "fila": 2,
+      "equivalenteImpresoM": 0.69,
+      "exteriorImpresoM": 0.025,
+      "numeroImpreso": 27,
+      "cocienteDerivado": 27.599999999999998,
+      "estado": "Original conservado; criterio técnico pendiente. No se reemplaza por un valor calculado."
+    },
+    {
+      "id": "fusiogas-p18-izquierdo-12",
+      "accesorio": "Transición macho 40x1 1/4”",
+      "pagina": 18,
+      "bloque": "izquierdo",
+      "fila": 12,
+      "equivalenteImpresoM": 0.26,
+      "exteriorImpresoM": 0.04,
+      "numeroImpreso": 6,
+      "cocienteDerivado": 6.5,
+      "estado": "Original conservado; criterio técnico pendiente. No se reemplaza por un valor calculado."
+    },
+    {
+      "id": "fusiogas-p18-derecho-21",
+      "accesorio": "Te fusión 40x25 - flujo 90º",
+      "pagina": 18,
+      "bloque": "derecho",
+      "fila": 21,
+      "equivalenteImpresoM": 0.46,
+      "exteriorImpresoM": 0.04,
+      "numeroImpreso": 11,
+      "cocienteDerivado": 11.5,
+      "estado": "Original conservado; criterio técnico pendiente. No se reemplaza por un valor calculado."
+    },
+    {
+      "id": "fusiogas-p18-derecho-41",
+      "accesorio": "Cupla reducción fusión 40 x 25",
+      "pagina": 18,
+      "bloque": "derecho",
+      "fila": 41,
+      "equivalenteImpresoM": 0.378,
+      "exteriorImpresoM": 0.04,
+      "numeroImpreso": 10,
+      "cocienteDerivado": 9.45,
+      "estado": "Original conservado; criterio técnico pendiente. No se reemplaza por un valor calculado."
+    }
+  ],
+  "diferenciaConSigas": {
+    "gas": "GLP / propano gaseoso (no equivalencia automática de composición)",
+    "longitudM": 8,
+    "exteriorMm": 50,
+    "fusiogasM3h": 24.311,
+    "paginaFusiogas": 20,
+    "sigasM3h": 24.301,
+    "paginaSigas": 23,
+    "estado": "Ambos impresos conservados en catálogos independientes."
+  },
+  "particularidades": [
+    "Codo 90° fusión 50: 0,280 m impreso; no sustituir por otra marca ni por codo 45° de 0,900 m.",
+    "Código de buje reducción 32x25 p.30: 0203033, conservado sin corregir por secuencia.",
+    "Llaves esféricas fusión 40/50/63 en equivalencias p.18; catálogo p.30 documenta fusión 20/25/32 y roscadas 1½ y 2 pulgadas. Identificar producto antes de asignar pérdidas.",
+    "Sobrepasos, niples entrefusión, bujes, tapas y monturas: no completar equivalentes ausentes por semejanza."
+  ],
+  "prolongaciones": "Matrices pp.21–22 no transcritas en esta etapa: no necesarias para tramos domiciliarios, uso de medidores/prolongaciones requiere catálogo específico y conservar vacíos."
+}

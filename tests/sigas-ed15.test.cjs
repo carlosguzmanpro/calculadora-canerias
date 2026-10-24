@@ -47,7 +47,7 @@ test('SIGAS: validación detecta capacidades ausentes, duplicados, unidades y en
  for(const mutar of [t=>t.tablas[4].unidadCapacidad='L/h',t=>t.tablas[4].filas.pop(),t=>t.tablas[4].filas[1].longitudM=1,t=>t.tablas[4].filas[0].capacidadesM3h[0]=null,t=>t.tablas[4].exterioresMm.reverse(),t=>t.tablas[5].interioresTabuladosMm[0]=13,t=>t.tablas[3].filas[1].id=t.tablas[3].filas[0].id]){const t=copia();mutar(t);assert.ok(api.validar(t).errores.length);assert.equal(api.validar(t).habilitado,false);}
 });
 test('SIGAS: falta de fuente correcta bloquea las consultas y el adaptador',()=>{
- assert.ok(api.validar(null).errores.length);const t=copia();t.fuente.sha256='otra';assert.throws(()=>api.capacidad(t,4,20,40));assert.equal(api.adaptador(t,'GN'),null);assert.equal(api.adaptador(d,'GLP'),null);assert.equal(api.adaptador(d,'propano-gaseoso'),null);
+ assert.ok(api.validar(null).errores.length);const t=copia();t.fuente.sha256='otra';assert.throws(()=>api.capacidad(t,4,20,40));assert.equal(api.adaptador(t,'GN'),null);assert.equal(api.adaptador(d,'GLP'),null);assert.equal(api.adaptador(d,'propano-gaseoso').gas,'propano-gaseoso');assert.equal(api.adaptador(d,'propano-gaseoso').verificado,false);
 });
 test('SIGAS: adaptador del motor tiene candidatos reales pero siempre permanece no aprobado',()=>{
  const p=api.adaptador(d,'GN');assert.equal(p.verificado,false);assert.equal(p.candidatos[0].interiorMm,13.24);assert.equal(p.candidatos[0].filas.find(f=>f.longitud===50).caudal,.791);assert.equal(p.condiciones.presionMinPa,null);assert.equal(p.condiciones.caidaPa,null);assert.equal(p.reglaLongitud,null);assert.deepEqual(p.piezas,{});assert.equal(p.redondeoSuperiorVerificado,false);

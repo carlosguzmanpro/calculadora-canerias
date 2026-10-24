@@ -1,0 +1,25 @@
+{
+  "id": "fusiogas",
+  "nombre": "FUSIOGAS Thermofusión",
+  "manual": "fuentes/fusiogas-v1-2026/manual-tecnico.pdf",
+  "sha256": "727650ead31bf85522c8bd475bd759fdf6319c2f1a8e6bf1735124f0a93f57ed",
+  "edicion": "V.1.2026",
+  "paginas": 40,
+  "datos": "datos/catalogos/fusiogas/tablas-v1-2026.js",
+  "extraccion": "scripts/extraer-fusiogas-v1.py",
+  "alcance": "Acero-polietileno FUSIOGAS Thermofusión. No es SIGAS ni acero epoxi roscado.",
+  "capacidades": [
+    {"gas": "GN", "pagina": 19, "cantidad": 360, "unidad": "m3/h", "densidadRelativa": 0.65},
+    {"gas": "GLP", "pagina": 20, "cantidad": 360, "unidad": "m3/h", "densidadRelativa": 1.52}
+  ],
+  "equivalencias": {"pagina": 18, "cantidad": 88, "unidad": "m lineales (ml impreso)", "diametroDeReferencia": "exterior m, no interior", "numeroDiametros": "se conserva impreso separado del cociente derivado"},
+  "interiores": {"paginas": [19,20], "exterioresMm": [20,25,32,40,50,63], "interioresMm": [13.24,18.19,24.94,33,42.8,54.84]},
+  "productos": {"paginas": [28,29,30], "cantidad": 108, "codigos": "cadenas originales con ceros iniciales"},
+  "largoComercial": {"pagina": 28, "metros": 4},
+  "caidaImpresa": "10 mm; no confundir con presión de suministro ni convertir silenciosamente a Pa",
+  "declaracionesFabricante": "p.4: NAG E210 / matrícula DC-B-I4-002.1. Son declaraciones del manual; vigencia y aplicabilidad no verificadas independientemente.",
+  "pendientes": "auditoria/fusiogas-v1-2026.json",
+  "habilitado": false,
+  "aplicabilidadNormativaVerificada": false,
+  "noHeredar": ["tablas", "interiores", "productos", "equivalencias", "15 metros iniciales del método de clase epoxi", "exclusión de reducciones del método de clase epoxi"]
+}

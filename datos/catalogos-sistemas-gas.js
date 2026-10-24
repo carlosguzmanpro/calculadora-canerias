@@ -1,17 +1,18 @@
 /* Fuentes independientes, preparación de accesorios y resultados. Ninguna habilitación. */
 (function(root){
- const IDS={epoxi:'acero-epoxi-roscado-gn',sigas:'sigas'};
+ const IDS={epoxi:'acero-epoxi-roscado-gn',sigas:'sigas',fusiogas:'fusiogas'};
  function identificar(perfil={}){
   if(perfil.catalogoTecnicoGas!==undefined)return Object.values(IDS).includes(perfil.catalogoTecnicoGas)?perfil.catalogoTecnicoGas:null;
   if(perfil.material==='Acero con revestimiento epoxi'&&perfil.sistema==='Roscado')return IDS.epoxi;
   if(String(perfil.material||'').trim().toLowerCase()==='sigas'||String(perfil.sistema||'').trim().toLowerCase()==='sigas')return IDS.sigas;
   return null;
  }
- function obtener(id,t3,t18,sigas=null){
+ function obtener(id,t3,t18,sigas=null,fusiogas=null){
   if(id===IDS.epoxi){
    const fuentesCorrectas=t3?.tabla===3&&t18?.tabla===18&&t3.procedencia?.sha256==='ce11e42467d7a4f4aa31b96c0ca83a3c97b5e6ae0cea0cf62cdb5db9f6e6d4f5'&&t18.procedencia?.sha256==='d9f541eb091f705c0dead916066da755f9cf2cb9a5f449be025f7dae2bad41a0';
    return {id,nombre:'Acero epoxi · roscado · GN',habilitado:false,origenConfirmadoPorPropietario:true,edicion:null,tablas:fuentesCorrectas?[t3,t18]:[],documentacion:'datos/catalogos/acero-epoxi/procedencia.json',pendientes:[...(fuentesCorrectas?[]:['Faltan las fuentes originales identificadas de acero epoxi o sus metadatos no coinciden.']),'Confirmar edición, aplicabilidad normativa, condiciones de suministro e interiores reales.','Resolver 7,67/7,65, redondeos y criterio de cuplas con documentación.']};}
   if(id===IDS.sigas&&sigas?.id==='sigas'&&sigas.fuente?.sha256==='a7dc5dd90adec7d9db335100407d4748f306281b3917e2e52a8f2b707d35e2b1')return {id,nombre:'SIGAS Thermofusión · ed.15 / 2025',habilitado:false,origenConfirmadoPorPropietario:true,edicion:sigas.fuente.edicion,tablas:[6,4,5,3].map(n=>sigas.tablas[n]),documentacion:'datos/catalogos/sigas/procedencia.json',fuente:sigas.fuente,pendientes:['Manual identificado: verificar criterios de cálculo, discrepancias del original, accesorios exactos y condiciones de suministro.','Las tablas SIGAS no habilitan ni utilizan equivalencias de acero epoxi.']};
+  if(id===IDS.fusiogas)return {id,nombre:'FUSIOGAS Thermofusión · V.1.2026',habilitado:false,origenConfirmadoPorPropietario:true,edicion:fusiogas?.fuente?.edicion||null,tablas:fusiogas?.id==='fusiogas'&&fusiogas.fuente?.sha256==='727650ead31bf85522c8bd475bd759fdf6319c2f1a8e6bf1735124f0a93f57ed'?[fusiogas.tablas.GN,fusiogas.tablas.GLP]:[],fuente:fusiogas?.fuente,documentacion:'datos/catalogos/fusiogas/procedencia.json',pendientes:['FUSIOGAS: verificar método, discrepancias de equivalencias, variantes de productos, suministro y validación técnica independiente.','No se heredan tablas, interiores, accesorios ni exclusiones de otros sistemas.']};
   if(id===IDS.sigas)return {id,nombre:'SIGAS',habilitado:false,origenConfirmadoPorPropietario:false,edicion:null,tablas:[],documentacion:'datos/catalogos/sigas/procedencia.json',pendientes:['No se cargó un manual SIGAS identificado; no se usarán tablas de acero epoxi.','Faltan capacidades y equivalencias completas, familia exacta, edición, manual y condiciones del fabricante. No se utilizarán tablas de acero epoxi.']};
   return {id:null,nombre:'Sistema pendiente de seleccionar',habilitado:false,tablas:[],pendientes:['Elegí el catálogo del proyecto. No se asignan tablas por defecto.']};
  }
@@ -19,7 +20,10 @@
   const ps=[];
   if(catalogo.id===IDS.epoxi&&(perfil.material!=='Acero con revestimiento epoxi'||perfil.sistema!=='Roscado'))ps.push('El material y la unión guardados no coinciden exactamente con acero epoxi roscado. Se conservaron: revisalos en Datos de instalación.');
   if(catalogo.id===IDS.sigas&&((perfil.material==='Acero con revestimiento epoxi')||perfil.sistema==='Roscado'))ps.push('SIGAS está seleccionado, pero hay datos de acero epoxi/roscado guardados. Se conservaron sin trasladar sus tablas a SIGAS.');
-  if(perfil.gas!=='GN')ps.push('Gas fuera del alcance GN estudiado; faltan tablas propias para ese gas.');
+  const admitido=catalogo.id===IDS.epoxi?['GN']:catalogo.id===IDS.sigas?['GN','propano-gaseoso']:catalogo.id===IDS.fusiogas?['GN','GLP']:[];
+  if(!admitido.includes(perfil.gas))ps.push('Combustible sin tabla aplicable a este sistema: '+(perfil.gas||'Pendiente')+'. SIGAS Tabla 5 requiere propano gaseoso identificado; EPOXI no tiene tabla GLP incorporada.');
+  if(catalogo.id===IDS.fusiogas&&((perfil.material&&perfil.material!=='Acero-polietileno FUSIOGAS Thermofusión')||(perfil.sistema&&perfil.sistema!=='Thermofusión')))ps.push('FUSIOGAS seleccionado con material/unión anteriores: se conservaron, revisalos sin trasladar tablas.');
+  if(catalogo.id===IDS.sigas&&/FUSIOGAS/i.test(perfil.material||''))ps.push('Material FUSIOGAS guardado: no coincide con SIGAS.');
   return ps;
  }
  function prepararAccesorios(piezas,red,ts,ceros=[],pendientesCarga=[],opciones={}){
@@ -41,10 +45,11 @@
   for(const t of ts)if(!Array.isArray(t.segmentos)||!t.segmentos.length)pendientes.push('Cuplas de '+t.desde+'–'+t.hasta+': segmentos continuos pendientes; '+(largo?'largo comercial ya configurado '+largo+' m':'largo comercial pendiente')+'. No se suponen cero uniones.');
   return {estado:'preparado-sin-equivalentes',fisicas:[...fisicas.values()],ceros:ceros.filter(c=>c.cantidad===0&&ids.has(c.ubicacion)).map(c=>({tramo:c.ubicacion,tipo:c.tipo,cantidad:0})),pendientes:[...new Set(pendientes)],porTramo:ts.map(t=>({id:t.id,nombre:t.desde+'–'+t.hasta,metros:t.metros,conexion:red.orientacion[t.id]||null,consumoKcal:red.porTramo[t.id]??null,referencias:[...fisicas.values()].filter(p=>p.tramos.includes(t.id)).map(p=>p.id)})),largoComercial:largo,habilitado:false};
  }
+ function largoDocumentado(id){return id===IDS.sigas?{metros:4,pagina:40,fuente:'fuentes/sigas-ed15-2025/manual-tecnico.pdf'}:id===IDS.fusiogas?{metros:4,pagina:28,fuente:'fuentes/fusiogas-v1-2026/manual-tecnico.pdf'}:null;}
  function resultadoPorTramo(ts,resultado,firmaActual,firmaResultado,{catalogoHabilitado=false,verificacionTecnica=false}={}){
   const valido=catalogoHabilitado===true&&verificacionTecnica===true&&resultado?.estado==='calculado'&&resultado.prueba===false&&resultado.verificacionTecnica===true&&resultado.catalogoHabilitado===true&&typeof firmaActual==='string'&&firmaActual===firmaResultado;
   return ts.map(t=>({tramo:t.desde+'–'+t.hasta,diametro:valido&&typeof resultado.diametros?.[t.id]==='string'?resultado.diametros[t.id]:'Pendiente',estado:valido&&resultado.diametros?.[t.id]?'Verificado':'Pendiente de verificación técnica'}));
  }
- const api={IDS,identificar,obtener,compatibilidad,prepararAccesorios,resultadoPorTramo};
+ const api={IDS,identificar,obtener,compatibilidad,prepararAccesorios,largoDocumentado,resultadoPorTramo};
  if(typeof module==='object'&&module.exports)module.exports=api;else root.CatalogosSistemasGas=api;
 })(globalThis);

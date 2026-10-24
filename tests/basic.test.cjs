@@ -669,7 +669,7 @@ test('aislamiento: una lectura de foto demorada no escribe en el espacio recién
 });
 
 test('Android: index autónomo contiene exactamente las diecisiete fuentes locales, sin solicitudes de scripts',()=>{
- const bloques=[...html.matchAll(/<script data-local="([^"]+)">\n([\s\S]*?)\n<\/script>/g)];assert.equal(bloques.length,17);assert.doesNotMatch(html,/<script\s+src=/i);
+ const bloques=[...html.matchAll(/<script data-local="([^"]+)">\n([\s\S]*?)\n<\/script>/g)];assert.equal(bloques.length,20);assert.doesNotMatch(html,/<script\s+src=/i);
  for(const [,ruta,codigo]of bloques)assert.equal(codigo,fs.readFileSync(ruta,'utf8'),ruta);
 });
 test('Android: ejecuta los scripts incorporados y navega todas las especialidades sin archivos vecinos',()=>{
@@ -1786,4 +1786,52 @@ test('cierre GAS: respaldo técnico parcial no impide cargar, recalcular ni impr
 });
 test('cierre GAS: cantidad inválida heredada no se presenta como confirmada ni se corrige por suposición',()=>{
  const a=app();const caso=require('./fixtures/cierre-gas-cinco-tramos.cjs');a.ctx.cierre=caso();a.run("abrir('gas');tramos=cierre.tramos;artefactos=cierre.artefactos;instalacionGas=cierre.instalacion;proyectos.gas.conteosRapidosGas=cierre.conteos;datosPlanGas().opciones.cargaManualDirecta=true;proyectos.gas.conteosRapidosGas['M-A'].codo45=-1;renderTramos()");assert.equal(a.run("proyectos.gas.conteosRapidosGas['M-A'].codo45"),-1);assert.ok(!a.elements.get('listaTramos').children[0].children[1].textContent.startsWith('Cantidades manuales guardadas'));
+});
+
+for(const sistema of ['acero-epoxi-roscado-gn','sigas','fusiogas'])for(const gas of ['GN','GLP'])test('etapa 1: '+sistema+' / '+gas+' conserva cinco tramos, materiales, consumos y bloqueos',()=>{
+ const a=app();a.ctx.caso=require('./fixtures/cierre-gas-cinco-tramos.cjs')();a.ctx.sistema=sistema;a.ctx.gas=gas;
+ a.run("abrir('gas');seleccionarCatalogoSistemaGas(sistema);tramos=caso.tramos;artefactos=caso.artefactos;proyectos.gas.conteosRapidosGas=caso.conteos;seleccionarCombustibleGas(gas);calcularMaterialesManualGas()");
+ assert.equal(a.run('tramos.length'),5);assert.equal(a.run('revisionMaterialesGas.plan.longitudInformada'),58);for(const [tipo,q]of [['codo90',18],['tee',2],['llave',3]])assert.equal(cantidadManual(a,tipo),q);
+ assert.equal(a.run('instalacionGas.perfil.gas'),gas);assert.equal(a.elements.get('gt').value,gas==='GN'?'9300':'22300');
+ const estado=a.run('estadoCierreGas()');assert.equal(estado.sistema,sistema);assert.equal(estado.consumoTotalKcal,29200);assert.deepEqual(JSON.parse(JSON.stringify(estado.consumos)),{'M-A':29200,'A-B':13200,'A-TERMO':16000,'B-CALEFACTOR':3000,'B-COCINA':10200});assert.equal(estado.diametros,null);assert.equal(estado.motor.estado,'bloqueado');
+ a.run("proyectoGasActual().foto='data:image/jpeg;base64,FOTO';guardarDatos();prepararInformeActual()");assert.match(a.elements.get('informeImpresion').innerHTML,/TRAMO/);assert.doesNotMatch(a.elements.get('informeImpresion').innerHTML,/<button/);
+ const b=app(a.saved());b.run("abrir('gas')");assert.equal(b.run('instalacionGas.perfil.gas'),gas);assert.equal(b.run('CatalogosSistemasGas.identificar(instalacionGas.perfil)'),sistema);assert.equal(b.run('proyectoGasActual().foto'),'data:image/jpeg;base64,FOTO');assert.equal(b.run('tramos.length'),5);
+});
+test('etapa 1: cambiar referencia antigua a envasado modifica perfil y suspende condiciones GN conservadas',()=>{
+ const a=app();iniciarRedFlexible(a);a.run("instalacionGas.perfil.poderCalorifico='9300';instalacionGas.perfil.densidadRelativa='.65';instalacionGas.perfil.fuenteGas='Ejercicio GN';guardarDatos()");a.elements.get('gt').value='22300';a.elements.get('gt').change();
+ assert.equal(a.run('instalacionGas.perfil.gas'),'GLP');assert.equal(a.run('perfilTecnicoActualGas().poderCalorifico'),'');assert.equal(a.run('instalacionGas.perfil.poderCalorifico'),'9300');assert.equal(a.run('instalacionGas.perfil.condicionesAnterioresCombustible[0].gas'),'GN');assert.equal(a.run('estadoCierreGas().motor.diametros'),null);assert.equal(a.run('estadoCierreGas().recorridos.every(r=>r.caudal===null)'),true);assert.match(a.text('estadoCombustibleGas'),/revisar poder calorífico/);
+ a.run("seleccionarCombustibleGas('GN')");assert.equal(a.run('perfilTecnicoActualGas().poderCalorifico'),''); // volver no valida automáticamente
+ for(const [id,v]of Object.entries({dimPCS:'9300',dimDensidad:'.65',dimFuenteGas:'Referencia GN revisada'}))a.elements.get(id).value=v;
+ a.run('guardarCondicionesDimensionamiento()');assert.equal(a.run('perfilTecnicoActualGas().poderCalorifico'),'9300');assert.equal(a.run('estadoCierreGas().diametros'),null);
+});
+test('etapa 1: respaldo legado contradictorio no se convierte en GN ni se reescribe al restaurar',()=>{
+ const a=app();iniciarRedFlexible(a);a.run("guardarDatos()");const datos=JSON.parse(a.saved());datos.gas.tipoGas='22300';datos.gas.instalacion.perfil.gas='GN';const guardado=JSON.stringify(datos),b=app(guardado);assert.equal(b.saved(),guardado);b.run("abrir('gas')");assert.equal(b.run('perfilTecnicoActualGas().gas'),null);assert.equal(b.run('instalacionGas.perfil.gas'),'GN');assert.equal(b.run('proyectoGasActual().tipoGas'),'22300');assert.equal(b.run('estadoCierreGas().diametros'),null);assert.match(b.text('estadoCombustibleGas'),/no coinciden/);
+ b.run("seleccionarCombustibleGas('GLP')");assert.equal(b.run('perfilTecnicoActualGas().gas'),'GLP');assert.equal(b.run('combustibleTecnicoGas().conflicto'),false);
+});
+test('etapa 1: nuevos proyectos SIGAS y FUSIOGAS usan 4 m; epoxi mantiene 6 m como opción',()=>{
+ const a=app();a.run("abrir('gas')");for(const id of ['sigas','fusiogas','acero-epoxi-roscado-gn']){a.ctx.id=id;a.run("crearProyectoGas('Nuevo '+id);seleccionarCatalogoSistemaGas(id)");assert.equal(a.run('opcionesMaterialesGas().largoComercial'),id==='acero-epoxi-roscado-gn'?6:4);assert.equal(a.run('tramos.length'),0);}
+});
+test('etapa 1: largo explícito anterior y 6 m implícitos se conservan hasta acción consciente',()=>{
+ const a=app();iniciarRedFlexible(a);a.run("instalacionGas.perfil.material='Acero con revestimiento epoxi';instalacionGas.perfil.sistema='Roscado';seleccionarCatalogoSistemaGas('sigas')");assert.equal(a.run('opcionesMaterialesGas().largoComercial'),6);assert.equal(a.run('estadoLargoComercialGas().pendiente'),true);assert.match(a.text('estadoLargoComercialGas'),/no se cambió/);
+ a.run('datosPlanGas().opciones.largoComercial=8;guardarDatos()');const b=app(a.saved());b.run("abrir('gas')");assert.equal(b.run('opcionesMaterialesGas().largoComercial'),8);assert.equal(b.run('tramos.length'),5);b.run('usarLargoDocumentadoGas()');assert.equal(b.run('opcionesMaterialesGas().largoComercial'),4);assert.equal(b.run('datosPlanGas().opciones.largoComercialAnterior'),8);assert.equal(b.run('tramos.length'),5);assert.equal(b.run('instalacionGas.perfil.material'),'Acero con revestimiento epoxi'); // material legado no se sobrescribe
+});
+test('etapa 1: catálogos y combustibles independientes por proyecto; respaldos conservan metadatos',()=>{
+ const a=app();a.run("abrir('gas');crearProyectoGas('FUSIO GLP');seleccionarCatalogoSistemaGas('fusiogas');seleccionarCombustibleGas('GLP');proyectoGasActual().foto='data:image/jpeg;base64,F';guardarDatos()");const id=a.run('ambitoGas');a.run("crearProyectoGas('SIGAS GN');seleccionarCatalogoSistemaGas('sigas');seleccionarCombustibleGas('GN')");a.ctx.id=id;a.run('seleccionarAmbitoGas(id)');assert.equal(a.run('instalacionGas.perfil.gas'),'GLP');assert.equal(a.run('CatalogosSistemasGas.identificar(instalacionGas.perfil)'),'fusiogas');assert.equal(a.run('opcionesMaterialesGas().largoComercial'),4);assert.equal(a.run('proyectoGasActual().foto'),'data:image/jpeg;base64,F');
+ const respaldo=JSON.stringify(a.run('JSON.parse(JSON.stringify(proyectos))'));assert.match(respaldo,/condicionesAnterioresCombustible/);const b=app(respaldo);b.run("abrir('gas')");assert.equal(b.run('instalacionGas.perfil.gas'),'GLP');assert.equal(b.run('CatalogosSistemasGas.identificar(instalacionGas.perfil)'),'fusiogas');assert.equal(b.run('opcionesMaterialesGas().largoComercial'),4);
+});
+test('etapa 1: SIGAS propano y FUSIO GLP consultan sus tablas; GLP genérico SIGAS queda pendiente',()=>{
+ const a=app();iniciarRedFlexible(a);a.run("seleccionarCatalogoSistemaGas('sigas');seleccionarCombustibleGas('GLP')");assert.equal(a.run('mostrarPreparacionDiametrosGas().diagnosticoSigas.filas.every(f=>f.tabla===null)'),true);
+ a.run("seleccionarCombustibleGas('propano-gaseoso')");assert.equal(a.run('mostrarPreparacionDiametrosGas().diagnosticoSigas.filas.every(f=>f.tabla===5&&f.pagina===23)'),true);
+ a.run("seleccionarCatalogoSistemaGas('fusiogas');seleccionarCombustibleGas('GLP')");assert.equal(a.run('mostrarPreparacionDiametrosGas().diagnosticoFusiogas.filas.every(f=>f.pagina===20)'),true);assert.equal(a.run('estadoCierreGas().diametros'),null);
+});
+test('etapa 1: PDF no traslada exclusiones epoxi a SIGAS o FUSIOGAS',()=>{
+ const a=app();iniciarRedFlexible(a);for(const id of ['sigas','fusiogas']){a.ctx.id=id;a.run('seleccionarCatalogoSistemaGas(id)');const pdf=a.run('modeloInformeActual().resumen.join(" ")');assert.match(pdf,/no se aplica la exclusión del método de clase epoxi/);assert.doesNotMatch(pdf,/Método de clase: reducciones en materiales, excluidas/);}
+});
+test('etapa 1: respaldo JSON v1 real recupera FUSIOGAS, GLP, largo anterior y fotografía para PDF',()=>{
+ const a=app();iniciarRedFlexible(a);a.run("seleccionarCatalogoSistemaGas('fusiogas');seleccionarCombustibleGas('GLP');datosPlanGas().opciones.largoComercial=6;usarLargoDocumentadoGas()");const io=lectorFotosPrueba(a),r=io.cargar();io.terminar(r,'data:image/jpeg;base64,RESPALDOFUSIO');
+ let contenido;a.ctx.Blob=class{constructor(partes){contenido=partes.join('')}};a.ctx.setTimeout=()=>{};a.ctx.document.createElement=()=>({click(){}});a.run('descargarRespaldoCompleto()');const x=JSON.parse(contenido);assert.equal(x.formato,'canerias-respaldo-v1');
+ const b=app();b.run("abrir('gas')");respaldoPrueba(b,x);assert.match(b.text('estadoRespaldo'),/recuperado/);assert.equal(b.run('tramos.length'),5);assert.equal(b.run('instalacionGas.perfil.gas'),'GLP');assert.equal(b.run('CatalogosSistemasGas.identificar(instalacionGas.perfil)'),'fusiogas');assert.equal(b.run('datosPlanGas().opciones.largoComercial'),4);assert.equal(b.run('datosPlanGas().opciones.largoComercialAnterior'),6);assert.ok(b.run('instalacionGas.perfil.condicionesAnterioresCombustible.length')>0);b.run('prepararInformeActual()');assert.match(b.elements.get('informeImpresion').innerHTML,/RESPALDOFUSIO/);
+});
+test('etapa 1: FUSIOGAS desordenado y con extremos invertidos conserva recorridos y consumos',()=>{
+ const a=app();iniciarRedFlexible(a,true,[4,2,0,3,1]);a.run("seleccionarCatalogoSistemaGas('fusiogas');seleccionarCombustibleGas('GLP');calcularMaterialesManualGas()");const e=a.run('estadoCierreGas()');assert.equal(e.consumoTotalKcal,29200);assert.deepEqual(Object.values(e.consumos).sort((a,b)=>a-b),[3000,10200,13200,16000,29200]);assert.deepEqual(Array.from(e.recorridos,r=>r.longitudReal),[36,33,24]);assert.equal(e.diametros,null);assert.equal(cantidadManual(a,'tee'),2);
 });
