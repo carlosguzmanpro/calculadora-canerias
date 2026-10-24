@@ -18,8 +18,12 @@ function modeloInformeActual(){
   const base=fuenteMaterialesGas==='proyecto'&&revisionMaterialesGas?revisionMaterialesGas:previa;
   const mismos=base?.firma===firma,actuales=filasRevisionGas(base);
   for(const f of plan.filas){const r=actuales.find(r=>mismos?r.id===f.id:r.editado&&identidadFilaGas(r)===identidadFilaGas(f));if(r){f.cantidad=r.cantidad;f.revisado=mismos&&!!r.revisado;if(r.editado){f.editado=true;f.estado='estimado';}}}
-  if(plan.manualDirecto)d.resumen.push('Longitud total informada: '+plan.longitudInformada+' m.',...plan.avisos.map(t=>ubicacionLegibleGas(t)));
-  d.filas=plan.filas.map(f=>({...f,ubicacion:ubicacionLegibleGas(f.ubicacion)}));d.materialesAgrupados=InformeProyecto.agruparMateriales(d.filas);
+  if(plan.manualDirecto){
+   d.resumen.push('Longitud '+(plan.longitudParcial?'parcial conocida':'total informada')+': '+plan.longitudInformada+' m.',...avisosListaManualGas(plan));
+   const redManual=plan.redManual,calor=Number(instalacionGas.perfil.poderCalorifico);
+   if(redManual){d.resumen.push(redManual.total===null?'Consumo conectado total: Pendiente.':'Consumo conectado total: '+redManual.total+' kcal/h.');for(const [i,t]of tramos.entries())if(instalacionGas.perfil.gas==='GN'&&Number.isFinite(calor)&&calor>0)d.planilla[i].consumo=Number.isFinite(redManual.porTramo[t.id])?redManual.porTramo[t.id]/calor:null;}
+  }
+  d.filas=plan.filas.map(f=>({...f,ubicacion:ubicacionLegibleGas(f.ubicacion)}));d.materialesAgrupados=plan.manualDirecto?resumenListaManualGas(plan).map(f=>({...f,material:f.material+(f.pendiente&&f.cantidad>0?' · '+f.cantidad+' '+f.unidad+' conocidas; resto pendiente':''),diametro:f.diametro||'Pendiente',cantidad:f.pendiente?null:f.cantidad,estado:f.pendiente||!f.diametro?'pendiente':f.estimado?'estimado':'confirmado',revisado:false,ubicaciones:['Ver detalle por tramo']})):InformeProyecto.agruparMateriales(d.filas);
   d.resumen.push('Materiales: largo comercial '+plan.config.largoComercial+' m; reutilización de sobrantes '+(plan.config.reutilizar?'selectiva estimada':'no prevista')+'. Cantidades sujetas a revisión; pendiente no significa cero.');
   d.resumen.push('Método de clase: reducciones en materiales, excluidas de equivalentes. Una instalación real puede requerir pérdidas adicionales.');
   }catch(e){d.resumen.push('Materiales: Pendiente de corregir los datos actuales. '+e.message+'. El respaldo anterior no es una lista de compra vigente.');}

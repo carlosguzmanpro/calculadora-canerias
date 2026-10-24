@@ -1471,3 +1471,80 @@ test('manual directo: un borrador inválido conserva campos y muestra error visi
 test('manual directo: el PDF usa la misma lista que pantalla, con ceros, avisos y consumos existentes',()=>{
  const a=app();ejemploManualDirecto(a);a.run('proyectos.gas.conteosRapidosGas[tramos[0].id].codo45=0;calcularMaterialesManualGas()');const modelo=a.run('modeloInformeActual()');for(const [tipo,total]of [['codo90',18],['tee',2],['llave',3],['codo45',0]])assert.equal(modelo.filas.filter(f=>f.tipo===tipo).reduce((s,f)=>s+(f.cantidad||0),0),total);assert.equal(modelo.artefactos.reduce((s,a)=>s+a.consumo,0),29200);assert.ok(modelo.resumen.some(t=>/58 m/.test(t)));assert.ok(modelo.resumen.some(t=>/Cantidad pendiente/.test(t)));assert.ok(!modelo.resumen.some(t=>/Sólo los adicionales conciliados/.test(t)));assert.equal(a.run('CATALOGOS_GAS_VERIFICADOS.length'),0);
 });
+
+function iniciarRedFlexible(a,invertir=false,orden=[0,1,2,3,4]){
+ ejemploManualDirecto(a);a.run("instalacionGas.perfil.poderCalorifico='9300';asegurarIdsGas()");a.ctx.ordenFlexible=orden;a.ctx.invertirFlexible=invertir;a.run('tramos=ordenFlexible.map(i=>tramos[i]);if(invertirFlexible)tramos=tramos.map(t=>({...t,desde:t.hasta,hasta:t.desde}))');
+}
+function consumosPorConexion(a){const r=a.run('redFisicaManualGas()');const resultado={};for(const t of a.run('tramos'))resultado[[t.desde.toLowerCase(),t.hasta.toLowerCase()].sort().join('-')]=r.porTramo[t.id];return resultado;}
+test('red flexible: orden arbitrario acumula 29200, 13200, 16000, 3000 y 10200 kcal/h',()=>{
+ const a=app();iniciarRedFlexible(a,false,[4,2,1,3,0]);a.run('calcularMaterialesManualGas()');const r=a.run('redFisicaManualGas()');assert.deepEqual(Array.from(r.errores),[]);assert.equal(r.total,29200);assert.equal(r.porTramo['manual-A'],29200);assert.equal(r.porTramo['manual-B'],13200);assert.equal(r.porTramo['manual-Termo'],16000);assert.equal(r.porTramo['manual-Calefactor'],3000);assert.equal(r.porTramo['manual-Cocina'],10200);assert.equal(cantidadManual(a,'codo90'),18);assert.equal(cantidadManual(a,'tee'),2);assert.equal(cantidadManual(a,'llave'),3);assert.equal(a.run('revisionMaterialesGas.plan.longitudInformada'),58);
+});
+test('red flexible: invertir todos los extremos y cambiar el orden conserva cantidades y consumos',()=>{
+ const a=app(),b=app();iniciarRedFlexible(a);iniciarRedFlexible(b,true,[3,1,4,0,2]);a.run('calcularMaterialesManualGas()');b.run('calcularMaterialesManualGas()');assert.deepEqual(consumosPorConexion(a),consumosPorConexion(b));assert.equal(b.run('redFisicaManualGas().total'),29200);for(const t of ['codo90','tee','llave'])assert.equal(cantidadManual(a,t),cantidadManual(b,t));assert.equal(b.run('revisionMaterialesGas.plan.longitudInformada'),58);
+});
+test('red flexible: cálculo derivado no cambia los extremos, detalles, consumos ni conexiones guardadas',()=>{
+ const a=app();iniciarRedFlexible(a,true,[4,0,3,2,1]);const antes=a.run('JSON.stringify({tramos,artefactos,instalacionGas})');a.run('redFisicaManualGas();calcularMaterialesManualGas();entradaMaterialesGas();modeloInformeActual()');assert.equal(a.run('JSON.stringify({tramos,artefactos,instalacionGas})'),antes);assert.equal(a.run('revisionMaterialesGas.plan.dimensionamientoDefinitivo'),false);
+});
+test('red flexible: conexiones formales y nombres invertidos representan la misma unión',()=>{
+ const a=app();iniciarRedFlexible(a);a.run("instalacionGas.nodos=[{id:'m',nombre:'M',tipo:'medidor'},{id:'a',nombre:'A',tipo:'derivacion'},{id:'b',nombre:'B',tipo:'derivacion'}];tramos[0].red={desde:'m',hasta:'a'};tramos[1].red={desde:'a',hasta:'b'};tramos[1].desde='B';tramos[1].hasta='A'");const r=a.run('redFisicaManualGas()');assert.equal(r.errores.length,0);assert.equal(r.total,29200);assert.equal(r.porTramo['manual-B'],13200);assert.equal(a.run('tramos[1].red.desde'),'a');
+});
+test('red flexible: nombres con espacios y mayúsculas conservan la identidad de los puntos',()=>{
+ const a=app();iniciarRedFlexible(a);a.run("tramos[1].desde=' a ';tramos[2].desde='A ';tramos[3].desde=' b '");const r=a.run('redFisicaManualGas()');assert.equal(r.errores.length,0);assert.equal(r.total,29200);
+});
+test('red flexible: formulario rechaza B-A cuando A-B existe sin cambiar datos',()=>{
+ const a=app();iniciarRedFlexible(a);const antes=a.run('JSON.stringify(tramos)');for(const [id,v]of Object.entries({desde:'B',hasta:'A',metros:'5',manualGas_codo90:'1'}))a.elements.get(id).value=v;a.run('agregarTramo()');assert.equal(a.run('JSON.stringify(tramos)'),antes);assert.match(a.text('mensajeCargaManualGas'),/ya está registrado/);assert.equal(a.elements.get('desde').value,'B');
+});
+test('red flexible: duplicado importado idéntico se advierte y no duplica metros ni accesorios',()=>{
+ const a=app();iniciarRedFlexible(a);a.run("tramos.push({...tramos[1],id:'duplicado',desde:'B',hasta:'A'});proyectos.gas.conteosRapidosGas.duplicado={...proyectos.gas.conteosRapidosGas['manual-B']};calcularMaterialesManualGas()");assert.equal(a.run('tramos.length'),6);assert.equal(a.run('revisionMaterialesGas.plan.longitudInformada'),58);assert.equal(cantidadManual(a,'codo90'),18);assert.equal(cantidadManual(a,'tee'),2);assert.match(a.run('revisionMaterialesGas.plan.avisos.join(" ")'),/Tramo duplicado/);assert.equal(a.run('redFisicaManualGas().total'),29200);
+});
+test('red flexible: duplicados con valores distintos quedan pendientes y conservan ambos registros',()=>{
+ const a=app();iniciarRedFlexible(a);a.run("tramos.push({...tramos[1],id:'duplicado',desde:'B',hasta:'A',metros:8});proyectos.gas.conteosRapidosGas.duplicado={codo90:5,tee:1};calcularMaterialesManualGas()");assert.equal(a.run('tramos.length'),6);assert.equal(a.run('revisionMaterialesGas.plan.longitudParcial'),true);assert.equal(a.run('redFisicaManualGas().total'),null);const filas=a.run('resumenListaManualGas(revisionMaterialesGas.plan)');assert.equal(filas.find(f=>f.tipo==='cano').pendiente,true);assert.equal(filas.find(f=>f.tipo==='codo90').pendiente,true);assert.match(a.run('revisionMaterialesGas.plan.avisos.join(" ")'),/datos distintos/);
+});
+test('red flexible: red desconectada no muestra consumo total como válido y permite materiales conocidos',()=>{
+ const a=app();iniciarRedFlexible(a);a.run("tramos[4].desde='X';calcularMaterialesManualGas()");assert.equal(a.run('redFisicaManualGas().total'),null);assert.match(a.run('redFisicaManualGas().errores.join(" ")'),/Red desconectada/);assert.equal(cantidadManual(a,'codo90'),18);assert.equal(a.run('revisionMaterialesGas.plan.longitudInformada'),58);
+});
+test('red flexible: un circuito cerrado advierte y conserva cantidades físicas sin dimensionar',()=>{
+ const a=app();iniciarRedFlexible(a);a.run("tramos.push({id:'ciclo',desde:'B',hasta:'M',metros:2,diametro:null});calcularMaterialesManualGas()");assert.match(a.run('redFisicaManualGas().errores.join(" ")'),/circuito cerrado/);assert.equal(a.run('redFisicaManualGas().total'),null);assert.equal(a.run('revisionMaterialesGas.plan.dimensionamientoDefinitivo'),false);
+});
+test('red flexible: consumos ambiguos y artefactos reutilizados no se adivinan',()=>{
+ const a=app();iniciarRedFlexible(a);a.run("artefactos.push({nombre:'Termo',consumo:5000})");assert.match(a.run('redFisicaManualGas().errores.join(" ")'),/Consumo ambiguo/);assert.equal(a.run('redFisicaManualGas().total'),null);
+});
+test('red flexible: datos de artefacto incompletos mantienen consumos parciales válidos',()=>{
+ const a=app();iniciarRedFlexible(a);a.run("artefactos=artefactos.filter(a=>a.nombre!=='Termo')");const r=a.run('redFisicaManualGas()');assert.equal(r.total,null);assert.equal(r.porTramo['manual-A'],null);assert.equal(r.porTramo['manual-B'],13200);assert.equal(r.parciales['manual-A'],13200);assert.match(r.faltantes.join(' '),/Consumo pendiente en Termo/);
+});
+test('lista simple: única tabla Material-Cantidad, metraje agrupado y cuplas pendientes',()=>{
+ const a=app();iniciarRedFlexible(a);a.run('calcularMaterialesManualGas()');const nodos=descendientesPresentacion(a.elements.get('resumenPrincipalMaterialesGas')),tablas=nodos.filter(n=>n.tagName==='TABLE');assert.equal(tablas.length,1);assert.deepEqual(tablas[0].children.find(n=>n.tagName==='THEAD').children[0].children.map(c=>c.textContent),['Material','Cantidad']);const filas=a.run('resumenListaManualGas(revisionMaterialesGas.plan)');assert.equal(filas.filter(f=>f.tipo==='cano').length,1);assert.equal(filas.find(f=>f.tipo==='cano').cantidad,58);assert.equal(filas.find(f=>f.tipo==='codo90').cantidad,18);assert.equal(filas.filter(f=>f.tipo==='cupla').length,1);assert.equal(filas.find(f=>f.tipo==='cupla').pendiente,true);assert.equal(nodos.filter(n=>n.textContent==='Datos técnicos pendientes').length,1);
+});
+test('lista simple: medidas distintas conocidas no se mezclan y estados no duplican renglones iguales',()=>{
+ const a=app();iniciarRedFlexible(a);a.run('calcularMaterialesManualGas()');a.ctx.planSimple={planes:[],filas:[{tipo:'codo90',material:'Codo 90°',cantidad:2,unidad:'unidad',diametro:'1"',cantidadConfirmada:true},{tipo:'codo90',material:'Codo 90°',cantidad:3,unidad:'unidad',diametro:'1"',estado:'estimado',cantidadConfirmada:false},{tipo:'codo90',material:'Codo 90°',cantidad:1,unidad:'unidad',diametro:'3/4"',cantidadConfirmada:true}]};const rs=a.run('resumenListaManualGas(planSimple)');assert.equal(rs.length,2);assert.equal(rs.find(r=>r.diametro==='1"').cantidad,5);assert.equal(rs.find(r=>r.diametro==='1"').estimado,true);
+});
+test('lista simple: avisos genéricos repetidos se reúnen sin ocultar contradicciones',()=>{
+ const a=app();iniciarRedFlexible(a);a.run('calcularMaterialesManualGas()');const avisos=a.run('avisosListaManualGas(revisionMaterialesGas.plan)');assert.equal(avisos.filter(x=>x.startsWith('Diámetros pendientes:')).length,1);assert.equal(avisos.filter(x=>x.startsWith('Faltan distancias')).length,1);assert.ok(avisos.some(x=>/normativo/.test(x)));
+});
+test('llave única: la antigua casilla no es visible y los proyectos heredados recuperan su cantidad',()=>{
+ const a=app();iniciarRedFlexible(a);a.run("delete proyectos.gas.conteosRapidosGas['manual-Termo'].llave;tramos[2].llave=true;editarTramo(2)");assert.equal(a.elements.get('manualGas_llave').value,1);assert.match(html,/<input id="llave" type="hidden"/);assert.doesNotMatch(html,/Contar una llave adicional a las registradas/);a.run('agregarTramo();calcularMaterialesManualGas()');assert.equal(cantidadManual(a,'llave'),3);assert.equal(a.run('tramos[2].llave'),true);
+});
+test('llave única: total manual más casilla y llave detallada representan una pieza, no tres',()=>{
+ const a=app();iniciarRedFlexible(a);a.run("tramos[2].llave=true;tramos[2].detalle.accesorios=[{tipo:'llave'}];calcularMaterialesManualGas()");assert.equal(cantidadManual(a,'llave'),3);a.run('editarTramo(2)');a.elements.get('manualGas_llave').value='0';a.run('agregarTramo();calcularMaterialesManualGas()');assert.equal(cantidadManual(a,'llave'),2);assert.equal(a.run('tramos[2].llave'),true);assert.equal(a.run('tramos[2].detalle.accesorios.length'),1);
+});
+test('llave única: respaldo sin conteos rápidos conserva una llave heredada sin crear otra detallada',()=>{
+ const a=app();a.run("abrir('gas');tramos=[{id:'heredado',desde:'M',hasta:'Cocina',metros:5,consumo:null,diametro:null,llave:true,detalle:{estado:'pendiente',accesorios:[{tipo:'llave'}]}}];guardarDatos()");const b=app(a.saved());b.run("abrir('gas');calcularMaterialesManualGas()");assert.equal(cantidadManual(b,'llave'),1);assert.equal(b.run('tramos[0].detalle.accesorios.length'),1);
+});
+test('red flexible: PDF mantiene las seis columnas y usa consumos acumulados sin diámetros inventados',()=>{
+ const a=app();iniciarRedFlexible(a,true,[4,1,3,0,2]);a.run('calcularMaterialesManualGas()');const modelo=a.run('modeloInformeActual()');for(const t of a.run('tramos')){const f=modelo.planilla.find(r=>r.tramo===t.desde+'–'+t.hasta);assert.ok(Math.abs(f.consumo-a.run('redFisicaManualGas()').porTramo[t.id]/9300)<1e-10);assert.equal(f.diametro,'Pendiente');}assert.equal(a.run('CATALOGOS_GAS_VERIFICADOS.length'),0);
+});
+test('red flexible: una misma placa vinculada a dos puntos no duplica el consumo',()=>{
+ const a=app();a.run("abrir('gas');artefactos=[{id:'art',nombre:'Termo',consumo:16000}];instalacionGas.nodos=[{id:'m',nombre:'M',tipo:'medidor'},{id:'a',nombre:'A',tipo:'derivacion'},{id:'t1',nombre:'T1',tipo:'artefacto',artefactoId:'art'},{id:'t2',nombre:'T2',tipo:'artefacto',artefactoId:'art'}];tramos=[{id:'ma',desde:'M',hasta:'A',metros:2},{id:'at1',desde:'A',hasta:'T1',metros:2},{id:'at2',desde:'A',hasta:'T2',metros:3}]");const r=a.run('redFisicaManualGas()');assert.equal(r.total,null);assert.match(r.errores.join(' '),/más de una vez/);
+});
+test('red flexible: discrepancia entre nombres y conexiones explícitas se advierte sin reescribirlas',()=>{
+ const a=app();iniciarRedFlexible(a);a.run("instalacionGas.nodos=[{id:'m',nombre:'M',tipo:'medidor'},{id:'a',nombre:'A',tipo:'derivacion'}];tramos[0].red={desde:'a',hasta:'a'}");const antes=a.run('JSON.stringify(tramos)');const r=a.run('redFisicaManualGas()');assert.equal(r.total,null);assert.match(r.errores.join(' '),/no coinciden|mismo punto/);assert.equal(a.run('JSON.stringify(tramos)'),antes);
+});
+test('red flexible: recarga e importación preservan llaves heredadas, cantidades y extremos invertidos',()=>{
+ const a=app();iniciarRedFlexible(a,true,[4,1,0,3,2]);a.run('tramos[4].llave=true;calcularMaterialesManualGas()');const guardado=JSON.parse(a.saved());const b=app(a.saved());b.run("abrir('gas');calcularMaterialesManualGas()");assert.equal(cantidadManual(b,'llave'),3);assert.equal(b.run('redFisicaManualGas().total'),29200);assert.deepEqual(JSON.parse(b.run('JSON.stringify(tramos)')),guardado.gas.tramos);const c=app();c.run("abrir('gas')");respaldoPrueba(c,{formato:'canerias-respaldo-v1',proyectos:guardado});c.run('calcularMaterialesManualGas()');assert.equal(c.run('redFisicaManualGas().total'),29200);assert.equal(cantidadManual(c,'codo90'),18);
+});
+test('lista simple: PDF agrupa el mismo metraje y accesorios sin filas de diámetro pendiente por tramo',()=>{
+ const a=app();iniciarRedFlexible(a);a.run('calcularMaterialesManualGas()');const m=a.run('modeloInformeActual()');assert.equal(m.materialesAgrupados.filter(f=>f.tipo==='cano').length,1);assert.equal(m.materialesAgrupados.find(f=>f.tipo==='cano').cantidad,58);assert.equal(m.materialesAgrupados.find(f=>f.tipo==='codo90').cantidad,18);assert.equal(m.materialesAgrupados.filter(f=>f.tipo==='cupla').length,1);assert.equal(m.materialesAgrupados.find(f=>f.tipo==='cupla').cantidad,null);assert.equal(m.materialesAgrupados.find(f=>f.tipo==='cano').diametro,'Pendiente');
+});
+test('lista simple: el orden de los grupos de caño de medidas distintas no cambia el resumen',()=>{
+ const a=app();a.ctx.planesOrden=[{diametro:'1"',material:'Acero epoxi',sistema:'Roscado',metros:9},{diametro:'3/4"',material:'Acero epoxi',sistema:'Roscado',metros:5}];const primero=a.run('JSON.stringify(resumenListaManualGas({planes:planesOrden,filas:[]}))');const segundo=a.run('JSON.stringify(resumenListaManualGas({planes:[...planesOrden].reverse(),filas:[]}))');assert.equal(primero,segundo);
+});
