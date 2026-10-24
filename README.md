@@ -1,5 +1,11 @@
 # CAÑERÍAS
 
+## GAS: preparación del dimensionamiento · prueba local
+
+Rama `prueba/gas-catalogos-tecnicos-pendientes`, base `d073aa4`. Diagnóstico de la red actual independiente del orden de carga, inventario de las fotografías/tablas conservadas y contrato para futuros catálogos por material, sistema, localidad y condiciones. Revisión avanzada opcional. **Los diámetros definitivos siguen bloqueados**, sin cambios de motores ni tablas.
+
+**519 pruebas aprobadas (495 anteriores + 24 nuevas)**. Sin publicación ni modificación de las vistas HTTPS actuales. [Hallazgos, implementación, pendientes y pruebas](GAS-PREPARACION-DIAMETROS.md). Las secciones siguientes son antecedentes históricos.
+
 ## GAS: proyectos independientes · nueva rama experimental local
 
 Rama `prueba/gas-proyectos-independientes`, derivada de `7a92910`. **Nuevo proyecto** crea una instalación vacía con nombre propio, sin ejemplos automáticos. El selector permite recuperar sus tramos, accesorios, fotografías, croquis, borradores y resultados. **Renombrar proyecto** conserva la identidad y los datos. Mi proyecto, Demostración y los respaldos anteriores se mantienen.

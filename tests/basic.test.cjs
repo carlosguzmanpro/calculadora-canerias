@@ -668,8 +668,8 @@ test('aislamiento: una lectura de foto demorada no escribe en el espacio recién
  a.ctx.evento={target:{files:[{type:'image/png',size:10}]}};a.run("cargarFoto(evento);seleccionarAmbitoGas('demostracion')");lector.result='data:image/png;base64,TARDÍA';lector.onload();assert.equal(a.run('proyectos.gas.demostracion.foto'),undefined);assert.equal(a.run('proyectos.gas.foto'),'data:image/png;base64,TARDÍA');
 });
 
-test('Android: index autónomo contiene exactamente las once fuentes locales, sin solicitudes de scripts',()=>{
- const bloques=[...html.matchAll(/<script data-local="([^"]+)">\n([\s\S]*?)\n<\/script>/g)];assert.equal(bloques.length,11);assert.doesNotMatch(html,/<script\s+src=/i);
+test('Android: index autónomo contiene exactamente las trece fuentes locales, sin solicitudes de scripts',()=>{
+ const bloques=[...html.matchAll(/<script data-local="([^"]+)">\n([\s\S]*?)\n<\/script>/g)];assert.equal(bloques.length,13);assert.doesNotMatch(html,/<script\s+src=/i);
  for(const [,ruta,codigo]of bloques)assert.equal(codigo,fs.readFileSync(ruta,'utf8'),ruta);
 });
 test('Android: ejecuta los scripts incorporados y navega todas las especialidades sin archivos vecinos',()=>{
@@ -1628,4 +1628,43 @@ test('proyectos GAS: borrador de revisión de croquis se recupera sólo en su pr
 });
 test('proyectos GAS: CSV identifica el proyecto activo y no exporta cantidades de otro',()=>{
  const a=app();a.run("abrir('gas')");const uno=nuevoProyectoPrueba(a,'CSV A');a.run("tramos=[{id:'a',desde:'M',hasta:'A',metros:6,diametro:null,consumo:null}];proyectoGasActual().conteosRapidosGas={a:{codo90:2}};calcularMaterialesManualGas()");nuevoProyectoPrueba(a,'CSV B');irProyectoPrueba(a,uno);let texto='',clicks=0;const crear=a.ctx.document.createElement;a.ctx.Blob=class{constructor(p){texto=p.join('');}};a.ctx.URL.createObjectURL=()=> 'blob:csv';a.ctx.setTimeout=fn=>fn();a.ctx.document.createElement=()=>{const e=crear();e.click=()=>clicks++;return e;};a.run('descargarMaterialesGas()');assert.equal(clicks,1);assert.match(texto,/"PROYECTO";"CSV A"/);assert.doesNotMatch(texto,/CSV B/);assert.equal(cantidadManual(a,'codo90'),2);
+});
+
+test('preparación de diámetros: red manual de cinco tramos reutiliza acumulados y rutas completas',()=>{
+ const a=app();iniciarRedFlexible(a);a.run("instalacionGas.perfil.fuenteGas='Dato declarado del ejercicio'");const r=a.run('mostrarPreparacionDiametrosGas()').red;
+ assert.deepEqual(Array.from(r.porTramo,t=>t.consumoKcal),[29200,13200,16000,3000,10200]);assert.deepEqual(Array.from(r.recorridos,x=>[x.artefacto,x.longitudReal]),[['Calefactor',36],['Cocina',33],['Termo',24]]);assert.equal(r.diametros,null);assert.equal(r.listoParaDimensionar,false);for(const t of r.porTramo)assert.equal(t.caudal,t.consumoKcal/9300);
+});
+test('preparación de diámetros: orden e inversión de extremos conservan los recorridos y consumos',()=>{
+ const a=app(),b=app();iniciarRedFlexible(a);iniciarRedFlexible(b,true,[4,1,3,0,2]);const x=a.run('mostrarPreparacionDiametrosGas()').red,y=b.run('mostrarPreparacionDiametrosGas()').red;
+ assert.equal(JSON.stringify(x.recorridos),JSON.stringify(y.recorridos));assert.deepEqual(Object.fromEntries(x.porTramo.map(t=>[t.id,t.consumoKcal])),Object.fromEntries(y.porTramo.map(t=>[t.id,t.consumoKcal])));
+});
+test('preparación de diámetros: no aplica un poder calorífico por defecto o sin fuente',()=>{
+ const a=app();iniciarRedFlexible(a);for(const cambiar of ["delete instalacionGas.perfil.poderCalorifico;instalacionGas.perfil.fuenteGas='Dato declarado'","instalacionGas.perfil.poderCalorifico='9300';delete instalacionGas.perfil.fuenteGas"]){a.run(cambiar);const r=a.run('mostrarPreparacionDiametrosGas()').red;assert.ok(r.porTramo.every(t=>t.caudal===null));assert.match(r.pendientes.join(' '),/Poder calorífico y fuente/);assert.equal(r.porTramo[0].consumoKcal,29200);}
+});
+test('preparación de diámetros: tee sin vía queda pendiente y no se inventa accesorio o equivalente',()=>{
+ const a=app();iniciarRedFlexible(a);const r=a.run('mostrarPreparacionDiametrosGas()').red;assert.match(r.pendientes.join(' '),/Derivación A.*Derivación B/);assert.ok(r.recorridos.every(x=>x.longitudEquivalente===null&&x.longitudDefinitiva===null));assert.equal(a.run('instalacionGas.nodos.length'),0);
+});
+test('preparación de diámetros: duplicados contradictorios, desconexiones y ciclos no generan rutas válidas',()=>{
+ for(const cambio of ["tramos.push({...tramos[1],id:'otro',metros:99})","tramos[3].desde='Z'","tramos.push({id:'ciclo',desde:'M',hasta:'B',metros:1})"]){const a=app();iniciarRedFlexible(a);a.run(cambio);const r=a.run('mostrarPreparacionDiametrosGas()').red;assert.ok(r.errores.length);assert.equal(r.recorridos.length,0);assert.ok(r.porTramo.every(t=>t.consumoKcal===null));assert.equal(r.diametros,null);}
+});
+test('preparación de diámetros: longitud inválida y IDs duplicados bloquean el diagnóstico',()=>{
+ for(const cambio of ["tramos[1].metros=0","tramos[1].metros=Infinity","tramos[1].id=tramos[0].id"]){const a=app();iniciarRedFlexible(a);a.run(cambio);const r=a.run('mostrarPreparacionDiametrosGas()').red;assert.ok(r.errores.length);assert.equal(r.recorridos.length,0);}
+});
+test('preparación de diámetros: lectura no cambia datos, cantidades, respaldos, PDF o CSV',()=>{
+ const a=app();iniciarRedFlexible(a);a.run('calcularMaterialesManualGas();guardarDatos()');const antes=a.saved(),plan=a.run('JSON.stringify(revisionMaterialesGas.plan)'),pdf=a.run('JSON.stringify(modeloInformeActual())');a.run('mostrarPreparacionDiametrosGas()');assert.equal(a.saved(),antes);assert.equal(a.run('JSON.stringify(revisionMaterialesGas.plan)'),plan);assert.equal(a.run('JSON.stringify(modeloInformeActual())'),pdf);assert.equal(cantidadManual(a,'codo90'),18);assert.equal(cantidadManual(a,'tee'),2);assert.equal(cantidadManual(a,'llave'),3);assert.equal(a.run('revisionMaterialesGas.plan.longitudInformada'),58);assert.equal(a.run('CATALOGOS_GAS_VERIFICADOS.length'),0);
+});
+test('preparación de diámetros: proyectos independientes y demostración no comparten diagnóstico',()=>{
+ const a=app();iniciarRedFlexible(a);a.run('guardarDatos()');const id=nuevoProyectoPrueba(a,'Red vacía');assert.equal(a.run('mostrarPreparacionDiametrosGas()').red.porTramo.length,0);irProyectoPrueba(a,'proyecto');assert.equal(a.run('mostrarPreparacionDiametrosGas()').red.porTramo.length,5);irProyectoPrueba(a,id);assert.equal(a.run('mostrarPreparacionDiametrosGas()').red.porTramo.length,0);irProyectoPrueba(a,'demostracion');assert.equal(a.run('mostrarPreparacionDiametrosGas()').red.porTramo.length,0);
+});
+test('preparación de diámetros: se actualiza al abrir diagnóstico y no requiere nueva conciliación',()=>{
+ const a=app();iniciarRedFlexible(a);a.run("mostrarVista('dimensionGas')");const texto=()=>JSON.stringify(a.elements.get('preparacionDiametrosGas').children);assert.match(texto(),/29200/);a.run("artefactos[0].consumo=17000;mostrarVista('dimensionGas')");assert.match(texto(),/30200/);assert.equal(a.run('proyectos.gas.conciliacionRapidaGas'),undefined);assert.match(html,/<details class="gas-detalles"><summary>Revisión avanzada y ejercicios separados \(opcional\)/);
+});
+test('preparación de diámetros: sin escritura disponible ni módulos vecinos sigue funcionando',()=>{
+ const a=app(null,{blocked:true,embebido:true});iniciarRedFlexible(a);assert.equal(a.run('mostrarPreparacionDiametrosGas()').red.porTramo.length,5);for(const m of ['agua','cloacas']){a.run(`abrir('${m}')`);assert.equal(a.run('mostrarPreparacionDiametrosGas()'),null);}
+});
+test('preparación de diámetros: enumera datos técnicos faltantes sin borrar los conocidos',()=>{
+ const a=app();iniciarRedFlexible(a);a.run("instalacionGas.perfil.material='Acero con revestimiento epoxi';instalacionGas.perfil.sistema='Roscado'");const r=a.run('mostrarPreparacionDiametrosGas()').red;assert.match(r.pendientes.join(' '),/presión disponible.*presión mínima.*pérdida admisible/);assert.match(r.pendientes.join(' '),/localidad.*distribuidora/);assert.doesNotMatch(r.pendientes.join(' '),/pendiente: material de la cañería|pendiente: sistema de unión/);assert.equal(a.run('instalacionGas.perfil.material'),'Acero con revestimiento epoxi');
+});
+test('preparación de diámetros: diagnósticos no habilitan el motor ni transfieren tablas a otros sistemas',()=>{
+ const a=app();iniciarRedFlexible(a);a.run("instalacionGas.perfil.material='Otro material';instalacionGas.perfil.sistema='Otro sistema';mostrarPreparacionDiametrosGas()");const r=a.run('motorDimensionarGas(tramos,artefactos,instalacionGas,catalogoParaGas(instalacionGas))');assert.equal(r.estado,'bloqueado');assert.equal(r.diametros,null);assert.equal(a.run('catalogoParaGas(instalacionGas)'),null);assert.equal(a.run('CATALOGOS_GAS_VERIFICADOS.length'),0);
 });
