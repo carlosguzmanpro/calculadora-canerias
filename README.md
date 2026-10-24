@@ -1,5 +1,13 @@
 # CAÑERÍAS
 
+## GAS: proyectos independientes · nueva rama experimental local
+
+Rama `prueba/gas-proyectos-independientes`, derivada de `7a92910`. **Nuevo proyecto** crea una instalación vacía con nombre propio, sin ejemplos automáticos. El selector permite recuperar sus tramos, accesorios, fotografías, croquis, borradores y resultados. **Renombrar proyecto** conserva la identidad y los datos. Mi proyecto, Demostración y los respaldos anteriores se mantienen.
+
+**495 pruebas aprobadas: 469 anteriores + 26 nuevas.** Se conservan la carga única, la lista simple, PDF/CSV y JSON v1. Motor, tablas y restricciones normativas intactos; AGUA/CLOACAS sin cambios de funcionalidad. No se subió ni publicó esta rama. La prueba visual en Android sigue pendiente por restricción de Chromium.
+
+[Uso, compatibilidad y pruebas](GAS-PROYECTOS-INDEPENDIENTES.md). Las secciones siguientes documentan las etapas anteriores.
+
 ## GAS: lista simple y conexiones en cualquier orden · nueva prueba local
 
 Rama `prueba/gas-lista-simple-red-flexible`, derivada de `85352b9`. Una tabla Material/Cantidad, avisos en «Datos técnicos pendientes» y detalle por tramo opcional. Se retiró la casilla visible de llave adicional, conservando los datos heredados. La red física admite extremos invertidos y orden arbitrario, calcula consumos acumulados y detecta duplicados o conexiones ambiguas sin reescribir el proyecto.

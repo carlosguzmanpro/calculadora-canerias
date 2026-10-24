@@ -128,7 +128,7 @@ function prepararSalidaMaterialesGas(){
 function descargarMaterialesGas(){
  const r=prepararSalidaMaterialesGas();if(!r)return;
  const quote=x=>'"'+String(x??'PENDIENTE').replaceAll('"','""')+'"';
- const filas=[['LISTA PARA REVISIÓN; NO DEFINITIVA'],...r.plan.supuestos.map(t=>[t]),...r.plan.avisos.map(t=>[t]),...r.plan.planes.map(g=>['RESUMEN',g.diametro,'Mínimo teórico: '+g.minimoTeorico,'Compra estimada: '+(g.compraEstimada??'PENDIENTE'),'Cuplas propuestas: '+(g.cuplasPropuestas??'PENDIENTES'),g.hipotesis?'Hipótesis NO COMPRA: '+g.plan.compraEstimada+' barras / '+g.plan.cuplasPropuestas+' uniones':'']),['Material','Diámetro','Cantidad','Unidad','Ubicación','Estado','Revisado','Evidencia'],...r.plan.filas.map(f=>[f.material,f.diametro,f.cantidad,f.unidad,ubicacionLegibleGas(f.ubicacion),f.estado,f.revisado?'Sí':'No',f.evidencia||f.equivalentes||''])];
+ const filas=[['LISTA PARA REVISIÓN; NO DEFINITIVA'],...(ambitoGas.startsWith('proyecto:')||proyectos.gas.nombreProyecto?[['PROYECTO',nombreProyectoGas()]]:[]),...r.plan.supuestos.map(t=>[t]),...r.plan.avisos.map(t=>[t]),...r.plan.planes.map(g=>['RESUMEN',g.diametro,'Mínimo teórico: '+g.minimoTeorico,'Compra estimada: '+(g.compraEstimada??'PENDIENTE'),'Cuplas propuestas: '+(g.cuplasPropuestas??'PENDIENTES'),g.hipotesis?'Hipótesis NO COMPRA: '+g.plan.compraEstimada+' barras / '+g.plan.cuplasPropuestas+' uniones':'']),['Material','Diámetro','Cantidad','Unidad','Ubicación','Estado','Revisado','Evidencia'],...r.plan.filas.map(f=>[f.material,f.diametro,f.cantidad,f.unidad,ubicacionLegibleGas(f.ubicacion),f.estado,f.revisado?'Sí':'No',f.evidencia||f.equivalentes||''])];
  const csv='\uFEFF'+filas.map(f=>f.map(quote).join(';')).join('\r\n');
  const blob=new Blob([csv],{type:'text/csv;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='canerias-materiales-revision.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
@@ -199,6 +199,7 @@ function actualizarDerivadosGas(){
  sincronizarMaterialesGas('proyecto');renderRespaldosGas();
 }
 function descargarRespaldoCompleto(){
+ if(modulo==='gas')capturarBorradorProyectoGas();
  if(Object.values(lecturasFoto).some(x=>x.pendiente)){$('estadoRespaldo').textContent='Esperá a que termine la lectura de la fotografía antes de descargar el respaldo.';return;}
  $('estadoRespaldo').textContent=Object.values(lecturasFoto).some(x=>x.error&&!x.datos)?'El respaldo conserva los datos y la foto anterior leída. La foto temporal actual no pudo incluirse; conservá su archivo original.':'Respaldo completo con las fotografías leídas; guardalo fuera del navegador.';
  const blob=new Blob([JSON.stringify({formato:'canerias-respaldo-v1',proyectos},null,2)],{type:'application/json;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');
@@ -322,7 +323,7 @@ function guardarConciliacionGas(clave,edicion,confirmar){
  const d=p.conciliacionRapidaGas;if(d.registros[clave])d.historial.push({clave,revision:d.registros[clave]});d.registros[clave]=revision;
  guardarDatos();generarPlanGas('proyecto');renderConciliacionRapidaGas();
  const actual=estadoConciliacionGas().find(x=>x.clave===clave);
- const almacenado=ambitoGas==='demostracion'?ultimoGuardadoValido?.gas?.demostracion:ultimoGuardadoValido?.gas;
+ const almacenado=proyectoGuardadoGas();
  const mensaje=JSON.stringify(almacenado?.conciliacionRapidaGas)!==JSON.stringify(d)?'Revisión sólo en sesión: descargá un respaldo antes de cerrar.':confirmar?(actual.error||'Revisión confirmada. Cantidades conciliadas; la revisión técnica sigue pendiente.'):'Vínculos guardados como pendientes; no se agregaron piezas.';
  mostrarRespuestaConciliacionGas(clave,mensaje,!!(confirmar&&actual.error));
  return true;
@@ -387,7 +388,7 @@ function confirmarCoincidenciasClarasGas(propuestas){
   if(!propuesta||propuesta.firma!==item.firma){pendientes++;continue;}
   if(guardarConciliacionGas(f.clave,propuesta.edicion,true))confirmadas++;else pendientes++;
  }
- const local=ambitoGas==='demostracion'?ultimoGuardadoValido?.gas?.demostracion:ultimoGuardadoValido?.gas;
+ const local=proyectoGuardadoGas();
  $('conciliacionMensaje').textContent=confirmadas+' coincidencias confirmadas, sin adicionales. '+pendientes+' casos omitidos o cambiados; revisalos por separado.'+(JSON.stringify(local?.conciliacionRapidaGas)!==JSON.stringify(proyectoGasActual().conciliacionRapidaGas)?' Guardado local no confirmado: conservá un respaldo.':'');
  return {confirmadas,pendientes};
 }
@@ -639,7 +640,7 @@ function avisosListaManualGas(plan){
 }
 function renderListaManualSimpleGas(out,plan,modelo){
  const texto=(padre,s)=>{const p=document.createElement('p');p.textContent=textoMaterialPantallaGas(s);padre.append(p);};
- texto(out,ambitoGas==='demostracion'?'DEMOSTRACIÓN · lista de materiales':'MI PROYECTO · lista de materiales');
+ texto(out,ambitoGas==='demostracion'?'DEMOSTRACIÓN · lista de materiales':ambitoGas==='proyecto'&&!proyectos.gas.nombreProyecto?'MI PROYECTO · lista de materiales':nombreProyectoGas()+' · lista de materiales');
  const tabla=document.createElement('table');tabla.className='tabla gas-lista-simple';if(resumenListaManualGas(plan).some(f=>!f.diametro)){const caption=document.createElement('caption');caption.textContent='Diámetros: pendientes de verificación.';tabla.append(caption);}const head=document.createElement('thead'),hr=document.createElement('tr');for(const s of ['Material','Cantidad']){const th=document.createElement('th');th.textContent=s;hr.append(th);}head.append(hr);tabla.append(head);const body=document.createElement('tbody');
  for(const f of resumenListaManualGas(plan)){
   const tr=document.createElement('tr'),nombre=document.createElement('td'),cantidad=document.createElement('td');nombre.textContent=f.material+(f.diametro?' · '+f.diametro:'');

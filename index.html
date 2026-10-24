@@ -82,6 +82,7 @@ dialog img{max-height:78vh;max-width:90vw}
 .gas-revision-check:has(input:checked){background:#e2f2e9;border-color:#087e6a}
 @media(min-width:900px){.gas-materiales-tarjetas{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:340px){.gas-material-card{grid-template-columns:minmax(0,1fr)}.gas-material-card>*{grid-column:1!important}}
+.gas-selector-proyectos{display:flex;flex-wrap:wrap;gap:8px;align-items:end}.gas-selector-proyectos label{flex:1 1 220px;min-width:0;margin:0}.gas-selector-proyectos button{flex:0 1 auto;width:auto;margin:0;min-height:44px}
 .gas-lista-simple{table-layout:fixed;width:100%}.gas-lista-simple td,.gas-lista-simple th{overflow-wrap:anywhere;vertical-align:top}.gas-lista-simple th:first-child{width:58%}
 .gas-campos-manuales{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.gas-campos-manuales label{margin:4px 0;font-size:14px}.gas-campos-manuales input{margin-top:4px;min-height:44px}@media(max-width:340px){.gas-campos-manuales{grid-template-columns:1fr}}
 .gas-acciones{display:flex;flex-wrap:wrap;gap:8px}
@@ -153,7 +154,8 @@ section{box-shadow:none}
 <h2 id="titulo"></h2><button class="alt" onclick="imprimirInformeActual()">Imprimir informe / guardar PDF</button>
 
 <div id="menuGas" class="oculto">
-<label>Espacio de trabajo <select id="ambitoGas" onchange="seleccionarAmbitoGas(this.value)"><option value="proyecto">Mi proyecto</option><option value="demostracion">Demostración separada</option></select></label><p id="estadoAmbitoGas"></p>
+<div class="gas-selector-proyectos"><label>Proyecto de GAS <select id="ambitoGas" onchange="seleccionarAmbitoGas(this.value)"><option value="proyecto">Mi proyecto</option><option value="demostracion">Demostración separada</option></select></label><button class="alt" onclick="mostrarEditorProyectoGas('crear')">Nuevo proyecto</button><button class="alt" onclick="mostrarEditorProyectoGas('renombrar')">Renombrar proyecto</button></div>
+<div id="editorProyectosGas" class="detalle oculto"><label for="nombreProyectoGas">Nombre del proyecto</label><input id="nombreProyectoGas" type="text" maxlength="80" placeholder="Ej.: Casa de Ana"><button id="guardarNombreProyectoGas" onclick="guardarNombreProyectoGas()">Crear proyecto vacío</button><button class="alt" onclick="cancelarEditorProyectoGas()">Cancelar</button></div><p id="mensajeProyectosGas" role="status" aria-live="polite"></p><p id="estadoAmbitoGas"></p>
 <div class="detalle solo-pantalla"><h3>Materiales de tu instalación</h3><p>Cargá tramos, artefactos y cantidades una sola vez. La foto y el plano son opcionales. No necesitás confirmar nuevamente los accesorios.</p><button onclick="mostrarVista('croquis');desplazarResultadoMaterialesGas('formularioGas')">Cargar o editar tramos y cantidades</button><button onclick="calcularMaterialesManualGas()">Calcular materiales</button><details class="gas-detalles"><summary>Herramientas de revisión anteriores (opcionales)</summary><button onclick="mostrarMaterialesPrincipalGas()">Obtener materiales de mi proyecto</button></details><button class="alt" onclick="mostrarPlanoOpcionalGas()">Agregar plano (opcional)</button></div>
 <nav class="opciones solo-pantalla" aria-label="Accesos directos de GAS">
 <button class="alt" onclick="irSeccionGas('tramos')">Ir a tramos</button><button class="alt" onclick="irSeccionGas('foto')">Ir a fotografía</button>
@@ -455,7 +457,7 @@ Estimación de compra sin reutilizar sobrantes: tiras de 6 m por segmento contin
 </dialog>
 
 <script data-local="informes/ambitos-gas.js">
-/* Espacio de práctica separado. Nunca se clasifican registros solo por su nombre. */
+/* Proyectos GAS independientes; espacios legados preservados sin clasificar datos por su nombre. */
 let ambitoGas='proyecto';
 function espacioDemostracionGas(){
  const g=proyectos.gas;
@@ -463,9 +465,9 @@ function espacioDemostracionGas(){
  const d=g.demostracion;if(!Array.isArray(d.tramos))d.tramos=[];if(!Array.isArray(d.artefactos))d.artefactos=[];
  if(!d.instalacion)d.instalacion={version:1,perfil:{pais:'AR',uso:'domiciliario',gas:'GN'},nodos:[]};return d;
 }
-function proyectoGasActual(){return ambitoGas==='demostracion'?espacioDemostracionGas():proyectos.gas;}
+function proyectoGasActual(){return ambitoGas==='demostracion'?espacioDemostracionGas():buscarProyectoGas(ambitoGas)||proyectos.gas;}
 function datosEspecialidadActual(){return modulo==='gas'?proyectoGasActual():proyectos[modulo];}
-function claveFotoActual(){return modulo==='gas'&&ambitoGas==='demostracion'?'gas-demostracion':modulo;}
+function claveFotoActual(){return modulo==='gas'?(ambitoGas==='proyecto'?'gas':'gas-'+ambitoGas):modulo;}
 function separarLegadoSimuladoGas(){
  const g=proyectos.gas,ts=Array.isArray(g.tramos)?g.tramos:[],as=Array.isArray(g.artefactos)?g.artefactos:[];
  const simulados=ts.filter(t=>esOrigenSimulado(t?.origen)),arts=as.filter(a=>esOrigenSimulado(a?.origen));
@@ -482,21 +484,80 @@ function separarLegadoSimuladoGas(){
  g.separacionDemostraciones={tramosConservados:simulados.length,artefactosConservados:arts.length,copiaDisponible:true};
 }
 function renderAmbitoGas(){
- $('ambitoGas').value=ambitoGas;
+ const select=$('ambitoGas');select.replaceChildren();
+ for(const [id,nombre]of [['proyecto','Mi proyecto'],['demostracion','Demostración separada'],...registrosProyectosGas().map(p=>['proyecto:'+p.id,p.nombre])]){const option=document.createElement('option');option.value=id;const propio=id==='proyecto'?proyectos.gas.nombreProyecto:id==='demostracion'?proyectos.gas.demostracion?.nombreProyecto:null;option.textContent=nombre+(propio?' · '+propio:'');select.append(option);}select.value=ambitoGas;
  actualizarVistaEntregaGas();renderSugerenciasGas();renderResumenPrincipalGas();
- $('estadoAmbitoGas').textContent=ambitoGas==='demostracion'?'DEMOSTRACIÓN: datos de práctica separados. No es tu proyecto real.':('MI PROYECTO: ejemplos separados de los datos reales.'+(proyectos.gas.separacionDemostraciones?' Se conservaron los simulados antiguos en Demostración y una copia anterior a la separación.':''));
+ $('estadoAmbitoGas').textContent=ambitoGas==='demostracion'?'DEMOSTRACIÓN: datos de práctica separados. No es tu proyecto real.':ambitoGas==='proyecto'?('MI PROYECTO: ejemplos separados de los datos reales.'+(proyectos.gas.separacionDemostraciones?' Se conservaron los simulados antiguos en Demostración y una copia anterior a la separación.':'')):'PROYECTO: '+nombreProyectoGas()+'. Datos independientes; fotografía opcional.';
 }
 function seleccionarAmbitoGas(destino){
- if(modulo!=='gas'||!['proyecto','demostracion'].includes(destino))return;
- guardarDatos();ambitoGas=destino;const g=proyectoGasActual();
+ if(modulo!=='gas'||!ambitoDisponibleGas(destino)){if(modulo==='gas'){$('ambitoGas').value=ambitoGas;$('mensajeProyectosGas').textContent='Proyecto no disponible. No se cambiaron los datos.';}return;}
+ capturarBorradorProyectoGas();guardarDatos();ambitoGas=destino;proyectos.gas.proyectoActivoGas=destino==='demostracion'?'proyecto':destino;cancelarEditorProyectoGas();const g=proyectoGasActual();
  tramos=Array.isArray(g.tramos)?g.tramos:[];artefactos=Array.isArray(g.artefactos)?g.artefactos:[];
  instalacionGas={version:1,perfil:{pais:'AR',uso:'domiciliario',gas:'GN'},nodos:[]};avisoRestauracionRedGas='';restaurarInstalacionGas(g);cancelarNodoGas();
  borradorCroquis=formatoBorradorValido(g.borradorCroquis)?g.borradorCroquis:null;
- revisionMaterialesGas=null;fuenteMaterialesGas='proyecto';$('matResultado').replaceChildren();
+ revisionMaterialesGas=null;fuenteMaterialesGas='proyecto';$('matResultado').replaceChildren();$('informeImpresion').innerHTML='';ultimoDocumentoPreparado=null;
+ $('planCompraGas').classList.add('oculto');$('estadoGemini').textContent='Gemini desactivado. No se envían fotografías.';
+ $('matMensaje').textContent='';$('mensajeCargaManualGas').textContent='';$('estadoPlanoOpcionalGas').replaceChildren();
  $('duda').value=g.aclaracion||'';$('revision').textContent=g.revision||'Todavía no hay una revisión registrada.';
  $('gt').value=g.tipoGas||'9300';cancelarEdicionTramo();cerrarAccesorios();renderTramos();renderGas();renderRevisionCroquis();renderRedGas();mostrarFotoLocal();renderAmbitoGas();
- $('resultadoMateriales').replaceChildren();$('resultadoMateriales').textContent='Datos del espacio seleccionado. Recalculá materiales para revisar.';
- actualizarDerivadosGas();mostrarVista('croquis');
+ $('resultadoMateriales').replaceChildren();$('resultadoMateriales').textContent='Datos del proyecto seleccionado. Cargá tramos o calculá sus materiales.';
+ actualizarDerivadosGas();if(tramos.length&&g.planCompra?.revisiones?.proyecto)generarPlanGas('proyecto');
+ restaurarBorradorProyectoGas();mostrarVista('croquis');guardarDatos();
+}
+
+function registrosProyectosGas(raiz=proyectos){return Array.isArray(raiz?.gas?.proyectosGuardados)?raiz.gas.proyectosGuardados.filter(p=>p&&typeof p.id==='string'&&typeof p.nombre==='string'&&p.datos&&typeof p.datos==='object'&&!Array.isArray(p.datos)):[];}
+function buscarProyectoGas(ambito,raiz=proyectos){if(ambito==='proyecto')return raiz?.gas;if(ambito==='demostracion')return raiz?.gas?.demostracion;if(typeof ambito!=='string'||!ambito.startsWith('proyecto:'))return null;const ps=registrosProyectosGas(raiz).filter(p=>p.id===ambito.slice(9));return ps.length===1?ps[0].datos:null;}
+function ambitoDisponibleGas(id){return ['proyecto','demostracion'].includes(id)||!!buscarProyectoGas(id);}
+function proyectoGuardadoGas(raiz=ultimoGuardadoValido){return buscarProyectoGas(ambitoGas,raiz);}
+function datosFotoGuardadaGas(clave,raiz=ultimoGuardadoValido){return clave==='gas'?raiz?.gas:clave==='gas-demostracion'?raiz?.gas?.demostracion:clave.startsWith('gas-proyecto:')?buscarProyectoGas(clave.slice(4),raiz):raiz?.[clave];}
+function nombreProyectoGas(){return ambitoGas==='proyecto'?proyectos.gas.nombreProyecto||'Mi proyecto':ambitoGas==='demostracion'?proyectos.gas.demostracion?.nombreProyecto||'Demostración separada':registrosProyectosGas().find(p=>'proyecto:'+p.id===ambitoGas)?.nombre||'Proyecto';}
+function validarRegistroProyectosGas(g){
+ if(g.proyectosGuardados===undefined)return;
+ if(!Array.isArray(g.proyectosGuardados))throw Error('Colección de proyectos no reconocida; se conserva sin sobrescribir.');
+ const ids=new Set();for(const p of g.proyectosGuardados){if(!p||typeof p.id!=='string'||!p.id||ids.has(p.id)||typeof p.nombre!=='string'||!p.nombre.trim()||!p.datos||typeof p.datos!=='object'||Array.isArray(p.datos))throw Error('Registro de proyecto inválido o identificador repetido.');ids.add(p.id);}
+}
+let accionEditorProyectoGas='crear';
+function mostrarEditorProyectoGas(accion='crear'){
+ if(modulo!=='gas')return;accionEditorProyectoGas=accion;$('editorProyectosGas').classList.remove('oculto');$('nombreProyectoGas').value=accion==='renombrar'?nombreProyectoGas():'';$('guardarNombreProyectoGas').textContent=accion==='renombrar'?'Guardar nombre':'Crear proyecto vacío';$('mensajeProyectosGas').textContent='';$('nombreProyectoGas').focus();
+}
+function cancelarEditorProyectoGas(){$('editorProyectosGas').classList.add('oculto');$('nombreProyectoGas').value='';}
+function guardarNombreProyectoGas(){const ok=accionEditorProyectoGas==='renombrar'?renombrarProyectoGas($('nombreProyectoGas').value):crearProyectoGas($('nombreProyectoGas').value);if(ok)cancelarEditorProyectoGas();}
+function nombreProyectoValidoGas(nombre,actual=null){const n=String(nombre??'').trim();if(!n||n.length>80)throw Error('Ingresá un nombre de 1 a 80 caracteres.');const normal=v=>String(v).trim().toLocaleLowerCase('es');const reservados=[['proyecto','Mi proyecto'],['demostracion','Demostración separada'],['proyecto',proyectos.gas.nombreProyecto||'Mi proyecto'],['demostracion',proyectos.gas.demostracion?.nombreProyecto||'Demostración separada'],...registrosProyectosGas().map(p=>['proyecto:'+p.id,p.nombre])];if(reservados.some(([id,x])=>id!==actual&&normal(x)===normal(n)))throw Error('Ese nombre ya existe. Elegí otro para distinguir los proyectos.');return n;}
+function crearProyectoGas(nombre){
+ if(modulo!=='gas')return null;
+ try{validarRegistroProyectosGas(proyectos.gas);const n=nombreProyectoValidoGas(nombre);let id;do{id=idGas('proyecto');}while(registrosProyectosGas().some(p=>p.id===id));
+ const nuevo={id,nombre:n,datos:{tramos:[],artefactos:[],instalacion:{version:1,perfil:{pais:'AR',uso:'domiciliario',gas:'GN'},nodos:[]},planCompra:{opciones:{cargaManualDirecta:true},extras:[],revisiones:{}}}};
+ if(!proyectos.gas.proyectosGuardados)proyectos.gas.proyectosGuardados=[];proyectos.gas.proyectosGuardados.push(nuevo);seleccionarAmbitoGas('proyecto:'+id);
+ $('mensajeProyectosGas').textContent='Proyecto vacío creado: '+n+'. '+(JSON.stringify(proyectoGuardadoGas())===JSON.stringify(proyectoGasActual())?'Guardado local confirmado.':'Guardado local no confirmado: conservá un respaldo antes de cerrar.');desplazarResultadoMaterialesGas('formularioGas');return id;
+ }catch(e){$('mensajeProyectosGas').textContent=e.message;return null;}
+}
+function renombrarProyectoGas(nombre){
+ if(modulo!=='gas')return false;
+ try{validarRegistroProyectosGas(proyectos.gas);const n=nombreProyectoValidoGas(nombre,ambitoGas);if(ambitoGas.startsWith('proyecto:'))registrosProyectosGas().find(p=>'proyecto:'+p.id===ambitoGas).nombre=n;else proyectoGasActual().nombreProyecto=n;guardarDatos();renderAmbitoGas();ultimoDocumentoPreparado=null;const guardado=ambitoGas.startsWith('proyecto:')?registrosProyectosGas(ultimoGuardadoValido).find(p=>'proyecto:'+p.id===ambitoGas)?.nombre:proyectoGuardadoGas()?.nombreProyecto;$('mensajeProyectosGas').textContent='Nombre actualizado. Las fotos y datos conservan su proyecto.'+(guardado!==n?' Guardado local no confirmado: conservá un respaldo antes de cerrar.':'');return true;}catch(e){$('mensajeProyectosGas').textContent=e.message;return false;}
+}
+const camposBorradorProyectoGas=['desde','hasta','metros','consumoTramo','diametro','otroDiametro','destinoArtefacto','gp','ga','redNombreNodo','redTipoNodo','redArtefactoNodo'];
+function capturarBorradorProyectoGas(){
+ if(modulo!=='gas')return;const valores={};for(const id of [...camposBorradorProyectoGas,...tiposRapidosGas.map(([k])=>'manualGas_'+k)])if($(id))valores[id]=$(id).value;
+ const d={valores,tramo:tramos[editandoTramo]?.id||null,nodo:editandoNodoGas||null};
+ if(editandoAccesorios>=0&&tramos[editandoAccesorios]){d.accesorios={tramo:tramos[editandoAccesorios].id,datos:JSON.parse(JSON.stringify(borradorAccesorios)),estado:$('estadoAccesorios').value,final:$('metrosFinal').value,rapidos:{}};for(const [k]of tiposRapidosGas)if($('rapidoGas_'+k))d.accesorios.rapidos[k]=$('rapidoGas_'+k).value;}
+ const utiles=Object.entries(valores).some(([id,v])=>!['ga','redTipoNodo','redArtefactoNodo'].includes(id)&&String(v??'').trim()!=='')||(valores.ga&&valores.ga!=='Cocina')||!!d.tramo||!!d.nodo||!!d.accesorios;
+ if(utiles)proyectoGasActual().borradorFormularioGas=d;else delete proyectoGasActual().borradorFormularioGas;
+}
+function restaurarBorradorProyectoGas(){
+ for(const id of camposBorradorProyectoGas)if($(id))$(id).value=id==='ga'?'Cocina':id==='redTipoNodo'?'derivacion':'';
+ const d=proyectoGasActual().borradorFormularioGas;if(!d)return;try{validarBorradorProyectoGas(proyectoGasActual());}catch(e){$('mensajeProyectosGas').textContent=e.message;return;}
+ const i=d.tramo?tramos.findIndex(t=>t.id===d.tramo):-1;if(i>=0)editarTramo(i);
+ if(d.accesorios){const j=tramos.findIndex(t=>t.id===d.accesorios.tramo);if(j>=0){abrirAccesorios(j);borradorAccesorios=JSON.parse(JSON.stringify(d.accesorios.datos||[]));$('estadoAccesorios').value=d.accesorios.estado||'pendiente';$('metrosFinal').value=d.accesorios.final??'';cambiarEstadoAccesorios();for(const [k,v]of Object.entries(d.accesorios.rapidos||{}))if($('rapidoGas_'+k))$('rapidoGas_'+k).value=v;}}
+ for(const [id,v]of Object.entries(d.valores||{}))if([...camposBorradorProyectoGas,...tiposRapidosGas.map(([k])=>'manualGas_'+k)].includes(id)&&$(id))$(id).value=v;
+ editandoNodoGas=instalacionGas.nodos.some(n=>n.id===d.nodo)?d.nodo:null;if(editandoNodoGas)$('redGuardarNodo').textContent='Guardar cambios del punto';
+ $('otroDiametro').classList.toggle('oculto',$('diametro').value!=='Otro (especificar)');
+}
+
+function validarBorradorProyectoGas(p){
+ const d=p.borradorFormularioGas;if(d===undefined)return;
+ const objeto=v=>v&&typeof v==='object'&&!Array.isArray(v);
+ if(!objeto(d)||(d.valores!==undefined&&!objeto(d.valores))||(d.tramo!=null&&typeof d.tramo!=='string')||(d.nodo!=null&&typeof d.nodo!=='string'))throw Error('Borrador de proyecto no reconocido; se conserva sin aplicar.');
+ if(d.accesorios&&(!objeto(d.accesorios)||typeof d.accesorios.tramo!=='string'||!Array.isArray(d.accesorios.datos)||d.accesorios.datos.some(a=>!objeto(a))||(d.accesorios.rapidos!==undefined&&!objeto(d.accesorios.rapidos))))throw Error('Borrador de accesorios no reconocido; se conserva sin aplicar.');
 }
 
 </script>
@@ -562,7 +623,7 @@ function seleccionarAmbitoGas(destino){
 <script data-local="informes/interfaz-informe.js">
 let ultimoDocumentoPreparado=null;
 function modeloInformeActual(){
- const gas=modulo==='gas',d={titulo:({gas:'GAS',agua:'AGUA',cloacas:'CLOACAS'})[modulo]||'Sin proyecto seleccionado',ambito:gas&&ambitoGas==='demostracion'?'DEMOSTRACIÓN · datos de práctica separados':'MI PROYECTO',tramos:gas?tramos:[],artefactos:gas?artefactos:[],filas:[],resumen:[],observaciones:$('duda').value.trim(),advertencia:gas?'Diámetros automáticos definitivos BLOQUEADOS. Cantidades estimadas y datos pendientes conservan su condición. Informe de revisión; no aprueba una instalación real.':''};
+ const gas=modulo==='gas',d={titulo:({gas:'GAS',agua:'AGUA',cloacas:'CLOACAS'})[modulo]||'Sin proyecto seleccionado',ambito:gas?(ambitoGas==='demostracion'?'DEMOSTRACIÓN · datos de práctica separados':ambitoGas==='proyecto'&&!proyectos.gas.nombreProyecto?'MI PROYECTO':'PROYECTO · '+nombreProyectoGas()):'MI PROYECTO',tramos:gas?tramos:[],artefactos:gas?artefactos:[],filas:[],resumen:[],observaciones:$('duda').value.trim(),advertencia:gas?'Diámetros automáticos definitivos BLOQUEADOS. Cantidades estimadas y datos pendientes conservan su condición. Informe de revisión; no aprueba una instalación real.':''};
  if(gas){
   d.resumen.push(modoManualGasActivo()?'Cálculo manual: cantidades ingresadas una sola vez, sin segunda confirmación; revisión técnica pendiente.':avisoConciliacionRapidaGas());
   const avisoDeteccion=avisoDeteccionGas();if(avisoDeteccion)d.resumen.push(avisoDeteccion);
@@ -905,7 +966,7 @@ function prepararSalidaMaterialesGas(){
 function descargarMaterialesGas(){
  const r=prepararSalidaMaterialesGas();if(!r)return;
  const quote=x=>'"'+String(x??'PENDIENTE').replaceAll('"','""')+'"';
- const filas=[['LISTA PARA REVISIÓN; NO DEFINITIVA'],...r.plan.supuestos.map(t=>[t]),...r.plan.avisos.map(t=>[t]),...r.plan.planes.map(g=>['RESUMEN',g.diametro,'Mínimo teórico: '+g.minimoTeorico,'Compra estimada: '+(g.compraEstimada??'PENDIENTE'),'Cuplas propuestas: '+(g.cuplasPropuestas??'PENDIENTES'),g.hipotesis?'Hipótesis NO COMPRA: '+g.plan.compraEstimada+' barras / '+g.plan.cuplasPropuestas+' uniones':'']),['Material','Diámetro','Cantidad','Unidad','Ubicación','Estado','Revisado','Evidencia'],...r.plan.filas.map(f=>[f.material,f.diametro,f.cantidad,f.unidad,ubicacionLegibleGas(f.ubicacion),f.estado,f.revisado?'Sí':'No',f.evidencia||f.equivalentes||''])];
+ const filas=[['LISTA PARA REVISIÓN; NO DEFINITIVA'],...(ambitoGas.startsWith('proyecto:')||proyectos.gas.nombreProyecto?[['PROYECTO',nombreProyectoGas()]]:[]),...r.plan.supuestos.map(t=>[t]),...r.plan.avisos.map(t=>[t]),...r.plan.planes.map(g=>['RESUMEN',g.diametro,'Mínimo teórico: '+g.minimoTeorico,'Compra estimada: '+(g.compraEstimada??'PENDIENTE'),'Cuplas propuestas: '+(g.cuplasPropuestas??'PENDIENTES'),g.hipotesis?'Hipótesis NO COMPRA: '+g.plan.compraEstimada+' barras / '+g.plan.cuplasPropuestas+' uniones':'']),['Material','Diámetro','Cantidad','Unidad','Ubicación','Estado','Revisado','Evidencia'],...r.plan.filas.map(f=>[f.material,f.diametro,f.cantidad,f.unidad,ubicacionLegibleGas(f.ubicacion),f.estado,f.revisado?'Sí':'No',f.evidencia||f.equivalentes||''])];
  const csv='\uFEFF'+filas.map(f=>f.map(quote).join(';')).join('\r\n');
  const blob=new Blob([csv],{type:'text/csv;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='canerias-materiales-revision.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
@@ -976,6 +1037,7 @@ function actualizarDerivadosGas(){
  sincronizarMaterialesGas('proyecto');renderRespaldosGas();
 }
 function descargarRespaldoCompleto(){
+ if(modulo==='gas')capturarBorradorProyectoGas();
  if(Object.values(lecturasFoto).some(x=>x.pendiente)){$('estadoRespaldo').textContent='Esperá a que termine la lectura de la fotografía antes de descargar el respaldo.';return;}
  $('estadoRespaldo').textContent=Object.values(lecturasFoto).some(x=>x.error&&!x.datos)?'El respaldo conserva los datos y la foto anterior leída. La foto temporal actual no pudo incluirse; conservá su archivo original.':'Respaldo completo con las fotografías leídas; guardalo fuera del navegador.';
  const blob=new Blob([JSON.stringify({formato:'canerias-respaldo-v1',proyectos},null,2)],{type:'application/json;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');
@@ -1099,7 +1161,7 @@ function guardarConciliacionGas(clave,edicion,confirmar){
  const d=p.conciliacionRapidaGas;if(d.registros[clave])d.historial.push({clave,revision:d.registros[clave]});d.registros[clave]=revision;
  guardarDatos();generarPlanGas('proyecto');renderConciliacionRapidaGas();
  const actual=estadoConciliacionGas().find(x=>x.clave===clave);
- const almacenado=ambitoGas==='demostracion'?ultimoGuardadoValido?.gas?.demostracion:ultimoGuardadoValido?.gas;
+ const almacenado=proyectoGuardadoGas();
  const mensaje=JSON.stringify(almacenado?.conciliacionRapidaGas)!==JSON.stringify(d)?'Revisión sólo en sesión: descargá un respaldo antes de cerrar.':confirmar?(actual.error||'Revisión confirmada. Cantidades conciliadas; la revisión técnica sigue pendiente.'):'Vínculos guardados como pendientes; no se agregaron piezas.';
  mostrarRespuestaConciliacionGas(clave,mensaje,!!(confirmar&&actual.error));
  return true;
@@ -1164,7 +1226,7 @@ function confirmarCoincidenciasClarasGas(propuestas){
   if(!propuesta||propuesta.firma!==item.firma){pendientes++;continue;}
   if(guardarConciliacionGas(f.clave,propuesta.edicion,true))confirmadas++;else pendientes++;
  }
- const local=ambitoGas==='demostracion'?ultimoGuardadoValido?.gas?.demostracion:ultimoGuardadoValido?.gas;
+ const local=proyectoGuardadoGas();
  $('conciliacionMensaje').textContent=confirmadas+' coincidencias confirmadas, sin adicionales. '+pendientes+' casos omitidos o cambiados; revisalos por separado.'+(JSON.stringify(local?.conciliacionRapidaGas)!==JSON.stringify(proyectoGasActual().conciliacionRapidaGas)?' Guardado local no confirmado: conservá un respaldo.':'');
  return {confirmadas,pendientes};
 }
@@ -1416,7 +1478,7 @@ function avisosListaManualGas(plan){
 }
 function renderListaManualSimpleGas(out,plan,modelo){
  const texto=(padre,s)=>{const p=document.createElement('p');p.textContent=textoMaterialPantallaGas(s);padre.append(p);};
- texto(out,ambitoGas==='demostracion'?'DEMOSTRACIÓN · lista de materiales':'MI PROYECTO · lista de materiales');
+ texto(out,ambitoGas==='demostracion'?'DEMOSTRACIÓN · lista de materiales':ambitoGas==='proyecto'&&!proyectos.gas.nombreProyecto?'MI PROYECTO · lista de materiales':nombreProyectoGas()+' · lista de materiales');
  const tabla=document.createElement('table');tabla.className='tabla gas-lista-simple';if(resumenListaManualGas(plan).some(f=>!f.diametro)){const caption=document.createElement('caption');caption.textContent='Diámetros: pendientes de verificación.';tabla.append(caption);}const head=document.createElement('thead'),hr=document.createElement('tr');for(const s of ['Material','Cantidad']){const th=document.createElement('th');th.textContent=s;hr.append(th);}head.append(hr);tabla.append(head);const body=document.createElement('tbody');
  for(const f of resumenListaManualGas(plan)){
   const tr=document.createElement('tr'),nombre=document.createElement('td'),cantidad=document.createElement('td');nombre.textContent=f.material+(f.diametro?' · '+f.diametro:'');
@@ -4522,6 +4584,7 @@ function invalidarConsumos(){
 }
 function guardarDatos(){
  if(!modulo)return;
+ if(modulo==='gas')capturarBorradorProyectoGas();
  const actual=datosEspecialidadActual();
  actual.aclaracion=$('duda').value;
  actual.revision=$('revision').textContent;
@@ -4546,6 +4609,7 @@ function guardarDatos(){
   const sinFotos=JSON.parse(JSON.stringify(proyectos));
   especialidades.forEach(m=>{if(ultimoGuardadoValido?.[m]?.foto)sinFotos[m].foto=ultimoGuardadoValido[m].foto;else delete sinFotos[m].foto;});
   if(sinFotos.gas.demostracion){if(ultimoGuardadoValido?.gas?.demostracion?.foto)sinFotos.gas.demostracion.foto=ultimoGuardadoValido.gas.demostracion.foto;else delete sinFotos.gas.demostracion.foto;}
+  for(const p of registrosProyectosGas(sinFotos)){const anterior=buscarProyectoGas('proyecto:'+p.id,ultimoGuardadoValido);if(anterior?.foto)p.datos.foto=anterior.foto;else delete p.datos.foto;}
   try{
    localStorage.setItem(CLAVE,JSON.stringify(sinFotos));
    ultimoGuardadoValido=JSON.parse(JSON.stringify(sinFotos));
@@ -4572,7 +4636,8 @@ function restaurarDatos(){
  try{
   if(datos)proyectos=datos;
   separarLegadoSimuladoGas();
-  const g=proyectos.gas;
+  ambitoGas=ambitoDisponibleGas(proyectos.gas.proyectoActivoGas)?proyectos.gas.proyectoActivoGas:'proyecto';
+  const g=proyectoGasActual();
   borradorCroquis=formatoBorradorValido(g.borradorCroquis)?g.borradorCroquis:null;
   tramos=Array.isArray(g.tramos)?g.tramos.filter(t=>t && typeof t.desde==='string' && typeof t.hasta==='string' && (t.diametro===null||typeof t.diametro==='string') && Number.isFinite(t.metros) && t.metros>0 && (t.consumo===null || (Number.isFinite(t.consumo) && t.consumo>=0))):[];
   artefactos=Array.isArray(g.artefactos)?g.artefactos.filter(a=>a && typeof a.nombre==='string' && Number.isFinite(a.consumo) && a.consumo>0):[];
@@ -4585,7 +4650,7 @@ function restaurarDatos(){
   instalacionGas={version:1,perfil:{pais:'AR',uso:'domiciliario',gas:'GN'},nodos:[]};
   $('estadoGuardado').textContent='Error al inicializar el proyecto: '+e.name+' · '+e.message+'. Los datos almacenados no se sobrescribirán.';
  }
- renderTramos();renderGas();renderRevisionCroquis();
+ renderTramos();renderGas();renderRevisionCroquis();restaurarBorradorProyectoGas();
 }
 function importarRespaldoCompleto(e){
  const archivo=e.target.files?.[0];if(!archivo)return;
@@ -4595,8 +4660,10 @@ function importarRespaldoCompleto(e){
   try{
    const x=JSON.parse(lector.result);
    if(x.formato!=='canerias-respaldo-v1'||!x.proyectos||!especialidades.every(m=>x.proyectos[m]&&typeof x.proyectos[m]==='object'&&!Array.isArray(x.proyectos[m])))throw Error('Formato de respaldo no reconocido');
-   for(const p of [...especialidades.map(m=>x.proyectos[m]),x.proyectos.gas.demostracion].filter(Boolean)){
+   validarRegistroProyectosGas(x.proyectos.gas);
+   for(const p of [...especialidades.map(m=>x.proyectos[m]),x.proyectos.gas.demostracion,...registrosProyectosGas(x.proyectos).map(p=>p.datos)].filter(Boolean)){
     if(typeof p!=='object'||Array.isArray(p)||['tramos','artefactos'].some(k=>p[k]!==undefined&&!Array.isArray(p[k])))throw Error('Proyecto con estructura no reconocida');
+    validarBorradorProyectoGas(p);
     if(p.foto!==undefined&&(typeof p.foto!=='string'||!/^data:image\/(png|jpeg|webp);base64,/.test(p.foto)))throw Error('Fotografía no recuperable: el respaldo debe incluir la imagen, no una URL temporal');
    }
    if(!persistenciaHabilitada)throw Error('Almacenamiento restringido; no se sobrescriben los datos anteriores');
@@ -4617,7 +4684,7 @@ $('importarRespaldo').addEventListener('change',importarRespaldoCompleto);
 function actualizarEstadoFoto(){
  if(!modulo)return;
  const clave=claveFotoActual(),actual=datosEspecialidadActual(),lectura=lecturasFoto[clave];
- const guardada=modulo==='gas'&&ambitoGas==='demostracion'?ultimoGuardadoValido?.gas?.demostracion:ultimoGuardadoValido?.[modulo];
+ const guardada=datosFotoGuardadaGas(clave);
  const coincide=actual.foto&&actual.foto===guardada?.foto;
  if(lectura?.datos&&lectura.datos===guardada?.foto)lectura.error=null;
  $('estadoFoto').textContent=lectura?.pendiente?'Leyendo fotografía para guardarla. No cierres Chrome todavía.':
@@ -4655,7 +4722,7 @@ function abrir(m){
  $('trabajo').classList.remove('oculto');
  $('titulo').textContent={gas:'🔥 GAS',agua:'💧 AGUA',cloacas:'🚽 CLOACAS'}[m];
  $('menuGas').classList.toggle('oculto',m!=='gas');
- if(m==='gas'){renderAmbitoGas();actualizarDerivadosGas();}
+ if(m==='gas'){renderAmbitoGas();actualizarDerivadosGas();if(ambitoGas.startsWith('proyecto:')&&tramos.length&&proyectoGasActual().planCompra?.revisiones?.proyecto)generarPlanGas('proyecto');}
  $('pendiente').classList.toggle('oculto',m==='gas');
  mostrarVista(m==='gas'?'croquis':'pendiente');
  window.scrollTo(0,0);
@@ -4727,7 +4794,7 @@ function cargarFoto(e){
     if(visible)fotoURL=lector.result;
     if(confirmada)destino.entregaGas.firmaCroquis=firmaCroquisEntrega();
     URL.revokeObjectURL(temporal);guardarDatos();
-    const guardada=clave==='gas-demostracion'?ultimoGuardadoValido?.gas?.demostracion:ultimoGuardadoValido?.[clave];
+    const guardada=datosFotoGuardadaGas(clave);
     if(guardada?.foto!==destino.foto)lectura.error='El navegador no pudo almacenar la imagen (cuota o acceso restringido). La fotografía anterior guardada se conserva.';
     if(visible){$('imagen').src=fotoURL;actualizarEstadoFoto();}
    };
@@ -5050,7 +5117,7 @@ function prepararIncorporacionCroquis(b,coleccion=tramos){
 function incorporarCroquis(){
  if(modulo!=='gas')return;
  try{
-  if(esOrigenSimulado({tipo:borradorCroquis?.origen})&&ambitoGas==='proyecto'){
+  if(esOrigenSimulado({tipo:borradorCroquis?.origen})&&ambitoGas!=='demostracion'){
    const d=espacioDemostracionGas(),n=prepararIncorporacionCroquis(borradorCroquis,d.tramos);
    d.tramos.push(...n.tramos);d.artefactos.push(...n.artefactos);
    d.borradorCroquis=JSON.parse(JSON.stringify({...borradorCroquis,aplicado:true}));
@@ -5176,7 +5243,7 @@ function guardarConteoRapidoGas(){
  // Metadatos independientes: no alterar detalle, firmas técnicas ni accesorios confirmados.
  p.conteosRapidosGas={...anterior,[t.id]:conteo};
  guardarDatos();renderTramos();
- const guardado=ambitoGas==='demostracion'?ultimoGuardadoValido?.gas?.demostracion:ultimoGuardadoValido?.gas;
+ const guardado=proyectoGuardadoGas();
  const persistido=JSON.stringify(guardado?.conteosRapidosGas?.[t.id])===JSON.stringify(conteo);
  $('mensajeRapidoGas').textContent=persistido?'Cantidades rápidas guardadas. El detalle no cambió: usá Editar tipos y distancias para corregir codo/tee. Calcular materiales usa estos totales sin segunda confirmación.':'Cantidades rápidas sólo en esta sesión: no se pudieron guardar. Descargá un respaldo antes de cerrar.';
 }
