@@ -42,7 +42,7 @@ dialog img{max-height:78vh;max-width:90vw}
 .resumen{font-weight:bold;margin-top:10px}
 /* La misma tabla y los mismos valores: tarjetas solo en GAS y en pantalla móvil. */
 #resumenPrincipalMaterialesGas,#matResultado{scroll-margin-top:16px}
-.sigas-candidatos{display:grid;gap:10px}.sigas-candidato{min-width:0;background:white;border:1px solid #c5dbd8;border-radius:12px;padding:12px}.sigas-candidato h4{margin:0 0 8px;color:#006f60}.sigas-candidato p{margin:6px 0;overflow-wrap:anywhere}.sigas-candidato p:first-of-type{font-weight:700}@media(min-width:720px){.sigas-candidatos{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.sigas-diametros{width:100%;table-layout:fixed}.sigas-diametros th,.sigas-diametros td{overflow-wrap:anywhere;font-size:13px;padding:8px 4px}.sigas-diametros th:first-child{width:24%}.sigas-candidatos{display:grid;gap:10px}.sigas-candidato{min-width:0;background:white;border:1px solid #c5dbd8;border-radius:12px;padding:12px}.sigas-candidato h4{margin:0 0 8px;color:#006f60}.sigas-candidato p{margin:6px 0;overflow-wrap:anywhere}.sigas-candidato p:first-of-type{font-weight:700}@media(min-width:720px){.sigas-candidatos{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media screen and (max-width:640px){
  .gas-calculo-tramos{display:block;min-width:0}
  .gas-calculo-tramos thead{position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip-path:inset(50%)}
@@ -160,7 +160,8 @@ section{box-shadow:none}
 <label for="catalogoSistemaGas">Sistema de cañería · se conserva por proyecto</label><select id="catalogoSistemaGas" onchange="seleccionarCatalogoSistemaGas(this.value)"><option value="">Pendiente de seleccionar</option><option value="acero-epoxi-roscado-gn">Acero epoxi · roscado</option><option value="sigas">SIGAS Thermofusión · manual ed.15 / 2025</option><option value="fusiogas">FUSIOGAS Thermofusión · V.1.2026</option></select><p id="estadoCatalogoSistemaGas" role="status" aria-live="polite"></p>
 <label for="combustibleSistemaGas">Combustible del proyecto</label><select id="combustibleSistemaGas" onchange="seleccionarCombustibleGas(this.value)"><option value="">Pendiente / revisar datos guardados</option><option value="GN">Gas natural</option><option value="GLP">GLP (composición por verificar)</option><option value="propano-gaseoso">Propano gaseoso identificado (SIGAS Tabla 5)</option></select><p id="estadoCombustibleGas" role="status" aria-live="polite"></p><details class="gas-detalles"><summary>Largo comercial del caño</summary><p id="estadoLargoComercialGas"></p><button id="usarLargoDocumentadoGas" class="alt oculto" onclick="usarLargoDocumentadoGas()">Usar largo documentado de 4 m para este proyecto</button></details>
 <details class="gas-detalles solo-pantalla"><summary>Entrada al casillero del medidor M</summary><label for="entradaCasilleroGas">¿Por dónde entra la cañería?</label><select id="entradaCasilleroGas" onchange="guardarCasilleroMedidorGas()"><option value="desconocida">No está indicada / pendiente</option><option value="lateral">Por un lateral</option><option value="posterior">Por atrás</option><option value="superior">Por arriba</option></select><div id="cotejoCodoCasilleroGas" class="oculto"><label for="codoCasilleroGas">Codo de 90° dentro del casillero</label><select id="codoCasilleroGas" onchange="guardarCasilleroMedidorGas()"><option value="pendiente">No sé si ya está contado</option><option value="incluido">Ya está incluido en mis cantidades o detalle</option><option value="no-incluido">No está incluido: agregar un codo</option></select></div><p id="estadoCasilleroGas" role="status" aria-live="polite"></p><p class="nota">Solo conteo de materiales. No se agregan cuplas, uniones dobles, entrerroscas ni otras conexiones del medidor.</p></details>
-<div class="detalle solo-pantalla"><h3>Datos de tu instalación GAS</h3><p>Cargá tramos, artefactos y cantidades una sola vez. La foto y el plano son opcionales. No necesitás confirmar nuevamente los accesorios.</p><button onclick="mostrarVista('croquis');desplazarResultadoMaterialesGas('formularioGas')">Cargar o editar tramos y cantidades</button><details class="gas-detalles"><summary>Herramientas de revisión anteriores (opcionales)</summary><button onclick="mostrarMaterialesPrincipalGas()">Obtener materiales de mi proyecto</button></details><button class="alt" onclick="mostrarPlanoOpcionalGas()">Agregar plano (opcional)</button></div>
+<div class="detalle solo-pantalla"><h3>Datos de tu instalación GAS</h3><p>Cargá tramos, artefactos y cantidades una sola vez. La foto y el plano son opcionales. No necesitás confirmar nuevamente los accesorios.</p><button onclick="mostrarVista('croquis');desplazarResultadoMaterialesGas('formularioGas')">Cargar o editar tramos y cantidades</button><details class="gas-detalles"><summary>Herramientas de revisión anteriores (opcionales)</summary><button class="alt" onclick="desplazarResultadoMaterialesGas()">Ir al resultado actual</button></details><button class="alt" onclick="mostrarPlanoOpcionalGas()">Agregar plano (opcional)</button></div>
+<details id="ejerciciosGasSeparados" class="gas-detalles solo-pantalla"><summary>Ejercicios y demostraciones · separados de mis proyectos</summary><p>Datos de prueba: no reemplazan tus instalaciones ni interpretan fotografías.</p><button class="alt" onclick="abrirEjercicioSigas19Gas()">Abrir ejercicio SIGAS · 58 m y 19 codos (proyecto separado)</button><button class="alt" onclick="generarPlanGas('ejemplo')">Probar materiales: calefón y cocina</button></details>
 <details id="herramientasGasOpcionales" class="gas-detalles solo-pantalla"><summary>Croquis, PDF y opciones avanzadas</summary>
 <nav class="opciones solo-pantalla" aria-label="Accesos directos de GAS">
 <button class="alt" onclick="irSeccionGas('tramos')">Ir a tramos</button><button class="alt" onclick="irSeccionGas('foto')">Ir a fotografía</button>
@@ -168,7 +169,7 @@ section{box-shadow:none}
 <button class="alt" onclick="irSeccionGas('pdf')">Documento PDF</button>
 </nav>
 <button onclick="mostrarVista('dimensionGas')">Calcular diámetros · diagnóstico</button>
-<button class="alt" onclick="mostrarVista('redGas')">Instalación: datos y conexiones de GAS</button><button class="alt" onclick="abrirEjercicioSigas19Gas()">Abrir ejercicio SIGAS · 58 m y 19 codos (proyecto separado)</button>
+<button class="alt" onclick="mostrarVista('redGas')">Instalación: datos y conexiones de GAS</button>
 <button class="alt" onclick="mostrarVista('revisionCroquis')">Revisar croquis y ejemplos</button>
 <button onclick="mostrarVista('croquis')">📷 Trabajar con croquis y tramos</button>
 <button class="alt" onclick="mostrarVista('consumos')">🧮 Consulta de consumos de gas</button>
@@ -400,8 +401,8 @@ section{box-shadow:none}
 <p class="nota">1. Revisá el detalle. 2. Indicá qué piezas ya están incluidas. 3. Confirmá sólo las adicionales. Cambiar la carga rápida no cambia los tipos del detalle.</p>
 <div id="propuestasCoincidenciaGas"></div><p id="conciliacionMensaje" role="status"></p><div id="conciliacionFilas"></div>
 </details><details class="gas-detalles"><summary>Criterios de conexiones que requieren verificación</summary><p>Verificar la conexión final de cada artefacto y la entrada lateral o superior del medidor contra el croquis, el montaje real y la documentación aplicable. Son criterios pendientes de comprobación, no cantidades fijas de accesorios. Una pieza compartida o una tee que gira no debe contarse dos veces. No se agregan codos, llaves ni otras piezas sólo por estos criterios.</p></details><div id="matUniones"></div>
-<button onclick="generarPlanGas('proyecto',true)">Generar lista de mi proyecto</button>
-<button class="alt" onclick="generarPlanGas('ejemplo')">Probar materiales: calefón y cocina</button>
+<button class="alt" onclick="desplazarResultadoMaterialesGas()">Volver al resultado</button>
+
 <details><summary>Agregar otro accesorio identificado manualmente</summary>
 <label>Nombre / tipo<input id="matExtraNombre" maxlength="100"></label>
 <label>Diámetro o conexiones (separar con →)<input id="matExtraDiametro" maxlength="100" placeholder="Ej.: 1&quot; → 3/4&quot;"></label>
@@ -499,9 +500,10 @@ function separarLegadoSimuladoGas(){
 }
 function renderAmbitoGas(){
  const select=$('ambitoGas');select.replaceChildren();
- for(const [id,nombre]of [['proyecto','Mi proyecto'],['demostracion','Demostración separada'],...registrosProyectosGas().map(p=>['proyecto:'+p.id,p.nombre])]){const option=document.createElement('option');option.value=id;const propio=id==='proyecto'?proyectos.gas.nombreProyecto:id==='demostracion'?proyectos.gas.demostracion?.nombreProyecto:null;option.textContent=nombre+(propio?' · '+propio:'');select.append(option);}select.value=ambitoGas;
+ const reales=document.createElement('optgroup'),ejercicios=document.createElement('optgroup');reales.label='Mis proyectos';ejercicios.label='Ejercicios y demostraciones';
+ for(const [id,nombre]of [['proyecto','Mi proyecto'],['demostracion','Demostración separada'],...registrosProyectosGas().map(p=>['proyecto:'+p.id,p.nombre])]){const option=document.createElement('option');option.value=id;const propio=id==='proyecto'?proyectos.gas.nombreProyecto:id==='demostracion'?proyectos.gas.demostracion?.nombreProyecto:null;option.textContent=nombre+(propio?' · '+propio:'');const referencia=id.startsWith('proyecto:')&&registrosProyectosGas().find(p=>'proyecto:'+p.id===id)?.datos.referenciaSigas19===true;(id==='demostracion'||referencia?ejercicios:reales).append(option);}select.append(reales,ejercicios);select.value=ambitoGas;
  sincronizarSistemaPrincipalGas();actualizarVistaEntregaGas();renderSugerenciasGas();renderResumenPrincipalGas();
- $('estadoAmbitoGas').textContent=ambitoGas==='demostracion'?'DEMOSTRACIÓN: datos de práctica separados. No es tu proyecto real.':ambitoGas==='proyecto'?('MI PROYECTO: ejemplos separados de los datos reales.'+(proyectos.gas.separacionDemostraciones?' Se conservaron los simulados antiguos en Demostración y una copia anterior a la separación.':'')):'PROYECTO: '+nombreProyectoGas()+'. Datos independientes; fotografía opcional.';
+ $('estadoAmbitoGas').textContent=proyectoGasActual().referenciaSigas19===true?'EJERCICIO SIGAS: datos de referencia separados de tus proyectos reales. Se conservan tus correcciones.':ambitoGas==='demostracion'?'DEMOSTRACIÓN: datos de práctica separados. No es tu proyecto real.':ambitoGas==='proyecto'?('MI PROYECTO: ejemplos separados de los datos reales.'+(proyectos.gas.separacionDemostraciones?' Se conservaron los simulados antiguos en Demostración y una copia anterior a la separación.':'')):'PROYECTO: '+nombreProyectoGas()+'. Datos independientes; fotografía opcional.';
 }
 function seleccionarAmbitoGas(destino){
  if(modulo!=='gas'||!ambitoDisponibleGas(destino)){if(modulo==='gas'){$('ambitoGas').value=ambitoGas;$('mensajeProyectosGas').textContent='Proyecto no disponible. No se cambiaron los datos.';}return;}
@@ -1530,7 +1532,7 @@ function avisosListaManualGas(plan){
 function renderListaManualSimpleGas(out,plan,modelo){
  const texto=(padre,s)=>{const p=document.createElement('p');p.textContent=textoMaterialPantallaGas(s);padre.append(p);};
  texto(out,ambitoGas==='demostracion'?'DEMOSTRACIÓN · lista de materiales':ambitoGas==='proyecto'&&!proyectos.gas.nombreProyecto?'MI PROYECTO · lista de materiales':nombreProyectoGas()+' · lista de materiales');
- renderPreseleccionSigasGas(out);
+ renderPreseleccionSigasGas(out,plan);
  const tabla=document.createElement('table');tabla.className='tabla gas-lista-simple';if(resumenListaManualGas(plan).some(f=>!f.diametro)){const caption=document.createElement('caption');caption.textContent='Diámetros: pendientes de verificación.';tabla.append(caption);}const head=document.createElement('thead'),hr=document.createElement('tr');for(const s of ['Material','Cantidad']){const th=document.createElement('th');th.textContent=s;hr.append(th);}head.append(hr);tabla.append(head);const body=document.createElement('tbody');
  for(const f of resumenListaManualGas(plan)){
   const tr=document.createElement('tr'),nombre=document.createElement('td'),cantidad=document.createElement('td');nombre.textContent=f.material+(f.diametro?' · '+f.diametro:'');
@@ -8787,20 +8789,23 @@ function entradaPreseleccionSigasGas(){
 }
 function calcularPreseleccionSigasGas(){const entrada=entradaPreseleccionSigasGas();return entrada?DimensionamientoSigas.resolver(SIGAS_ED15_2025,entrada):null;
 }
-function renderPreseleccionSigasGas(out){
+function renderPreseleccionSigasGas(out,plan=null){
  let r;try{r=calcularPreseleccionSigasGas();}catch(e){const p=document.createElement('p');p.textContent='Preselección SIGAS pendiente: '+e.message+'. Los datos guardados se conservaron.';out.append(p);return;}
  if(!r)return;
  const titulo=document.createElement('h3');titulo.textContent=perfilTecnicoActualGas().gas==='GN'?'Diámetros por tramo · SIGAS GN':'Dimensionamiento SIGAS · combustible pendiente de método propio';out.append(titulo);
  const aviso=document.createElement('p');aviso.textContent=r.filas.length?'Preselección parcial, sin validación de instalación. Pérdidas pendientes no equivalen a cero.':'No hay preselección: '+r.errores.join(' ');out.append(aviso);
+ const tabla=document.createElement('table');tabla.className='tabla sigas-diametros';const head=document.createElement('thead'),hr=document.createElement('tr');for(const s of ['Tramo','Exterior candidato condicionado']){const th=document.createElement('th');th.textContent=s;hr.append(th);}head.append(hr);tabla.append(head);const body=document.createElement('tbody');
+ for(const f of r.filas){const tr=document.createElement('tr');for(const s of [f.tramo,f.candidato?f.candidato.exteriorMm+' mm':'Sin candidato: '+(f.pendientes[0]||'Revisar conexiones, combustible y poder calorífico')]){const td=document.createElement('td');td.textContent=s;tr.append(td);}body.append(tr);}tabla.append(body);if(r.filas.length)out.append(tabla);
+ const resumen=document.createElement('details'),sr=document.createElement('summary');sr.textContent='Ver caudales, capacidades y recorridos por tramo';resumen.append(sr);
  const lista=document.createElement('div');lista.className='sigas-candidatos';
  for(const f of r.filas){const card=document.createElement('article');card.className='sigas-candidato';const h=document.createElement('h4');h.textContent=f.tramo;card.append(h);for(const s of [f.candidato?'Candidato condicionado: exterior '+f.candidato.exteriorMm+' mm · interior '+f.candidato.interiorTabuladoMm+' mm':'Diámetro: Pendiente',f.candidato?'Tabla 4 · p.22 · fila '+f.candidato.longitudFilaM+' m · capacidad '+f.candidato.capacidadM3h+' m³/h':'Sin capacidad seleccionada', 'Consumo '+(f.consumoKcal??'Pendiente')+' kcal/h · caudal '+(f.caudalM3h===null?'Pendiente':f.caudalM3h.toLocaleString('es-AR',{maximumFractionDigits:6}))+' m³/h', 'Tramo real '+f.longitudRealM+' m · recorrido de control: '+(f.recorridoControl||'Pendiente')+' · longitud consultada '+(f.longitudConsultaM??'Pendiente')+' m', 'Equivalente conocido del recorrido: '+(f.equivalenteConocidoRutaM===null?'Pendiente':fmt(f.equivalenteConocidoRutaM)+' m')+' · longitud definitiva: '+(f.longitudDefinitivaM??'Pendiente')]){const p=document.createElement('p');p.textContent=s;card.append(p);}lista.append(card);}
- out.append(lista);
+ resumen.append(lista);out.append(resumen);
  const detalles=document.createElement('details'),sum=document.createElement('summary');sum.textContent='Ver trazabilidad SIGAS y datos que faltan';detalles.append(sum);
  const texto=s=>{const p=document.createElement('p');p.textContent=s;detalles.append(p);};texto(r.advertencia||'Diámetros definitivos bloqueados.');
  for(const h of r.historia){texto('Iteración '+h.iteracion+' · '+h.fase);for(const ruta of h.recorridos){texto(ruta.artefacto+': '+ruta.longitudReal+' m reales; '+(ruta.equivalenteConocidoM===null?'equivalentes pendientes':ruta.equivalenteConocidoM+' m equivalentes conocidos')+'; consulta '+ruta.longitudConsultaM+' m.');for(const a of ruta.aportes)texto(a.cantidad+' × '+a.nombre+' · Tabla 3 p.'+a.pagina+' · '+a.equivalenteUnitarioM+' m/unidad = '+a.equivalenteTotalM+' m.');}for(const f of h.filas)for(const q of f.consultas)texto(f.tramo+': exterior '+q.exteriorMm+' mm / fila '+q.longitudFilaM+' m / '+q.capacidadM3h+' m³/h · '+(q.cubre?'cubre solo esta consulta':'capacidad insuficiente'));}
  for(const s of [...r.errores,...r.pendientes])texto(s);out.append(detalles);
  renderVinculosSigasGas(out,r);
- const nota=document.createElement('p');nota.textContent='Posibles cuplas: pendiente de confirmar si faltan posiciones o continuidad. Esto no impide consultar candidatos de diámetro.';out.append(nota);
+ const nota=document.createElement('p');nota.textContent=textoCuplasSigasGas(plan);out.append(nota);
 }
 function abrirEjercicioSigas19Gas(){
  if(modulo!=='gas')return false;
@@ -8857,6 +8862,12 @@ function renderVinculosSigasGas(out,r){
   detalles.append(caja);
  }
  out.append(detalles);
+}
+
+function textoCuplasSigasGas(plan){
+ const filas=plan?.filas?.filter(f=>['cupla','cupla-plan'].includes(f.tipo))||[];
+ if(!filas.length||filas.some(f=>!Number.isFinite(f.cantidad))||plan.planes?.some(g=>g.hipotesis))return 'Posibles cuplas: pendiente de confirmar. Faltan posiciones o continuidad de caños; los candidatos de diámetro se pueden consultar.';
+ return 'Cuplas '+(filas.every(f=>f.cantidadConfirmada&&!f.editado)?'declaradas':'estimadas')+': '+filas.reduce((n,f)=>n+f.cantidad,0)+'. Revisar las uniones propuestas antes de comprar.';
 }
 
 </script>

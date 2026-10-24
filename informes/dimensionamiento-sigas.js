@@ -10,20 +10,23 @@ function entradaPreseleccionSigasGas(){
 }
 function calcularPreseleccionSigasGas(){const entrada=entradaPreseleccionSigasGas();return entrada?DimensionamientoSigas.resolver(SIGAS_ED15_2025,entrada):null;
 }
-function renderPreseleccionSigasGas(out){
+function renderPreseleccionSigasGas(out,plan=null){
  let r;try{r=calcularPreseleccionSigasGas();}catch(e){const p=document.createElement('p');p.textContent='Preselección SIGAS pendiente: '+e.message+'. Los datos guardados se conservaron.';out.append(p);return;}
  if(!r)return;
  const titulo=document.createElement('h3');titulo.textContent=perfilTecnicoActualGas().gas==='GN'?'Diámetros por tramo · SIGAS GN':'Dimensionamiento SIGAS · combustible pendiente de método propio';out.append(titulo);
  const aviso=document.createElement('p');aviso.textContent=r.filas.length?'Preselección parcial, sin validación de instalación. Pérdidas pendientes no equivalen a cero.':'No hay preselección: '+r.errores.join(' ');out.append(aviso);
+ const tabla=document.createElement('table');tabla.className='tabla sigas-diametros';const head=document.createElement('thead'),hr=document.createElement('tr');for(const s of ['Tramo','Exterior candidato condicionado']){const th=document.createElement('th');th.textContent=s;hr.append(th);}head.append(hr);tabla.append(head);const body=document.createElement('tbody');
+ for(const f of r.filas){const tr=document.createElement('tr');for(const s of [f.tramo,f.candidato?f.candidato.exteriorMm+' mm':'Sin candidato: '+(f.pendientes[0]||'Revisar conexiones, combustible y poder calorífico')]){const td=document.createElement('td');td.textContent=s;tr.append(td);}body.append(tr);}tabla.append(body);if(r.filas.length)out.append(tabla);
+ const resumen=document.createElement('details'),sr=document.createElement('summary');sr.textContent='Ver caudales, capacidades y recorridos por tramo';resumen.append(sr);
  const lista=document.createElement('div');lista.className='sigas-candidatos';
  for(const f of r.filas){const card=document.createElement('article');card.className='sigas-candidato';const h=document.createElement('h4');h.textContent=f.tramo;card.append(h);for(const s of [f.candidato?'Candidato condicionado: exterior '+f.candidato.exteriorMm+' mm · interior '+f.candidato.interiorTabuladoMm+' mm':'Diámetro: Pendiente',f.candidato?'Tabla 4 · p.22 · fila '+f.candidato.longitudFilaM+' m · capacidad '+f.candidato.capacidadM3h+' m³/h':'Sin capacidad seleccionada', 'Consumo '+(f.consumoKcal??'Pendiente')+' kcal/h · caudal '+(f.caudalM3h===null?'Pendiente':f.caudalM3h.toLocaleString('es-AR',{maximumFractionDigits:6}))+' m³/h', 'Tramo real '+f.longitudRealM+' m · recorrido de control: '+(f.recorridoControl||'Pendiente')+' · longitud consultada '+(f.longitudConsultaM??'Pendiente')+' m', 'Equivalente conocido del recorrido: '+(f.equivalenteConocidoRutaM===null?'Pendiente':fmt(f.equivalenteConocidoRutaM)+' m')+' · longitud definitiva: '+(f.longitudDefinitivaM??'Pendiente')]){const p=document.createElement('p');p.textContent=s;card.append(p);}lista.append(card);}
- out.append(lista);
+ resumen.append(lista);out.append(resumen);
  const detalles=document.createElement('details'),sum=document.createElement('summary');sum.textContent='Ver trazabilidad SIGAS y datos que faltan';detalles.append(sum);
  const texto=s=>{const p=document.createElement('p');p.textContent=s;detalles.append(p);};texto(r.advertencia||'Diámetros definitivos bloqueados.');
  for(const h of r.historia){texto('Iteración '+h.iteracion+' · '+h.fase);for(const ruta of h.recorridos){texto(ruta.artefacto+': '+ruta.longitudReal+' m reales; '+(ruta.equivalenteConocidoM===null?'equivalentes pendientes':ruta.equivalenteConocidoM+' m equivalentes conocidos')+'; consulta '+ruta.longitudConsultaM+' m.');for(const a of ruta.aportes)texto(a.cantidad+' × '+a.nombre+' · Tabla 3 p.'+a.pagina+' · '+a.equivalenteUnitarioM+' m/unidad = '+a.equivalenteTotalM+' m.');}for(const f of h.filas)for(const q of f.consultas)texto(f.tramo+': exterior '+q.exteriorMm+' mm / fila '+q.longitudFilaM+' m / '+q.capacidadM3h+' m³/h · '+(q.cubre?'cubre solo esta consulta':'capacidad insuficiente'));}
  for(const s of [...r.errores,...r.pendientes])texto(s);out.append(detalles);
  renderVinculosSigasGas(out,r);
- const nota=document.createElement('p');nota.textContent='Posibles cuplas: pendiente de confirmar si faltan posiciones o continuidad. Esto no impide consultar candidatos de diámetro.';out.append(nota);
+ const nota=document.createElement('p');nota.textContent=textoCuplasSigasGas(plan);out.append(nota);
 }
 function abrirEjercicioSigas19Gas(){
  if(modulo!=='gas')return false;
@@ -80,4 +83,10 @@ function renderVinculosSigasGas(out,r){
   detalles.append(caja);
  }
  out.append(detalles);
+}
+
+function textoCuplasSigasGas(plan){
+ const filas=plan?.filas?.filter(f=>['cupla','cupla-plan'].includes(f.tipo))||[];
+ if(!filas.length||filas.some(f=>!Number.isFinite(f.cantidad))||plan.planes?.some(g=>g.hipotesis))return 'Posibles cuplas: pendiente de confirmar. Faltan posiciones o continuidad de caños; los candidatos de diámetro se pueden consultar.';
+ return 'Cuplas '+(filas.every(f=>f.cantidadConfirmada&&!f.editado)?'declaradas':'estimadas')+': '+filas.reduce((n,f)=>n+f.cantidad,0)+'. Revisar las uniones propuestas antes de comprar.';
 }
