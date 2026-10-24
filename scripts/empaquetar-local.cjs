@@ -8,7 +8,7 @@ html=html.replace(bloques,(_,ruta)=>{
  if(/<\/script/i.test(codigo))throw Error('Cierre HTML inesperado en '+ruta);
  cantidad++;return '<script data-local="'+ruta+'">\n'+codigo+'\n</script>';
 });
-if(cantidad!==13)throw Error('Se esperaban trece dependencias locales, hay '+cantidad);
+if(cantidad!==14)throw Error('Se esperaban catorce dependencias locales, hay '+cantidad);
 if(process.argv.includes('--check')){if(html!==fs.readFileSync(archivo,'utf8'))throw Error('index.html requiere npm run empaquetar:local');}
 else fs.writeFileSync(archivo,html);
 console.log('JavaScript local autónomo: '+cantidad+' archivos incorporados sin alterar sus fuentes.');

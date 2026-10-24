@@ -363,7 +363,7 @@
         27785,
         48094,
         75865,
-        155753
+        155735
       ],
       "estado": "cotejado"
     },
@@ -792,7 +792,7 @@
   "pendientes": [
     "Fuente y edición no aparecen en la fotografía; verificar atribución y aplicabilidad al acero roscado epoxi",
     "Confirmar interpretación de h = 10 mm y condiciones del método",
-    "Revisión técnica independiente de las cifras, incluidas las cinco correcciones, y comparación con ejercicio completo"
+    "Revisión técnica independiente de las cifras, incluidas las seis correcciones, y comparación con ejercicio completo"
   ],
   "auditoria": {
     "base": "1e99313",
@@ -839,6 +839,15 @@
         "anterior": 17655,
         "corregido": 17565,
         "motivo": "Error de transcripción de 1e99313; corrección cotejada en ampliación de fotografía original, sin alterar la imagen",
+        "fuente": "fuentes/tabla-3-347520.jpg",
+        "estado": "Cotejo visual; pendiente revisión técnica independiente"
+      },
+      {
+        "longitud": 34,
+        "diametro": "4\"",
+        "anterior": 155753,
+        "corregido": 155735,
+        "motivo": "Relectura visual completa 2026-10-24: la fotografía muestra 155,735; transposición de los dos últimos dígitos en la transcripción anterior. No se cambió la imagen ni se dedujo por fórmula.",
         "fuente": "fuentes/tabla-3-347520.jpg",
         "estado": "Cotejo visual; pendiente revisión técnica independiente"
       }

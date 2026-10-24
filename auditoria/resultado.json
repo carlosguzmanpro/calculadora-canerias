@@ -9,7 +9,7 @@
     ],
     "posiciones": 441,
     "coincidencias": 441,
-    "coincidenciasBase": 436,
+    "coincidenciasBase": 435,
     "correccionesDocumentadas": [
       {
         "longitud": 10,
@@ -35,6 +35,15 @@
         "anterior": 227244,
         "corregido": 227024,
         "motivo": "Error de transcripción de 1e99313; corrección cotejada en ampliación de fotografía original, sin alterar la imagen",
+        "fuente": "fuentes/tabla-3-347520.jpg",
+        "estado": "Cotejo visual; pendiente revisión técnica independiente"
+      },
+      {
+        "longitud": 34,
+        "diametro": "4\"",
+        "anterior": 155753,
+        "corregido": 155735,
+        "motivo": "Relectura visual completa 2026-10-24: la fotografía muestra 155,735; transposición de los dos últimos dígitos en la transcripción anterior. No se cambió la imagen ni se dedujo por fórmula.",
         "fuente": "fuentes/tabla-3-347520.jpg",
         "estado": "Cotejo visual; pendiente revisión técnica independiente"
       },

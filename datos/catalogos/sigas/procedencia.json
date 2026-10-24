@@ -1,0 +1,10 @@
+{
+  "id": "sigas",
+  "nombre": "SIGAS",
+  "fotografiasLocalizadas": false,
+  "tablas": [],
+  "edicion": null,
+  "habilitado": false,
+  "faltantes": ["Fotografías originales completas de capacidades y equivalencias SIGAS, con encabezados, unidades, notas y edición", "Manual técnico del fabricante: familia exacta, materiales, sistema de unión, diámetros interiores y accesorios compatibles", "Método, gas, presiones, densidad, criterios de cuplas, redondeo y pérdidas aplicables"],
+  "nota": "El propietario informa que las aportó antes, pero no están localizadas en los archivos accesibles de este entorno. No se completan con tablas de acero epoxi."
+}

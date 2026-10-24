@@ -1,0 +1,31 @@
+{
+  "id": "acero-epoxi-roscado-gn",
+  "nombre": "Acero epoxi · roscado · GN",
+  "origenConfirmadoPorPropietario": true,
+  "declaracion": "El propietario confirmó que las fotografías originales de las Tablas 3 y 18 corresponden a acero epoxi. Esta declaración no verifica edición, vigencia, interiores ni aplicabilidad normativa.",
+  "edicion": null,
+  "aplicabilidadNormativaVerificada": false,
+  "habilitado": false,
+  "tablas": [
+    {
+      "numero": 3,
+      "datos": "datos/tabla-3.js",
+      "fotografia": "fuentes/tabla-3-347520.jpg",
+      "unidadLongitud": "m",
+      "unidadCapacidad": "L/h",
+      "densidadRelativaImpresa": 0.65,
+      "referenciaImpresa": "Para caída de presión h = 10 mm.",
+      "presionSuministro": null
+    },
+    {
+      "numero": 18,
+      "datos": "datos/tabla-18.js",
+      "fotografia": "fuentes/tabla-18-347525.jpg",
+      "encabezado": "Longitudes equivalentes de accesorios a rosca, en diámetros",
+      "interioresComercialesVerificados": false,
+      "unidadEquivalenteNormalizada": "m",
+      "unidadExpresaEnComplemento": null
+    }
+  ],
+  "nota": "Referencias a los originales existentes, sin duplicar ni mover archivos históricos. No se asignan estos datos a SIGAS."
+}

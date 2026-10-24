@@ -1,5 +1,11 @@
 # CAÑERÍAS
 
+## GAS: acero epoxi y SIGAS separados · prueba local
+
+Rama `prueba/gas-catalogos-epoxi-sigas`, base `d7f03b8`. Origen epoxi confirmado por el propietario; cotejo de 441 capacidades y 225 equivalencias con una corrección explícita: **34 m / 4″ = 155735 L/h**. SIGAS no localizado tras revisar los archivos y 32 ZIP; catálogo independiente vacío. Elección conservada por proyecto y preparación de accesorios usando la misma carga manual, sin duplicarla. **Diámetros definitivos bloqueados.**
+
+**545 pruebas aprobadas (519 anteriores + 26 nuevas)**. Sin publicación ni cambios en vistas HTTPS. [Fuentes, cotejo, cálculos preparados y documentación faltante](GAS-CATALOGOS-EPOXI-SIGAS.md). Las secciones siguientes son antecedentes históricos.
+
 ## GAS: preparación del dimensionamiento · prueba local
 
 Rama `prueba/gas-catalogos-tecnicos-pendientes`, base `d073aa4`. Diagnóstico de la red actual independiente del orden de carga, inventario de las fotografías/tablas conservadas y contrato para futuros catálogos por material, sistema, localidad y condiciones. Revisión avanzada opcional. **Los diámetros definitivos siguen bloqueados**, sin cambios de motores ni tablas.

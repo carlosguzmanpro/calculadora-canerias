@@ -8,20 +8,20 @@ const {auditarTabla3,auditarRedondeos,auditarDudas}=require('../datos/auditoria-
 const {validarTablas}=require('../datos/validacion-tablas.js');
 const copia=x=>structuredClone(x);
 const auditar=t=>auditarTabla3(t,referencia);
-test('auditoría3: 441 posiciones, 436 sin cambios y cinco correcciones explícitas',()=>{
- const r=auditar(t3);assert.equal(r.integra,true);assert.equal(r.posiciones,441);assert.equal(r.coincidencias,441);assert.equal(r.coincidenciasBase,436);assert.equal(r.correccionesDocumentadas.length,5);assert.deepEqual(r.errores,[]);
+test('auditoría3: 441 posiciones, 435 sin cambios y seis correcciones explícitas',()=>{
+ const r=auditar(t3);assert.equal(r.integra,true);assert.equal(r.posiciones,441);assert.equal(r.coincidencias,441);assert.equal(r.coincidenciasBase,435);assert.equal(r.correccionesDocumentadas.length,6);assert.deepEqual(r.errores,[]);
  assert.match(r.alertas.join(' '),/no prueba exactitud normativa/);
 });
 test('auditoría3: controles pedidos continúan asociados exactamente a sus coordenadas',()=>{
  for(const [l,d,q]of [[50,'1/2"',715],[50,'3/4"',1975],[50,'1"',4035],[65,'1/2"',630]])assert.equal(t3.filas.find(f=>f.longitud===l).capacidades[t3.columnas.indexOf(d)],q);
 });
 test('auditoría3: correcciones coinciden con original registrado y lectura revisada, sin borrar historia',()=>{
- const esperado=[[10,'4"',287190,287189],[12,'4"',262151,282151],[16,'4"',227244,227024],[55,'3"',59612,59650],[85,'2"',17655,17565]];
+ const esperado=[[10,'4"',287190,287189],[12,'4"',262151,282151],[16,'4"',227244,227024],[55,'3"',59612,59650],[85,'2"',17655,17565],[34,'4"',155753,155735]];
  assert.deepEqual(t3.auditoria.correcciones.map(c=>[c.longitud,c.diametro,c.anterior,c.corregido]),esperado);
  for(const [l,d,antes,ahora]of esperado){const j=t3.columnas.indexOf(d);assert.equal(base.filas.find(f=>f.longitud===l).capacidades[j],antes);assert.equal(t3.filas.find(f=>f.longitud===l).capacidades[j],ahora);}
  assert.deepEqual(t3.auditoria.correcciones,referencia.correccionesAuditadas);
 });
-test('auditoría3: reintroducir cualquiera de los cinco errores se detecta',()=>{
+test('auditoría3: reintroducir cualquiera de los seis errores se detecta',()=>{
  for(const c of t3.auditoria.correcciones){const t=copia(t3);t.filas.find(f=>f.longitud===c.longitud).capacidades[t.columnas.indexOf(c.diametro)]=c.anterior;const r=auditar(t);assert.equal(r.integra,false);assert.equal(r.diferencias.length,1);}
 });
 test('auditoría3: se detecta fila ausente aunque las restantes sigan ordenadas',()=>{

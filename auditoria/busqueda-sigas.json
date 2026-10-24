@@ -1,0 +1,277 @@
+{
+  "fecha": "2026-10-24",
+  "resultado": "SIGAS no localizado",
+  "alcance": "Archivos del repositorio y de /workspace, nombres y textos SIGAS en ZIP, adjuntos visibles y nombres/historial de fuentes en ramas locales. No incluye archivos de otros chats ni cuentas externas.",
+  "carpetasAdjuntosAccesibles": false,
+  "zipsExaminados": 32,
+  "zips": [
+    {
+      "archivo": "canerias-materiales-gas-revision.zip",
+      "imagenes": [
+        "fuentes/tabla-18-347525.jpg",
+        "fuentes/tabla-3-347520.jpg"
+      ],
+      "nombresSIGAS": [],
+      "textosSIGAS": []
+    },
+    {
+      "archivo": "canerias-informe-limpio-android.zip",
+      "imagenes": [
+        "canerias-informe-limpio-android/fuentes/tabla-18-347525.jpg",
+        "canerias-informe-limpio-android/fuentes/tabla-3-347520.jpg"
+      ],
+      "nombresSIGAS": [],
+      "textosSIGAS": []
+    },
+    {
+      "archivo": "canerias-tablas-nag200-revision.zip",
+      "imagenes": [],
+      "nombresSIGAS": [],
+      "textosSIGAS": []
+    },
+    {
+      "archivo": "canerias-avisos-conciliacion-android.zip",
+      "imagenes": [
+        "canerias-avisos-conciliacion-android/fuentes/tabla-18-347525.jpg",
+        "canerias-avisos-conciliacion-android/fuentes/tabla-3-347520.jpg"
+      ],
+      "nombresSIGAS": [],
+      "textosSIGAS": []
+    },
+    {
+      "archivo": "canerias-red-gas.zip",
+      "imagenes": [],
+      "nombresSIGAS": [],
+      "textosSIGAS": []
+    },
+    {
+      "archivo": "canerias-foto-gas-persistente.zip",
+      "imagenes": [
+        "canerias-foto-gas-persistente/fuentes/tabla-18-347525.jpg",
+        "canerias-foto-gas-persistente/fuentes/tabla-3-347520.jpg"
+      ],
+      "nombresSIGAS": [],
+      "textosSIGAS": []
+    },
+    {
+      "archivo": "canerias-tarjetas-gas-android.zip",
+      "imagenes": [
+        "canerias-tarjetas-gas-android/fuentes/tabla-18-347525.jpg",
+        "canerias-tarjetas-gas-android/fuentes/tabla-3-347520.jpg"
+      ],
+      "nombresSIGAS": [],
+      "textosSIGAS": []
+    },
+    {
+      "archivo": "canerias-gas-materiales-flujo-simple.zip",
+      "imagenes": [
+        "canerias-gas-materiales-flujo-simple/fuentes/tabla-18-347525.jpg",
+        "canerias-gas-materiales-flujo-simple/fuentes/tabla-3-347520.jpg"
+      ],
+      "nombresSIGAS": [],
+      "textosSIGAS": []
+    },
+    {
+      "archivo": "canerias-gas-materiales-movil.zip",
+      "imagenes": [
+        "canerias-gas-materiales-movil/fuentes/tabla-18-347525.jpg",
+        "canerias-gas-materiales-movil/fuentes/tabla-3-347520.jpg"
+      ],
+      "nombresSIGAS": [],
+      "textosSIGAS": []
+    },
+    {
+      "archivo": "canerias-revision-simulada.zip",
+      "imagenes": [],
+      "nombresSIGAS": [],
+      "textosSIGAS": []
+    },
+    {
+      "archivo": "canerias-conciliacion-rapida-materiales-gas.zip",
+      "imagenes": [
+        "canerias-conciliacion-rapida-materiales-gas/fuentes/tabla-18-347525.jpg",
+        "canerias-conciliacion-rapida-materiales-gas/fuentes/tabla-3-347520.jpg"
+      ],
+      "nombresSIGAS": [],
+      "textosSIGAS": []
+    },
+    {
+      "archivo": "canerias-diagnostico-calefon-cocina.zip",
+      "imagenes": [
+        "fuentes/tabla-18-347525.jpg",
+        "fuentes/tabla-3-347520.jpg"
+      ],
+      "nombresSIGAS": [],
+      "textosSIGAS": []
+    },
+    {
+      "archivo": "canerias-cotejo-fotografias-nag200.zip",
+      "imagenes": [
+        "fuentes/tabla-18-347525.jpg",
+        "fuentes/tabla-3-347520.jpg"
+      ],
+      "nombresSIGAS": [],
+      "textosSIGAS": []
+    },
+    {
+      "archivo": "canerias-pdf-gas-legible.zip",
+      "imagenes": [
+        "canerias-pdf-gas-legible/fuentes/tabla-18-347525.jpg",
+        "canerias-pdf-gas-legible/fuentes/tabla-3-347520.jpg"
+      ],
+      "nombresSIGAS": [],
+      "textosSIGAS": []
+    },
+    {
+      "archivo": "canerias-formato-entrega-gas.zip",
+      "imagenes": [
+        "canerias-formato-entrega-gas/fuentes/tabla-18-347525.jpg",
+        "canerias-formato-entrega-gas/fuentes/tabla-3-347520.jpg"
+      ],
+      "nombresSIGAS": [],
+      "textosSIGAS": []
+    },
+    {
+      "archivo": "canerias-tarjetas-compactas-gas.zip",
+      "imagenes": [
+        "canerias-tarjetas-compactas-gas/fuentes/tabla-18-347525.jpg",
+        "canerias-tarjetas-compactas-gas/fuentes/tabla-3-347520.jpg"
+      ],
+      "nombresSIGAS": [],
+      "textosSIGAS": []
+    },
+    {
+      "archivo": "canerias-deteccion-accesorios-sin-ia.zip",
+      "imagenes": [
+        "canerias-deteccion-accesorios-sin-ia/fuentes/tabla-18-347525.jpg",
+        "canerias-deteccion-accesorios-sin-ia/fuentes/tabla-3-347520.jpg"
+      ],
+      "nombresSIGAS": [],
+      "textosSIGAS": []
+    },
+    {
+      "archivo": "canerias-auditoria-final-tablas.zip",
+      "imagenes": [
+        "fuentes/tabla-18-347525.jpg",
+        "fuentes/tabla-3-347520.jpg"
+      ],
+      "nombresSIGAS": [],
+      "textosSIGAS": []
+    },
+    {
+      "archivo": "canerias-integracion-carga-rapida-gas.zip",
+      "imagenes": [
+        "canerias-integracion-carga-rapida-gas/fuentes/tabla-18-347525.jpg",
+        "canerias-integracion-carga-rapida-gas/fuentes/tabla-3-347520.jpg"
+      ],
+      "nombresSIGAS": [],
+      "textosSIGAS": []
+    },
+    {
+      "archivo": "canerias-pdf-actualizacion-gas.zip",
+      "imagenes": [
+        "canerias-pdf-actualizacion-gas/fuentes/tabla-18-347525.jpg",
+        "canerias-pdf-actualizacion-gas/fuentes/tabla-3-347520.jpg"
+      ],
+      "nombresSIGAS": [],
+      "textosSIGAS": []
+    },
+    {
+      "archivo": "CAÑERIAS-4219aa5.zip",
+      "imagenes": [
+        "canerias-4219aa5/fuentes/tabla-18-347525.jpg",
+        "canerias-4219aa5/fuentes/tabla-3-347520.jpg"
+      ],
+      "nombresSIGAS": [],
+      "textosSIGAS": []
+    },
+    {
+      "archivo": "canerias-confirmacion-croquis-android.zip",
+      "imagenes": [
+        "canerias-confirmacion-croquis-android/fuentes/tabla-18-347525.jpg",
+        "canerias-confirmacion-croquis-android/fuentes/tabla-3-347520.jpg"
+      ],
+      "nombresSIGAS": [],
+      "textosSIGAS": []
+    },
+    {
+      "archivo": "canerias-sincronizacion-detalle-gas.zip",
+      "imagenes": [
+        "canerias-sincronizacion-detalle-gas/fuentes/tabla-18-347525.jpg",
+        "canerias-sincronizacion-detalle-gas/fuentes/tabla-3-347520.jpg"
+      ],
+      "nombresSIGAS": [],
+      "textosSIGAS": []
+    },
+    {
+      "archivo": "canerias-clase-acero-epoxi.zip",
+      "imagenes": [],
+      "nombresSIGAS": [],
+      "textosSIGAS": []
+    },
+    {
+      "archivo": "canerias-accesorios-gas.zip",
+      "imagenes": [],
+      "nombresSIGAS": [],
+      "textosSIGAS": []
+    },
+    {
+      "archivo": "canerias-android-inicio-local.zip",
+      "imagenes": [
+        "canerias-android-inicio-local/fuentes/tabla-18-347525.jpg",
+        "canerias-android-inicio-local/fuentes/tabla-3-347520.jpg"
+      ],
+      "nombresSIGAS": [],
+      "textosSIGAS": []
+    },
+    {
+      "archivo": "canerias-conexiones-gas-android.zip",
+      "imagenes": [
+        "canerias-conexiones-gas-android/fuentes/tabla-18-347525.jpg",
+        "canerias-conexiones-gas-android/fuentes/tabla-3-347520.jpg"
+      ],
+      "nombresSIGAS": [],
+      "textosSIGAS": []
+    },
+    {
+      "archivo": "canerias-prueba.zip",
+      "imagenes": [],
+      "nombresSIGAS": [],
+      "textosSIGAS": []
+    },
+    {
+      "archivo": "canerias-gemini-preparacion.zip",
+      "imagenes": [],
+      "nombresSIGAS": [],
+      "textosSIGAS": []
+    },
+    {
+      "archivo": "canerias-motor-gas.zip",
+      "imagenes": [],
+      "nombresSIGAS": [],
+      "textosSIGAS": []
+    },
+    {
+      "archivo": "outputs/CAÑERIAS-4219aa5.zip",
+      "imagenes": [
+        "canerias-4219aa5/fuentes/tabla-18-347525.jpg",
+        "canerias-4219aa5/fuentes/tabla-3-347520.jpg"
+      ],
+      "nombresSIGAS": [],
+      "textosSIGAS": []
+    },
+    {
+      "archivo": "outputs/CANERIAS-GAS-MANUAL-PRUEBA.zip",
+      "imagenes": [
+        "canerias-gas-manual/fuentes/tabla-18-347525.jpg",
+        "canerias-gas-manual/fuentes/tabla-3-347520.jpg"
+      ],
+      "nombresSIGAS": [],
+      "textosSIGAS": []
+    }
+  ],
+  "faltantes": [
+    "Originales SIGAS completos",
+    "Manual, edición, familia exacta y condiciones técnicas SIGAS"
+  ]
+}

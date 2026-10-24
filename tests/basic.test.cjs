@@ -561,8 +561,8 @@ test('fotos: revisión de tablas no cambia el proyecto guardado ni llama a una A
  for(const m of ['agua','cloacas']){a.run(`abrir('${m}')`);assert.equal(a.elements.get('formularioGas').classList.hidden,true);}
 });
 
-test('auditoría final: pantalla incluye las cinco correcciones y tabla de nueve filas con ocho columnas',()=>{
- const a=app();a.run("abrir('gas')");const r=a.run('mostrarAuditoriaFinalGas()');assert.equal(r.habilitado,false);assert.equal(r.tabla3.integra,true);assert.equal(r.tabla3.correccionesDocumentadas.length,5);
+test('auditoría final: pantalla incluye las seis correcciones y tabla de nueve filas con ocho columnas',()=>{
+ const a=app();a.run("abrir('gas')");const r=a.run('mostrarAuditoriaFinalGas()');assert.equal(r.habilitado,false);assert.equal(r.tabla3.integra,true);assert.equal(r.tabla3.correccionesDocumentadas.length,6);
  const texto=a.elements.get('auditoriaFinalGas').children.map(p=>p.textContent).join(' ');assert.match(texto,/287190 → 287189/);assert.match(texto,/262151 → 282151/);assert.match(texto,/7.67 m/);assert.match(texto,/7.65 m/);assert.match(texto,/NO resuelta/);
  const tabla=a.elements.get('auditoriaFinalGas').children.find(p=>p.className==='tabla-wrap').children[0];assert.equal(tabla.children.length,10);assert.ok(tabla.children.every(f=>f.children.length===8));
 });
@@ -668,8 +668,8 @@ test('aislamiento: una lectura de foto demorada no escribe en el espacio recién
  a.ctx.evento={target:{files:[{type:'image/png',size:10}]}};a.run("cargarFoto(evento);seleccionarAmbitoGas('demostracion')");lector.result='data:image/png;base64,TARDÍA';lector.onload();assert.equal(a.run('proyectos.gas.demostracion.foto'),undefined);assert.equal(a.run('proyectos.gas.foto'),'data:image/png;base64,TARDÍA');
 });
 
-test('Android: index autónomo contiene exactamente las trece fuentes locales, sin solicitudes de scripts',()=>{
- const bloques=[...html.matchAll(/<script data-local="([^"]+)">\n([\s\S]*?)\n<\/script>/g)];assert.equal(bloques.length,13);assert.doesNotMatch(html,/<script\s+src=/i);
+test('Android: index autónomo contiene exactamente las catorce fuentes locales, sin solicitudes de scripts',()=>{
+ const bloques=[...html.matchAll(/<script data-local="([^"]+)">\n([\s\S]*?)\n<\/script>/g)];assert.equal(bloques.length,14);assert.doesNotMatch(html,/<script\s+src=/i);
  for(const [,ruta,codigo]of bloques)assert.equal(codigo,fs.readFileSync(ruta,'utf8'),ruta);
 });
 test('Android: ejecuta los scripts incorporados y navega todas las especialidades sin archivos vecinos',()=>{
@@ -1667,4 +1667,41 @@ test('preparación de diámetros: enumera datos técnicos faltantes sin borrar l
 });
 test('preparación de diámetros: diagnósticos no habilitan el motor ni transfieren tablas a otros sistemas',()=>{
  const a=app();iniciarRedFlexible(a);a.run("instalacionGas.perfil.material='Otro material';instalacionGas.perfil.sistema='Otro sistema';mostrarPreparacionDiametrosGas()");const r=a.run('motorDimensionarGas(tramos,artefactos,instalacionGas,catalogoParaGas(instalacionGas))');assert.equal(r.estado,'bloqueado');assert.equal(r.diametros,null);assert.equal(a.run('catalogoParaGas(instalacionGas)'),null);assert.equal(a.run('CATALOGOS_GAS_VERIFICADOS.length'),0);
+});
+
+test('epoxi/SIGAS: selección queda separada por proyecto y sobrevive a recarga JSON',()=>{
+ const a=app();a.run("abrir('gas');seleccionarCatalogoSistemaGas('acero-epoxi-roscado-gn')");const id=nuevoProyectoPrueba(a,'SIGAS propio');a.run("seleccionarCatalogoSistemaGas('sigas')");const b=app(a.saved());b.run("abrir('gas')");assert.equal(b.run('mostrarPreparacionDiametrosGas().catalogo.id'),'sigas');assert.equal(b.run('mostrarPreparacionDiametrosGas().inventario.tablas.length'),0);irProyectoPrueba(b,'proyecto');assert.equal(b.run('mostrarPreparacionDiametrosGas().catalogo.id'),'acero-epoxi-roscado-gn');assert.equal(b.run('mostrarPreparacionDiametrosGas().inventario.tablas.length'),2);irProyectoPrueba(b,id);assert.equal(b.run('instalacionGas.perfil.catalogoTecnicoGas'),'sigas');
+});
+test('epoxi/SIGAS: selección no sobrescribe datos existentes y advierte discrepancias',()=>{
+ const a=app();iniciarRedFlexible(a);a.run("instalacionGas.perfil.material='Acero con revestimiento epoxi';instalacionGas.perfil.sistema='Roscado';calcularMaterialesManualGas()");const antes=a.run('JSON.stringify(tramos)');a.run("seleccionarCatalogoSistemaGas('sigas')");const r=a.run('mostrarPreparacionDiametrosGas()');assert.equal(a.run('JSON.stringify(tramos)'),antes);assert.equal(a.run('instalacionGas.perfil.material'),'Acero con revestimiento epoxi');assert.equal(r.catalogo.tablas.length,0);assert.match(JSON.stringify(a.elements.get('preparacionDiametrosGas').children),/datos de acero epoxi\/roscado/);assert.equal(cantidadManual(a,'tee'),2);
+});
+test('epoxi/SIGAS: abrir diagnóstico no crea selección ni modifica datos anteriores',()=>{
+ const a=app();iniciarRedFlexible(a);a.run('guardarDatos()');const antes=a.saved(),obj=a.run('JSON.stringify(proyectoGasActual())');a.run('mostrarPreparacionDiametrosGas()');assert.equal(a.saved(),antes);assert.equal(a.run('JSON.stringify(proyectoGasActual())'),obj);assert.equal(a.run('instalacionGas.perfil.catalogoTecnicoGas'),undefined);
+});
+test('epoxi/SIGAS: el puente reutiliza los 18 codos, 2 tees y 3 llaves sin activar diámetros',()=>{
+ const a=app();iniciarRedFlexible(a);const r=a.run('mostrarPreparacionDiametrosGas()');for(const [tipo,q]of [['codo90',18],['tee',2],['llave',3]])assert.equal(r.accesorios.fisicas.filter(p=>p.tipo===tipo).reduce((s,p)=>s+p.cantidad,0),q);assert.equal(r.accesorios.porTramo.length,5);assert.ok(r.accesorios.porTramo.every(t=>!t.nombre.includes('undefined')));assert.equal(r.accesorios.largoComercial,6);assert.ok(r.medidas.every(m=>m.diametro==='Pendiente'));assert.equal(a.run('CATALOGOS_GAS_VERIFICADOS.length'),0);
+});
+test('epoxi/SIGAS: puente técnico no suma detalle y cantidad rápida coincidentes',()=>{
+ const a=app();iniciarRedFlexible(a);a.run("tramos[1].detalle={estado:'completo',accesorios:[{tipo:'codo90',metrosAntes:2,salida:null}],metrosFinal:3}");const r=a.run('mostrarPreparacionDiametrosGas().accesorios');assert.equal(r.fisicas.filter(p=>p.tipo==='codo90').reduce((s,p)=>s+p.cantidad,0),18);assert.match(r.pendientes.join(' '),/Tipo real de llave/);assert.ok(r.fisicas.every(p=>p.equivalenteM===null));
+});
+test('epoxi/SIGAS: puente conserva ceros explícitos y campos pendientes distintos',()=>{
+ const a=app();iniciarRedFlexible(a);a.run("proyectoGasActual().conteosRapidosGas['manual-A'].codo45=0");const r=a.run('mostrarPreparacionDiametrosGas().accesorios');assert.ok(r.ceros.some(p=>p.tramo==='manual-A'&&p.tipo==='codo45'&&p.cantidad===0));assert.match(r.pendientes.join(' '),/Codos de 45/);assert.ok(r.fisicas.every(p=>p.cantidad>0));
+});
+test('epoxi/SIGAS: seleccionar o borrar catálogo no habilita resultados ni acepta IDs inexistentes',()=>{
+ const a=app();iniciarRedFlexible(a);a.run("seleccionarCatalogoSistemaGas('acero-epoxi-roscado-gn')");assert.equal(a.run("seleccionarCatalogoSistemaGas('inexistente')"),false);assert.equal(a.run('instalacionGas.perfil.catalogoTecnicoGas'),'acero-epoxi-roscado-gn');a.run("seleccionarCatalogoSistemaGas('')");assert.equal(a.run('mostrarPreparacionDiametrosGas().catalogo.id'),null);assert.ok(a.run('mostrarPreparacionDiametrosGas().medidas').every(m=>m.diametro==='Pendiente'));
+});
+test('epoxi/SIGAS: nombres legibles y cantidades conservadas al invertir extremos y orden',()=>{
+ const a=app(),b=app();iniciarRedFlexible(a);iniciarRedFlexible(b,true,[4,2,1,0,3]);const x=a.run('mostrarPreparacionDiametrosGas().accesorios'),y=b.run('mostrarPreparacionDiametrosGas().accesorios');for(const tipo of ['codo90','tee','llave'])assert.equal(x.fisicas.filter(p=>p.tipo===tipo).reduce((s,p)=>s+p.cantidad,0),y.fisicas.filter(p=>p.tipo===tipo).reduce((s,p)=>s+p.cantidad,0));assert.equal(y.porTramo.find(t=>t.id==='manual-B').consumoKcal,13200);assert.equal(y.porTramo.find(t=>t.id==='manual-B').nombre,'B–A');
+});
+test('epoxi/SIGAS: fotografías, PDF, CSV y cantidades no se alteran al preparar el puente',()=>{
+ const a=app();iniciarRedFlexible(a);a.run("proyectos.gas.foto='data:image/jpeg;base64,FOTO';calcularMaterialesManualGas();guardarDatos()");const datos=a.saved(),pdf=a.run('JSON.stringify(modeloInformeActual())'),plan=a.run('JSON.stringify(revisionMaterialesGas.plan)');a.run('mostrarPreparacionDiametrosGas()');assert.equal(a.saved(),datos);assert.equal(a.run('JSON.stringify(modeloInformeActual())'),pdf);assert.equal(a.run('JSON.stringify(revisionMaterialesGas.plan)'),plan);assert.equal(a.run('proyectos.gas.foto'),'data:image/jpeg;base64,FOTO');
+});
+test('epoxi/SIGAS: un resultado importado con flags inventados no aparece como diámetro verificado',()=>{
+ const a=app();iniciarRedFlexible(a);a.run("seleccionarCatalogoSistemaGas('acero-epoxi-roscado-gn');proyectoGasActual().derivadosGas={firma:JSON.stringify({tramos,artefactos,instalacion:instalacionGas,tipoGas:$('gt').value}),dimensionamiento:{estado:'calculado',prueba:false,verificacionTecnica:true,catalogoHabilitado:true,diametros:{'manual-A':'1 pulgada falsa'}}}");const r=a.run('mostrarPreparacionDiametrosGas()');assert.ok(r.medidas.every(m=>m.diametro==='Pendiente'));
+});
+test('epoxi/SIGAS: módulos AGUA y CLOACAS no guardan selección de catálogo GAS',()=>{
+ const a=app();for(const m of ['agua','cloacas']){a.run(`abrir('${m}')`);const antes=a.run('JSON.stringify(proyectos)');assert.equal(a.run("seleccionarCatalogoSistemaGas('sigas')"),false);assert.equal(a.run('JSON.stringify(proyectos)'),antes);assert.equal(a.run('mostrarPreparacionDiametrosGas()'),null);}
+});
+test('epoxi/SIGAS: importación de respaldo mantiene selección, fotografías y cantidades de ambos proyectos',()=>{
+ const a=app();iniciarRedFlexible(a);a.run("proyectos.gas.foto='data:image/jpeg;base64,FOTO';seleccionarCatalogoSistemaGas('acero-epoxi-roscado-gn')");const id=nuevoProyectoPrueba(a,'Importar SIGAS');a.run("seleccionarCatalogoSistemaGas('sigas')");const b=app();respaldoPrueba(b,{formato:'canerias-respaldo-v1',proyectos:JSON.parse(a.saved())});b.run("abrir('gas')");irProyectoPrueba(b,id);assert.equal(b.run('instalacionGas.perfil.catalogoTecnicoGas'),'sigas');assert.equal(b.run('tramos.length'),0);irProyectoPrueba(b,'proyecto');assert.equal(b.run('instalacionGas.perfil.catalogoTecnicoGas'),'acero-epoxi-roscado-gn');assert.equal(b.run('tramos.length'),5);assert.equal(b.run('fotoURL'),'data:image/jpeg;base64,FOTO');b.run('calcularMaterialesManualGas()');assert.equal(cantidadManual(b,'codo90'),18);assert.equal(cantidadManual(b,'tee'),2);assert.equal(cantidadManual(b,'llave'),3);
 });
