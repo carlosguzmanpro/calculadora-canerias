@@ -42,7 +42,7 @@ dialog img{max-height:78vh;max-width:90vw}
 .resumen{font-weight:bold;margin-top:10px}
 /* La misma tabla y los mismos valores: tarjetas solo en GAS y en pantalla móvil. */
 #resumenPrincipalMaterialesGas,#matResultado{scroll-margin-top:16px}
-.sigas-diametros{width:100%;table-layout:fixed}.sigas-diametros th,.sigas-diametros td{overflow-wrap:anywhere;font-size:13px;padding:8px 4px}.sigas-diametros th:first-child{width:24%}.sigas-candidatos{display:grid;gap:10px}.sigas-candidato{min-width:0;background:white;border:1px solid #c5dbd8;border-radius:12px;padding:12px}.sigas-candidato h4{margin:0 0 8px;color:#006f60}.sigas-candidato p{margin:6px 0;overflow-wrap:anywhere}.sigas-candidato p:first-of-type{font-weight:700}@media(min-width:720px){.sigas-candidatos{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.sigas-diametros{width:100%;table-layout:fixed}.sigas-diametros th,.sigas-diametros td{overflow-wrap:anywhere;font-size:13px;padding:8px 4px}.sigas-diametros th:first-child{width:42%}.sigas-candidatos{display:grid;gap:10px}.sigas-candidato{min-width:0;background:white;border:1px solid #c5dbd8;border-radius:12px;padding:12px}.sigas-candidato h4{margin:0 0 8px;color:#006f60}.sigas-candidato p{margin:6px 0;overflow-wrap:anywhere}.sigas-candidato p:first-of-type{font-weight:700}@media(min-width:720px){.sigas-candidatos{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media screen and (max-width:640px){
  .gas-calculo-tramos{display:block;min-width:0}
  .gas-calculo-tramos thead{position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip-path:inset(50%)}
@@ -160,7 +160,7 @@ section{box-shadow:none}
 <label for="catalogoSistemaGas">Sistema de cañería · se conserva por proyecto</label><select id="catalogoSistemaGas" onchange="seleccionarCatalogoSistemaGas(this.value)"><option value="">Pendiente de seleccionar</option><option value="acero-epoxi-roscado-gn">Acero epoxi · roscado</option><option value="sigas">SIGAS Thermofusión · manual ed.15 / 2025</option><option value="fusiogas">FUSIOGAS Thermofusión · V.1.2026</option></select><p id="estadoCatalogoSistemaGas" role="status" aria-live="polite"></p>
 <label for="combustibleSistemaGas">Combustible del proyecto</label><select id="combustibleSistemaGas" onchange="seleccionarCombustibleGas(this.value)"><option value="">Pendiente / revisar datos guardados</option><option value="GN">Gas natural</option><option value="GLP">GLP (composición por verificar)</option><option value="propano-gaseoso">Propano gaseoso identificado (SIGAS Tabla 5)</option></select><p id="estadoCombustibleGas" role="status" aria-live="polite"></p><details class="gas-detalles"><summary>Largo comercial del caño</summary><p id="estadoLargoComercialGas"></p><button id="usarLargoDocumentadoGas" class="alt oculto" onclick="usarLargoDocumentadoGas()">Usar largo documentado de 4 m para este proyecto</button></details>
 <details class="gas-detalles solo-pantalla"><summary>Entrada al casillero del medidor M</summary><label for="entradaCasilleroGas">¿Por dónde entra la cañería?</label><select id="entradaCasilleroGas" onchange="guardarCasilleroMedidorGas()"><option value="desconocida">No está indicada / pendiente</option><option value="lateral">Por un lateral</option><option value="posterior">Por atrás</option><option value="superior">Por arriba</option></select><div id="cotejoCodoCasilleroGas" class="oculto"><label for="codoCasilleroGas">Codo de 90° dentro del casillero</label><select id="codoCasilleroGas" onchange="guardarCasilleroMedidorGas()"><option value="pendiente">No sé si ya está contado</option><option value="incluido">Ya está incluido en mis cantidades o detalle</option><option value="no-incluido">No está incluido: agregar un codo</option></select></div><p id="estadoCasilleroGas" role="status" aria-live="polite"></p><p class="nota">Solo conteo de materiales. No se agregan cuplas, uniones dobles, entrerroscas ni otras conexiones del medidor.</p></details>
-<div class="detalle solo-pantalla"><h3>Datos de tu instalación GAS</h3><p>Cargá tramos, artefactos y cantidades una sola vez. La foto y el plano son opcionales. No necesitás confirmar nuevamente los accesorios.</p><button onclick="mostrarVista('croquis');desplazarResultadoMaterialesGas('formularioGas')">Cargar o editar tramos y cantidades</button><details class="gas-detalles"><summary>Herramientas de revisión anteriores (opcionales)</summary><button class="alt" onclick="desplazarResultadoMaterialesGas()">Ir al resultado actual</button></details><button class="alt" onclick="mostrarPlanoOpcionalGas()">Agregar plano (opcional)</button></div>
+<div class="detalle solo-pantalla"><h3>Datos de tu instalación GAS</h3><p>Cargá tramos, artefactos y cantidades una sola vez. La foto y el plano son opcionales. No necesitás confirmar nuevamente los accesorios.</p><button onclick="mostrarVista('croquis');$('editarTramosGas').open=true;desplazarResultadoMaterialesGas('formularioGas')">Cargar o editar tramos y cantidades</button><details class="gas-detalles"><summary>Herramientas de revisión anteriores (opcionales)</summary><button class="alt" onclick="desplazarResultadoMaterialesGas()">Ir al resultado actual</button></details><button class="alt" onclick="mostrarPlanoOpcionalGas()">Agregar plano (opcional)</button></div>
 <details id="ejerciciosGasSeparados" class="gas-detalles solo-pantalla"><summary>Ejercicios y demostraciones · separados de mis proyectos</summary><p>Datos de prueba: no reemplazan tus instalaciones ni interpretan fotografías.</p><button class="alt" onclick="abrirEjercicioSigas19Gas()">Abrir ejercicio SIGAS · 58 m y 19 codos (proyecto separado)</button><button class="alt" onclick="generarPlanGas('ejemplo')">Probar materiales: calefón y cocina</button></details>
 <details id="herramientasGasOpcionales" class="gas-detalles solo-pantalla"><summary>Croquis, PDF y opciones avanzadas</summary>
 <nav class="opciones solo-pantalla" aria-label="Accesos directos de GAS">
@@ -305,7 +305,7 @@ section{box-shadow:none}
 <div id="revision" class="resultado" aria-live="polite">Todavía no hay una revisión registrada.</div>
 
 </details>
-<div id="formularioGas">
+<details id="editarTramosGas" class="gas-detalles"><summary>Cargar o editar tramos y accesorios</summary><div id="formularioGas">
 <h3>Tramos y accesorios de GAS</h3>
 <p class="nota">Ingresá puntos, metros, consumo del artefacto y cantidades. El diámetro manual es opcional; los automáticos siguen sujetos a verificación técnica.</p>
 <label for="desde">Desde</label>
@@ -344,7 +344,7 @@ section{box-shadow:none}
 <input id="llave" type="hidden" aria-hidden="true"><!-- Compatibilidad interna con respaldos; el único control visible es Llaves de paso. -->
 <div class="detalle" id="cantidadesManualesGas"><h3>Accesorios del tramo · totales manuales</h3><p class="nota">Incluí las piezas del detalle en estos totales. Vacío = pendiente; 0 = no hay. Una tee es una sola pieza aunque su ramal gire. No sumes una pieza compartida nuevamente en otro tramo.</p><div class="gas-campos-manuales"><label>Codos de 90°<input id="manualGas_codo90" type="number" min="0" step="1" inputmode="numeric" placeholder="Pendiente"></label><label>Codos de 45°<input id="manualGas_codo45" type="number" min="0" step="1" inputmode="numeric" placeholder="Pendiente"></label><label>Tees<input id="manualGas_tee" type="number" min="0" step="1" inputmode="numeric" placeholder="Pendiente"></label><label>Reducciones independientes<input id="manualGas_reduccion" type="number" min="0" step="1" inputmode="numeric" placeholder="Pendiente"></label><label>Llaves de paso<input id="manualGas_llave" type="number" min="0" step="1" inputmode="numeric" placeholder="Pendiente"></label></div><p id="mensajeCargaManualGas" role="status" aria-live="polite"></p></div><button id="guardarTramo" onclick="agregarTramo()">+ AGREGAR TRAMO</button>
 <button id="cancelarTramo" class="alt oculto" onclick="cancelarEdicionTramo()">Cancelar edición del tramo</button>
-<details id="tramosRegistradosGas" class="gas-detalles"><summary id="resumenTramosRegistradosGas">Tramos registrados · editar o quitar</summary><div id="listaTramos"></div></details>
+</div></details><div><details id="tramosRegistradosGas" class="gas-detalles"><summary id="resumenTramosRegistradosGas">Tramos registrados · editar o quitar</summary><div id="listaTramos"></div></details>
 <section id="editorAccesorios" class="oculto solo-pantalla" aria-label="Accesorios del tramo">
 <h3 id="tituloAccesorios"></h3>
 <p>Recorré el tramo desde su inicio hasta su final. Cada accesorio separa dos segmentos de caño. Indicá las longitudes reales entre accesorios, sin descontar medidas de accesorios que no conozcas.</p>
@@ -8692,6 +8692,9 @@ function avisoDeteccionGas(){
 (function(root){
  const tecnico=()=>typeof module==='object'&&module.exports?require('./diagnostico-ed15.js'):root.SigasTecnico;
  const positivo=x=>typeof x==='number'&&Number.isFinite(x)&&x>0;
+ function familiaProducto(f){
+  return /^(Codo Normal a (45º|90º)|Codo MH a (45°|90°) de|Llave Esférica) \d+\s*mm$/i.test(f.nombreOriginal)?f.nombreOriginal.replace(/ \d+\s*mm$/i,''):null;
+ }
  function seleccionar(d,longitudM,caudalM3h){
   if(!positivo(longitudM)||!positivo(caudalM3h))return {candidato:null,consultas:[],pendientes:['Longitud o caudal conocido pendiente.']};
   const consultas=[],pendientes=[];
@@ -8742,13 +8745,15 @@ function avisoDeteccionGas(){
      if(aplicadas.has(p.id))continue;aplicadas.add(p.id);
      if(p.conflicto||p.confirmada!==true){faltantes.push(p.id+': identidad/cantidad por verificar.');continue;}
      const a=vinculo?.porRecorrido?.[r.artefacto]||vinculo?.producto;
-     if(!a||a.confirmado!==true||!Array.isArray(a.tramosDiametro)||!a.tramosDiametro.length||a.tramosDiametro.some(id=>!base.has(id))){faltantes.push(p.id+': producto SIGAS exacto y vía pendientes.');continue;}
+     if(!a||a.confirmado!==true||(!a.familia&&(!Array.isArray(a.tramosDiametro)||!a.tramosDiametro.length||a.tramosDiametro.some(id=>!base.has(id))))){faltantes.push(p.id+': producto SIGAS exacto y vía pendientes.');continue;}
      if(iteracion===0){faltantes.push(p.id+': semilla sin equivalentes, no es pérdida cero.');continue;}
-     const clave=a.tramosDiametro.map(id=>vector[id]).join('/'),id=a.productos?.[clave];
-     const fila=d.tablas[3].filas.find(f=>f.id===id);
+     const clave=(a.tramosDiametro||[]).map(id=>vector[id]).join('/'),id=a.productos?.[clave];
+     const diametros=[...new Set(ubicaciones.map(id=>vector[id]))];
+     const opciones=a.familia&&p.tipo!=='tee'&&diametros.length===1?d.tablas[3].filas.filter(f=>familiaProducto(f)===a.familia&&f.diametroExteriorM*1000===diametros[0]):[];
+     const fila=a.familia?(opciones.length===1?opciones[0]:null):d.tablas[3].filas.find(f=>f.id===id);
      const tipoCorrecto=fila&&({codo90:/^Codo.*90/,codo45:/^Codo.*45/,tee:/^Te /,llave:/^Llave /,reduccion:/Reduct|Reduc/,cupla:/Cupla/}[p.tipo]?.test(fila.nombreOriginal));
      if(!tipoCorrecto||!ubicaciones.some(id=>vector[id]===fila.diametroExteriorM*1000)){faltantes.push(p.id+': combinación '+clave+' sin producto/diámetro/vía SIGAS compatible documentado.');continue;}
-     try{const x=tecnico().accesorio(d,id,p.cantidad);aportes.push({piezaId:p.id,tipo:p.tipo,...x});}catch(e){faltantes.push(p.id+': '+e.message);}
+     try{const x=tecnico().accesorio(d,fila.id,p.cantidad);aportes.push({piezaId:p.id,tipo:p.tipo,...x});}catch(e){faltantes.push(p.id+': '+e.message);}
     }
     const equivalenteConocidoM=aportes.reduce((n,a)=>n+a.equivalenteTotalM,0),completo=!inventarioInvalido&&!faltantes.length&&!faltantesInventario.length&&config.inventarioPerdidasCompleto===true&&config.fuenteInventario;
     return {...r,indice:ri,aportes,faltantes,equivalenteConocidoM:aportes.length||completo?equivalenteConocidoM:null,equivalenteCompleto:!!completo,longitudConsultaM:r.longitudReal+equivalenteConocidoM,longitudDefinitivaM:completo?r.longitudReal+equivalenteConocidoM:null};
@@ -8772,7 +8777,7 @@ function avisoDeteccionGas(){
   salida.advertencia='PRESELECCIÓN CONDICIONADA. Pérdidas desconocidas no son cero. No acredita presión final, método normativo ni aptitud de instalación. No se asignan diámetros a los tramos guardados.';
   return salida;
  }
- const api={consultar,resolver};if(typeof module==='object'&&module.exports)module.exports=api;else root.DimensionamientoSigas=api;
+ const api={consultar,resolver,familiaProducto};if(typeof module==='object'&&module.exports)module.exports=api;else root.DimensionamientoSigas=api;
 })(globalThis);
 
 </script>
@@ -8794,8 +8799,8 @@ function renderPreseleccionSigasGas(out,plan=null){
  if(!r)return;
  const titulo=document.createElement('h3');titulo.textContent=perfilTecnicoActualGas().gas==='GN'?'Diámetros por tramo · SIGAS GN':'Dimensionamiento SIGAS · combustible pendiente de método propio';out.append(titulo);
  const aviso=document.createElement('p');aviso.textContent=r.filas.length?'Preselección parcial, sin validación de instalación. Pérdidas pendientes no equivalen a cero.':'No hay preselección: '+r.errores.join(' ');out.append(aviso);
- const tabla=document.createElement('table');tabla.className='tabla sigas-diametros';const head=document.createElement('thead'),hr=document.createElement('tr');for(const s of ['Tramo','Exterior candidato condicionado']){const th=document.createElement('th');th.textContent=s;hr.append(th);}head.append(hr);tabla.append(head);const body=document.createElement('tbody');
- for(const f of r.filas){const tr=document.createElement('tr');for(const s of [f.tramo,f.candidato?f.candidato.exteriorMm+' mm':'Sin candidato: '+(f.pendientes[0]||'Revisar conexiones, combustible y poder calorífico')]){const td=document.createElement('td');td.textContent=s;tr.append(td);}body.append(tr);}tabla.append(body);if(r.filas.length)out.append(tabla);
+ const tabla=document.createElement('table');tabla.className='tabla sigas-diametros';const head=document.createElement('thead'),hr=document.createElement('tr');for(const s of ['Tramo','Inicial → recalculado (condicionado)']){const th=document.createElement('th');th.textContent=s;hr.append(th);}head.append(hr);tabla.append(head);const body=document.createElement('tbody');
+ for(const f of r.filas){const tr=document.createElement('tr');for(const s of [f.tramo,f.candidato?(r.historia[0]?.diametrosExteriorMm[f.id]??'Pendiente')+' → '+f.candidato.exteriorMm+' mm':'Sin candidato: '+(f.pendientes[0]||'Revisar conexiones, combustible y poder calorífico')]){const td=document.createElement('td');td.textContent=s;tr.append(td);}body.append(tr);}tabla.append(body);if(r.filas.length)out.append(tabla);
  const resumen=document.createElement('details'),sr=document.createElement('summary');sr.textContent='Ver caudales, capacidades y recorridos por tramo';resumen.append(sr);
  const lista=document.createElement('div');lista.className='sigas-candidatos';
  for(const f of r.filas){const card=document.createElement('article');card.className='sigas-candidato';const h=document.createElement('h4');h.textContent=f.tramo;card.append(h);for(const s of [f.candidato?'Candidato condicionado: exterior '+f.candidato.exteriorMm+' mm · interior '+f.candidato.interiorTabuladoMm+' mm':'Diámetro: Pendiente',f.candidato?'Tabla 4 · p.22 · fila '+f.candidato.longitudFilaM+' m · capacidad '+f.candidato.capacidadM3h+' m³/h':'Sin capacidad seleccionada', 'Consumo '+(f.consumoKcal??'Pendiente')+' kcal/h · caudal '+(f.caudalM3h===null?'Pendiente':f.caudalM3h.toLocaleString('es-AR',{maximumFractionDigits:6}))+' m³/h', 'Tramo real '+f.longitudRealM+' m · recorrido de control: '+(f.recorridoControl||'Pendiente')+' · longitud consultada '+(f.longitudConsultaM??'Pendiente')+' m', 'Equivalente conocido del recorrido: '+(f.equivalenteConocidoRutaM===null?'Pendiente':fmt(f.equivalenteConocidoRutaM)+' m')+' · longitud definitiva: '+(f.longitudDefinitivaM??'Pendiente')]){const p=document.createElement('p');p.textContent=s;card.append(p);}lista.append(card);}
@@ -8826,7 +8831,7 @@ function guardarVinculoSigasGas(piezaId,recorrido,productoId,tramoAplicacion=nul
  const entrada=entradaPreseleccionSigasGas();if(!entrada||!entrada.inventario.fisicas.some(p=>p.id===piezaId))return false;
  const r=DimensionamientoSigas.resolver(SIGAS_ED15_2025,entrada),vector=r.historia.at(-1)?.diametrosExteriorMm;
  if(!vector)return false;
- const filas=SIGAS_ED15_2025.tablas[3].filas;if(productoId&&!filas.some(f=>f.id===productoId))return false;
+ const filas=SIGAS_ED15_2025.tablas[3].filas;const familia=productoId.startsWith('familia:')?productoId.slice(8):null;if(productoId&&!filas.some(f=>f.id===productoId||familia&&DimensionamientoSigas.familiaProducto(f)===familia))return false;
  if(!entrada.preparacion.recorridos.some(r=>r.artefacto===recorrido))return false;
  if(tramoAplicacion!==null&&!entrada.preparacion.porTramo.some(t=>t.id===tramoAplicacion))return false;
  const config=proyectoGasActual().calculoSigas||={version:1,vinculos:{}};config.vinculos||={};
@@ -8834,18 +8839,19 @@ function guardarVinculoSigasGas(piezaId,recorrido,productoId,tramoAplicacion=nul
  if(tramoAplicacion!==null){if(!entrada.preparacion.porTramo.some(t=>t.id===tramoAplicacion))return false;v.tramoAplicacion=tramoAplicacion;}
  const ids=entrada.preparacion.porTramo.map(t=>t.id),clave=ids.map(id=>vector[id]).join('/');
  const pieza=entrada.inventario.fisicas.find(p=>p.id===piezaId),campo=pieza.tipo==='tee'?v.porRecorrido:v,llave=pieza.tipo==='tee'?recorrido:'producto';
- if(productoId)campo[llave]={confirmado:true,tramosDiametro:ids,productos:{...(campo[llave]?.productos||{}),[clave]:productoId}};else delete campo[llave];
+ if(familia&&pieza.tipo!=='tee')campo[llave]={confirmado:true,familia};else if(productoId)campo[llave]={confirmado:true,tramosDiametro:ids,productos:{...(campo[llave]?.productos||{}),[clave]:productoId}};else delete campo[llave];
  guardarDatos();renderResumenPrincipalGas();return true;
 }
 function renderVinculosSigasGas(out,r){
  const entrada=entradaPreseleccionSigasGas();if(!entrada)return;
  const detalles=document.createElement('details'),sum=document.createElement('summary');sum.textContent='Identificar productos SIGAS para las pérdidas (sin repetir cantidades)';detalles.append(sum);
- const aviso=document.createElement('p');aviso.textContent='Elegí solo el producto y vía reales. Las cantidades ya están cargadas. Una asignación sirve para el vector de diámetros mostrado; si cambia, revisá su compatibilidad. No confirma normativa ni suministro.';detalles.append(aviso);
+ const aviso=document.createElement('p');aviso.textContent='Elegí solo el producto y vía reales. Las cantidades ya están cargadas. Codos y llaves de familia confirmada siguen el diámetro tabulado. Las tees requieren producto y vía por recorrido, con revisión si cambian las conexiones. Si el grupo contiene productos distintos, identificá las piezas por separado; no asignes una familia común. No confirma normativa ni suministro.';detalles.append(aviso);
  const patrones={codo90:/^Codo.*90/,codo45:/^Codo.*45/,tee:/^Te /,llave:/^Llave /,reduccion:/Reduct|Reduc/,cupla:/Cupla/},vector=r.historia.at(-1)?.diametrosExteriorMm;
  if(!vector){out.append(detalles);return;}
  const ids=entrada.preparacion.porTramo.map(t=>t.id),clave=ids.map(id=>vector[id]).join('/');
  for(const p of entrada.inventario.fisicas){
   const caja=document.createElement('details');caja.className='sigas-vinculo';const titulo=document.createElement('summary');titulo.textContent=p.cantidad+' × '+p.tipo+' · '+(p.tramos.map(id=>entrada.preparacion.porTramo.find(t=>t.id===id)?.nombre||id).join(', ')||'ubicación técnica pendiente');caja.append(titulo);
+  if(p.tipo==='tee'){const nota=document.createElement('p');nota.textContent='Falta confirmar la variante real (normal o reductora), las medidas de sus tres conexiones y qué recorrido pasa a través o gira 90°. La red de conexiones sola no determina esa vía. No se asigna una tee por defecto.';caja.append(nota);}
   const v=entrada.config.vinculos?.[p.id]||{};
   const ub=document.createElement('select');for(const [valor,texto]of [['','Ubicación de la pérdida pendiente'],...entrada.preparacion.porTramo.map(t=>[t.id,t.nombre])]){const o=document.createElement('option');o.value=valor;o.textContent=texto;ub.append(o);}ub.value=p.tramos[0]||v.tramoAplicacion||'';
   if(!p.tramos.length){const l=document.createElement('label');l.textContent='Asociar al tramo solo si la pieza pertenece al circuito calculado';l.append(ub);caja.append(l);}
@@ -8854,8 +8860,9 @@ function renderVinculosSigasGas(out,r){
    if(p.tramos.length&&!p.tramos.some(id=>ruta.tramos.includes(id)))continue;
    const label=document.createElement('label'),select=document.createElement('select');label.textContent=p.tipo==='tee'?'Producto/vía hacia '+ruta.artefacto:'Producto SIGAS (se reutiliza en los recorridos)';renderizados++;
    const vacio=document.createElement('option');vacio.value='';vacio.textContent='Pendiente: no se asigna pérdida cero';select.append(vacio);
+   if(p.tipo!=='tee'){for(const familia of [...new Set(SIGAS_ED15_2025.tablas[3].filas.filter(f=>patrones[p.tipo]?.test(f.nombreOriginal)).map(DimensionamientoSigas.familiaProducto).filter(Boolean))]){const o=document.createElement('option');o.value='familia:'+familia;o.textContent=familia+' · seguir diámetro candidato (confirmar producto real)';select.append(o);}}
    for(const f of SIGAS_ED15_2025.tablas[3].filas.filter(f=>patrones[p.tipo]?.test(f.nombreOriginal))){const o=document.createElement('option');o.value=f.id;o.textContent=f.nombreOriginal+' · '+f.longitudEquivalenteM+' m · p.'+f.pagina;select.append(o);}
-   select.value=(p.tipo==='tee'?v.porRecorrido?.[ruta.artefacto]:v.producto)?.productos?.[clave]||'';
+   const asignado=p.tipo==='tee'?v.porRecorrido?.[ruta.artefacto]:v.producto;select.value=asignado?.familia?'familia:'+asignado.familia:asignado?.productos?.[clave]||'';
    select.onchange=()=>{if(!p.tramos.length&&!ub.value){$('matMensaje').textContent='Indicá primero si esta pérdida pertenece a un tramo del circuito; no se inventó su ubicación.';select.value='';return;}guardarVinculoSigasGas(p.id,ruta.artefacto,select.value,p.tramos.length?null:ub.value);};
    label.append(select);caja.append(label);
   }
@@ -16952,6 +16959,8 @@ function abrir(m){
  $('duda').value=datosEspecialidadActual().aclaracion||'';
  $('revision').textContent=datosEspecialidadActual().revision||'Todavía no hay una revisión registrada.';
  $('formularioGas').classList.toggle('oculto',m!=='gas');
+ $('editarTramosGas').classList.toggle('oculto',m!=='gas');
+ if(m==='gas')$('editarTramosGas').open=false;
  $('panelGemini').classList.toggle('oculto',m!=='gas');
  $('modalidadIaFuturaGas').classList.toggle('oculto',m!=='gas');
  mostrarFotoLocal();
@@ -17435,6 +17444,7 @@ function cancelarEdicionTramo(){
  cargarCantidadesFormularioGas();
 }
 function editarTramo(i){
+ if(modulo==='gas')$('editarTramosGas').open=true;
  cerrarAccesorios();
  editandoTramo=i;const t=tramos[i];
  $('desde').value=t.desde;$('hasta').value=t.hasta;

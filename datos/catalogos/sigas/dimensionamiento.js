@@ -3,6 +3,9 @@
 (function(root){
  const tecnico=()=>typeof module==='object'&&module.exports?require('./diagnostico-ed15.js'):root.SigasTecnico;
  const positivo=x=>typeof x==='number'&&Number.isFinite(x)&&x>0;
+ function familiaProducto(f){
+  return /^(Codo Normal a (45º|90º)|Codo MH a (45°|90°) de|Llave Esférica) \d+\s*mm$/i.test(f.nombreOriginal)?f.nombreOriginal.replace(/ \d+\s*mm$/i,''):null;
+ }
  function seleccionar(d,longitudM,caudalM3h){
   if(!positivo(longitudM)||!positivo(caudalM3h))return {candidato:null,consultas:[],pendientes:['Longitud o caudal conocido pendiente.']};
   const consultas=[],pendientes=[];
@@ -53,13 +56,15 @@
      if(aplicadas.has(p.id))continue;aplicadas.add(p.id);
      if(p.conflicto||p.confirmada!==true){faltantes.push(p.id+': identidad/cantidad por verificar.');continue;}
      const a=vinculo?.porRecorrido?.[r.artefacto]||vinculo?.producto;
-     if(!a||a.confirmado!==true||!Array.isArray(a.tramosDiametro)||!a.tramosDiametro.length||a.tramosDiametro.some(id=>!base.has(id))){faltantes.push(p.id+': producto SIGAS exacto y vía pendientes.');continue;}
+     if(!a||a.confirmado!==true||(!a.familia&&(!Array.isArray(a.tramosDiametro)||!a.tramosDiametro.length||a.tramosDiametro.some(id=>!base.has(id))))){faltantes.push(p.id+': producto SIGAS exacto y vía pendientes.');continue;}
      if(iteracion===0){faltantes.push(p.id+': semilla sin equivalentes, no es pérdida cero.');continue;}
-     const clave=a.tramosDiametro.map(id=>vector[id]).join('/'),id=a.productos?.[clave];
-     const fila=d.tablas[3].filas.find(f=>f.id===id);
+     const clave=(a.tramosDiametro||[]).map(id=>vector[id]).join('/'),id=a.productos?.[clave];
+     const diametros=[...new Set(ubicaciones.map(id=>vector[id]))];
+     const opciones=a.familia&&p.tipo!=='tee'&&diametros.length===1?d.tablas[3].filas.filter(f=>familiaProducto(f)===a.familia&&f.diametroExteriorM*1000===diametros[0]):[];
+     const fila=a.familia?(opciones.length===1?opciones[0]:null):d.tablas[3].filas.find(f=>f.id===id);
      const tipoCorrecto=fila&&({codo90:/^Codo.*90/,codo45:/^Codo.*45/,tee:/^Te /,llave:/^Llave /,reduccion:/Reduct|Reduc/,cupla:/Cupla/}[p.tipo]?.test(fila.nombreOriginal));
      if(!tipoCorrecto||!ubicaciones.some(id=>vector[id]===fila.diametroExteriorM*1000)){faltantes.push(p.id+': combinación '+clave+' sin producto/diámetro/vía SIGAS compatible documentado.');continue;}
-     try{const x=tecnico().accesorio(d,id,p.cantidad);aportes.push({piezaId:p.id,tipo:p.tipo,...x});}catch(e){faltantes.push(p.id+': '+e.message);}
+     try{const x=tecnico().accesorio(d,fila.id,p.cantidad);aportes.push({piezaId:p.id,tipo:p.tipo,...x});}catch(e){faltantes.push(p.id+': '+e.message);}
     }
     const equivalenteConocidoM=aportes.reduce((n,a)=>n+a.equivalenteTotalM,0),completo=!inventarioInvalido&&!faltantes.length&&!faltantesInventario.length&&config.inventarioPerdidasCompleto===true&&config.fuenteInventario;
     return {...r,indice:ri,aportes,faltantes,equivalenteConocidoM:aportes.length||completo?equivalenteConocidoM:null,equivalenteCompleto:!!completo,longitudConsultaM:r.longitudReal+equivalenteConocidoM,longitudDefinitivaM:completo?r.longitudReal+equivalenteConocidoM:null};
@@ -83,5 +88,5 @@
   salida.advertencia='PRESELECCIÓN CONDICIONADA. Pérdidas desconocidas no son cero. No acredita presión final, método normativo ni aptitud de instalación. No se asignan diámetros a los tramos guardados.';
   return salida;
  }
- const api={consultar,resolver};if(typeof module==='object'&&module.exports)module.exports=api;else root.DimensionamientoSigas=api;
+ const api={consultar,resolver,familiaProducto};if(typeof module==='object'&&module.exports)module.exports=api;else root.DimensionamientoSigas=api;
 })(globalThis);

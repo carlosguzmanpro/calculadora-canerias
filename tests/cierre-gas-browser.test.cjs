@@ -5,7 +5,7 @@ test('móvil GAS: sistema principal, una carga, un cálculo, lista única y esta
   const page=await browser.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true}),errores=[];page.on('pageerror',e=>errores.push(e.message));await page.route(/^https?:/,route=>route.abort());await page.setContent(require('node:fs').readFileSync('index.html','utf8'),{waitUntil:'load'});await page.getByRole('button',{name:'🔥 Gas',exact:true}).tap();
   for(const sistema of ['acero-epoxi-roscado-gn','sigas','fusiogas']){
    await page.getByRole('button',{name:'Nuevo proyecto',exact:true}).tap();await page.locator('#nombreProyectoGas').fill('Prueba '+sistema);await page.locator('#guardarNombreProyectoGas').tap();
-   assert.equal(await page.locator('#catalogoSistemaGas').isVisible(),true);await page.locator('#catalogoSistemaGas').selectOption(sistema);
+   assert.equal(await page.locator('#catalogoSistemaGas').isVisible(),true);await page.locator('#catalogoSistemaGas').selectOption(sistema);if(!await page.locator('#editarTramosGas').evaluate(e=>e.open))await page.locator('#editarTramosGas > summary').tap();
    for(const [desde,hasta,metros,codos,tee,llave,consumo,art]of [['M','A',15,7,1,0,'',''],['A','B',5,1,1,0,'',''],['A','TERMO',9,1,0,1,'16000','Termotanque'],['B','CALEFACTOR',16,4,0,1,'3000','Calefactor'],['B','COCINA',13,5,0,1,'10200','Cocina']]){
     for(const [id,v]of Object.entries({desde,hasta,metros,consumoTramo:consumo,manualGas_codo90:codos,manualGas_codo45:0,manualGas_tee:tee,manualGas_llave:llave,manualGas_reduccion:0}))await page.locator('#'+id).fill(String(v));await page.locator('#destinoArtefacto').selectOption(art);await page.locator('#guardarTramo').tap();
    }
