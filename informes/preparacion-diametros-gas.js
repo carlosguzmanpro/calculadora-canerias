@@ -21,7 +21,7 @@ function inventarioAccesoriosParaMotorGas(red){
 }
 function mostrarPreparacionDiametrosGas(){
  if(modulo!=='gas')return null;
- const out=$('preparacionDiametrosGas');out.replaceChildren();
+ const out=$('preparacionDiametrosGas');out.replaceChildren();renderPreseleccionSigasGas(out);
  const texto=(s,padre=out)=>{const p=document.createElement('p');p.textContent=s;padre.append(p);};
  const redActual=redFisicaManualGas(),r=PreparacionDiametrosGas.prepararRed(redActual,tramos,perfilTecnicoActualGas());
  const catalogo=CatalogosSistemasGas.obtener(CatalogosSistemasGas.identificar(instalacionGas.perfil),TABLA_NAG200_3,TABLA_NAG200_18,SIGAS_ED15_2025,FUSIOGAS_V1_2026);

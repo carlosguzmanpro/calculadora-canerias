@@ -1,0 +1,1191 @@
+{
+  "fuente": {
+    "archivo": "fuentes/sigas-ed15-2025/manual-tecnico.pdf",
+    "sha256": "a7dc5dd90adec7d9db335100407d4748f306281b3917e2e52a8f2b707d35e2b1",
+    "paginas": 48,
+    "edicion": "15 - 2025",
+    "fechaEditorial": "Julio 2025",
+    "paginaEdicion": 46,
+    "portadaEdicion": 1,
+    "metadatosPDFCreacion": "2025-06-27",
+    "origen": "PDF original adjuntado por el usuario",
+    "validacionNormativa": false
+  },
+  "origen": "Ejercicio aportado por el propietario: no agregado al proyecto real automáticamente",
+  "metodo": "Consulta SIGAS por recorrido completo más desfavorable, con fila superior; aplicación normativa pendiente",
+  "estado": "preseleccion-parcial",
+  "convergente": true,
+  "definitivo": false,
+  "advertencia": "PRESELECCIÓN CONDICIONADA. Pérdidas desconocidas no son cero. No acredita presión final, método normativo ni aptitud de instalación. No se asignan diámetros a los tramos guardados.",
+  "metros": 58,
+  "codos90": 19,
+  "tees": 2,
+  "llaves": 3,
+  "consumoTotalKcal": 29200,
+  "condiciones": {
+    "gas": "GN",
+    "densidadTabla": 0.65,
+    "caidaImpresa": {
+      "valor": 10,
+      "unidad": "mm",
+      "presionSuministro": null
+    },
+    "poderCalorifico": 9300,
+    "fuentePCS": "Poder calorífico aportado para el ejercicio por el propietario; suministro real sin verificar",
+    "simultaneidad": "Consumos sumados sin reducción; criterio técnico por verificar",
+    "presupuestoDisponiblePa": null
+  },
+  "filas": [
+    {
+      "id": "ref-M-A",
+      "tramo": "M–A",
+      "longitudRealM": 15,
+      "consumoKcal": 29200,
+      "caudalM3h": 3.139784946236559,
+      "poderCalorifico": 9300,
+      "fuentePCS": "Poder calorífico aportado para el ejercicio por el propietario; suministro real sin verificar",
+      "recorridoControl": "Calefactor",
+      "longitudConsultaM": 36,
+      "equivalenteConocidoRutaM": null,
+      "longitudDefinitivaM": null,
+      "candidato": {
+        "tabla": 4,
+        "pagina": 22,
+        "gas": "GN",
+        "longitudSolicitadaM": 36,
+        "longitudFilaM": 36,
+        "exteriorMm": 32,
+        "interiorTabuladoMm": 24.94,
+        "capacidadM3h": 4.541,
+        "densidadTabulada": 0.65,
+        "caidaPresionImpresa": {
+          "valor": 10,
+          "unidad": "mm",
+          "presionSuministro": null
+        },
+        "criterio": "superior-diagnostico",
+        "estado": "Consulta documental; no diámetro recomendado",
+        "cubre": true
+      },
+      "consultas": [
+        {
+          "tabla": 4,
+          "pagina": 22,
+          "gas": "GN",
+          "longitudSolicitadaM": 36,
+          "longitudFilaM": 36,
+          "exteriorMm": 20,
+          "interiorTabuladoMm": 13.24,
+          "capacidadM3h": 0.932,
+          "densidadTabulada": 0.65,
+          "caidaPresionImpresa": {
+            "valor": 10,
+            "unidad": "mm",
+            "presionSuministro": null
+          },
+          "criterio": "superior-diagnostico",
+          "estado": "Consulta documental; no diámetro recomendado",
+          "cubre": false
+        },
+        {
+          "tabla": 4,
+          "pagina": 22,
+          "gas": "GN",
+          "longitudSolicitadaM": 36,
+          "longitudFilaM": 36,
+          "exteriorMm": 25,
+          "interiorTabuladoMm": 18.19,
+          "capacidadM3h": 2.063,
+          "densidadTabulada": 0.65,
+          "caidaPresionImpresa": {
+            "valor": 10,
+            "unidad": "mm",
+            "presionSuministro": null
+          },
+          "criterio": "superior-diagnostico",
+          "estado": "Consulta documental; no diámetro recomendado",
+          "cubre": false
+        },
+        {
+          "tabla": 4,
+          "pagina": 22,
+          "gas": "GN",
+          "longitudSolicitadaM": 36,
+          "longitudFilaM": 36,
+          "exteriorMm": 32,
+          "interiorTabuladoMm": 24.94,
+          "capacidadM3h": 4.541,
+          "densidadTabulada": 0.65,
+          "caidaPresionImpresa": {
+            "valor": 10,
+            "unidad": "mm",
+            "presionSuministro": null
+          },
+          "criterio": "superior-diagnostico",
+          "estado": "Consulta documental; no diámetro recomendado",
+          "cubre": true
+        },
+        {
+          "tabla": 4,
+          "pagina": 22,
+          "gas": "GN",
+          "longitudSolicitadaM": 36,
+          "longitudFilaM": 36,
+          "exteriorMm": 40,
+          "interiorTabuladoMm": 33,
+          "capacidadM3h": 9.145,
+          "densidadTabulada": 0.65,
+          "caidaPresionImpresa": {
+            "valor": 10,
+            "unidad": "mm",
+            "presionSuministro": null
+          },
+          "criterio": "superior-diagnostico",
+          "estado": "Consulta documental; no diámetro recomendado",
+          "cubre": true
+        },
+        {
+          "tabla": 4,
+          "pagina": 22,
+          "gas": "GN",
+          "longitudSolicitadaM": 36,
+          "longitudFilaM": 36,
+          "exteriorMm": 50,
+          "interiorTabuladoMm": 42.8,
+          "capacidadM3h": 17.518,
+          "densidadTabulada": 0.65,
+          "caidaPresionImpresa": {
+            "valor": 10,
+            "unidad": "mm",
+            "presionSuministro": null
+          },
+          "criterio": "superior-diagnostico",
+          "estado": "Consulta documental; no diámetro recomendado",
+          "cubre": true
+        },
+        {
+          "tabla": 4,
+          "pagina": 22,
+          "gas": "GN",
+          "longitudSolicitadaM": 36,
+          "longitudFilaM": 36,
+          "exteriorMm": 63,
+          "interiorTabuladoMm": 54.84,
+          "capacidadM3h": 32.555,
+          "densidadTabulada": 0.65,
+          "caidaPresionImpresa": {
+            "valor": 10,
+            "unidad": "mm",
+            "presionSuministro": null
+          },
+          "criterio": "superior-diagnostico",
+          "estado": "Consulta documental; no diámetro recomendado",
+          "cubre": true
+        },
+        {
+          "tabla": 4,
+          "pagina": 22,
+          "gas": "GN",
+          "longitudSolicitadaM": 36,
+          "longitudFilaM": 36,
+          "exteriorMm": 75,
+          "interiorTabuladoMm": 63,
+          "capacidadM3h": 46.05,
+          "densidadTabulada": 0.65,
+          "caidaPresionImpresa": {
+            "valor": 10,
+            "unidad": "mm",
+            "presionSuministro": null
+          },
+          "criterio": "superior-diagnostico",
+          "estado": "Consulta documental; no diámetro recomendado",
+          "cubre": true
+        },
+        {
+          "tabla": 4,
+          "pagina": 22,
+          "gas": "GN",
+          "longitudSolicitadaM": 36,
+          "longitudFilaM": 36,
+          "exteriorMm": 90,
+          "interiorTabuladoMm": 74,
+          "capacidadM3h": 68.858,
+          "densidadTabulada": 0.65,
+          "caidaPresionImpresa": {
+            "valor": 10,
+            "unidad": "mm",
+            "presionSuministro": null
+          },
+          "criterio": "superior-diagnostico",
+          "estado": "Consulta documental; no diámetro recomendado",
+          "cubre": true
+        },
+        {
+          "tabla": 4,
+          "pagina": 22,
+          "gas": "GN",
+          "longitudSolicitadaM": 36,
+          "longitudFilaM": 36,
+          "exteriorMm": 110,
+          "interiorTabuladoMm": 94,
+          "capacidadM3h": 125.227,
+          "densidadTabulada": 0.65,
+          "caidaPresionImpresa": {
+            "valor": 10,
+            "unidad": "mm",
+            "presionSuministro": null
+          },
+          "criterio": "superior-diagnostico",
+          "estado": "Consulta documental; no diámetro recomendado",
+          "cubre": true
+        }
+      ],
+      "diametroDefinitivo": null,
+      "pendientes": [
+        "referencia-codo19: ubicación respecto del recorrido/medidor pendiente.",
+        "manual-total:[\"ref-M-A\",\"codo90\"]: producto SIGAS exacto y vía pendientes.",
+        "tee:nombre:a: producto SIGAS exacto y vía pendientes.",
+        "manual-total:[\"ref-A-B\",\"codo90\"]: producto SIGAS exacto y vía pendientes.",
+        "tee:nombre:b: producto SIGAS exacto y vía pendientes.",
+        "manual-total:[\"ref-B-Calefactor\",\"codo90\"]: producto SIGAS exacto y vía pendientes.",
+        "manual-total:[\"ref-B-Calefactor\",\"llave\"]: producto SIGAS exacto y vía pendientes.",
+        "referencia-codo19: ubicación respecto del recorrido/medidor pendiente.",
+        "manual-total:[\"ref-M-A\",\"codo90\"]: producto SIGAS exacto y vía pendientes.",
+        "tee:nombre:a: producto SIGAS exacto y vía pendientes.",
+        "manual-total:[\"ref-A-B\",\"codo90\"]: producto SIGAS exacto y vía pendientes.",
+        "tee:nombre:b: producto SIGAS exacto y vía pendientes.",
+        "manual-total:[\"ref-B-Cocina\",\"codo90\"]: producto SIGAS exacto y vía pendientes.",
+        "manual-total:[\"ref-B-Cocina\",\"llave\"]: producto SIGAS exacto y vía pendientes.",
+        "referencia-codo19: ubicación respecto del recorrido/medidor pendiente.",
+        "manual-total:[\"ref-M-A\",\"codo90\"]: producto SIGAS exacto y vía pendientes.",
+        "tee:nombre:a: producto SIGAS exacto y vía pendientes.",
+        "manual-total:[\"ref-A-Termo\",\"codo90\"]: producto SIGAS exacto y vía pendientes.",
+        "manual-total:[\"ref-A-Termo\",\"llave\"]: producto SIGAS exacto y vía pendientes."
+      ],
+      "estado": "Preselección condicionada; no diámetro de ejecución"
+    },
+    {
+      "id": "ref-A-B",
+      "tramo": "A–B",
+      "longitudRealM": 5,
+      "consumoKcal": 13200,
+      "caudalM3h": 1.4193548387096775,
+      "poderCalorifico": 9300,
+      "fuentePCS": "Poder calorífico aportado para el ejercicio por el propietario; suministro real sin verificar",
+      "recorridoControl": "Calefactor",
+      "longitudConsultaM": 36,
+      "equivalenteConocidoRutaM": null,
+      "longitudDefinitivaM": null,
+      "candidato": {
+        "tabla": 4,
+        "pagina": 22,
+        "gas": "GN",
+        "longitudSolicitadaM": 36,
+        "longitudFilaM": 36,
+        "exteriorMm": 25,
+        "interiorTabuladoMm": 18.19,
+        "capacidadM3h": 2.063,
+        "densidadTabulada": 0.65,
+        "caidaPresionImpresa": {
+          "valor": 10,
+          "unidad": "mm",
+          "presionSuministro": null
+        },
+        "criterio": "superior-diagnostico",
+        "estado": "Consulta documental; no diámetro recomendado",
+        "cubre": true
+      },
+      "consultas": [
+        {
+          "tabla": 4,
+          "pagina": 22,
+          "gas": "GN",
+          "longitudSolicitadaM": 36,
+          "longitudFilaM": 36,
+          "exteriorMm": 20,
+          "interiorTabuladoMm": 13.24,
+          "capacidadM3h": 0.932,
+          "densidadTabulada": 0.65,
+          "caidaPresionImpresa": {
+            "valor": 10,
+            "unidad": "mm",
+            "presionSuministro": null
+          },
+          "criterio": "superior-diagnostico",
+          "estado": "Consulta documental; no diámetro recomendado",
+          "cubre": false
+        },
+        {
+          "tabla": 4,
+          "pagina": 22,
+          "gas": "GN",
+          "longitudSolicitadaM": 36,
+          "longitudFilaM": 36,
+          "exteriorMm": 25,
+          "interiorTabuladoMm": 18.19,
+          "capacidadM3h": 2.063,
+          "densidadTabulada": 0.65,
+          "caidaPresionImpresa": {
+            "valor": 10,
+            "unidad": "mm",
+            "presionSuministro": null
+          },
+          "criterio": "superior-diagnostico",
+          "estado": "Consulta documental; no diámetro recomendado",
+          "cubre": true
+        },
+        {
+          "tabla": 4,
+          "pagina": 22,
+          "gas": "GN",
+          "longitudSolicitadaM": 36,
+          "longitudFilaM": 36,
+          "exteriorMm": 32,
+          "interiorTabuladoMm": 24.94,
+          "capacidadM3h": 4.541,
+          "densidadTabulada": 0.65,
+          "caidaPresionImpresa": {
+            "valor": 10,
+            "unidad": "mm",
+            "presionSuministro": null
+          },
+          "criterio": "superior-diagnostico",
+          "estado": "Consulta documental; no diámetro recomendado",
+          "cubre": true
+        },
+        {
+          "tabla": 4,
+          "pagina": 22,
+          "gas": "GN",
+          "longitudSolicitadaM": 36,
+          "longitudFilaM": 36,
+          "exteriorMm": 40,
+          "interiorTabuladoMm": 33,
+          "capacidadM3h": 9.145,
+          "densidadTabulada": 0.65,
+          "caidaPresionImpresa": {
+            "valor": 10,
+            "unidad": "mm",
+            "presionSuministro": null
+          },
+          "criterio": "superior-diagnostico",
+          "estado": "Consulta documental; no diámetro recomendado",
+          "cubre": true
+        },
+        {
+          "tabla": 4,
+          "pagina": 22,
+          "gas": "GN",
+          "longitudSolicitadaM": 36,
+          "longitudFilaM": 36,
+          "exteriorMm": 50,
+          "interiorTabuladoMm": 42.8,
+          "capacidadM3h": 17.518,
+          "densidadTabulada": 0.65,
+          "caidaPresionImpresa": {
+            "valor": 10,
+            "unidad": "mm",
+            "presionSuministro": null
+          },
+          "criterio": "superior-diagnostico",
+          "estado": "Consulta documental; no diámetro recomendado",
+          "cubre": true
+        },
+        {
+          "tabla": 4,
+          "pagina": 22,
+          "gas": "GN",
+          "longitudSolicitadaM": 36,
+          "longitudFilaM": 36,
+          "exteriorMm": 63,
+          "interiorTabuladoMm": 54.84,
+          "capacidadM3h": 32.555,
+          "densidadTabulada": 0.65,
+          "caidaPresionImpresa": {
+            "valor": 10,
+            "unidad": "mm",
+            "presionSuministro": null
+          },
+          "criterio": "superior-diagnostico",
+          "estado": "Consulta documental; no diámetro recomendado",
+          "cubre": true
+        },
+        {
+          "tabla": 4,
+          "pagina": 22,
+          "gas": "GN",
+          "longitudSolicitadaM": 36,
+          "longitudFilaM": 36,
+          "exteriorMm": 75,
+          "interiorTabuladoMm": 63,
+          "capacidadM3h": 46.05,
+          "densidadTabulada": 0.65,
+          "caidaPresionImpresa": {
+            "valor": 10,
+            "unidad": "mm",
+            "presionSuministro": null
+          },
+          "criterio": "superior-diagnostico",
+          "estado": "Consulta documental; no diámetro recomendado",
+          "cubre": true
+        },
+        {
+          "tabla": 4,
+          "pagina": 22,
+          "gas": "GN",
+          "longitudSolicitadaM": 36,
+          "longitudFilaM": 36,
+          "exteriorMm": 90,
+          "interiorTabuladoMm": 74,
+          "capacidadM3h": 68.858,
+          "densidadTabulada": 0.65,
+          "caidaPresionImpresa": {
+            "valor": 10,
+            "unidad": "mm",
+            "presionSuministro": null
+          },
+          "criterio": "superior-diagnostico",
+          "estado": "Consulta documental; no diámetro recomendado",
+          "cubre": true
+        },
+        {
+          "tabla": 4,
+          "pagina": 22,
+          "gas": "GN",
+          "longitudSolicitadaM": 36,
+          "longitudFilaM": 36,
+          "exteriorMm": 110,
+          "interiorTabuladoMm": 94,
+          "capacidadM3h": 125.227,
+          "densidadTabulada": 0.65,
+          "caidaPresionImpresa": {
+            "valor": 10,
+            "unidad": "mm",
+            "presionSuministro": null
+          },
+          "criterio": "superior-diagnostico",
+          "estado": "Consulta documental; no diámetro recomendado",
+          "cubre": true
+        }
+      ],
+      "diametroDefinitivo": null,
+      "pendientes": [
+        "referencia-codo19: ubicación respecto del recorrido/medidor pendiente.",
+        "manual-total:[\"ref-M-A\",\"codo90\"]: producto SIGAS exacto y vía pendientes.",
+        "tee:nombre:a: producto SIGAS exacto y vía pendientes.",
+        "manual-total:[\"ref-A-B\",\"codo90\"]: producto SIGAS exacto y vía pendientes.",
+        "tee:nombre:b: producto SIGAS exacto y vía pendientes.",
+        "manual-total:[\"ref-B-Calefactor\",\"codo90\"]: producto SIGAS exacto y vía pendientes.",
+        "manual-total:[\"ref-B-Calefactor\",\"llave\"]: producto SIGAS exacto y vía pendientes.",
+        "referencia-codo19: ubicación respecto del recorrido/medidor pendiente.",
+        "manual-total:[\"ref-M-A\",\"codo90\"]: producto SIGAS exacto y vía pendientes.",
+        "tee:nombre:a: producto SIGAS exacto y vía pendientes.",
+        "manual-total:[\"ref-A-B\",\"codo90\"]: producto SIGAS exacto y vía pendientes.",
+        "tee:nombre:b: producto SIGAS exacto y vía pendientes.",
+        "manual-total:[\"ref-B-Cocina\",\"codo90\"]: producto SIGAS exacto y vía pendientes.",
+        "manual-total:[\"ref-B-Cocina\",\"llave\"]: producto SIGAS exacto y vía pendientes."
+      ],
+      "estado": "Preselección condicionada; no diámetro de ejecución"
+    },
+    {
+      "id": "ref-A-Termo",
+      "tramo": "A–Termo",
+      "longitudRealM": 9,
+      "consumoKcal": 16000,
+      "caudalM3h": 1.7204301075268817,
+      "poderCalorifico": 9300,
+      "fuentePCS": "Poder calorífico aportado para el ejercicio por el propietario; suministro real sin verificar",
+      "recorridoControl": "Termo",
+      "longitudConsultaM": 24,
+      "equivalenteConocidoRutaM": null,
+      "longitudDefinitivaM": null,
+      "candidato": {
+        "tabla": 4,
+        "pagina": 22,
+        "gas": "GN",
+        "longitudSolicitadaM": 24,
+        "longitudFilaM": 24,
+        "exteriorMm": 25,
+        "interiorTabuladoMm": 18.19,
+        "capacidadM3h": 2.526,
+        "densidadTabulada": 0.65,
+        "caidaPresionImpresa": {
+          "valor": 10,
+          "unidad": "mm",
+          "presionSuministro": null
+        },
+        "criterio": "superior-diagnostico",
+        "estado": "Consulta documental; no diámetro recomendado",
+        "cubre": true
+      },
+      "consultas": [
+        {
+          "tabla": 4,
+          "pagina": 22,
+          "gas": "GN",
+          "longitudSolicitadaM": 24,
+          "longitudFilaM": 24,
+          "exteriorMm": 20,
+          "interiorTabuladoMm": 13.24,
+          "capacidadM3h": 1.142,
+          "densidadTabulada": 0.65,
+          "caidaPresionImpresa": {
+            "valor": 10,
+            "unidad": "mm",
+            "presionSuministro": null
+          },
+          "criterio": "superior-diagnostico",
+          "estado": "Consulta documental; no diámetro recomendado",
+          "cubre": false
+        },
+        {
+          "tabla": 4,
+          "pagina": 22,
+          "gas": "GN",
+          "longitudSolicitadaM": 24,
+          "longitudFilaM": 24,
+          "exteriorMm": 25,
+          "interiorTabuladoMm": 18.19,
+          "capacidadM3h": 2.526,
+          "densidadTabulada": 0.65,
+          "caidaPresionImpresa": {
+            "valor": 10,
+            "unidad": "mm",
+            "presionSuministro": null
+          },
+          "criterio": "superior-diagnostico",
+          "estado": "Consulta documental; no diámetro recomendado",
+          "cubre": true
+        },
+        {
+          "tabla": 4,
+          "pagina": 22,
+          "gas": "GN",
+          "longitudSolicitadaM": 24,
+          "longitudFilaM": 24,
+          "exteriorMm": 32,
+          "interiorTabuladoMm": 24.94,
+          "capacidadM3h": 5.561,
+          "densidadTabulada": 0.65,
+          "caidaPresionImpresa": {
+            "valor": 10,
+            "unidad": "mm",
+            "presionSuministro": null
+          },
+          "criterio": "superior-diagnostico",
+          "estado": "Consulta documental; no diámetro recomendado",
+          "cubre": true
+        },
+        {
+          "tabla": 4,
+          "pagina": 22,
+          "gas": "GN",
+          "longitudSolicitadaM": 24,
+          "longitudFilaM": 24,
+          "exteriorMm": 40,
+          "interiorTabuladoMm": 33,
+          "capacidadM3h": 11.2,
+          "densidadTabulada": 0.65,
+          "caidaPresionImpresa": {
+            "valor": 10,
+            "unidad": "mm",
+            "presionSuministro": null
+          },
+          "criterio": "superior-diagnostico",
+          "estado": "Consulta documental; no diámetro recomendado",
+          "cubre": true
+        },
+        {
+          "tabla": 4,
+          "pagina": 22,
+          "gas": "GN",
+          "longitudSolicitadaM": 24,
+          "longitudFilaM": 24,
+          "exteriorMm": 50,
+          "interiorTabuladoMm": 42.8,
+          "capacidadM3h": 21.455,
+          "densidadTabulada": 0.65,
+          "caidaPresionImpresa": {
+            "valor": 10,
+            "unidad": "mm",
+            "presionSuministro": null
+          },
+          "criterio": "superior-diagnostico",
+          "estado": "Consulta documental; no diámetro recomendado",
+          "cubre": true
+        },
+        {
+          "tabla": 4,
+          "pagina": 22,
+          "gas": "GN",
+          "longitudSolicitadaM": 24,
+          "longitudFilaM": 24,
+          "exteriorMm": 63,
+          "interiorTabuladoMm": 54.84,
+          "capacidadM3h": 39.872,
+          "densidadTabulada": 0.65,
+          "caidaPresionImpresa": {
+            "valor": 10,
+            "unidad": "mm",
+            "presionSuministro": null
+          },
+          "criterio": "superior-diagnostico",
+          "estado": "Consulta documental; no diámetro recomendado",
+          "cubre": true
+        },
+        {
+          "tabla": 4,
+          "pagina": 22,
+          "gas": "GN",
+          "longitudSolicitadaM": 24,
+          "longitudFilaM": 24,
+          "exteriorMm": 75,
+          "interiorTabuladoMm": 63,
+          "capacidadM3h": 56.399,
+          "densidadTabulada": 0.65,
+          "caidaPresionImpresa": {
+            "valor": 10,
+            "unidad": "mm",
+            "presionSuministro": null
+          },
+          "criterio": "superior-diagnostico",
+          "estado": "Consulta documental; no diámetro recomendado",
+          "cubre": true
+        },
+        {
+          "tabla": 4,
+          "pagina": 22,
+          "gas": "GN",
+          "longitudSolicitadaM": 24,
+          "longitudFilaM": 24,
+          "exteriorMm": 90,
+          "interiorTabuladoMm": 74,
+          "capacidadM3h": 84.334,
+          "densidadTabulada": 0.65,
+          "caidaPresionImpresa": {
+            "valor": 10,
+            "unidad": "mm",
+            "presionSuministro": null
+          },
+          "criterio": "superior-diagnostico",
+          "estado": "Consulta documental; no diámetro recomendado",
+          "cubre": true
+        },
+        {
+          "tabla": 4,
+          "pagina": 22,
+          "gas": "GN",
+          "longitudSolicitadaM": 24,
+          "longitudFilaM": 24,
+          "exteriorMm": 110,
+          "interiorTabuladoMm": 94,
+          "capacidadM3h": 153.371,
+          "densidadTabulada": 0.65,
+          "caidaPresionImpresa": {
+            "valor": 10,
+            "unidad": "mm",
+            "presionSuministro": null
+          },
+          "criterio": "superior-diagnostico",
+          "estado": "Consulta documental; no diámetro recomendado",
+          "cubre": true
+        }
+      ],
+      "diametroDefinitivo": null,
+      "pendientes": [
+        "referencia-codo19: ubicación respecto del recorrido/medidor pendiente.",
+        "manual-total:[\"ref-M-A\",\"codo90\"]: producto SIGAS exacto y vía pendientes.",
+        "tee:nombre:a: producto SIGAS exacto y vía pendientes.",
+        "manual-total:[\"ref-A-Termo\",\"codo90\"]: producto SIGAS exacto y vía pendientes.",
+        "manual-total:[\"ref-A-Termo\",\"llave\"]: producto SIGAS exacto y vía pendientes."
+      ],
+      "estado": "Preselección condicionada; no diámetro de ejecución"
+    },
+    {
+      "id": "ref-B-Calefactor",
+      "tramo": "B–Calefactor",
+      "longitudRealM": 16,
+      "consumoKcal": 3000,
+      "caudalM3h": 0.3225806451612903,
+      "poderCalorifico": 9300,
+      "fuentePCS": "Poder calorífico aportado para el ejercicio por el propietario; suministro real sin verificar",
+      "recorridoControl": "Calefactor",
+      "longitudConsultaM": 36,
+      "equivalenteConocidoRutaM": null,
+      "longitudDefinitivaM": null,
+      "candidato": {
+        "tabla": 4,
+        "pagina": 22,
+        "gas": "GN",
+        "longitudSolicitadaM": 36,
+        "longitudFilaM": 36,
+        "exteriorMm": 20,
+        "interiorTabuladoMm": 13.24,
+        "capacidadM3h": 0.932,
+        "densidadTabulada": 0.65,
+        "caidaPresionImpresa": {
+          "valor": 10,
+          "unidad": "mm",
+          "presionSuministro": null
+        },
+        "criterio": "superior-diagnostico",
+        "estado": "Consulta documental; no diámetro recomendado",
+        "cubre": true
+      },
+      "consultas": [
+        {
+          "tabla": 4,
+          "pagina": 22,
+          "gas": "GN",
+          "longitudSolicitadaM": 36,
+          "longitudFilaM": 36,
+          "exteriorMm": 20,
+          "interiorTabuladoMm": 13.24,
+          "capacidadM3h": 0.932,
+          "densidadTabulada": 0.65,
+          "caidaPresionImpresa": {
+            "valor": 10,
+            "unidad": "mm",
+            "presionSuministro": null
+          },
+          "criterio": "superior-diagnostico",
+          "estado": "Consulta documental; no diámetro recomendado",
+          "cubre": true
+        },
+        {
+          "tabla": 4,
+          "pagina": 22,
+          "gas": "GN",
+          "longitudSolicitadaM": 36,
+          "longitudFilaM": 36,
+          "exteriorMm": 25,
+          "interiorTabuladoMm": 18.19,
+          "capacidadM3h": 2.063,
+          "densidadTabulada": 0.65,
+          "caidaPresionImpresa": {
+            "valor": 10,
+            "unidad": "mm",
+            "presionSuministro": null
+          },
+          "criterio": "superior-diagnostico",
+          "estado": "Consulta documental; no diámetro recomendado",
+          "cubre": true
+        },
+        {
+          "tabla": 4,
+          "pagina": 22,
+          "gas": "GN",
+          "longitudSolicitadaM": 36,
+          "longitudFilaM": 36,
+          "exteriorMm": 32,
+          "interiorTabuladoMm": 24.94,
+          "capacidadM3h": 4.541,
+          "densidadTabulada": 0.65,
+          "caidaPresionImpresa": {
+            "valor": 10,
+            "unidad": "mm",
+            "presionSuministro": null
+          },
+          "criterio": "superior-diagnostico",
+          "estado": "Consulta documental; no diámetro recomendado",
+          "cubre": true
+        },
+        {
+          "tabla": 4,
+          "pagina": 22,
+          "gas": "GN",
+          "longitudSolicitadaM": 36,
+          "longitudFilaM": 36,
+          "exteriorMm": 40,
+          "interiorTabuladoMm": 33,
+          "capacidadM3h": 9.145,
+          "densidadTabulada": 0.65,
+          "caidaPresionImpresa": {
+            "valor": 10,
+            "unidad": "mm",
+            "presionSuministro": null
+          },
+          "criterio": "superior-diagnostico",
+          "estado": "Consulta documental; no diámetro recomendado",
+          "cubre": true
+        },
+        {
+          "tabla": 4,
+          "pagina": 22,
+          "gas": "GN",
+          "longitudSolicitadaM": 36,
+          "longitudFilaM": 36,
+          "exteriorMm": 50,
+          "interiorTabuladoMm": 42.8,
+          "capacidadM3h": 17.518,
+          "densidadTabulada": 0.65,
+          "caidaPresionImpresa": {
+            "valor": 10,
+            "unidad": "mm",
+            "presionSuministro": null
+          },
+          "criterio": "superior-diagnostico",
+          "estado": "Consulta documental; no diámetro recomendado",
+          "cubre": true
+        },
+        {
+          "tabla": 4,
+          "pagina": 22,
+          "gas": "GN",
+          "longitudSolicitadaM": 36,
+          "longitudFilaM": 36,
+          "exteriorMm": 63,
+          "interiorTabuladoMm": 54.84,
+          "capacidadM3h": 32.555,
+          "densidadTabulada": 0.65,
+          "caidaPresionImpresa": {
+            "valor": 10,
+            "unidad": "mm",
+            "presionSuministro": null
+          },
+          "criterio": "superior-diagnostico",
+          "estado": "Consulta documental; no diámetro recomendado",
+          "cubre": true
+        },
+        {
+          "tabla": 4,
+          "pagina": 22,
+          "gas": "GN",
+          "longitudSolicitadaM": 36,
+          "longitudFilaM": 36,
+          "exteriorMm": 75,
+          "interiorTabuladoMm": 63,
+          "capacidadM3h": 46.05,
+          "densidadTabulada": 0.65,
+          "caidaPresionImpresa": {
+            "valor": 10,
+            "unidad": "mm",
+            "presionSuministro": null
+          },
+          "criterio": "superior-diagnostico",
+          "estado": "Consulta documental; no diámetro recomendado",
+          "cubre": true
+        },
+        {
+          "tabla": 4,
+          "pagina": 22,
+          "gas": "GN",
+          "longitudSolicitadaM": 36,
+          "longitudFilaM": 36,
+          "exteriorMm": 90,
+          "interiorTabuladoMm": 74,
+          "capacidadM3h": 68.858,
+          "densidadTabulada": 0.65,
+          "caidaPresionImpresa": {
+            "valor": 10,
+            "unidad": "mm",
+            "presionSuministro": null
+          },
+          "criterio": "superior-diagnostico",
+          "estado": "Consulta documental; no diámetro recomendado",
+          "cubre": true
+        },
+        {
+          "tabla": 4,
+          "pagina": 22,
+          "gas": "GN",
+          "longitudSolicitadaM": 36,
+          "longitudFilaM": 36,
+          "exteriorMm": 110,
+          "interiorTabuladoMm": 94,
+          "capacidadM3h": 125.227,
+          "densidadTabulada": 0.65,
+          "caidaPresionImpresa": {
+            "valor": 10,
+            "unidad": "mm",
+            "presionSuministro": null
+          },
+          "criterio": "superior-diagnostico",
+          "estado": "Consulta documental; no diámetro recomendado",
+          "cubre": true
+        }
+      ],
+      "diametroDefinitivo": null,
+      "pendientes": [
+        "referencia-codo19: ubicación respecto del recorrido/medidor pendiente.",
+        "manual-total:[\"ref-M-A\",\"codo90\"]: producto SIGAS exacto y vía pendientes.",
+        "tee:nombre:a: producto SIGAS exacto y vía pendientes.",
+        "manual-total:[\"ref-A-B\",\"codo90\"]: producto SIGAS exacto y vía pendientes.",
+        "tee:nombre:b: producto SIGAS exacto y vía pendientes.",
+        "manual-total:[\"ref-B-Calefactor\",\"codo90\"]: producto SIGAS exacto y vía pendientes.",
+        "manual-total:[\"ref-B-Calefactor\",\"llave\"]: producto SIGAS exacto y vía pendientes."
+      ],
+      "estado": "Preselección condicionada; no diámetro de ejecución"
+    },
+    {
+      "id": "ref-B-Cocina",
+      "tramo": "B–Cocina",
+      "longitudRealM": 13,
+      "consumoKcal": 10200,
+      "caudalM3h": 1.096774193548387,
+      "poderCalorifico": 9300,
+      "fuentePCS": "Poder calorífico aportado para el ejercicio por el propietario; suministro real sin verificar",
+      "recorridoControl": "Cocina",
+      "longitudConsultaM": 33,
+      "equivalenteConocidoRutaM": null,
+      "longitudDefinitivaM": null,
+      "candidato": {
+        "tabla": 4,
+        "pagina": 22,
+        "gas": "GN",
+        "longitudSolicitadaM": 33,
+        "longitudFilaM": 34,
+        "exteriorMm": 25,
+        "interiorTabuladoMm": 18.19,
+        "capacidadM3h": 2.123,
+        "densidadTabulada": 0.65,
+        "caidaPresionImpresa": {
+          "valor": 10,
+          "unidad": "mm",
+          "presionSuministro": null
+        },
+        "criterio": "superior-diagnostico",
+        "estado": "Consulta documental; no diámetro recomendado",
+        "cubre": true
+      },
+      "consultas": [
+        {
+          "tabla": 4,
+          "pagina": 22,
+          "gas": "GN",
+          "longitudSolicitadaM": 33,
+          "longitudFilaM": 34,
+          "exteriorMm": 20,
+          "interiorTabuladoMm": 13.24,
+          "capacidadM3h": 0.959,
+          "densidadTabulada": 0.65,
+          "caidaPresionImpresa": {
+            "valor": 10,
+            "unidad": "mm",
+            "presionSuministro": null
+          },
+          "criterio": "superior-diagnostico",
+          "estado": "Consulta documental; no diámetro recomendado",
+          "cubre": false
+        },
+        {
+          "tabla": 4,
+          "pagina": 22,
+          "gas": "GN",
+          "longitudSolicitadaM": 33,
+          "longitudFilaM": 34,
+          "exteriorMm": 25,
+          "interiorTabuladoMm": 18.19,
+          "capacidadM3h": 2.123,
+          "densidadTabulada": 0.65,
+          "caidaPresionImpresa": {
+            "valor": 10,
+            "unidad": "mm",
+            "presionSuministro": null
+          },
+          "criterio": "superior-diagnostico",
+          "estado": "Consulta documental; no diámetro recomendado",
+          "cubre": true
+        },
+        {
+          "tabla": 4,
+          "pagina": 22,
+          "gas": "GN",
+          "longitudSolicitadaM": 33,
+          "longitudFilaM": 34,
+          "exteriorMm": 32,
+          "interiorTabuladoMm": 24.94,
+          "capacidadM3h": 4.672,
+          "densidadTabulada": 0.65,
+          "caidaPresionImpresa": {
+            "valor": 10,
+            "unidad": "mm",
+            "presionSuministro": null
+          },
+          "criterio": "superior-diagnostico",
+          "estado": "Consulta documental; no diámetro recomendado",
+          "cubre": true
+        },
+        {
+          "tabla": 4,
+          "pagina": 22,
+          "gas": "GN",
+          "longitudSolicitadaM": 33,
+          "longitudFilaM": 34,
+          "exteriorMm": 40,
+          "interiorTabuladoMm": 33,
+          "capacidadM3h": 9.41,
+          "densidadTabulada": 0.65,
+          "caidaPresionImpresa": {
+            "valor": 10,
+            "unidad": "mm",
+            "presionSuministro": null
+          },
+          "criterio": "superior-diagnostico",
+          "estado": "Consulta documental; no diámetro recomendado",
+          "cubre": true
+        },
+        {
+          "tabla": 4,
+          "pagina": 22,
+          "gas": "GN",
+          "longitudSolicitadaM": 33,
+          "longitudFilaM": 34,
+          "exteriorMm": 50,
+          "interiorTabuladoMm": 42.8,
+          "capacidadM3h": 18.026,
+          "densidadTabulada": 0.65,
+          "caidaPresionImpresa": {
+            "valor": 10,
+            "unidad": "mm",
+            "presionSuministro": null
+          },
+          "criterio": "superior-diagnostico",
+          "estado": "Consulta documental; no diámetro recomendado",
+          "cubre": true
+        },
+        {
+          "tabla": 4,
+          "pagina": 22,
+          "gas": "GN",
+          "longitudSolicitadaM": 33,
+          "longitudFilaM": 34,
+          "exteriorMm": 63,
+          "interiorTabuladoMm": 54.84,
+          "capacidadM3h": 33.499,
+          "densidadTabulada": 0.65,
+          "caidaPresionImpresa": {
+            "valor": 10,
+            "unidad": "mm",
+            "presionSuministro": null
+          },
+          "criterio": "superior-diagnostico",
+          "estado": "Consulta documental; no diámetro recomendado",
+          "cubre": true
+        },
+        {
+          "tabla": 4,
+          "pagina": 22,
+          "gas": "GN",
+          "longitudSolicitadaM": 33,
+          "longitudFilaM": 34,
+          "exteriorMm": 75,
+          "interiorTabuladoMm": 63,
+          "capacidadM3h": 47.385,
+          "densidadTabulada": 0.65,
+          "caidaPresionImpresa": {
+            "valor": 10,
+            "unidad": "mm",
+            "presionSuministro": null
+          },
+          "criterio": "superior-diagnostico",
+          "estado": "Consulta documental; no diámetro recomendado",
+          "cubre": true
+        },
+        {
+          "tabla": 4,
+          "pagina": 22,
+          "gas": "GN",
+          "longitudSolicitadaM": 33,
+          "longitudFilaM": 34,
+          "exteriorMm": 90,
+          "interiorTabuladoMm": 74,
+          "capacidadM3h": 70.855,
+          "densidadTabulada": 0.65,
+          "caidaPresionImpresa": {
+            "valor": 10,
+            "unidad": "mm",
+            "presionSuministro": null
+          },
+          "criterio": "superior-diagnostico",
+          "estado": "Consulta documental; no diámetro recomendado",
+          "cubre": true
+        },
+        {
+          "tabla": 4,
+          "pagina": 22,
+          "gas": "GN",
+          "longitudSolicitadaM": 33,
+          "longitudFilaM": 34,
+          "exteriorMm": 110,
+          "interiorTabuladoMm": 94,
+          "capacidadM3h": 128.857,
+          "densidadTabulada": 0.65,
+          "caidaPresionImpresa": {
+            "valor": 10,
+            "unidad": "mm",
+            "presionSuministro": null
+          },
+          "criterio": "superior-diagnostico",
+          "estado": "Consulta documental; no diámetro recomendado",
+          "cubre": true
+        }
+      ],
+      "diametroDefinitivo": null,
+      "pendientes": [
+        "referencia-codo19: ubicación respecto del recorrido/medidor pendiente.",
+        "manual-total:[\"ref-M-A\",\"codo90\"]: producto SIGAS exacto y vía pendientes.",
+        "tee:nombre:a: producto SIGAS exacto y vía pendientes.",
+        "manual-total:[\"ref-A-B\",\"codo90\"]: producto SIGAS exacto y vía pendientes.",
+        "tee:nombre:b: producto SIGAS exacto y vía pendientes.",
+        "manual-total:[\"ref-B-Cocina\",\"codo90\"]: producto SIGAS exacto y vía pendientes.",
+        "manual-total:[\"ref-B-Cocina\",\"llave\"]: producto SIGAS exacto y vía pendientes."
+      ],
+      "estado": "Preselección condicionada; no diámetro de ejecución"
+    }
+  ],
+  "historia": [
+    {
+      "iteracion": 0,
+      "fase": "semilla-real-sin-perdidas",
+      "diametrosExteriorMm": {
+        "ref-M-A": 32,
+        "ref-A-B": 25,
+        "ref-A-Termo": 25,
+        "ref-B-Calefactor": 20,
+        "ref-B-Cocina": 25
+      }
+    },
+    {
+      "iteracion": 1,
+      "fase": "recálculo-equivalentes-identificados",
+      "diametrosExteriorMm": {
+        "ref-M-A": 32,
+        "ref-A-B": 25,
+        "ref-A-Termo": 25,
+        "ref-B-Calefactor": 20,
+        "ref-B-Cocina": 25
+      }
+    }
+  ],
+  "pendientes": [
+    "Nombres repetidos: no seleccionar por nombre ni resolver por promedio.",
+    "Longitud equivalente y Nº de Ø no coinciden por simple redondeo en 24 accesorios. No recalcular la columna impresa.",
+    "Tabla 5, 75 m / 75, 90 y 110 mm: descenso distinto del patrón de las otras columnas; cotejado con el PDF, pendiente aclaración del fabricante.",
+    "Ejemplos pp.26–27 remiten Tabla 6 a pp.24–25, pero está en p.21. Conservar la referencia literal como discrepancia editorial.",
+    "Edición identificada no equivale a condiciones de suministro ni validación normativa vigente.",
+    "Criterio de recorrido/fila superior y simultaneidad: validar con método aplicable. No se añadieron 15 m EPOXI.",
+    "Presión disponible, mínima de artefactos y pérdida admisible: confirmar alcance de la tabla; caída impresa 10 mm no es suministro.",
+    "Cuplas y otras pérdidas no identificadas permanecen pendientes; no se suponen nulas ni bloquean esta preselección parcial.",
+    "Densidad del suministro pendiente de confirmar frente a 0,65 tabulado.",
+    "Dato de suministro pendiente: presionDisponible.",
+    "Dato de suministro pendiente: presionMinima.",
+    "Dato de suministro pendiente: perdidaMaxima.",
+    "Dato de suministro pendiente: fuentePresiones.",
+    "Ubicación técnica pendiente de codo90; se conserva la cantidad conocida.",
+    "Tee en nombre:a: identificar vía directa/giro y configuración reductora.",
+    "Tee en nombre:b: identificar vía directa/giro y configuración reductora.",
+    "Tipo real de llave pendiente; no se supone válvula macho, globo o esclusa.",
+    "referencia-codo19: ubicación respecto del recorrido/medidor pendiente.",
+    "manual-total:[\"ref-M-A\",\"codo90\"]: producto SIGAS exacto y vía pendientes.",
+    "tee:nombre:a: producto SIGAS exacto y vía pendientes.",
+    "manual-total:[\"ref-A-B\",\"codo90\"]: producto SIGAS exacto y vía pendientes.",
+    "tee:nombre:b: producto SIGAS exacto y vía pendientes.",
+    "manual-total:[\"ref-B-Calefactor\",\"codo90\"]: producto SIGAS exacto y vía pendientes.",
+    "manual-total:[\"ref-B-Calefactor\",\"llave\"]: producto SIGAS exacto y vía pendientes.",
+    "manual-total:[\"ref-B-Cocina\",\"codo90\"]: producto SIGAS exacto y vía pendientes.",
+    "manual-total:[\"ref-B-Cocina\",\"llave\"]: producto SIGAS exacto y vía pendientes.",
+    "manual-total:[\"ref-A-Termo\",\"codo90\"]: producto SIGAS exacto y vía pendientes.",
+    "manual-total:[\"ref-A-Termo\",\"llave\"]: producto SIGAS exacto y vía pendientes."
+  ]
+}

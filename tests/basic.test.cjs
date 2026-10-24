@@ -669,7 +669,7 @@ test('aislamiento: una lectura de foto demorada no escribe en el espacio recién
 });
 
 test('Android: index autónomo contiene exactamente las diecisiete fuentes locales, sin solicitudes de scripts',()=>{
- const bloques=[...html.matchAll(/<script data-local="([^"]+)">\n([\s\S]*?)\n<\/script>/g)];assert.equal(bloques.length,20);assert.doesNotMatch(html,/<script\s+src=/i);
+ const bloques=[...html.matchAll(/<script data-local="([^"]+)">\n([\s\S]*?)\n<\/script>/g)];assert.equal(bloques.length,22);assert.doesNotMatch(html,/<script\s+src=/i);
  for(const [,ruta,codigo]of bloques)assert.equal(codigo,fs.readFileSync(ruta,'utf8'),ruta);
 });
 test('Android: ejecuta los scripts incorporados y navega todas las especialidades sin archivos vecinos',()=>{
@@ -1871,4 +1871,27 @@ test('revisión final GAS: aviso del resultado reconoce el codo condicional sin 
 });
 test('revisión final GAS: comprobaciones largas permanecen plegadas y detalle conserva ubicación conocida del casillero',()=>{
  const a=app();iniciarRedFlexible(a);configurarCasilleroPrueba(a,'lateral','no-incluido');a.run('calcularMaterialesManualGas()');const nodos=descendientesPresentacion(a.elements.get('resumenPrincipalMaterialesGas'));assert.equal(nodos.filter(n=>n.tagName==='TABLE').length,1);const resumen=nodos.find(n=>n.textContent.startsWith('Ver comprobaciones técnicas pendientes ('));assert.ok(resumen);assert.ok(nodos.some(n=>n.textContent==='Codo 90° · 1 unidad · Interior del casillero M'));assert.ok(nodos.some(n=>n.textContent.startsWith('Ver detalle por tramo')));assert.ok(nodos.some(n=>n.textContent==='Datos técnicos pendientes'));
+});
+
+test('motor SIGAS: ejercicio listo conserva 58m, 19 codos, 2 tees, 3 llaves y demandas sin otra carga',()=>{
+ const a=app();a.run("abrir('gas');abrirEjercicioSigas19Gas()");assert.equal(a.run('tramos.length'),5);assert.equal(a.run('revisionMaterialesGas.plan.longitudInformada'),58);assert.equal(cantidadManual(a,'codo90'),19);assert.equal(cantidadManual(a,'tee'),2);assert.equal(cantidadManual(a,'llave'),3);assert.equal(a.run('estadoCierreGas().consumoTotalKcal'),29200);
+ const r=a.run('calcularPreseleccionSigasGas()');assert.deepEqual(Array.from(r.filas,f=>f.candidato?.exteriorMm),[32,25,25,20,25]);assert.deepEqual(Array.from(r.filas,f=>f.candidato?.longitudFilaM),[36,36,24,36,34]);assert.deepEqual(Array.from(r.filas,f=>f.candidato?.capacidadM3h),[4.541,2.063,2.526,.932,2.123]);assert.equal(r.definitivo,false);assert.equal(r.diametrosDefinitivos,null);assert.ok(r.filas.every(f=>f.longitudDefinitivaM===null));assert.ok(a.run('tramos.every(t=>t.diametro===null)'));
+});
+test('motor SIGAS: proyecto de referencia no pisa datos, fotografía ni proyecto y no se duplica al abrirlo otra vez',()=>{
+ const a=app();iniciarRedFlexible(a);a.run("proyectoGasActual().foto='data:image/jpeg;base64,ORIGINAL';guardarDatos()");const antes=a.run('JSON.stringify({tramos:proyectos.gas.tramos,foto:proyectos.gas.foto,conteos:proyectos.gas.conteosRapidosGas})');a.run('abrirEjercicioSigas19Gas()');const id=a.run('ambitoGas');a.run('abrirEjercicioSigas19Gas()');assert.equal(a.run('ambitoGas'),id);assert.equal(a.run('registrosProyectosGas().filter(p=>p.datos.referenciaSigas19).length'),1);a.run("seleccionarAmbitoGas('proyecto')");assert.equal(a.run('JSON.stringify({tramos:proyectos.gas.tramos,foto:proyectos.gas.foto,conteos:proyectos.gas.conteosRapidosGas})'),antes);
+});
+test('motor SIGAS: 19 piezas de codo siguen registradas con técnicos desconocidos, sin inventar orientación del casillero',()=>{
+ const a=app();a.run("abrir('gas');abrirEjercicioSigas19Gas()");assert.equal(a.run('proyectoGasActual().casilleroMedidorGas'),undefined);assert.equal(a.run("entradaPreseleccionSigasGas().inventario.fisicas.filter(p=>p.tipo==='codo90').reduce((n,p)=>n+p.cantidad,0)"),19);assert.match(a.run('calcularPreseleccionSigasGas().pendientes.join(" ")'),/ubicación.*pendiente/);assert.equal(cantidadManual(a,'codo90'),19);
+});
+test('motor SIGAS: guardar producto recalcula equivalentes sin volver a confirmar cantidades ni cambiar tramos',()=>{
+ const a=app();a.run("abrir('gas');abrirEjercicioSigas19Gas()");const antes=a.run('JSON.stringify(tramos)'),pieza=a.run("entradaPreseleccionSigasGas().inventario.fisicas.find(p=>p.tipo==='codo90'&&p.tramos.includes('ref-M-A')).id");a.ctx.pieza=pieza;a.run("guardarVinculoSigasGas(pieza,'Calefactor','sigas-p24-izquierdo-21')");const r=a.run('calcularPreseleccionSigasGas()');assert.ok(r.recorridos.every(r=>r.aportes.some(a=>a.piezaId===pieza&&Math.abs(a.equivalenteTotalM-8.337)<1e-10)));assert.equal(a.run('JSON.stringify(tramos)'),antes);assert.equal(cantidadManual(a,'codo90'),19);assert.equal(r.definitivo,false);const b=app(a.saved());b.run("abrir('gas');calcularMaterialesManualGas()");assert.equal(b.run('JSON.stringify(proyectoGasActual().calculoSigas)'),a.run('JSON.stringify(proyectoGasActual().calculoSigas)'));assert.equal(cantidadManual(b,'codo90'),19);
+});
+test('motor SIGAS: resultados numéricos prioritarios, una tabla de materiales y copia de seguridad sin diámetros inventados',()=>{
+ const a=app();a.run("abrir('gas');abrirEjercicioSigas19Gas();prepararInformeActual()");const ns=descendientesPresentacion(a.elements.get('resumenPrincipalMaterialesGas'));assert.equal(ns.filter(n=>n.tagName==='TABLE').length,1);assert.ok(ns.some(n=>n.textContent==='Diámetros por tramo · SIGAS GN'));assert.ok(ns.some(n=>/exterior 32 mm/.test(n.textContent)));assert.match(a.elements.get('informeImpresion').innerHTML,/19/);assert.equal(a.run('estadoCierreGas().diametros'),null);assert.equal(a.run('CATALOGOS_GAS_VERIFICADOS.length'),0);
+});
+test('motor SIGAS: edición de consumos invalida la preselección anterior y no altera AGUA/CLOACAS',()=>{
+ const a=app();a.run("abrir('gas');abrirEjercicioSigas19Gas();proyectos.agua={aclaracion:'Agua conservada'};proyectos.cloacas={aclaracion:'Cloacas conservadas'}");const q=a.run('calcularPreseleccionSigasGas().filas[0].caudalM3h');a.run('artefactos[0].consumo=17000;guardarDatos();calcularMaterialesManualGas()');assert.notEqual(a.run('calcularPreseleccionSigasGas().filas[0].caudalM3h'),q);assert.equal(a.run('estadoCierreGas().consumoTotalKcal'),30200);assert.equal(a.run('proyectos.agua.aclaracion'),'Agua conservada');assert.equal(a.run('proyectos.cloacas.aclaracion'),'Cloacas conservadas');
+});
+test('motor SIGAS: nombre de referencia ocupado no sobrescribe un proyecto del usuario',()=>{
+ const a=app();iniciarRedFlexible(a);a.run("crearProyectoGas('Referencia SIGAS · 58 m · 19 codos');proyectoGasActual().foto='data:image/jpeg;base64,PROPIA';guardarDatos()");const antes=a.saved(),ambito=a.run('ambitoGas');assert.equal(a.run('abrirEjercicioSigas19Gas()'),false);assert.equal(a.saved(),antes);assert.equal(a.run('ambitoGas'),ambito);assert.equal(a.run('proyectoGasActual().foto'),'data:image/jpeg;base64,PROPIA');
 });

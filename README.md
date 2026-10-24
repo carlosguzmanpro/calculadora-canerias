@@ -1,3 +1,7 @@
+## Motor SIGAS GN experimental
+
+Preselección tabular e iteración de equivalentes identificados, con resultados por tramo y ejercicio de 58 m / 19 codos listo para abrir. Candidatos condicionados; diámetros definitivos aún bloqueados. Ver [método, pruebas y pendientes](PRESELECCION-SIGAS-GN.md). Esta rama no se publicó.
+
 # Estado de revisión de GAS manual
 
 La versión experimental conserva EPOXI, SIGAS y FUSIOGAS, una carga y una lista consolidada. Los diámetros definitivos permanecen bloqueados. Ver [revisión final y límites técnicos](REVISION-FINAL-GAS-MANUAL.md). No se publicó ni modificó producción.
