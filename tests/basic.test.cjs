@@ -1402,3 +1402,72 @@ test('materiales móvil: navegador sin opciones de scroll y error visible al gen
 test('materiales móvil: cinco tramos, veinte conciliaciones, foto y PDF sobreviven al cambio de presentación',()=>{
  const a=app();veinteConteosFlujo(a);a.run("proyectos.gas.foto='data:image/png;base64,MOVIL';guardarDatos();generarPlanGas();prepararInformeActual()");const antes=a.run('JSON.stringify({tramos,proyectos,artefactos})'),pdf=a.elements.get('informeImpresion').innerHTML;a.run("calcularMateriales();generarPlanGas('proyecto',true);prepararInformeActual()");assert.equal(a.run('JSON.stringify({tramos,proyectos,artefactos})'),antes);assert.equal(a.elements.get('informeImpresion').innerHTML,pdf);assert.equal(a.run('estadoConciliacionGas().filter(f=>!f.error).length'),20);assert.equal(a.run('tramos.length'),5);assert.equal(a.run('revisionMaterialesGas.plan.filas.filter(f=>f.tipo==="tee").reduce((s,f)=>s+f.cantidad,0)'),2);
 });
+
+function ejemploManualDirecto(a){
+ a.run(`abrir('gas');tramos=[['M','A',15,7,1,0],['A','B',5,1,1,0],['A','Termo',9,1,0,1],['B','Calefactor',16,4,0,1],['B','Cocina',13,5,0,1]].map(([desde,hasta,metros])=>({id:'manual-'+hasta,desde,hasta,metros,diametro:null,consumo:null,detalle:{estado:'pendiente',accesorios:[]}}));proyectos.gas.conteosRapidosGas=Object.fromEntries(tramos.map((t,i)=>[t.id,{codo90:[7,1,1,4,5][i],tee:i<2?1:0,llave:i>1?1:0}]));artefactos=[{nombre:'Termo',consumo:16000},{nombre:'Calefactor',consumo:3000},{nombre:'Cocina',consumo:10200}];`);
+}
+function cantidadManual(a,tipo){return a.run(`revisionMaterialesGas.plan.filas.filter(f=>f.tipo==='${tipo}').reduce((n,f)=>n+(f.cantidad||0),0)`);}
+test('manual directo: ejemplo de cinco tramos calcula 58 m, 18 codos, dos tees y tres llaves sin conciliar',()=>{
+ const a=app();ejemploManualDirecto(a);a.run('calcularMaterialesManualGas()');assert.equal(a.run('revisionMaterialesGas.plan.longitudInformada'),58);assert.equal(cantidadManual(a,'codo90'),18);assert.equal(cantidadManual(a,'tee'),2);assert.equal(cantidadManual(a,'llave'),3);assert.equal(a.run('proyectos.gas.conciliacionRapidaGas'),undefined);assert.equal(a.run('revisionMaterialesGas.plan.dimensionamientoDefinitivo'),false);assert.equal(a.run('tramos.every(t=>t.diametro===null)'),true);assert.equal(a.elements.get('ajustesAvanzadosGas').open,false);assert.equal(a.run('fotoURL'),null);
+});
+test('manual directo: siete codos sustituyen el detalle de cantidades sin duplicarlo ni alterarlo',()=>{
+ const a=app();ejemploManualDirecto(a);a.run("tramos[0].detalle.accesorios=Array.from({length:7},()=>({tipo:'codo90',metrosAntes:''}))");const detalle=a.run('JSON.stringify(tramos[0].detalle)');a.run('calcularMaterialesManualGas();calcularMaterialesManualGas()');assert.equal(cantidadManual(a,'codo90'),18);assert.equal(a.run('JSON.stringify(tramos[0].detalle)'),detalle);assert.equal(a.run('estadoConciliacionGas().filter(f=>f.revision?.confirmado).length'),0);
+});
+test('manual directo: cantidades discordantes conservan el original y muestran advertencia, no suman ambos',()=>{
+ const a=app();ejemploManualDirecto(a);a.run("tramos[0].detalle.accesorios=[{tipo:'codo90'},{tipo:'codo90'}];calcularMaterialesManualGas()");assert.equal(cantidadManual(a,'codo90'),18);assert.equal(a.run('tramos[0].detalle.accesorios.length'),2);assert.match(a.run('revisionMaterialesGas.plan.avisos.join(" ")'),/total manual 7.*detalle \(2\)/);
+});
+test('manual directo: vacío permanece pendiente y cero explícito no agrega piezas',()=>{
+ const a=app();ejemploManualDirecto(a);a.run('proyectos.gas.conteosRapidosGas[tramos[0].id].codo45=0;calcularMaterialesManualGas()');assert.equal(a.run('revisionMaterialesGas.plan.filas.find(f=>f.tipo==="codo45").cantidad'),0);assert.match(a.run('revisionMaterialesGas.plan.avisos.join(" ")'),/Cantidad pendiente: A–B: Codos de 45/);assert.equal(a.run('proyectos.gas.conteosRapidosGas[tramos[1].id].codo45'),undefined);assert.equal(a.run('revisionMaterialesGas.plan.planes.every(p=>p.compraEstimada===null&&p.cuplasPropuestas===null)'),true);
+});
+test('manual directo: modificar una cantidad recalcula y conserva respaldo sin segunda carga',()=>{
+ const a=app();ejemploManualDirecto(a);a.run('calcularMaterialesManualGas();proyectos.gas.conteosRapidosGas[tramos[0].id].codo90=6;guardarDatos()');assert.equal(cantidadManual(a,'codo90'),17);assert.ok(a.run('datosPlanGas().respaldos.length')>0);assert.equal(a.run('proyectos.gas.conciliacionRapidaGas'),undefined);
+});
+test('manual directo: guardado y respaldo importado mantienen cantidades, fotografía y revisión anterior',()=>{
+ const a=app();veinteConteosFlujo(a);a.run("proyectos.gas.foto='data:image/png;base64,MANUAL';guardarDatos()");const revisiones=a.run('JSON.stringify(proyectos.gas.conciliacionRapidaGas)');a.run('calcularMaterialesManualGas()');assert.equal(a.run('JSON.stringify(proyectos.gas.conciliacionRapidaGas)'),revisiones);const b=app(a.saved());b.run("abrir('gas');calcularMaterialesManualGas();prepararInformeActual()");assert.equal(cantidadManual(b,'tee'),2);assert.equal(cantidadManual(b,'llave'),3);assert.match(b.elements.get('informeImpresion').innerHTML,/MANUAL/);assert.equal(b.run('modoManualGasActivo()'),true);const c=app();c.run("abrir('gas')");respaldoPrueba(c,{formato:'canerias-respaldo-v1',proyectos:JSON.parse(a.saved())});c.run('calcularMaterialesManualGas()');assert.equal(cantidadManual(c,'tee'),2);assert.equal(c.run('JSON.stringify(proyectos.gas.conciliacionRapidaGas)'),revisiones);
+});
+test('manual directo: tee compartida identificada sigue siendo una sola pieza en varios tramos',()=>{
+ const a=app();redAndroidEstructurada(a);a.run('detectarAccesoriosGas()');const tee=registrosDeteccion(a,'tee').find(r=>r.propuesta.ubicacion==='A');confirmarDeteccion(a,tee.propuesta.id);for(const i of [0,2]){abrirRapidoPrueba(a,i);guardarRapidoPrueba(a,{tee:1});}a.run('calcularMaterialesManualGas()');assert.equal(cantidadManual(a,'tee'),1);assert.equal(a.run('revisionMaterialesGas.plan.filas.filter(f=>f.tipo==="codo90"&&f.cantidad>0).length'),0);
+});
+test('manual directo: una tee que gira no produce un codo adicional',()=>{
+ const a=app();proyectoPlan(a);a.run("tramos[0].detalle={estado:'pendiente',accesorios:[{tipo:'tee',nodo:'A',via:'giro90'}]};proyectos.gas.conteosRapidosGas={t:{tee:1,codo90:0}};calcularMaterialesManualGas()");assert.equal(cantidadManual(a,'tee'),1);assert.equal(cantidadManual(a,'codo90'),0);
+});
+test('manual directo: materiales, PDF y CSV quedan disponibles sin marcar revisión técnica',()=>{
+ const a=app();ejemploManualDirecto(a);a.run('calcularMaterialesManualGas()');assert.equal(a.run('!!prepararSalidaMaterialesGas()'),true);assert.equal(a.run('revisionMaterialesGas.plan.filas.every(f=>!f.revisado)'),true);a.run('prepararInformeActual()');const pdf=a.elements.get('informeImpresion').innerHTML;assert.match(pdf,/DEFINITIVO/);assert.doesNotMatch(pdf,/<(?:button|input)\b/);assert.match(a.text('matMensaje'),/estimados|pendientes/);
+});
+test('manual directo: formulario único guarda, edita y permite volver a pendiente',()=>{
+ const a=app();a.run("abrir('gas')");for(const [id,valor]of Object.entries({desde:'M',hasta:'A',metros:'15',manualGas_codo90:'7',manualGas_tee:'1',manualGas_llave:'0'}))a.elements.get(id).value=valor;a.run('agregarTramo()');assert.equal(a.run('conteoRapidoDelTramoGas(tramos[0]).codo90'),7);a.run('editarTramo(0)');assert.equal(a.elements.get('manualGas_codo90').value,7);a.elements.get('manualGas_codo90').value='6';a.elements.get('manualGas_tee').value='';a.run('agregarTramo();calcularMaterialesManualGas()');assert.equal(cantidadManual(a,'codo90'),6);assert.equal(a.run('conteoRapidoDelTramoGas(tramos[0]).tee'),undefined);assert.equal(a.run('tramos.length'),1);
+});
+test('manual directo: cantidades inválidas no alteran el proyecto',()=>{
+ const a=app();a.run("abrir('gas')");for(const [id,v]of Object.entries({desde:'M',hasta:'A',metros:'15',manualGas_codo90:'-1'}))a.elements.get(id).value=v;a.run('agregarTramo()');assert.equal(a.run('tramos.length'),0);assert.match(a.text('resultadoMateriales'),/enteros no negativos/);
+});
+test('manual directo: modos y cantidades no se mezclan entre proyecto, demostración, AGUA y CLOACAS',()=>{
+ const a=app();ejemploManualDirecto(a);a.run('calcularMaterialesManualGas()');const gas=a.run('JSON.stringify(proyectos.gas)');a.run("seleccionarAmbitoGas('demostracion')");assert.equal(a.run('modoManualGasActivo()'),false);assert.equal(a.run('tramos.length'),0);a.run("abrir('agua');calcularMaterialesManualGas();abrir('cloacas');calcularMaterialesManualGas()");assert.equal(a.run('proyectos.agua.planCompra?.opciones?.cargaManualDirecta'),undefined);a.run("abrir('gas');seleccionarAmbitoGas('proyecto');calcularMaterialesManualGas()");assert.equal(cantidadManual(a,'tee'),2);assert.ok(gas.includes('cargaManualDirecta'));
+});
+test('manual directo: CSV real conserva las cantidades y no pide otra confirmación',()=>{
+ const a=app();ejemploManualDirecto(a);a.run('calcularMaterialesManualGas()');let texto='',clicks=0;const crear=a.ctx.document.createElement;a.ctx.Blob=class{constructor(partes){texto=partes.join('');}};a.ctx.URL.createObjectURL=()=> 'blob:manual';a.ctx.setTimeout=fn=>fn();a.ctx.document.createElement=()=>{const e=crear();e.click=()=>clicks++;return e;};a.run('descargarMaterialesGas()');assert.equal(clicks,1);assert.match(texto,/cantidad manual/);assert.match(texto,/NO DEFINITIVA/);assert.match(texto,/"7"/);assert.match(texto,/M–A/);assert.equal(a.run('revisionMaterialesGas.plan.filas.some(f=>f.revisado)'),false);
+});
+test('manual directo: sin tramos no anuncia éxito y mantiene el proyecto',()=>{
+ const a=app();a.run("abrir('gas');calcularMaterialesManualGas()");assert.match(a.text('matMensaje'),/Agregá tramos/);assert.equal(a.run('tramos.length'),0);assert.equal(a.run('revisionMaterialesGas'),null);
+});
+test('manual directo: accesorios reductores integrados no se cuentan como otra reducción',()=>{
+ const a=app();proyectoPlan(a);a.run(`tramos[0].detalle={estado:'pendiente',accesorios:[{tipo:'codo90',entrada:'1"',salida:'3/4"'}]};proyectos.gas.conteosRapidosGas={t:{codo90:1,reduccion:1}};calcularMaterialesManualGas()`);assert.equal(cantidadManual(a,'codo90'),1);assert.equal(cantidadManual(a,'reduccion'),0);assert.match(a.run('revisionMaterialesGas.plan.avisos.join(" ")'),/reductor integrado/);
+});
+test('manual directo: IA futura no aplica reglas de medidor o artefactos ni altera cantidades',()=>{
+ const a=app();ejemploManualDirecto(a);a.run('calcularMaterialesManualGas()');const antes=a.run('JSON.stringify({proyectos,tramos,artefactos})');const contrato=a.run('contratoInterpretacionFuturaGas()');assert.equal(contrato.habilitada,false);assert.equal(contrato.aplicarReglasAutomaticamente,false);assert.equal(contrato.envioAutomatico,false);assert.equal(contrato.reglas.find(r=>r.id==='medidor-lateral').propuesta.cantidad,1);assert.equal(contrato.reglas.find(r=>r.id==='medidor-superior').propuesta.cantidad,0);assert.equal(a.run('JSON.stringify({proyectos,tramos,artefactos})'),antes);assert.equal(cantidadManual(a,'codo90'),18);
+});
+test('manual directo: varias tees compartidas posibles quedan advertidas sin inventar otro punto',()=>{
+ const a=app();a.run(`abrir('gas');tramos=[{id:'ab',desde:'A',hasta:'B',metros:5,diametro:null,detalle:{estado:'pendiente',accesorios:[]}}];proyectos.gas.conteosRapidosGas={ab:{tee:1}};datosPlanGas().extras=[{tipo:'tee',nodo:'A',cantidad:1,medidas:[],confirmado:true,ubicacion:'A'},{tipo:'tee',nodo:'B',cantidad:1,medidas:[],confirmado:true,ubicacion:'B'}];calcularMaterialesManualGas()`);assert.equal(cantidadManual(a,'tee'),2);assert.match(a.run('revisionMaterialesGas.plan.avisos.join(" ")'),/varias piezas compartidas posibles/);assert.equal(a.run("revisionMaterialesGas.plan.filas.some(f=>f.nodo&&!['nombre:a','nombre:b'].includes(f.nodo))"),false);
+});
+test('manual directo: cuplas y otros accesorios detallados se conservan sin crear conexiones no informadas',()=>{
+ const a=app();proyectoPlan(a);a.run("tramos[0].detalle={estado:'pendiente',accesorios:[{tipo:'cupla'},{tipo:'soporte'}]};calcularMaterialesManualGas()");assert.equal(cantidadManual(a,'cupla'),1);assert.equal(cantidadManual(a,'soporte'),1);assert.equal(cantidadManual(a,'llave'),0);assert.equal(a.run('revisionMaterialesGas.plan.dimensionamientoDefinitivo'),false);
+});
+test('manual directo: Calcular guarda el tramo válido en edición sin otro paso',()=>{
+ assert.match(html,/desplazarResultadoMaterialesGas\('formularioGas'\)">Cargar o editar/);
+ const a=app();a.run("abrir('gas')");for(const [id,v]of Object.entries({desde:'M',hasta:'A',metros:'15',manualGas_codo90:'7',manualGas_tee:'1'}))a.elements.get(id).value=v;a.run('calcularMaterialesManualGas()');assert.equal(a.run('tramos.length'),1);assert.equal(cantidadManual(a,'codo90'),7);assert.equal(a.run('revisionMaterialesGas.plan.longitudInformada'),15);
+});
+test('manual directo: un borrador inválido conserva campos y muestra error visible sin usar el resultado anterior',()=>{
+ const a=app();ejemploManualDirecto(a);a.run('calcularMaterialesManualGas();editarTramo(0)');a.elements.get('manualGas_codo90').value='-1';a.run('calcularMaterialesManualGas()');assert.match(a.text('mensajeCargaManualGas'),/enteros no negativos/);assert.equal(a.run('conteoRapidoDelTramoGas(tramos[0]).codo90'),7);assert.equal(a.elements.get('manualGas_codo90').value,'-1');assert.match(a.text('resumenPrincipalMaterialesGas'),/Borrador sin guardar/);
+});
+test('manual directo: el PDF usa la misma lista que pantalla, con ceros, avisos y consumos existentes',()=>{
+ const a=app();ejemploManualDirecto(a);a.run('proyectos.gas.conteosRapidosGas[tramos[0].id].codo45=0;calcularMaterialesManualGas()');const modelo=a.run('modeloInformeActual()');for(const [tipo,total]of [['codo90',18],['tee',2],['llave',3],['codo45',0]])assert.equal(modelo.filas.filter(f=>f.tipo===tipo).reduce((s,f)=>s+(f.cantidad||0),0),total);assert.equal(modelo.artefactos.reduce((s,a)=>s+a.consumo,0),29200);assert.ok(modelo.resumen.some(t=>/58 m/.test(t)));assert.ok(modelo.resumen.some(t=>/Cantidad pendiente/.test(t)));assert.ok(!modelo.resumen.some(t=>/Sólo los adicionales conciliados/.test(t)));assert.equal(a.run('CATALOGOS_GAS_VERIFICADOS.length'),0);
+});

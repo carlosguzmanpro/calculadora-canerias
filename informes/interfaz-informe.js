@@ -2,7 +2,7 @@ let ultimoDocumentoPreparado=null;
 function modeloInformeActual(){
  const gas=modulo==='gas',d={titulo:({gas:'GAS',agua:'AGUA',cloacas:'CLOACAS'})[modulo]||'Sin proyecto seleccionado',ambito:gas&&ambitoGas==='demostracion'?'DEMOSTRACIÓN · datos de práctica separados':'MI PROYECTO',tramos:gas?tramos:[],artefactos:gas?artefactos:[],filas:[],resumen:[],observaciones:$('duda').value.trim(),advertencia:gas?'Diámetros automáticos definitivos BLOQUEADOS. Cantidades estimadas y datos pendientes conservan su condición. Informe de revisión; no aprueba una instalación real.':''};
  if(gas){
-  d.resumen.push(avisoConciliacionRapidaGas());
+  d.resumen.push(modoManualGasActivo()?'Cálculo manual: cantidades ingresadas una sola vez, sin segunda confirmación; revisión técnica pendiente.':avisoConciliacionRapidaGas());
   const avisoDeteccion=avisoDeteccionGas();if(avisoDeteccion)d.resumen.push(avisoDeteccion);
   const resultado=motorClaseAceroGas(tramos,artefactos,instalacionGas,catalogoParaGas(instalacionGas));
   const red=analizarRedGas();
@@ -14,10 +14,11 @@ function modeloInformeActual(){
   try{
   const entrada=entradaMaterialesGas('proyecto'),opciones=opcionesMaterialesGas('proyecto');
   const firma=JSON.stringify({fuente:'proyecto',entrada,opciones});
-  const plan=anotarFilasRevisionGas(MaterialesGas.planificarMateriales(entrada,opciones),entrada),previa=datosPlanGas().revisiones.proyecto;
+  const plan=anotarFilasRevisionGas(planificarVistaMaterialesGas(entrada,opciones),entrada),previa=datosPlanGas().revisiones.proyecto;
   const base=fuenteMaterialesGas==='proyecto'&&revisionMaterialesGas?revisionMaterialesGas:previa;
   const mismos=base?.firma===firma,actuales=filasRevisionGas(base);
   for(const f of plan.filas){const r=actuales.find(r=>mismos?r.id===f.id:r.editado&&identidadFilaGas(r)===identidadFilaGas(f));if(r){f.cantidad=r.cantidad;f.revisado=mismos&&!!r.revisado;if(r.editado){f.editado=true;f.estado='estimado';}}}
+  if(plan.manualDirecto)d.resumen.push('Longitud total informada: '+plan.longitudInformada+' m.',...plan.avisos.map(t=>ubicacionLegibleGas(t)));
   d.filas=plan.filas.map(f=>({...f,ubicacion:ubicacionLegibleGas(f.ubicacion)}));d.materialesAgrupados=InformeProyecto.agruparMateriales(d.filas);
   d.resumen.push('Materiales: largo comercial '+plan.config.largoComercial+' m; reutilización de sobrantes '+(plan.config.reutilizar?'selectiva estimada':'no prevista')+'. Cantidades sujetas a revisión; pendiente no significa cero.');
   d.resumen.push('Método de clase: reducciones en materiales, excluidas de equivalentes. Una instalación real puede requerir pérdidas adicionales.');
