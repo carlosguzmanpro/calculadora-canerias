@@ -1,5 +1,13 @@
 # CAÑERÍAS
 
+## GAS: lista simple y conexiones en cualquier orden · nueva prueba local
+
+Rama `prueba/gas-lista-simple-red-flexible`, derivada de `85352b9`. Una tabla Material/Cantidad, avisos en «Datos técnicos pendientes» y detalle por tramo opcional. Se retiró la casilla visible de llave adicional, conservando los datos heredados. La red física admite extremos invertidos y orden arbitrario, calcula consumos acumulados y detecta duplicados o conexiones ambiguas sin reescribir el proyecto.
+
+**468 pruebas aprobadas: 445 anteriores + 23 nuevas.** Ejemplo: 58 m, 18 codos de 90°, 2 tees, 3 llaves; demanda conectada 29.200 kcal/h. Motor normativo y tablas intactos; dimensionamiento definitivo bloqueado. Prueba visual Android pendiente por restricción de Chromium. Esta rama no se subió ni se desplegó.
+
+[Guía y límites de la nueva mejora](GAS-LISTA-SIMPLE-RED-FLEXIBLE.md). Las secciones siguientes documentan versiones anteriores.
+
 ## GAS: cálculo manual simplificado · nueva rama experimental
 
 Rama local `prueba/gas-manual-un-solo-calculo`, basada en los archivos de `prueba/gas-materiales-tarjetas-movil` (`4219aa5`, idénticos a la recuperación remota `6305c3b`). Tramos y cantidades se ingresan juntos; **Calcular materiales** usa los totales manuales una sola vez, conserva detalles y evita sumar las piezas compartidas identificadas. Foto opcional. Las herramientas anteriores siguen como opciones avanzadas.
