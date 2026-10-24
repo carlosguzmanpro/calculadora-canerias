@@ -624,7 +624,7 @@ function resumenListaManualGas(plan){
   const material=tipo==='cupla'?'Cuplas':tipo==='tee'&&!/reductora|igual/i.test(f.material)?'Tee':f.material;
   agregar(tipo,material,f.diametro,f.unidad||'unidad',f.cantidad,false,!f.cantidadConfirmada||!!f.editado);
  }
- return [...grupos.values()].sort((a,b)=>(a.tipo==='cano'?-1:b.tipo==='cano'?1:a.material.localeCompare(b.material,'es'))||a.diametro.localeCompare(b.diametro));
+ return [...grupos.values()].sort((a,b)=>(a.tipo==='cano'&&b.tipo!=='cano'?-1:a.tipo!=='cano'&&b.tipo==='cano'?1:a.material.localeCompare(b.material,'es'))||a.diametro.localeCompare(b.diametro));
 }
 function avisosListaManualGas(plan){
  const avisos=new Set(['Los diámetros definitivos siguen bloqueados. Esta lista no acredita cumplimiento normativo.']);

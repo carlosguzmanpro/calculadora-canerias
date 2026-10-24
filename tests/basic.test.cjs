@@ -1545,3 +1545,6 @@ test('red flexible: recarga e importación preservan llaves heredadas, cantidade
 test('lista simple: PDF agrupa el mismo metraje y accesorios sin filas de diámetro pendiente por tramo',()=>{
  const a=app();iniciarRedFlexible(a);a.run('calcularMaterialesManualGas()');const m=a.run('modeloInformeActual()');assert.equal(m.materialesAgrupados.filter(f=>f.tipo==='cano').length,1);assert.equal(m.materialesAgrupados.find(f=>f.tipo==='cano').cantidad,58);assert.equal(m.materialesAgrupados.find(f=>f.tipo==='codo90').cantidad,18);assert.equal(m.materialesAgrupados.filter(f=>f.tipo==='cupla').length,1);assert.equal(m.materialesAgrupados.find(f=>f.tipo==='cupla').cantidad,null);assert.equal(m.materialesAgrupados.find(f=>f.tipo==='cano').diametro,'Pendiente');
 });
+test('lista simple: el orden de los grupos de caño de medidas distintas no cambia el resumen',()=>{
+ const a=app();a.ctx.planesOrden=[{diametro:'1"',material:'Acero epoxi',sistema:'Roscado',metros:9},{diametro:'3/4"',material:'Acero epoxi',sistema:'Roscado',metros:5}];const primero=a.run('JSON.stringify(resumenListaManualGas({planes:planesOrden,filas:[]}))');const segundo=a.run('JSON.stringify(resumenListaManualGas({planes:[...planesOrden].reverse(),filas:[]}))');assert.equal(primero,segundo);
+});

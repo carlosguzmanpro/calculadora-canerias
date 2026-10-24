@@ -4,7 +4,7 @@
 
 Rama `prueba/gas-lista-simple-red-flexible`, derivada de `85352b9`. Una tabla Material/Cantidad, avisos en «Datos técnicos pendientes» y detalle por tramo opcional. Se retiró la casilla visible de llave adicional, conservando los datos heredados. La red física admite extremos invertidos y orden arbitrario, calcula consumos acumulados y detecta duplicados o conexiones ambiguas sin reescribir el proyecto.
 
-**468 pruebas aprobadas: 445 anteriores + 23 nuevas.** Ejemplo: 58 m, 18 codos de 90°, 2 tees, 3 llaves; demanda conectada 29.200 kcal/h. Motor normativo y tablas intactos; dimensionamiento definitivo bloqueado. Prueba visual Android pendiente por restricción de Chromium. Esta rama no se subió ni se desplegó.
+**469 pruebas aprobadas: 445 anteriores + 24 nuevas.** Ejemplo: 58 m, 18 codos de 90°, 2 tees, 3 llaves; demanda conectada 29.200 kcal/h. Motor normativo y tablas intactos; dimensionamiento definitivo bloqueado. Prueba visual Android pendiente por restricción de Chromium. Esta rama no se subió ni se desplegó.
 
 [Guía y límites de la nueva mejora](GAS-LISTA-SIMPLE-RED-FLEXIBLE.md). Las secciones siguientes documentan versiones anteriores.
 

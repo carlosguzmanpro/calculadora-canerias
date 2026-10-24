@@ -66,7 +66,7 @@ El total de demanda no suma los consumos acumulados de los tramos compartidos: s
 
 ## Verificación
 
-`npm test`: 468 pruebas aprobadas (369 básicas y 99 específicas). Las 445 anteriores se conservan; 23 nuevas comprueban tabla única, agrupación, compatibilidad de llaves y respaldos, permutaciones, inversión, duplicados, consumos parciales, ciclos y PDF.
+`npm test`: 469 pruebas aprobadas (370 básicas y 99 específicas). Las 445 anteriores se conservan; 24 nuevas comprueban tabla única, agrupación, compatibilidad de llaves y respaldos, permutaciones, inversión, duplicados, consumos parciales, ciclos y PDF.
 
 Los archivos de tablas N.º 3/N.º 18, planificador físico y detección SIN IA no cambiaron. Se cotejaron las funciones normativas y el analizador técnico anterior con la base: idénticos. El HTML continúa incorporando once fuentes locales para Android.
 
