@@ -1,5 +1,13 @@
 # CAÑERÍAS
 
+## GAS: cálculo manual simplificado · nueva rama experimental
+
+Rama local `prueba/gas-manual-un-solo-calculo`, basada en los archivos de `prueba/gas-materiales-tarjetas-movil` (`4219aa5`, idénticos a la recuperación remota `6305c3b`). Tramos y cantidades se ingresan juntos; **Calcular materiales** usa los totales manuales una sola vez, conserva detalles y evita sumar las piezas compartidas identificadas. Foto opcional. Las herramientas anteriores siguen como opciones avanzadas.
+
+**445 pruebas aprobadas: 424 anteriores intactas + 21 nuevas.** Ejemplo comprobado: 58 m, 18 codos de 90°, 2 tees y 3 llaves. Diámetros definitivos siguen bloqueados. Compra y cuplas requieren datos suficientes. IA premium futura desactivada, sin servicios ni pagos. Prueba visual Android pendiente por restricción del navegador del entorno. No se subió ni desplegó esta rama.
+
+Uso, conservación de datos, límites y prueba local: [GAS-MANUAL-UN-SOLO-CALCULO.md](GAS-MANUAL-UN-SOLO-CALCULO.md). Las secciones siguientes documentan etapas anteriores.
+
 ## Detección básica de accesorios SIN IA (versión experimental actual)
 
 Rama `prueba/deteccion-accesorios-sin-ia`, base `474bbcf`. El botón **Detectar accesorios automáticamente** propone tees por conexiones, llaves de artefactos, cuplas por segmentos/largo comercial y reducciones con medidas conocidas. Permite corregir, confirmar o rechazar; solo las confirmadas se incorporan, sin duplicar piezas manuales. Cambios posteriores conservan correcciones y piden revisión. No lee fotos, inventa codos ni calcula diámetros.
