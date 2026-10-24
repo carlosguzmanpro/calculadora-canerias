@@ -1,3 +1,7 @@
+# Estado de revisión de GAS manual
+
+La versión experimental conserva EPOXI, SIGAS y FUSIOGAS, una carga y una lista consolidada. Los diámetros definitivos permanecen bloqueados. Ver [revisión final y límites técnicos](REVISION-FINAL-GAS-MANUAL.md). No se publicó ni modificó producción.
+
 # CAÑERÍAS
 
 ## GAS manual: cierre local para revisión

@@ -680,16 +680,16 @@ function renderListaManualSimpleGas(out,plan,modelo){
   cantidad.textContent=f.pendiente?(f.cantidad>0?fmt(f.cantidad)+' '+f.unidad+' conocidas · resto pendiente':'Pendiente'):fmt(f.cantidad)+' '+f.unidad+(f.estimado&&f.cantidad>0?' estimadas':'');tr.append(nombre,cantidad);body.append(tr);
  }
  tabla.append(body);out.append(tabla);
- const pendientes=document.createElement('details'),titulo=document.createElement('summary');pendientes.className='gas-detalles';titulo.textContent='Datos técnicos pendientes';pendientes.append(titulo);for(const s of avisosListaManualGas(plan))texto(pendientes,s);renderEstadoCierreGas(out,pendientes);out.append(pendientes);
+ const pendientes=document.createElement('details'),titulo=document.createElement('summary');pendientes.className='gas-detalles';titulo.textContent='Datos técnicos pendientes';pendientes.append(titulo);for(const s of avisosListaManualGas(plan))texto(pendientes,s);renderEstadoCierreGas(out,pendientes,plan);out.append(pendientes);
  const detalles=document.createElement('details'),sum=document.createElement('summary');sum.textContent='Ver detalle por tramo y consumos';detalles.append(sum);
  const red=plan.redManual;
- if(red)texto(detalles,red.total===null?'Consumo total conectado: Pendiente. Los consumos parciales conocidos se conservan.':'Consumo total conectado: '+fmt(red.total)+' kcal/h, sin simultaneidad. No dimensiona diámetros.');
+ if(red)texto(detalles,red.total===null?'Consumo total conectado: Pendiente. Los consumos parciales conocidos se conservan.':'Consumo total conectado: '+fmt(red.total)+' kcal/h, sin aplicar reducción por simultaneidad. No dimensiona diámetros.');
  for(const tramo of modelo.porTramo){
   const h=document.createElement('h4');h.textContent=tramo.tramo;detalles.append(h);const t=tramos.find(t=>t.desde+'–'+t.hasta===tramo.tramo);
   if(t&&red){const consumo=red.porTramo[t.id];texto(detalles,'Consumo acumulado: '+(Number.isFinite(consumo)?fmt(consumo)+' kcal/h':'Pendiente'));}
   for(const a of tramo.filas)texto(detalles,a.fila.material+' · '+(a.fila.cantidad??'Pendiente')+' '+a.fila.unidad+(a.compartida?' · referencia compartida; una sola pieza en el total':'')+' · '+a.fila.diametro);
  }
- if(modelo.sinUbicacion.length)for(const a of modelo.sinUbicacion)texto(detalles,a.fila.material+' · '+(a.fila.cantidad??'Pendiente')+' '+a.fila.unidad+' · ubicación pendiente');
+ if(modelo.sinUbicacion.length)for(const a of modelo.sinUbicacion)texto(detalles,a.fila.material+' · '+(a.fila.cantidad??'Pendiente')+' '+a.fila.unidad+' · '+(a.fila.ubicacion?ubicacionLegibleGas(a.fila.ubicacion):'ubicación pendiente'));
  out.append(detalles);
 }
 

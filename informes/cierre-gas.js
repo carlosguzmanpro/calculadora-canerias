@@ -19,11 +19,11 @@ function estadoCierreGas(){
   return {sistema:id,consumoTotalKcal:red.total,consumos:red.porTramo,recorridos:preparacion.recorridos,estadoMateriales:'cantidades-manuales-disponibles',estadoDiametros:'pendiente-validacion-tecnica',diametros:null,entradaMotor:preparada.entrada,motor,faltantes:[...new Set(faltantes)]};
  }catch(e){return {sistema,consumoTotalKcal:red?.total??null,consumos:red?.porTramo||{},recorridos:preparacion?.recorridos||[],estadoMateriales:'cantidades-manuales-disponibles',estadoDiametros:'diagnostico-no-disponible',diametros:null,faltantes:['Diagnóstico técnico no disponible: '+e.message+'. Los materiales manuales siguen disponibles.']};}
 }
-function renderEstadoCierreGas(out,pendientes){
+function renderEstadoCierreGas(out,pendientes,plan=null){
  const estado=estadoCierreGas();if(!estado)return;
  const texto=(padre,s)=>{const p=document.createElement('p');p.textContent=s;padre.append(p);};
  texto(out,'Estado: materiales manuales calculados · consumo total '+(Number.isFinite(estado.consumoTotalKcal)?fmt(estado.consumoTotalKcal)+' kcal/h':'Pendiente de conexiones/consumos')+' · diámetros pendientes de verificación técnica.');
- texto(pendientes,'El bloqueo técnico no impide obtener las cantidades válidas. No se agregaron accesorios ni se asignaron diámetros orientativos.');
- for(const s of estado.faltantes)texto(pendientes,s);
+ texto(pendientes,'El bloqueo técnico no impide obtener las cantidades válidas. No se asignaron diámetros orientativos.'+(plan?.casilleroMedidorGas?.adicional===1?' Incluye un codo de 90° dentro del casillero M por entrada lateral/posterior confirmada y declarado no incluido en los tramos.':' Se conservan las cantidades declaradas y el cotejo del casillero M.'));
+ const detalle=document.createElement('details'),titulo=document.createElement('summary');detalle.className='gas-detalles';titulo.textContent='Ver comprobaciones técnicas pendientes ('+estado.faltantes.length+')';detalle.append(titulo);for(const s of estado.faltantes)texto(detalle,s);pendientes.append(detalle);
  const boton=document.createElement('button');boton.className='alt solo-pantalla';boton.textContent='Ver tablas y diagnóstico avanzado';boton.onclick=()=>mostrarVista('dimensionGas');pendientes.append(boton);
 }
