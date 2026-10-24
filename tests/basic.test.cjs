@@ -1835,3 +1835,30 @@ test('etapa 1: respaldo JSON v1 real recupera FUSIOGAS, GLP, largo anterior y fo
 test('etapa 1: FUSIOGAS desordenado y con extremos invertidos conserva recorridos y consumos',()=>{
  const a=app();iniciarRedFlexible(a,true,[4,2,0,3,1]);a.run("seleccionarCatalogoSistemaGas('fusiogas');seleccionarCombustibleGas('GLP');calcularMaterialesManualGas()");const e=a.run('estadoCierreGas()');assert.equal(e.consumoTotalKcal,29200);assert.deepEqual(Object.values(e.consumos).sort((a,b)=>a-b),[3000,10200,13200,16000,29200]);assert.deepEqual(Array.from(e.recorridos,r=>r.longitudReal),[36,33,24]);assert.equal(e.diametros,null);assert.equal(cantidadManual(a,'tee'),2);
 });
+
+function configurarCasilleroPrueba(a,entrada,codo='pendiente'){
+ a.elements.get('entradaCasilleroGas').value=entrada;a.run('guardarCasilleroMedidorGas()');
+ a.elements.get('codoCasilleroGas').value=codo;a.run('guardarCasilleroMedidorGas()');
+}
+for(const orientacion of ['lateral','posterior','superior','desconocida'])test('casillero M: entrada '+orientacion+' solo suma la pieza justificada',()=>{
+ const a=app();iniciarRedFlexible(a);a.run('calcularMaterialesManualGas()');const datos=a.run('JSON.stringify({tramos,artefactos,instalacionGas,conteos:proyectoGasActual().conteosRapidosGas})'),otras=a.run("JSON.stringify(revisionMaterialesGas.plan.filas.filter(f=>f.tipo!=='codo90'))"),tecnico=a.run('JSON.stringify(estadoCierreGas())');
+ configurarCasilleroPrueba(a,orientacion,'no-incluido');a.run('calcularMaterialesManualGas()');const esperado=['lateral','posterior'].includes(orientacion)?19:18;assert.equal(cantidadManual(a,'codo90'),esperado);assert.equal(a.run('revisionMaterialesGas.plan.filas.filter(f=>f.id==="casillero-medidor:codo90").length'),esperado===19?1:0);
+ assert.equal(a.run('JSON.stringify({tramos,artefactos,instalacionGas,conteos:proyectoGasActual().conteosRapidosGas})'),datos);assert.equal(a.run("JSON.stringify(revisionMaterialesGas.plan.filas.filter(f=>f.tipo!=='codo90'))"),otras);assert.equal(a.run('JSON.stringify(estadoCierreGas())'),tecnico);assert.equal(a.run('revisionMaterialesGas.plan.longitudInformada'),58);
+ if(esperado===19){const f=a.run('revisionMaterialesGas.plan.filas.find(f=>f.id==="casillero-medidor:codo90")');assert.equal(f.ubicacion,'Interior del casillero M');assert.equal(f.diametro,'Pendiente');assert.equal(f.cantidadConfirmada,true);}
+ a.run('calcularMaterialesManualGas();calcularMaterialesManualGas()');assert.equal(cantidadManual(a,'codo90'),esperado);
+});
+for(const orientacion of ['lateral','posterior'])test('casillero M: '+orientacion+' ya incluido o sin cotejo nunca duplica',()=>{
+ const a=app();iniciarRedFlexible(a);configurarCasilleroPrueba(a,orientacion);a.run('calcularMaterialesManualGas()');assert.equal(cantidadManual(a,'codo90'),18);assert.match(a.text('estadoCasilleroGas'),/indicá si el codo/);
+ configurarCasilleroPrueba(a,orientacion,'incluido');a.run('calcularMaterialesManualGas()');assert.equal(cantidadManual(a,'codo90'),18);assert.match(a.text('estadoCasilleroGas'),/ya incluido/);
+});
+test('casillero M: cambiar orientación exige nuevo cotejo y conserva respaldo desactualizado',()=>{
+ const a=app();iniciarRedFlexible(a);configurarCasilleroPrueba(a,'lateral','no-incluido');a.run('calcularMaterialesManualGas()');assert.equal(cantidadManual(a,'codo90'),19);a.elements.get('entradaCasilleroGas').value='posterior';a.run('guardarCasilleroMedidorGas();calcularMaterialesManualGas()');assert.equal(a.run('proyectoGasActual().casilleroMedidorGas.codo'),'pendiente');assert.equal(cantidadManual(a,'codo90'),18);assert.ok(a.run('datosPlanGas().respaldos.length')>0);
+});
+test('casillero M: referencia física detallada existente no se agrega dos veces aunque se declare no incluida',()=>{
+ const a=app();iniciarRedFlexible(a);a.run("tramos[0].detalle={estado:'pendiente',accesorios:[{idFisico:'casillero-medidor:codo90',tipo:'codo90',entrada:null,salida:null}]}");configurarCasilleroPrueba(a,'lateral','no-incluido');a.run('calcularMaterialesManualGas()');assert.equal(cantidadManual(a,'codo90'),18);assert.ok(a.run('revisionMaterialesGas.plan.avisos.some(s=>s.includes("referencia física registrada"))'));assert.equal(a.run('revisionMaterialesGas.plan.filas.some(f=>f.origen==="regla-casillero-confirmada")'),false);
+});
+test('casillero M: PDF, JSON y proyectos conservan regla y conteo; ejemplo anterior no se reescribe',()=>{
+ const a=app();iniciarRedFlexible(a);configurarCasilleroPrueba(a,'posterior','no-incluido');a.run('calcularMaterialesManualGas();prepararInformeActual()');assert.match(a.elements.get('informeImpresion').innerHTML,/codo de 90° dentro del casillero M/);assert.equal(a.run('modeloInformeActual().filas.filter(f=>f.tipo==="codo90").reduce((s,f)=>s+f.cantidad,0)'),19);
+ const b=app(a.saved());b.run("abrir('gas');calcularMaterialesManualGas()");assert.equal(cantidadManual(b,'codo90'),19);assert.equal(b.run('proyectoGasActual().casilleroMedidorGas.entrada'),'posterior');b.run("crearProyectoGas('Otro proyecto vacío')");assert.equal(b.run('proyectoGasActual().casilleroMedidorGas'),undefined);b.run("seleccionarAmbitoGas('proyecto');calcularMaterialesManualGas()");assert.equal(cantidadManual(b,'codo90'),19);
+ const c=app();c.run("abrir('gas')");respaldoPrueba(c,{formato:'canerias-respaldo-v1',proyectos:JSON.parse(a.saved())});c.run('calcularMaterialesManualGas()');assert.equal(cantidadManual(c,'codo90'),19);assert.equal(require('./fixtures/cierre-gas-cinco-tramos.cjs')().conteos['M-A'].codo90,7);
+});

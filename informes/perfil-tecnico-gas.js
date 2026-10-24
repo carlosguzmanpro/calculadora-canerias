@@ -33,6 +33,7 @@ function usarLargoDocumentadoGas(){
 }
 function sincronizarPerfilTecnicoGas(){
  if(modulo!=='gas')return;
+ renderCasilleroMedidorGas();
  const c=combustibleTecnicoGas();$('combustibleSistemaGas').value=c.gas||'';if(!c.conflicto&&['GN','GLP','propano-gaseoso'].includes(c.gas))$('gt').value=c.gas==='GN'?'9300':'22300';
  $('estadoCombustibleGas').textContent=c.pendientes.join(' ')||'Combustible del perfil: '+(c.gas||'Pendiente')+'. La referencia de kcal/m³ no confirma condiciones técnicas.';
  const e=estadoLargoComercialGas();$('estadoLargoComercialGas').textContent='Largo comercial: '+e.configurado+' m. '+e.estado+'.'+(e.documentado?' Manual del sistema: '+e.documentado+' m (p.'+e.pagina+').'+(e.pendiente?' Diferencia pendiente de revisión; no se cambió el proyecto.':''):'');

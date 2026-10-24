@@ -9,7 +9,7 @@ function entradaMaterialesGas(fuente='proyecto',sinSugerencias=false,sinConcilia
  if(fuente==='proyecto'&&!sinConciliacion&&modoManualGasActivo())return entradaManualMaterialesGas(sinSugerencias);
  if(fuente==='ejemplo')return {origen:'Ejemplo educativo calefón/cocina; no incorporado al proyecto',material:'Acero epoxi',sistema:'Roscado',nodos:[{id:'M'},{id:'A'},{id:'Calefón'},{id:'Cocina'}],tramos:[['M','A',19,5,0,'1"'],['A','Calefón',18,7,1,'1"'],['A','Cocina',12,5,1,'3/4"']].map(([desde,hasta,metros,codos,llaves,diametro])=>({id:desde+'-'+hasta,metros,diametro,medidasEstimadas:true,red:{desde,hasta},segmentos:null,accesorios:[{tipo:'codo90',cantidad:codos,medidas:[diametro,diametro],confirmado:true,medidasEstimadas:true,evidencia:'Cantidad aportada en el ejercicio; medidas del diagnóstico condicionado'},...(llaves?[{tipo:'llave',cantidad:llaves,medidas:[diametro],confirmado:true,medidasEstimadas:true}]:[]),...(hasta==='A'?[{tipo:'tee',cantidad:1,nodo:'A',medidas:['1"','1"','3/4"'],confirmado:true,medidasEstimadas:true}]:[])]}))};
  const nodos=instalacionGas.nodos||[];
- const entrada={origen:'Proyecto manual actual',material:instalacionGas.perfil.material,sistema:instalacionGas.perfil.sistema,nodos,tramos:tramos.map((t,i)=>{
+ const entrada={casilleroMedidorGas:{...(proyectoGasActual().casilleroMedidorGas||{})},origen:'Proyecto manual actual',material:instalacionGas.perfil.material,sistema:instalacionGas.perfil.sistema,nodos,tramos:tramos.map((t,i)=>{
   const r=evaluarTramo(t,tramos),d=t.detalle,geometria=d&&['completo','ninguno'].includes(d.estado)&&(!r.pendiente||r.soloMedidasPendientes);
   let posicion=0,posicionConocida=true,entradaActual=t.diametro;
   const registrados=geometria?r.accesorios:Array.isArray(d?.accesorios)?d.accesorios.filter(a=>a&&typeof a.tipo==='string'):[];
@@ -500,10 +500,43 @@ function entradaManualMaterialesGas(sinSugerencias=false){
  entrada.extras=[...registros.filter(r=>!omitidos.has(r.id)).map(r=>({...r.a,idFisico:r.id,confirmado:true})),...nuevos].map(a=>({...a,nodo:a.tipo==='tee'&&a.nodo?nodoConciliacionGas(a.nodo).replace(/^n:/,''):a.nodo}));
  entrada.manualDirecto={avisos,ceros,pendientes};return filtrarRedManualMaterialesGas(entrada);
 }
+// Regla de inventario autorizada: no alimenta geometría, equivalentes ni diámetros.
+function estadoCodoCasilleroGas(entrada){
+ const c=entrada.casilleroMedidorGas||{},orientacion=c.entrada,conteo=c.codo;
+ if(orientacion==='superior')return {adicional:0,pendiente:false,mensaje:'Entrada superior: no se agrega un codo dentro del casillero. Los accesorios declarados se conservan.'};
+ if(!['lateral','posterior'].includes(orientacion))return {adicional:0,pendiente:true,mensaje:'Casillero M: orientación de entrada pendiente. No se agregó ningún codo por suposición.'};
+ if(conteo==='incluido')return {adicional:0,pendiente:false,mensaje:'Entrada '+orientacion+': codo del casillero ya incluido en los accesorios declarados; no se suma otra pieza.'};
+ if(conteo!=='no-incluido')return {adicional:0,pendiente:true,mensaje:'Entrada '+orientacion+': indicá si el codo del casillero ya está incluido. No se agregó otra pieza mientras falta el cotejo.'};
+ const existentes=[...(entrada.extras||[]),...(entrada.tramos||[]).flatMap(t=>t.accesorios||[])].filter(a=>a.tipo==='codo90'&&a.idFisico==='casillero-medidor:codo90');
+ if(existentes.length)return {adicional:0,pendiente:true,mensaje:'El codo del casillero ya tiene una referencia física registrada. Revisá la declaración «no incluido»; no se duplicó la pieza.'};
+ return {adicional:1,pendiente:false,mensaje:'Entrada '+orientacion+' confirmada: se agrega un codo de 90° dentro del casillero M, declarado fuera de las cantidades cargadas. Diámetro pendiente.'};
+}
+function renderCasilleroMedidorGas(){
+ if(modulo!=='gas')return;const c=proyectoGasActual().casilleroMedidorGas||{};
+ $('entradaCasilleroGas').value=['lateral','posterior','superior'].includes(c.entrada)?c.entrada:'desconocida';
+ $('codoCasilleroGas').value=['incluido','no-incluido'].includes(c.codo)?c.codo:'pendiente';
+ $('cotejoCodoCasilleroGas').classList.toggle('oculto',!['lateral','posterior'].includes(c.entrada));
+ $('estadoCasilleroGas').textContent=estadoCodoCasilleroGas({casilleroMedidorGas:c,extras:proyectoGasActual().planCompra?.extras||[],tramos:tramos.map(t=>({accesorios:t.detalle?.accesorios||[]}))}).mensaje;
+}
+function guardarCasilleroMedidorGas(){
+ if(modulo!=='gas')return false;
+ const entrada=$('entradaCasilleroGas').value,codo=$('codoCasilleroGas').value;
+ if(!['lateral','posterior','superior','desconocida'].includes(entrada)||!['incluido','no-incluido','pendiente'].includes(codo))return false;
+ const anterior=proyectoGasActual().casilleroMedidorGas;
+ // Una orientación nueva requiere un nuevo cotejo, no reutiliza una respuesta anterior.
+ proyectoGasActual().casilleroMedidorGas={entrada,codo:anterior?.entrada===entrada?codo:'pendiente'};
+ guardarDatos();renderCasilleroMedidorGas();renderResumenPrincipalGas();return true;
+}
+function agregarCodoCasilleroAlPlanGas(plan,entrada){
+ if(entrada.origen!=='Proyecto manual actual')return;
+ const e=estadoCodoCasilleroGas(entrada);plan.casilleroMedidorGas=e;
+ if(entrada.casilleroMedidorGas?.entrada||e.pendiente)plan.avisos.push(e.mensaje);
+ if(e.adicional===1)plan.filas.push({id:'casillero-medidor:codo90',tipo:'codo90',material:'Codo 90°',cantidad:1,unidad:'unidad',diametro:'Pendiente',ubicacion:'Interior del casillero M',estado:'estimado',cantidadConfirmada:true,revisado:false,origen:'regla-casillero-confirmada',evidencia:e.mensaje,equivalentes:'No incorporado al dimensionamiento; tipo, diámetro y pérdidas requieren verificación técnica.'});
+}
 function planificarVistaMaterialesGas(entrada,opciones){
  const manual=entrada.manualDirecto;
  if(manual?.red){const uniones={...opciones.uniones};for(const p of manual.red.puntos){const id=p.id.replace(/^id:/,'');if(Object.hasOwn(uniones,id))uniones[p.id]=uniones[id];}opciones={...opciones,uniones};}
- const plan=MaterialesGas.planificarMateriales(entrada,opciones);if(!manual)return plan;
+ const plan=MaterialesGas.planificarMateriales(entrada,opciones);agregarCodoCasilleroAlPlanGas(plan,entrada);if(!manual)return plan;
  plan.manualDirecto=true;plan.redManual=manual.red;plan.longitudParcial=manual.red?.ambiguos.length>0;plan.longitudInformada=entrada.tramos.reduce((n,t)=>n+t.metros,0);
  plan.avisos.push(...manual.avisos,...manual.pendientes.map(p=>'Cantidad pendiente: '+p+'. Vacío no equivale a cero.'));
  plan.supuestos.unshift('Carga manual directa: las cantidades rápidas son totales por tramo; el detalle no vuelve a sumarse. No se interpretó la foto ni se agregaron conexiones por reglas de IA.');
@@ -531,7 +564,7 @@ function leerCantidadesFormularioGas(){
 
 // Contrato de la modalidad futura; no ejecuta inferencias ni modifica el proyecto.
 function contratoInterpretacionFuturaGas(){return {version:1,modalidad:'ia-premium-futura',habilitada:false,proveedor:null,envioAutomatico:false,revisionObligatoria:true,reglas:[
- {id:'medidor-lateral',condicion:'Entrada lateral verificada',propuesta:{tipo:'codo90',cantidad:1},ubicacion:'Interior del casillero M',requiereCotejoPiezaExistente:true},
+ {id:'medidor-lateral',condicion:'Entrada lateral o posterior verificada',propuesta:{tipo:'codo90',cantidad:1},ubicacion:'Interior del casillero M',requiereCotejoPiezaExistente:true},
  {id:'medidor-superior',condicion:'Entrada superior verificada',propuesta:{tipo:'codo90',cantidad:0},requiereCotejoPiezaExistente:true},
  {id:'conexion-artefacto',condicion:'Conexion real del artefacto que requiere codo, verificada',propuesta:{tipo:'codo90',cantidad:1},requiereCotejoPiezaExistente:true}
  ],desconocidos:'Señalar la duda; no inventar medidas, posición ni cantidades',aplicarReglasAutomaticamente:false};}
