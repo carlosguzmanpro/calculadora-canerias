@@ -74,3 +74,30 @@ llave en acero epoxi. Los registros anteriores se conservan para revisión.
 Sin producto verificado, la equivalencia sigue pendiente (null), no cero. Retirar
 un vínculo vuelve pendiente el producto, pero conserva la necesidad automática.
 La cabecera principal, el motor SIGAS y las tablas permanecen sin cambios.
+
+## Clasificación automática por cantidades (base f5d7716)
+
+Rama prueba/gas-terminales-por-cantidades. En cada tramo que alimenta un artefacto
+se requiere una llave: se reutiliza la registrada; si no hay ninguna se informa el
+faltante sin agregarla. Los tramos de transporte/derivación no reciben llaves por
+esta regla y conservan cualquier cantidad declarada anteriormente.
+
+SIGAS/FUSIOGAS: de los codos90 registrados se clasifica uno como terminal
+fusión–rosca y los demás como comunes, sin elegir ni mover una pieza física:
+Termo 1 = 1+0; Calefactor 4 = 1+3; Cocina 6 = 1+5. Una llave por artefacto ya
+registrada. El total permanece 58 m / 19 codos90 / 2 tees / 3 llaves.
+
+Sin codos registrados se pide definir el accesorio terminal, sin inventar codos.
+El medidor conserva la conexión roscada requerida y su pieza exacta pendiente.
+Acero epoxi conserva codos/conexiones roscadas; no recibe categoría fusión–rosca.
+
+La clasificación es derivada, no cambia tramos, conteos, revisiones ni respaldos.
+Se muestra al desplegar la revisión técnica; la identificación individual anterior
+permanece como herramienta avanzada opcional, no necesaria para esta clasificación.
+
+Para pérdidas, una reserva contable impide aplicar la equivalencia de un codo común
+al terminal todavía no identificado. Se pueden calcular equivalentes comunes
+respaldados del resto; los productos terminales, medidas y pérdidas desconocidos
+permanecen pendientes. Con varios grupos de productos sin identificación suficiente,
+no se distribuyen pérdidas por suposición. Se conserva el método de diámetros y las
+tablas originales; no se habilitan resultados definitivos.

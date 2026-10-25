@@ -246,18 +246,19 @@
         "tee:nombre:a: producto SIGAS exacto y vía pendientes.",
         "manual-total:[\"ref-A-B\",\"codo90\"]: producto SIGAS exacto y vía pendientes.",
         "tee:nombre:b: producto SIGAS exacto y vía pendientes.",
+        "manual-total:[\"ref-B-Calefactor\",\"codo90\"]: 1 codo terminal fusión–rosca ya contado; producto y pérdida pendientes, no cero.",
         "manual-total:[\"ref-B-Calefactor\",\"codo90\"]: producto SIGAS exacto y vía pendientes.",
         "manual-total:[\"ref-B-Calefactor\",\"llave\"]: producto SIGAS exacto y vía pendientes.",
-        "referencia-codo19: producto SIGAS exacto y vía pendientes.",
+        "referencia-codo19: clasificación automática por cantidades; producto terminal y equivalencias por categoría pendientes.",
         "manual-total:[\"ref-M-A\",\"codo90\"]: producto SIGAS exacto y vía pendientes.",
         "tee:nombre:a: producto SIGAS exacto y vía pendientes.",
         "manual-total:[\"ref-A-B\",\"codo90\"]: producto SIGAS exacto y vía pendientes.",
         "tee:nombre:b: producto SIGAS exacto y vía pendientes.",
-        "manual-total:[\"ref-B-Cocina\",\"codo90\"]: producto SIGAS exacto y vía pendientes.",
+        "manual-total:[\"ref-B-Cocina\",\"codo90\"]: clasificación automática por cantidades; producto terminal y equivalencias por categoría pendientes.",
         "manual-total:[\"ref-B-Cocina\",\"llave\"]: producto SIGAS exacto y vía pendientes.",
         "manual-total:[\"ref-M-A\",\"codo90\"]: producto SIGAS exacto y vía pendientes.",
         "tee:nombre:a: producto SIGAS exacto y vía pendientes.",
-        "manual-total:[\"ref-A-Termo\",\"codo90\"]: producto SIGAS exacto y vía pendientes.",
+        "manual-total:[\"ref-A-Termo\",\"codo90\"]: 1 codo terminal fusión–rosca ya contado; producto y pérdida pendientes, no cero.",
         "manual-total:[\"ref-A-Termo\",\"llave\"]: producto SIGAS exacto y vía pendientes."
       ],
       "estado": "Preselección condicionada; no diámetro de ejecución"
@@ -472,14 +473,15 @@
         "tee:nombre:a: producto SIGAS exacto y vía pendientes.",
         "manual-total:[\"ref-A-B\",\"codo90\"]: producto SIGAS exacto y vía pendientes.",
         "tee:nombre:b: producto SIGAS exacto y vía pendientes.",
+        "manual-total:[\"ref-B-Calefactor\",\"codo90\"]: 1 codo terminal fusión–rosca ya contado; producto y pérdida pendientes, no cero.",
         "manual-total:[\"ref-B-Calefactor\",\"codo90\"]: producto SIGAS exacto y vía pendientes.",
         "manual-total:[\"ref-B-Calefactor\",\"llave\"]: producto SIGAS exacto y vía pendientes.",
-        "referencia-codo19: producto SIGAS exacto y vía pendientes.",
+        "referencia-codo19: clasificación automática por cantidades; producto terminal y equivalencias por categoría pendientes.",
         "manual-total:[\"ref-M-A\",\"codo90\"]: producto SIGAS exacto y vía pendientes.",
         "tee:nombre:a: producto SIGAS exacto y vía pendientes.",
         "manual-total:[\"ref-A-B\",\"codo90\"]: producto SIGAS exacto y vía pendientes.",
         "tee:nombre:b: producto SIGAS exacto y vía pendientes.",
-        "manual-total:[\"ref-B-Cocina\",\"codo90\"]: producto SIGAS exacto y vía pendientes.",
+        "manual-total:[\"ref-B-Cocina\",\"codo90\"]: clasificación automática por cantidades; producto terminal y equivalencias por categoría pendientes.",
         "manual-total:[\"ref-B-Cocina\",\"llave\"]: producto SIGAS exacto y vía pendientes."
       ],
       "estado": "Preselección condicionada; no diámetro de ejecución"
@@ -692,7 +694,7 @@
       "pendientes": [
         "manual-total:[\"ref-M-A\",\"codo90\"]: producto SIGAS exacto y vía pendientes.",
         "tee:nombre:a: producto SIGAS exacto y vía pendientes.",
-        "manual-total:[\"ref-A-Termo\",\"codo90\"]: producto SIGAS exacto y vía pendientes.",
+        "manual-total:[\"ref-A-Termo\",\"codo90\"]: 1 codo terminal fusión–rosca ya contado; producto y pérdida pendientes, no cero.",
         "manual-total:[\"ref-A-Termo\",\"llave\"]: producto SIGAS exacto y vía pendientes."
       ],
       "estado": "Preselección condicionada; no diámetro de ejecución"
@@ -907,6 +909,7 @@
         "tee:nombre:a: producto SIGAS exacto y vía pendientes.",
         "manual-total:[\"ref-A-B\",\"codo90\"]: producto SIGAS exacto y vía pendientes.",
         "tee:nombre:b: producto SIGAS exacto y vía pendientes.",
+        "manual-total:[\"ref-B-Calefactor\",\"codo90\"]: 1 codo terminal fusión–rosca ya contado; producto y pérdida pendientes, no cero.",
         "manual-total:[\"ref-B-Calefactor\",\"codo90\"]: producto SIGAS exacto y vía pendientes.",
         "manual-total:[\"ref-B-Calefactor\",\"llave\"]: producto SIGAS exacto y vía pendientes."
       ],
@@ -1118,12 +1121,12 @@
       ],
       "diametroDefinitivo": null,
       "pendientes": [
-        "referencia-codo19: producto SIGAS exacto y vía pendientes.",
+        "referencia-codo19: clasificación automática por cantidades; producto terminal y equivalencias por categoría pendientes.",
         "manual-total:[\"ref-M-A\",\"codo90\"]: producto SIGAS exacto y vía pendientes.",
         "tee:nombre:a: producto SIGAS exacto y vía pendientes.",
         "manual-total:[\"ref-A-B\",\"codo90\"]: producto SIGAS exacto y vía pendientes.",
         "tee:nombre:b: producto SIGAS exacto y vía pendientes.",
-        "manual-total:[\"ref-B-Cocina\",\"codo90\"]: producto SIGAS exacto y vía pendientes.",
+        "manual-total:[\"ref-B-Cocina\",\"codo90\"]: clasificación automática por cantidades; producto terminal y equivalencias por categoría pendientes.",
         "manual-total:[\"ref-B-Cocina\",\"llave\"]: producto SIGAS exacto y vía pendientes."
       ],
       "estado": "Preselección condicionada; no diámetro de ejecución"
@@ -1174,16 +1177,20 @@
     "Calefactor: Necesidad de conexión roscada reconocida automáticamente. Pendiente únicamente identificar geometría, medidas y producto de transición termofusión–rosca.",
     "Cocina: Necesidad de conexión roscada reconocida automáticamente. Pendiente únicamente identificar geometría, medidas y producto de transición termofusión–rosca.",
     "M: Necesidad de conexión roscada reconocida automáticamente. Pendiente únicamente identificar geometría, medidas y producto de transición termofusión–rosca.",
+    "A–Termo: un codo terminal fusión–rosca clasificado dentro del total; medidas, producto y pérdida pendientes.",
+    "B–Calefactor: un codo terminal fusión–rosca clasificado dentro del total; medidas, producto y pérdida pendientes.",
+    "B–Cocina: un codo terminal fusión–rosca clasificado dentro del total; medidas, producto y pérdida pendientes.",
     "manual-total:[\"ref-M-A\",\"codo90\"]: producto SIGAS exacto y vía pendientes.",
     "tee:nombre:a: producto SIGAS exacto y vía pendientes.",
     "manual-total:[\"ref-A-B\",\"codo90\"]: producto SIGAS exacto y vía pendientes.",
     "tee:nombre:b: producto SIGAS exacto y vía pendientes.",
+    "manual-total:[\"ref-B-Calefactor\",\"codo90\"]: 1 codo terminal fusión–rosca ya contado; producto y pérdida pendientes, no cero.",
     "manual-total:[\"ref-B-Calefactor\",\"codo90\"]: producto SIGAS exacto y vía pendientes.",
     "manual-total:[\"ref-B-Calefactor\",\"llave\"]: producto SIGAS exacto y vía pendientes.",
-    "referencia-codo19: producto SIGAS exacto y vía pendientes.",
-    "manual-total:[\"ref-B-Cocina\",\"codo90\"]: producto SIGAS exacto y vía pendientes.",
+    "referencia-codo19: clasificación automática por cantidades; producto terminal y equivalencias por categoría pendientes.",
+    "manual-total:[\"ref-B-Cocina\",\"codo90\"]: clasificación automática por cantidades; producto terminal y equivalencias por categoría pendientes.",
     "manual-total:[\"ref-B-Cocina\",\"llave\"]: producto SIGAS exacto y vía pendientes.",
-    "manual-total:[\"ref-A-Termo\",\"codo90\"]: producto SIGAS exacto y vía pendientes.",
+    "manual-total:[\"ref-A-Termo\",\"codo90\"]: 1 codo terminal fusión–rosca ya contado; producto y pérdida pendientes, no cero.",
     "manual-total:[\"ref-A-Termo\",\"llave\"]: producto SIGAS exacto y vía pendientes."
   ]
 }

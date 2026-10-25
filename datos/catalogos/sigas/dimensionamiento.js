@@ -55,6 +55,10 @@
      if(!enRuta){if(!ubicaciones.length&&!vinculo?.recorridos)faltantes.push(p.id+': ubicación respecto del recorrido/medidor pendiente.');continue;}
      if(aplicadas.has(p.id))continue;aplicadas.add(p.id);
      if(p.conflicto||p.confirmada!==true){faltantes.push(p.id+': identidad/cantidad por verificar.');continue;}
+     const reserva=p.reservaTerminalPorCantidad;
+     if(reserva?.ambigua){faltantes.push(p.id+': clasificación automática por cantidades; producto terminal y equivalencias por categoría pendientes.');continue;}
+     const cantidadComun=p.cantidad-(reserva?.cantidad||0);
+     if(reserva){faltantes.push(p.id+': 1 codo terminal fusión–rosca ya contado; producto y pérdida pendientes, no cero.');if(cantidadComun<=0)continue;}
      const a=p.productoConexionId?{confirmado:true,tramosDiametro:ubicaciones,productos:{[ubicaciones.map(id=>vector[id]).join('/')]:p.productoConexionId}}:vinculo?.porRecorrido?.[r.artefacto]||vinculo?.producto;
      if(!a||a.confirmado!==true||(!a.familia&&(!Array.isArray(a.tramosDiametro)||!a.tramosDiametro.length||a.tramosDiametro.some(id=>!base.has(id))))){faltantes.push(p.id+': producto SIGAS exacto y vía pendientes.');continue;}
      if(iteracion===0){faltantes.push(p.id+': semilla sin equivalentes, no es pérdida cero.');continue;}
@@ -64,7 +68,7 @@
      const fila=a.familia?(opciones.length===1?opciones[0]:null):d.tablas[3].filas.find(f=>f.id===id);
      const tipoCorrecto=fila&&((p.rolConexion==='terminal'&&(['otro','transicion'].includes(p.tipo)||/^Transici[oó]n(?: |$)/i.test(p.tipo))&&/^Transici[oó]n/i.test(fila.nombreOriginal))||({codo90:/^Codo.*90/,codo45:/^Codo.*45/,tee:/^Te /,llave:/^Llave /,reduccion:/Reduct|Reduc/,cupla:/Cupla/}[p.tipo]?.test(fila.nombreOriginal)));
      if(!tipoCorrecto||!ubicaciones.some(id=>vector[id]===fila.diametroExteriorM*1000)){faltantes.push(p.id+': combinación '+clave+' sin producto/diámetro/vía SIGAS compatible documentado.');continue;}
-     try{const x=tecnico().accesorio(d,fila.id,p.cantidad);aportes.push({piezaId:p.id,tipo:p.tipo,...x});}catch(e){faltantes.push(p.id+': '+e.message);}
+     try{const x=tecnico().accesorio(d,fila.id,cantidadComun);aportes.push({piezaId:p.id,tipo:p.tipo,...x});}catch(e){faltantes.push(p.id+': '+e.message);}
     }
     const equivalenteConocidoM=aportes.reduce((n,a)=>n+a.equivalenteTotalM,0),completo=!inventarioInvalido&&!faltantes.length&&!faltantesInventario.length&&config.inventarioPerdidasCompleto===true&&config.fuenteInventario;
     return {...r,indice:ri,aportes,faltantes,equivalenteConocidoM:aportes.length||completo?equivalenteConocidoM:null,equivalenteCompleto:!!completo,longitudConsultaM:r.longitudReal+equivalenteConocidoM,longitudDefinitivaM:completo?r.longitudReal+equivalenteConocidoM:null};

@@ -8752,6 +8752,10 @@ function avisoDeteccionGas(){
      if(!enRuta){if(!ubicaciones.length&&!vinculo?.recorridos)faltantes.push(p.id+': ubicación respecto del recorrido/medidor pendiente.');continue;}
      if(aplicadas.has(p.id))continue;aplicadas.add(p.id);
      if(p.conflicto||p.confirmada!==true){faltantes.push(p.id+': identidad/cantidad por verificar.');continue;}
+     const reserva=p.reservaTerminalPorCantidad;
+     if(reserva?.ambigua){faltantes.push(p.id+': clasificación automática por cantidades; producto terminal y equivalencias por categoría pendientes.');continue;}
+     const cantidadComun=p.cantidad-(reserva?.cantidad||0);
+     if(reserva){faltantes.push(p.id+': 1 codo terminal fusión–rosca ya contado; producto y pérdida pendientes, no cero.');if(cantidadComun<=0)continue;}
      const a=p.productoConexionId?{confirmado:true,tramosDiametro:ubicaciones,productos:{[ubicaciones.map(id=>vector[id]).join('/')]:p.productoConexionId}}:vinculo?.porRecorrido?.[r.artefacto]||vinculo?.producto;
      if(!a||a.confirmado!==true||(!a.familia&&(!Array.isArray(a.tramosDiametro)||!a.tramosDiametro.length||a.tramosDiametro.some(id=>!base.has(id))))){faltantes.push(p.id+': producto SIGAS exacto y vía pendientes.');continue;}
      if(iteracion===0){faltantes.push(p.id+': semilla sin equivalentes, no es pérdida cero.');continue;}
@@ -8761,7 +8765,7 @@ function avisoDeteccionGas(){
      const fila=a.familia?(opciones.length===1?opciones[0]:null):d.tablas[3].filas.find(f=>f.id===id);
      const tipoCorrecto=fila&&((p.rolConexion==='terminal'&&(['otro','transicion'].includes(p.tipo)||/^Transici[oó]n(?: |$)/i.test(p.tipo))&&/^Transici[oó]n/i.test(fila.nombreOriginal))||({codo90:/^Codo.*90/,codo45:/^Codo.*45/,tee:/^Te /,llave:/^Llave /,reduccion:/Reduct|Reduc/,cupla:/Cupla/}[p.tipo]?.test(fila.nombreOriginal)));
      if(!tipoCorrecto||!ubicaciones.some(id=>vector[id]===fila.diametroExteriorM*1000)){faltantes.push(p.id+': combinación '+clave+' sin producto/diámetro/vía SIGAS compatible documentado.');continue;}
-     try{const x=tecnico().accesorio(d,fila.id,p.cantidad);aportes.push({piezaId:p.id,tipo:p.tipo,...x});}catch(e){faltantes.push(p.id+': '+e.message);}
+     try{const x=tecnico().accesorio(d,fila.id,cantidadComun);aportes.push({piezaId:p.id,tipo:p.tipo,...x});}catch(e){faltantes.push(p.id+': '+e.message);}
     }
     const equivalenteConocidoM=aportes.reduce((n,a)=>n+a.equivalenteTotalM,0),completo=!inventarioInvalido&&!faltantes.length&&!faltantesInventario.length&&config.inventarioPerdidasCompleto===true&&config.fuenteInventario;
     return {...r,indice:ri,aportes,faltantes,equivalenteConocidoM:aportes.length||completo?equivalenteConocidoM:null,equivalenteCompleto:!!completo,longitudConsultaM:r.longitudReal+equivalenteConocidoM,longitudDefinitivaM:completo?r.longitudReal+equivalenteConocidoM:null};
@@ -8900,18 +8904,19 @@ function renderConexionesTerminalesGas(out){
  const red=redFisicaManualGas(),inventario=inventarioAccesoriosParaMotorGas(red),r=inventario.conexiones;if(!r?.extremos.length)return;
  const detalle=document.createElement('details'),sum=document.createElement('summary');detalle.className='gas-detalles';sum.textContent='Conexiones terminales e intermedias · revisión técnica';detalle.append(sum);
  const texto=s=>{const p=document.createElement('p');p.textContent=s;detalle.append(p);};
- texto(r.necesidadesRosca+' necesidades de conexión roscada reconocidas automáticamente en medidor y artefactos. Solo quedan por identificar la geometría, las medidas y el producto exacto. Las llaves de paso son independientes. No se agregan codos ni cantidades por defecto.');
+ for(const c of r.clasificacionPorTramo){const p=document.createElement('p');p.className='clasificacion-cantidades-gas';p.textContent=c.tramo+': '+(c.codosTerminalesFusionRosca?c.codosRegistrados+' codos de 90° = 1 terminal fusión–rosca + '+c.codosComunes+' comunes':c.codosRegistrados+' codos de 90° '+c.categoriaCodos)+(c.esTramoArtefacto?' · '+(c.llavePendiente?'Falta contemplar 1 llave de paso (sin agregar)':c.llavesRegistradas+' llave(s) registradas; se reutilizan')+(c.codosRegistrados===0?' · Accesorio terminal por definir, sin inventar codos':''):' · Sin llave de artefacto requerida'+(c.llavesRegistradas?'; se conservan '+c.llavesRegistradas+' declaradas':''))+'. Medidas, productos y pérdidas no verificados siguen pendientes.';detalle.append(p);}
+ texto(r.necesidadesRosca+' necesidades de conexión roscada reconocidas automáticamente en medidor y artefactos. En artefactos SIGAS/FUSIOGAS se clasifica un codo terminal dentro del total registrado, sin elegir una pieza física. El medidor mantiene pendiente su pieza exacta. Las llaves de paso son independientes. No se agregan codos ni cantidades por defecto.');
  for(const e of r.extremos){
-  const grupo=document.createElement('details'),titulo=document.createElement('summary');grupo.className='conexion-terminal-gas';titulo.textContent=e.nombre+' · '+e.rol+' · '+(e.requiereRosca?'rosca requerida · ':'')+e.estado;grupo.append(titulo);const nota=document.createElement('p');nota.textContent=e.tipoConexionNecesaria+'. '+e.motivo;grupo.append(nota);
-  const pieza=document.createElement('select'),producto=document.createElement('select');const lp=document.createElement('label'),lf=document.createElement('label');lp.textContent='Asociar una pieza individual ya contabilizada (opcional)';lf.textContent='Producto terminal del sistema seleccionado';
+  const grupo=document.createElement('details'),titulo=document.createElement('summary');grupo.className='conexion-terminal-gas';titulo.textContent=e.nombre+' · '+e.rol+' · '+(e.requiereRosca?'rosca requerida · ':'')+e.estado;grupo.append(titulo);const nota=document.createElement('p');nota.textContent=e.clasificacionAutomatica?.codosTerminalesFusionRosca?'Un codo del total queda clasificado como terminal fusión–rosca por cantidad. No necesitás elegir una pieza física ni repetir cantidades. Medidas, producto y equivalencia exactos requieren respaldo.':e.tipoConexionNecesaria+'. '+e.motivo;grupo.append(nota);
+  const avanzado=document.createElement('details'),sa=document.createElement('summary');sa.textContent='Producto documentado · identificación avanzada opcional';avanzado.append(sa);const pieza=document.createElement('select'),producto=document.createElement('select');const lp=document.createElement('label'),lf=document.createElement('label');lp.textContent='Vínculo individual previo (no necesario para la clasificación automática)';lf.textContent='Producto terminal del sistema seleccionado';
   const o=document.createElement('option');o.value='';o.textContent='Producto pendiente: sin pieza individual identificada';pieza.append(o);
   for(const p of inventario.fisicas.filter(p=>e.piezasElegibles.includes(p.id))){const o=document.createElement('option');o.value=p.id;o.textContent=p.tipo+' · '+p.tramos.map(id=>tramos.find(t=>t.id===id)).filter(Boolean).map(t=>t.desde+'–'+t.hasta).join(', ');pieza.append(o);}pieza.value=e.piezaId||'';
   const cargar=()=>{producto.replaceChildren();const o=document.createElement('option');o.value='';o.textContent='Pendiente: tipo, medidas y rosca por identificar';producto.append(o);const p=inventario.fisicas.find(p=>p.id===pieza.value);for(const f of r.productos.filter(f=>CatalogosSistemasGas.tipoProductoCompatible(p,f))){const o=document.createElement('option');o.value=f.id;o.textContent=f.nombreOriginal+' · p.'+f.pagina+' · '+f.longitudEquivalenteM+' m documentales';producto.append(o);}};
-  cargar();producto.value=e.producto?.id||'';pieza.onchange=cargar;lp.append(pieza);lf.append(producto);grupo.append(lp,lf);
+  cargar();producto.value=e.producto?.id||'';pieza.onchange=cargar;lp.append(pieza);lf.append(producto);avanzado.append(lp,lf);
   if(e.equivalenteM!==null){const p=document.createElement('p');p.textContent='Equivalente documental de esta pieza: '+e.equivalenteM+' m. Diámetro y aplicación todavía deben verificarse.';grupo.append(p);}
-  const guardar=document.createElement('button');guardar.className='alt';guardar.textContent='Guardar identificación sin sumar piezas';guardar.onclick=()=>guardarConexionTerminalGas(e.id,pieza.value,producto.value);grupo.append(guardar);detalle.append(grupo);
+  const guardar=document.createElement('button');guardar.className='alt';guardar.textContent='Guardar identificación sin sumar piezas';guardar.onclick=()=>guardarConexionTerminalGas(e.id,pieza.value,producto.value);avanzado.append(guardar);grupo.append(avanzado);detalle.append(grupo);
  }
- const intermedias=r.piezas.filter(p=>p.rol==='intermedia').length;texto('Piezas intermedias identificadas por nodo: '+intermedias+'. Las restantes conservan pendiente su posición terminal/intermedia.');out.append(detalle);
+ const intermedias=r.piezas.filter(p=>p.rol==='intermedia').length;texto('Piezas intermedias identificadas por nodo: '+intermedias+'. La clasificación automática por cantidades no exige elegir posiciones físicas.');out.append(detalle);
 }
 function ubicarCodoAdicionalReferenciaGas(){
  const p=proyectoGasActual();if(p.referenciaSigas19!==true||!tramos.some(t=>t.id==='ref-B-Cocina'))return;
@@ -13766,6 +13771,27 @@ function sincronizarPerfilTecnicoGas(){
   if(sistema===IDS.epoxi)return ['codo90','codo45','cupla','otro','transicion'].includes(tipo)||/^(transici[oó]n|conexi[oó]n|uni[oó]n|adaptador|niple|entrerrosca)(?: |$)/i.test(tipo);
   return productos.some(f=>tipoProductoCompatible(p,f));
  }
+ function clasificarPorCantidades(red,ts,inventario,sistema,extremos){
+  const porTramo=[],reservas={},fusion=[IDS.sigas,IDS.fusiogas].includes(sistema);
+  for(const t of ts){
+   const extremo=extremos.find(e=>e.rol==='artefacto'&&e.tramos.length===1&&e.tramos[0]===t.id),valido=!red.errores?.length;
+   const idsVistos=new Set();
+   const piezas=(inventario.fisicas||[]).filter(p=>{if(!p.id||idsVistos.has(p.id))return false;idsVistos.add(p.id);return true;}).filter(p=>p.confirmada===true&&!p.conflicto&&Number.isSafeInteger(p.cantidad)&&p.cantidad>0&&p.tramos?.length===1&&p.tramos[0]===t.id);
+   const codos=piezas.filter(p=>p.tipo==='codo90'),llaves=piezas.filter(p=>p.tipo==='llave'),total=codos.reduce((n,p)=>n+p.cantidad,0),cantidadLlaves=llaves.reduce((n,p)=>n+p.cantidad,0);
+   const terminal=!!extremo&&valido&&fusion&&total>0?1:0;
+   const c={tramoId:t.id,tramo:t.desde&&t.hasta?t.desde+'–'+t.hasta:t.nombre||t.id,artefacto:extremo?.nombre||null,esTramoArtefacto:!!extremo&&valido,codosRegistrados:total,codosTerminalesFusionRosca:terminal,codosComunes:total-terminal,categoriaCodos:sistema===IDS.epoxi?'roscados':'del sistema seleccionado',requiereLlave:!!extremo&&valido,llavesRegistradas:cantidadLlaves,llavePendiente:!!extremo&&valido&&cantidadLlaves===0,accesorioTerminalPendiente:!!extremo&&valido&&(!fusion||total===0),productoTerminalPendiente:extremo?.estado!=='producto identificado',equivalenteTerminalM:extremo?.equivalenteM??null};
+   porTramo.push(c);if(extremo)extremo.clasificacionAutomatica=c;
+   if(terminal){
+    const identificado=extremo?.estado==='producto identificado'&&codos.find(p=>p.id===extremo.piezaId&&p.cantidad===1);
+    if(!identificado){
+     // Reserva contable, no identificación de una pieza física. No aplicar pérdida común a la terminal desconocida.
+     if(codos.length===1)reservas[codos[0].id]={cantidad:1,ambigua:false};
+     else for(const p of codos)reservas[p.id]={cantidad:null,ambigua:true};
+    }
+   }
+  }
+  return {porTramo,reservas};
+ }
  function conexiones(red,ts,inventario,sistema,registros={},sigas=null,fusiogas=null){
   const extremos=[],intermedias=[],pendientes=[],productos=productosTerminales(sistema,sigas,fusiogas),usadas=new Set();
   const puntos=red.puntos||[],os=Object.entries(red.orientacion||{}),entradas=new Set(os.map(([,o])=>o.hasta));
@@ -13801,9 +13827,11 @@ function sincronizarPerfilTecnicoGas(){
    const nodo=puntos.find(n=>n.id===pieza.nodo||String(n.nombre).trim().toLowerCase()===String(pieza.nodo||'').trim().toLowerCase());
    intermedias.push({piezaId:pieza.id,rol:terminal?'terminal':nodo&&grados.get(nodo.id)>1?'intermedia':'ubicación en el tramo pendiente',extremo:terminal?.id||null});
   }
-  return {extremos,piezas:intermedias,productos,pendientes,necesidadesRosca:extremos.filter(e=>e.requiereRosca===true).length,llavesIndependientes:(inventario.fisicas||[]).filter(p=>/llave|v[aá]lvula/i.test(String(p.tipo))),agregadas:0};
+  const automaticos=clasificarPorCantidades(red,ts,inventario,sistema,extremos);
+  for(const c of automaticos.porTramo){if(c.llavePendiente)pendientes.push(c.tramo+': falta contemplar una llave de paso del artefacto; no se agregó ninguna.');if(c.codosTerminalesFusionRosca&&c.productoTerminalPendiente)pendientes.push(c.tramo+': un codo terminal fusión–rosca clasificado dentro del total; medidas, producto y pérdida pendientes.');if(c.esTramoArtefacto&&c.codosRegistrados===0)pendientes.push(c.tramo+': falta definir el accesorio terminal; no se inventan codos.');}
+  return {clasificacionPorTramo:automaticos.porTramo,reservasTerminales:automaticos.reservas,extremos,piezas:intermedias,productos,pendientes,necesidadesRosca:extremos.filter(e=>e.requiereRosca===true).length,llavesIndependientes:(inventario.fisicas||[]).filter(p=>/llave|v[aá]lvula/i.test(String(p.tipo))),agregadas:0};
  }
- const api={piezaTerminalElegible,conexiones,productosTerminales,tipoProductoCompatible,IDS,identificar,obtener,compatibilidad,prepararAccesorios,largoDocumentado,resultadoPorTramo};
+ const api={clasificarPorCantidades,piezaTerminalElegible,conexiones,productosTerminales,tipoProductoCompatible,IDS,identificar,obtener,compatibilidad,prepararAccesorios,largoDocumentado,resultadoPorTramo};
  if(typeof module==='object'&&module.exports)module.exports=api;else root.CatalogosSistemasGas=api;
 })(globalThis);
 
@@ -13957,7 +13985,7 @@ function inventarioAccesoriosParaMotorGas(red){
   const inventario=CatalogosSistemasGas.prepararAccesorios(piezas,red,entrada.tramos.map(t=>({...t,desde:tramos.find(o=>o.id===t.id)?.desde||'',hasta:tramos.find(o=>o.id===t.id)?.hasta||''})),entrada.manualDirecto?.ceros||[],entrada.manualDirecto?.pendientes||[],opcionesMaterialesGas('proyecto'));
   const sistema=CatalogosSistemasGas.identificar(instalacionGas.perfil);
   const conexiones=CatalogosSistemasGas.conexiones(red,tramos,inventario,sistema,p.conexionesTerminalesGas,SIGAS_ED15_2025,FUSIOGAS_V1_2026);
-  for(const pieza of inventario.fisicas){const clasificacion=conexiones.piezas.find(c=>c.piezaId===pieza.id);pieza.rolConexion=clasificacion?.rol;const terminal=conexiones.extremos.find(e=>e.piezaId===pieza.id&&e.estado==='producto identificado');if(terminal)pieza.productoConexionId=terminal.producto.id;}
+  for(const pieza of inventario.fisicas){const clasificacion=conexiones.piezas.find(c=>c.piezaId===pieza.id);pieza.rolConexion=clasificacion?.rol;const reserva=conexiones.reservasTerminales[pieza.id];if(reserva)pieza.reservaTerminalPorCantidad=reserva;const terminal=conexiones.extremos.find(e=>e.piezaId===pieza.id&&e.estado==='producto identificado');if(terminal)pieza.productoConexionId=terminal.producto.id;}
   inventario.conexiones=conexiones;inventario.pendientes.push(...conexiones.pendientes);
   return inventario;
  }finally{if(tenia)p.planCompra=original;else delete p.planCompra;}

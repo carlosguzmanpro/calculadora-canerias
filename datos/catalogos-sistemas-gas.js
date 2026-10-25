@@ -72,6 +72,27 @@
   if(sistema===IDS.epoxi)return ['codo90','codo45','cupla','otro','transicion'].includes(tipo)||/^(transici[oó]n|conexi[oó]n|uni[oó]n|adaptador|niple|entrerrosca)(?: |$)/i.test(tipo);
   return productos.some(f=>tipoProductoCompatible(p,f));
  }
+ function clasificarPorCantidades(red,ts,inventario,sistema,extremos){
+  const porTramo=[],reservas={},fusion=[IDS.sigas,IDS.fusiogas].includes(sistema);
+  for(const t of ts){
+   const extremo=extremos.find(e=>e.rol==='artefacto'&&e.tramos.length===1&&e.tramos[0]===t.id),valido=!red.errores?.length;
+   const idsVistos=new Set();
+   const piezas=(inventario.fisicas||[]).filter(p=>{if(!p.id||idsVistos.has(p.id))return false;idsVistos.add(p.id);return true;}).filter(p=>p.confirmada===true&&!p.conflicto&&Number.isSafeInteger(p.cantidad)&&p.cantidad>0&&p.tramos?.length===1&&p.tramos[0]===t.id);
+   const codos=piezas.filter(p=>p.tipo==='codo90'),llaves=piezas.filter(p=>p.tipo==='llave'),total=codos.reduce((n,p)=>n+p.cantidad,0),cantidadLlaves=llaves.reduce((n,p)=>n+p.cantidad,0);
+   const terminal=!!extremo&&valido&&fusion&&total>0?1:0;
+   const c={tramoId:t.id,tramo:t.desde&&t.hasta?t.desde+'–'+t.hasta:t.nombre||t.id,artefacto:extremo?.nombre||null,esTramoArtefacto:!!extremo&&valido,codosRegistrados:total,codosTerminalesFusionRosca:terminal,codosComunes:total-terminal,categoriaCodos:sistema===IDS.epoxi?'roscados':'del sistema seleccionado',requiereLlave:!!extremo&&valido,llavesRegistradas:cantidadLlaves,llavePendiente:!!extremo&&valido&&cantidadLlaves===0,accesorioTerminalPendiente:!!extremo&&valido&&(!fusion||total===0),productoTerminalPendiente:extremo?.estado!=='producto identificado',equivalenteTerminalM:extremo?.equivalenteM??null};
+   porTramo.push(c);if(extremo)extremo.clasificacionAutomatica=c;
+   if(terminal){
+    const identificado=extremo?.estado==='producto identificado'&&codos.find(p=>p.id===extremo.piezaId&&p.cantidad===1);
+    if(!identificado){
+     // Reserva contable, no identificación de una pieza física. No aplicar pérdida común a la terminal desconocida.
+     if(codos.length===1)reservas[codos[0].id]={cantidad:1,ambigua:false};
+     else for(const p of codos)reservas[p.id]={cantidad:null,ambigua:true};
+    }
+   }
+  }
+  return {porTramo,reservas};
+ }
  function conexiones(red,ts,inventario,sistema,registros={},sigas=null,fusiogas=null){
   const extremos=[],intermedias=[],pendientes=[],productos=productosTerminales(sistema,sigas,fusiogas),usadas=new Set();
   const puntos=red.puntos||[],os=Object.entries(red.orientacion||{}),entradas=new Set(os.map(([,o])=>o.hasta));
@@ -107,8 +128,10 @@
    const nodo=puntos.find(n=>n.id===pieza.nodo||String(n.nombre).trim().toLowerCase()===String(pieza.nodo||'').trim().toLowerCase());
    intermedias.push({piezaId:pieza.id,rol:terminal?'terminal':nodo&&grados.get(nodo.id)>1?'intermedia':'ubicación en el tramo pendiente',extremo:terminal?.id||null});
   }
-  return {extremos,piezas:intermedias,productos,pendientes,necesidadesRosca:extremos.filter(e=>e.requiereRosca===true).length,llavesIndependientes:(inventario.fisicas||[]).filter(p=>/llave|v[aá]lvula/i.test(String(p.tipo))),agregadas:0};
+  const automaticos=clasificarPorCantidades(red,ts,inventario,sistema,extremos);
+  for(const c of automaticos.porTramo){if(c.llavePendiente)pendientes.push(c.tramo+': falta contemplar una llave de paso del artefacto; no se agregó ninguna.');if(c.codosTerminalesFusionRosca&&c.productoTerminalPendiente)pendientes.push(c.tramo+': un codo terminal fusión–rosca clasificado dentro del total; medidas, producto y pérdida pendientes.');if(c.esTramoArtefacto&&c.codosRegistrados===0)pendientes.push(c.tramo+': falta definir el accesorio terminal; no se inventan codos.');}
+  return {clasificacionPorTramo:automaticos.porTramo,reservasTerminales:automaticos.reservas,extremos,piezas:intermedias,productos,pendientes,necesidadesRosca:extremos.filter(e=>e.requiereRosca===true).length,llavesIndependientes:(inventario.fisicas||[]).filter(p=>/llave|v[aá]lvula/i.test(String(p.tipo))),agregadas:0};
  }
- const api={piezaTerminalElegible,conexiones,productosTerminales,tipoProductoCompatible,IDS,identificar,obtener,compatibilidad,prepararAccesorios,largoDocumentado,resultadoPorTramo};
+ const api={clasificarPorCantidades,piezaTerminalElegible,conexiones,productosTerminales,tipoProductoCompatible,IDS,identificar,obtener,compatibilidad,prepararAccesorios,largoDocumentado,resultadoPorTramo};
  if(typeof module==='object'&&module.exports)module.exports=api;else root.CatalogosSistemasGas=api;
 })(globalThis);
