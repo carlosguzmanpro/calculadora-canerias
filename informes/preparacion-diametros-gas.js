@@ -16,7 +16,17 @@ function inventarioAccesoriosParaMotorGas(red){
  p.planCompra=original?JSON.parse(JSON.stringify(original)):{};
  try{
   const entrada=entradaManualMaterialesGas();
-  return CatalogosSistemasGas.prepararAccesorios(piezasConciliacionGas(entrada),red,entrada.tramos.map(t=>({...t,desde:tramos.find(o=>o.id===t.id)?.desde||'',hasta:tramos.find(o=>o.id===t.id)?.hasta||''})),entrada.manualDirecto?.ceros||[],entrada.manualDirecto?.pendientes||[],opcionesMaterialesGas('proyecto'));
+  const inventario=CatalogosSistemasGas.prepararAccesorios(piezasConciliacionGas(entrada),red,entrada.tramos.map(t=>({...t,desde:tramos.find(o=>o.id===t.id)?.desde||'',hasta:tramos.find(o=>o.id===t.id)?.hasta||''})),entrada.manualDirecto?.ceros||[],entrada.manualDirecto?.pendientes||[],opcionesMaterialesGas('proyecto'));
+  // La aclaración del propietario ubica el adicional, sin identificar su producto ni tocar materiales.
+  const extra=p.planCompra?.extras?.find(e=>e.idFisico==='referencia-codo19');
+  const adicional=inventario.fisicas.find(f=>f.id==='referencia-codo19');
+  if(p.referenciaSigas19===true&&adicional&&extra?.ubicacion==='Codo 19 del ejercicio · ubicación técnica por verificar'&&tramos.some(t=>t.id==='ref-B-Cocina'))adicional.tramos=['ref-B-Cocina'];
+  for(const pieza of inventario.fisicas)if(pieza.tipo==='tee'&&pieza.nodo){
+   const nodo=red.puntos.find(n=>n.id===pieza.nodo||String(n.nombre).trim().toLocaleLowerCase('es')===String(pieza.nodo).trim().toLocaleLowerCase('es'));
+   if(nodo)pieza.conexionesDiametro=Object.entries(red.orientacion).filter(([,o])=>o.desde===nodo.id||o.hasta===nodo.id).map(([id])=>id);
+  }
+  if(inventario.fisicas.filter(f=>f.tipo==='codo90').every(f=>f.tramos.length))inventario.pendientes=inventario.pendientes.filter(s=>s!=='Ubicación técnica pendiente de codo90; se conserva la cantidad conocida.');
+  return inventario;
  }finally{if(tenia)p.planCompra=original;else delete p.planCompra;}
 }
 function mostrarPreparacionDiametrosGas(){
