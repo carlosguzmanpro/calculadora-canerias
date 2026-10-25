@@ -534,6 +534,7 @@ function entradaManualMaterialesGas(sinSugerencias=false){
  // Mantener detalle no sustituido y extras identificados. Los identificadores físicos deduplican tees compartidas.
  for(const t of entrada.tramos)t.accesorios=[];
  entrada.extras=[...registros.filter(r=>!omitidos.has(r.id)).map(r=>({...r.a,idFisico:r.id,confirmado:true})),...nuevos].map(a=>({...a,nodo:a.tipo==='tee'&&a.nodo?nodoConciliacionGas(a.nodo).replace(/^n:/,''):a.nodo}));
+ if(typeof transicionesRectasDeclaradasSigasGas==='function')for(const a of transicionesRectasDeclaradasSigasGas())if(!entrada.extras.some(e=>e.idFisico===a.idFisico))entrada.extras.push(a);
  entrada.manualDirecto={avisos,ceros,pendientes};return filtrarRedManualMaterialesGas(entrada);
 }
 // Regla de inventario autorizada: no alimenta geometría, equivalentes ni diámetros.

@@ -6,6 +6,16 @@
  function familiaProducto(f){
   return /^(Codo Normal a (45º|90º)|Codo MH a (45°|90°) de|Llave Esférica) \d+\s*mm$/i.test(f.nombreOriginal)?f.nombreOriginal.replace(/ \d+\s*mm$/i,''):null;
  }
+ function atributosTerminal(f){
+  const n=f.nombreOriginal,rosca=n.match(/(\d+\/\d+|\d+(?: \d+\/\d+)?)(?:["”])?(?:\s*ST)?$/i)?.[1];
+  if(!rosca)return null;
+  if(/^Transición (Hembra|Macho)/i.test(n))return {geometria:'recta',sexo:/Hembra/i.test(n)?'hembra':'macho',rosca,variante:'recta'};
+  if(/^Codo 90º (con rosca hembra|C\/base H\.)/i.test(n))return {geometria:'codo90',sexo:'hembra',rosca,variante:/extra/i.test(n)?'base-extra-larga':/base/i.test(n)?'base-larga':'estandar'};
+  return null;
+ }
+ function opcionesTerminal(d,atributos={},diametro){
+  return d.tablas[3].filas.filter(f=>{const a=atributosTerminal(f);return a&&(!diametro||f.diametroExteriorM*1000===diametro)&&['geometria','sexo','rosca','variante'].every(k=>!atributos[k]||atributos[k]===a[k]);});
+ }
  function seleccionar(d,longitudM,caudalM3h){
   if(!positivo(longitudM)||!positivo(caudalM3h))return {candidato:null,consultas:[],pendientes:['Longitud o caudal conocido pendiente.']};
   const consultas=[],pendientes=[];
@@ -37,6 +47,11 @@
    if(previo){if(previo.tipo!==p.tipo||previo.cantidad!==p.cantidad)errores.push('Cantidad/tipo contradictorios de la pieza '+p.id);else previo.tramos=[...new Set([...(previo.tramos||[]),...(p.tramos||[])])];continue;}
    piezas.set(p.id,{...p,tramos:[...(p.tramos||[])]});
   }
+  const identidades=new Map();
+  for(const p of piezas.values())if(Array.isArray(p.identidadesFisicas)){
+   if(p.identidadesFisicas.length!==p.cantidad||new Set(p.identidadesFisicas).size!==p.cantidad){p.conflicto=true;inventarioInvalido=true;pendientes.push(p.id+': identidades físicas inconsistentes.');}
+   for(const id of p.identidadesFisicas){const previo=identidades.get(id);if(previo&&previo.id!==p.id){previo.conflicto=true;p.conflicto=true;inventarioInvalido=true;pendientes.push('Identidad física compartida por grupos: '+id+'; no se suman ambos.');}else identidades.set(id,p);}
+  }
   if(errores.length)return salida;
   pendientes.push('Criterio de recorrido/fila superior y simultaneidad: validar con método aplicable. No se añadieron 15 m EPOXI.','Presión disponible, mínima de artefactos y pérdida admisible: confirmar alcance de la tabla; caída impresa 10 mm no es suministro.','Cuplas y otras pérdidas no identificadas permanecen pendientes; no se suponen nulas ni bloquean esta preselección parcial.');
   if(!perfil.densidadRelativa)pendientes.push('Densidad del suministro pendiente de confirmar frente a 0,65 tabulado.');
@@ -57,20 +72,22 @@
      if(aplicadas.has(p.id))continue;aplicadas.add(p.id);
      if(p.conflicto||p.confirmada!==true){pendiente({...p,tramos:ubicaciones},'identidad/cantidad por verificar.');continue;}
      const a=vinculo?.porRecorrido?.[r.artefacto]||vinculo?.producto;
-     if(!a||a.confirmado!==true||(!a.familia&&(!Array.isArray(a.tramosDiametro)||!a.tramosDiametro.length||a.tramosDiametro.some(id=>!base.has(id))))){pendiente({...p,tramos:ubicaciones},p.tipo==='tee'?'producto SIGAS, medidas de tres conexiones y vía directa/giro pendientes.':p.tipo==='llave'?'tipo y producto de llave SIGAS pendientes.':'producto SIGAS exacto y vía pendientes.'+(p.tipo==='codo90'?' Confirmar normal, MH o roscado y sus medidas; no se elige una variante por defecto.':''));continue;}
+     if(!a||a.confirmado!==true||(!a.familia&&!a.atributos&&(!Array.isArray(a.tramosDiametro)||!a.tramosDiametro.length||a.tramosDiametro.some(id=>!base.has(id))))){pendiente({...p,tramos:ubicaciones},p.tipo==='tee'?'producto SIGAS, medidas de tres conexiones y vía directa/giro pendientes.':p.tipo==='llave'?'tipo y producto de llave SIGAS pendientes.':'producto SIGAS exacto y vía pendientes.'+(p.tipo==='codo90'?' Confirmar normal, MH o roscado y sus medidas; no se elige una variante por defecto.':''));continue;}
      if(iteracion===0){pendiente({...p,tramos:ubicaciones},'semilla sin equivalentes, no es pérdida cero.');continue;}
      const clave=(a.tramosDiametro||[]).map(id=>vector[id]).join('/'),id=a.productos?.[clave];
      const diametros=[...new Set(ubicaciones.map(id=>vector[id]))];
      const opciones=a.familia&&p.tipo!=='tee'&&diametros.length===1?d.tablas[3].filas.filter(f=>familiaProducto(f)===a.familia&&f.diametroExteriorM*1000===diametros[0]):[];
-     const fila=a.familia?(opciones.length===1?opciones[0]:null):d.tablas[3].filas.find(f=>f.id===id);
-     const tipoCorrecto=fila&&({codo90:/^Codo(?: Normal a 90º | MH a 90° | 90º)/,codo45:/^Codo.*45/,tee:/^Te /,llave:/^Llave /,reduccion:/Reduct|Reduc/,cupla:/Cupla/}[p.tipo]?.test(fila.nombreOriginal));
+     const terminales=a.atributos&&diametros.length===1&&a.atributos.geometria&&a.atributos.sexo&&a.atributos.rosca?opcionesTerminal(d,a.atributos,diametros[0]):[];
+     const fila=a.atributos?(terminales.length===1?terminales[0]:null):a.familia?(opciones.length===1?opciones[0]:null):d.tablas[3].filas.find(f=>f.id===id);
+     if(p.necesidadTerminal&&fila&&!atributosTerminal(fila)){pendiente({...p,tramos:ubicaciones},'conexión terminal: producto roscado compatible pendiente; no se utiliza un codo común.');continue;}
+     const tipoCorrecto=fila&&(p.necesidadTerminal?atributosTerminal(fila)?.geometria===(p.geometria||p.tipo):({codo90:/^Codo(?: Normal a 90º | MH a 90° | 90º)/,codo45:/^Codo.*45/,tee:/^Te /,llave:/^Llave /,reduccion:/Reduct|Reduc/,cupla:/Cupla/}[p.tipo]?.test(fila.nombreOriginal)));
      if(!tipoCorrecto||!(p.tipo==='tee'?ubicaciones.some(id=>vector[id]===fila.diametroExteriorM*1000):ubicaciones.every(id=>vector[id]===fila.diametroExteriorM*1000))){pendiente({...p,tramos:ubicaciones},'combinación '+clave+' sin producto/diámetro/vía SIGAS compatible documentado.');continue;}
-     if(p.necesidadTerminal&&!/rosca|H\.larga|H\.extra/i.test(fila.nombreOriginal)){pendiente({...p,tramos:ubicaciones},'conexión terminal: producto roscado compatible pendiente; no se utiliza un codo común.');continue;}
+
      if(p.tipo==='tee'&&/^Te Normal /.test(fila.nombreOriginal)&&Array.isArray(p.conexionesDiametro)&&p.conexionesDiametro.some(id=>vector[id]!==fila.diametroExteriorM*1000)){
       pendiente({...p,tramos:ubicaciones},'tee normal incompatible con los diámetros candidatos de sus tres conexiones; identificar configuración y reducciones sin inventarlas.');continue;
      }
      const tramosEnRuta=ubicaciones.filter(id=>r.tramos.includes(id)),tramoId=tramosEnRuta.length===1?tramosEnRuta[0]:null;
-     try{const x=tecnico().accesorio(d,fila.id,p.cantidad);aportes.push({piezaId:p.id,tipo:p.tipo,tramoId,diametroExteriorMm:fila.diametroExteriorM*1000,...x});}catch(e){pendiente({...p,tramos:ubicaciones},e.message);}
+     try{const x=tecnico().accesorio(d,fila.id,p.cantidad);aportes.push({piezaId:p.id,identidadesFisicas:p.identidadesFisicas?.slice()||null,tipo:p.tipo,tramoId,diametroExteriorMm:fila.diametroExteriorM*1000,...x});}catch(e){pendiente({...p,tramos:ubicaciones},e.message);}
     }
     // Son necesidades, no piezas adicionales: sin vínculo físico inequívoco no atribuirles cero.
     for(const terminal of inventario.necesidadesTerminales||[])if(terminal.recorridos?.includes(r.artefacto)){
@@ -107,5 +124,5 @@
   salida.advertencia='PRESELECCIÓN CONDICIONADA. Pérdidas desconocidas no son cero. No acredita presión final, método normativo ni aptitud de instalación. No se asignan diámetros a los tramos guardados.';
   return salida;
  }
- const api={consultar,resolver,familiaProducto};if(typeof module==='object'&&module.exports)module.exports=api;else root.DimensionamientoSigas=api;
+ const api={consultar,resolver,familiaProducto,atributosTerminal,opcionesTerminal};if(typeof module==='object'&&module.exports)module.exports=api;else root.DimensionamientoSigas=api;
 })(globalThis);
