@@ -29,6 +29,21 @@ function entradaPreseleccionSigasGas(){
    if(!Object.hasOwn(config.vinculos,id))config.vinculos[id]={producto:{confirmado:true,familia:'Codo Normal a 90º',origen:'Regla del ejercicio confirmada por el propietario'}};
   }
  }
+ // Clasificación reutilizable en todos los tramos SIGAS; nunca crea piezas ni vías de tees.
+ if(proyecto.reglaMedidorReferenciaGas!==false&&proyecto.automatizacionRecorridosGas!==false){
+  config.vinculos||={};
+  for(const p of inventario.fisicas){
+   if(p.tipo==='tee'){p.clasificacionAutomatica='Tee de derivación · medidas y vía pendientes';continue;}
+   if(p.tipo==='llave'){p.clasificacionAutomatica='Llave de paso registrada · tipo exacto pendiente';continue;}
+   const vinculo=config.vinculos[p.id];
+   const esComun=['codo90','codo45'].includes(p.tipo)&&p.confirmada===true&&!p.conflicto&&p.tramos.length===1&&!p.necesidadTerminal&&!vinculo?.necesidadTerminal&&!config.desgloses?.[p.id]&&p.id!=='referencia-codo19'&&p.id!=='casillero-medidor:codo90';
+   if(!esComun)continue;
+   const familia=p.tipo==='codo90'?'Codo Normal a 90º':'Codo Normal a 45º';
+   p.clasificacionAutomatica='Codo común de termofusión · variante corregible';
+   // Un vínculo explícito vacío también es una corrección: se conserva como Pendiente.
+   if(!Object.hasOwn(config.vinculos,p.id))config.vinculos[p.id]={producto:{confirmado:true,familia,origen:'Tipo común registrado en tramo SIGAS'}};
+  }
+ }
  inventario.fisicas=inventario.fisicas.flatMap(p=>{
   const separacion=config.desgloses?.[p.id];if(!separacion)return [p];
   if(separacion.cantidad!==p.cantidad){inventario.pendientes.push('Cambió la cantidad de '+p.tipo+': revisar identificaciones individuales conservadas.');return [{...p,conflicto:true}];}
@@ -120,6 +135,7 @@ function renderVinculosSigasGas(out,r){
  const ids=entrada.preparacion.porTramo.map(t=>t.id),clave=ids.map(id=>vector[id]).join('/');
  for(const p of entrada.inventario.fisicas){
   const caja=document.createElement('details');caja.className='sigas-vinculo';const titulo=document.createElement('summary');titulo.textContent=p.cantidad+' × '+p.tipo+' · '+(p.tramos.map(id=>entrada.preparacion.porTramo.find(t=>t.id===id)?.nombre||id).join(', ')||'ubicación técnica pendiente');caja.append(titulo);
+  if(p.clasificacionAutomatica&&!p.automatico){const n=document.createElement('p');n.textContent=p.clasificacionAutomatica;caja.append(n);}
   if(p.automatico){const n=document.createElement('p');n.textContent=p.automatico+'; corregible si el croquis indica otra variante.';caja.append(n);}
   if(p.grupoOriginal)titulo.textContent+=' · pieza '+p.numeroUnidad+' (cantidad ya registrada)';
   if(p.cantidad>1&&p.tipo!=='tee'&&!p.grupoOriginal){const b=document.createElement('button');b.type='button';b.textContent='Identificar las '+p.cantidad+' piezas por separado';b.onclick=()=>separarProductosSigasGas(p.id);caja.append(b);}
