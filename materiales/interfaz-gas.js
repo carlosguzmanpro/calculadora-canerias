@@ -80,35 +80,71 @@ function textoMaterialPantallaGas(valor){
  return ubicacionLegibleGas(String(valor??''))
   .replace(/\btramo-[a-z0-9]+-\d+\b/gi,'Tramo sin ubicación identificada');
 }
+// Agrupación de pantalla: cada fila conserva identidad, valores y ubicación originales.
+function organizarEdicionMaterialesGas(plan,ts=tramos,contexto=proyectoGasActual()){
+ const grupos=ts.map(t=>({clave:t.id,nombre:t.desde+'–'+t.hasta,metros:t.metros,filas:[]}));
+ const adicionales=new Map();
+ const grupoExtra=(clave,nombre)=>{if(!adicionales.has(clave))adicionales.set(clave,{clave,nombre,filas:[]});return adicionales.get(clave);};
+ const escapar=x=>String(x).replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+ for(const f of plan.filas){
+  const ubicacion=String(f.ubicacion||''),legible=ubicacionLegibleGas(ubicacion);
+  const ids=ts.filter(t=>ubicacion===t.id||new RegExp('(^|[\\s,;])'+escapar(t.id)+'(?=$|[\\s,;·])').test(ubicacion)||new RegExp('(^|[\\s,;])'+escapar(t.desde+'–'+t.hasta)+'(?=$|[\\s,;·])').test(legible)).map(t=>t.id);
+  const adicionalReferencia=contexto?.referenciaSigas19===true&&f.tipo==='codo90'&&ubicacion==='Codo 19 del ejercicio · ubicación técnica por verificar'&&ts.some(t=>t.id==='ref-B-Cocina');
+  const grupo=adicionalReferencia?grupos.find(g=>g.clave==='ref-B-Cocina'):ids.length===1?grupos.find(g=>g.clave===ids[0]):ids.length>1||f.nodo?grupoExtra('compartidos','Materiales compartidos · una sola pieza en el total'):grupoExtra('sin-ubicacion','Materiales sin tramo individual confirmado');
+  grupo.filas.push({fila:f,ubicacionTexto:adicionalReferencia?'B–Cocina · codo adicional del ejercicio':legible,compartida:!!f.nodo||ids.length>1,adicionalReferencia});
+ }
+ return [...grupos,...adicionales.values()].filter(g=>g.filas.length);
+}
+function estadosEdicionMaterialesGas(raiz){
+ const estados=new Map();function visitar(n){if(n.claveVistaGas)estados.set(n.claveVistaGas,!!n.open);for(const h of Array.from(n.children||[]))visitar(h);}visitar(raiz);return estados;
+}
 function renderPlanGas(){
- const out=$('matResultado');out.replaceChildren();$('ajustesAvanzadosGas').open=!modoManualGasActivo();$('opcionesAvanzadasPlanGas').open=!modoManualGasActivo();$('resultadoMateriales').classList.toggle('oculto',modoManualGasActivo());renderResumenPrincipalGas();if(!revisionMaterialesGas)return;const r=revisionMaterialesGas.plan;
+ const out=$('matResultado'),abiertos=estadosEdicionMaterialesGas(out);out.replaceChildren();$('ajustesAvanzadosGas').open=!modoManualGasActivo()||(!!$('ajustesAvanzadosGas').open&&Array.from(abiertos.keys()).some(k=>k.startsWith(ambitoGas+':'+fuenteMaterialesGas+':')));$('opcionesAvanzadasPlanGas').open=!modoManualGasActivo();$('resultadoMateriales').classList.toggle('oculto',modoManualGasActivo());renderResumenPrincipalGas();if(!revisionMaterialesGas)return;const r=revisionMaterialesGas.plan;
  const texto=(t,padre=out)=>{const p=document.createElement('p');p.textContent=textoMaterialPantallaGas(t);padre.append(p);};
  const detalles=document.createElement('details'),resumen=document.createElement('summary');detalles.className='gas-detalles';resumen.textContent='Ver detalles técnicos';detalles.append(resumen);
- texto((fuenteMaterialesGas==='ejemplo'?'EJEMPLO SEPARADO: no reemplaza tus datos. ':'PROYECTO ACTUAL. ')+'Lista para revisión, no cantidades definitivas. Diámetros automáticos definitivos bloqueados.');
- if(fuenteMaterialesGas==='proyecto'&&avisoDeteccionGas())texto(avisoDeteccionGas());
- if(fuenteMaterialesGas==='proyecto'&&!modoManualGasActivo()){texto(avisoConciliacionRapidaGas());renderConciliacionRapidaGas();}
+ texto((fuenteMaterialesGas==='ejemplo'?'EJEMPLO SEPARADO. ':'')+'Cantidades y medidas para revisión; pendiente no significa cero.');
+ if(fuenteMaterialesGas==='proyecto'&&avisoDeteccionGas())texto(avisoDeteccionGas(),detalles);
+ if(fuenteMaterialesGas==='proyecto'&&!modoManualGasActivo()){texto(avisoConciliacionRapidaGas(),detalles);renderConciliacionRapidaGas();}
  r.supuestos.forEach(t=>texto(t,detalles));if(!r.manualDirecto)r.avisos.forEach(t=>texto(t,detalles));
  for(const g of r.planes){
   texto(g.diametro+' · '+(g.material||'material pendiente')+' / '+(g.sistema||'sistema pendiente')+' · '+g.metros+' m · mínimo teórico '+g.minimoTeorico+' caños de '+r.config.largoComercial+' m · compra estimada '+(g.compraEstimada??'PENDIENTE')+' · cuplas propuestas '+(g.cuplasPropuestas??'PENDIENTES'),detalles);
   if(g.hipotesis)texto('HIPÓTESIS POR LONGITUD, NO COMPRA: '+g.plan.compraEstimada+' barras y '+g.plan.cuplasPropuestas+' uniones si cada tramo fuera continuo; NO representa los codos del croquis ni resuelve cuplas reales.',detalles);
   if(g.plan)for(const b of g.plan.barras)texto(b.id+' · cortes '+b.cortes.map(c=>c.metros+' m para '+c.segmento).join('; ')+' · sobrante '+fmt(b.sobrante)+' m',detalles);
  }
- out.append(detalles);
+ const resumenCompacto=document.createElement('div');resumenCompacto.className='gas-edicion-resumen';
+ for(const f of resumenListaManualGas(r).filter(f=>f.cantidad!==0||f.pendiente)){
+  const p=document.createElement('p');p.textContent=(f.tipo==='cano'?'Cañería registrada':f.material)+' · '+(f.pendiente?(f.cantidad>0?fmt(f.cantidad)+' '+f.unidad+' conocidas; resto pendiente':'Pendiente'):fmt(f.cantidad)+' '+f.unidad)+(f.tipo==='cano'?' · '+(f.diametro||'diámetro pendiente')+(r.filas.some(x=>x.tipo==='cano'&&!Number.isFinite(x.cantidad))?' · compra pendiente':''):'');resumenCompacto.append(p);
+ }
+ out.append(resumenCompacto);out.append(detalles);
  const lista=document.createElement('div');lista.className='gas-materiales-tarjetas';
- for(const f of r.filas){
-  const card=document.createElement('article');card.className='gas-material-card';
+ const grupos=organizarEdicionMaterialesGas(r,fuenteMaterialesGas==='proyecto'?tramos:[]),prefijo=ambitoGas+':'+fuenteMaterialesGas+':';
+ const preparar=(el,clave,defecto=false)=>{el.claveVistaGas=prefijo+clave;el.open=abiertos.has(el.claveVistaGas)?abiertos.get(el.claveVistaGas):defecto;};
+ for(const g of grupos){
+  const grupo=document.createElement('details');grupo.className='gas-materiales-grupo';preparar(grupo,'grupo:'+g.clave);
+  const tituloGrupo=document.createElement('summary'),pendientes=g.filas.filter(a=>a.fila.cantidad!==0&&(!Number.isFinite(a.fila.cantidad)||!a.fila.diametro||/pendiente/i.test(a.fila.diametro))).length;
+  tituloGrupo.textContent=g.nombre+(Number.isFinite(g.metros)?' · '+fmt(g.metros)+' m':'')+(pendientes?' · '+pendientes+' pendientes':'');grupo.append(tituloGrupo);
+  const ceros=document.createElement('details');ceros.className='gas-materiales-ceros';preparar(ceros,'ceros:'+g.clave);const tituloCeros=document.createElement('summary');tituloCeros.textContent='Ver o editar cantidades 0 ('+g.filas.filter(a=>a.fila.cantidad===0).length+')';ceros.append(tituloCeros);
+  for(const asignacion of g.filas){const f=asignacion.fila;
+   const fila=document.createElement('details');fila.className='gas-material-fila';preparar(fila,'fila:'+f.id);
+   const compacta=document.createElement('summary'),nombre=document.createElement('span'),cantidad=document.createElement('span'),estado=document.createElement('small');
+   nombre.textContent=f.tipo==='cano'?'Caños comerciales':f.tipo==='cupla-plan'?'Cuplas':textoMaterialPantallaGas(f.material)+(asignacion.adicionalReferencia?' · adicional B–Cocina':'')+(asignacion.compartida?' · compartida':'');
+   const actualizarFila=()=>{cantidad.textContent=Number.isFinite(f.cantidad)?fmt(f.cantidad)+' '+f.unidad:'Pendiente';estado.textContent=(Number.isFinite(f.cantidad)?f.estado.toUpperCase():'CANTIDAD PENDIENTE')+' · '+(f.revisado?'Revisado':'Por revisar')+(!f.diametro||/pendiente/i.test(f.diametro)?' · medida pendiente':'');};actualizarFila();compacta.append(nombre,cantidad,estado);fila.append(compacta);
+  const card=document.createElement('article');card.className='gas-material-card';card.claveFilaGas=f.id;
   const titulo=document.createElement('h3');titulo.textContent=textoMaterialPantallaGas(f.material);card.append(titulo);
   texto('Estado: '+(f.cantidad===null?'Pendiente':f.estado.toUpperCase())+(f.cantidadConfirmada?' · '+(f.origen==='identificado'?'Accesorio confirmado':'cantidad identificada'):''),card);
   if(!r.manualDirecto){const tecnica=document.createElement('p');tecnica.className='gas-tecnica-pendiente';tecnica.textContent='Revisión técnica pendiente · diámetros y conexiones';card.append(tecnica);}
   texto('Diámetro: '+(f.diametro||'Pendiente'),card);
-  texto('Ubicación: '+ubicacionLegibleGas(f.ubicacion),card);
+  texto('Ubicación: '+asignacion.ubicacionTexto+(asignacion.compartida?' · compartida, contabilizada una sola vez':''),card);
   const qty=document.createElement('label'),input=document.createElement('input');qty.textContent='Cantidad · '+f.unidad;input.type='number';input.min='0';input.step='1';input.inputMode='numeric';input.placeholder='Pendiente';input.ariaLabel='Cantidad de '+textoMaterialPantallaGas(f.material)+' en '+textoMaterialPantallaGas(f.ubicacion)+' ('+f.unidad+')';input.value=f.cantidad??'';
   input.onchange=()=>{const n=input.value===''?null:Number(input.value);if(n!==null&&(!Number.isInteger(n)||n<0)){$('matMensaje').textContent='Cantidad entera no negativa o pendiente.';input.value=f.cantidad??'';f.revisado=false;guardarRevisionMaterialesGas();return;}if(!f.editado)f.cantidadCalculada=f.cantidad;f.cantidad=n;f.revisado=false;f.editado=true;f.cantidadConfirmada=false;f.estado='estimado';guardarRevisionMaterialesGas();renderPlanGas();};qty.className='gas-cantidad';qty.append(input);if(f.cantidad===null){const pendiente=document.createElement('span');pendiente.className='gas-cantidad-pendiente';pendiente.textContent='Pendiente';qty.append(pendiente);}card.append(qty);
-  const info=document.createElement('details'),summary=document.createElement('summary');info.className='gas-detalles';summary.textContent='Ver detalles técnicos';info.append(summary);
+  const info=document.createElement('details'),summary=document.createElement('summary');info.className='gas-detalles';preparar(info,'info:'+f.id);summary.textContent='Ver detalles técnicos';info.append(summary);
   texto(f.evidencia||f.equivalentes||'Sin evidencia adicional registrada.',info);
   if(f.editado)texto('Cantidad ajustada manualmente; calculada originalmente '+(f.cantidadCalculada??'PENDIENTE'),info);
   card.append(info);
-  const label=document.createElement('label'),check=document.createElement('input');label.className='gas-revision-check';label.textContent='Revisado';label.title='Revisión de la lista de materiales; no valida diámetros ni conexiones';check.type='checkbox';check.checked=f.revisado;check.onchange=()=>{f.revisado=check.checked;guardarRevisionMaterialesGas();};label.append(check);card.append(label);lista.append(card);
+  const label=document.createElement('label'),check=document.createElement('input');label.className='gas-revision-check';label.textContent='Revisado';label.title='Revisión de la lista de materiales; no valida diámetros ni conexiones';check.type='checkbox';check.checked=f.revisado;check.onchange=()=>{f.revisado=check.checked;guardarRevisionMaterialesGas();actualizarFila();};label.append(check);card.append(label);fila.append(card);
+   if(f.cantidad===0){ceros.append(fila);if(fila.open)ceros.open=true;}else grupo.append(fila);
+  }
+  if(g.filas.some(a=>a.fila.cantidad===0))grupo.append(ceros);lista.append(grupo);
  }
  out.append(lista);texto('Revisado se refiere a la lista, no a la validación técnica. Pendiente no significa cero.');
 }
