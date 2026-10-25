@@ -64,6 +64,15 @@
             "ref-M-A"
           ],
           "motivo": "producto SIGAS, medidas de tres conexiones y vía directa/giro pendientes."
+        },
+        {
+          "piezaId": "terminal-medidor",
+          "tipo": "conexion-terminal",
+          "cantidad": null,
+          "tramos": [
+            "ref-M-A"
+          ],
+          "motivo": "Salida roscada del medidor: identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero."
         }
       ],
       "perdidasSinUbicacion": [],
@@ -287,6 +296,8 @@
         "tee:nombre:b: producto SIGAS, medidas de tres conexiones y vía directa/giro pendientes.",
         "manual-total:[\"ref-B-Calefactor\",\"codo90\"]: producto SIGAS exacto y vía pendientes. Confirmar normal, MH o roscado y sus medidas; no se elige una variante por defecto.",
         "manual-total:[\"ref-B-Calefactor\",\"llave\"]: tipo y producto de llave SIGAS pendientes.",
+        "terminal-medidor: Salida roscada del medidor: identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero.",
+        "terminal-Calefactor: Conexión fusión–rosca de Calefactor: identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero.",
         "referencia-codo19: producto SIGAS exacto y vía pendientes. Confirmar normal, MH o roscado y sus medidas; no se elige una variante por defecto.",
         "manual-total:[\"ref-M-A\",\"codo90\"]: producto SIGAS exacto y vía pendientes. Confirmar normal, MH o roscado y sus medidas; no se elige una variante por defecto.",
         "tee:nombre:a: producto SIGAS, medidas de tres conexiones y vía directa/giro pendientes.",
@@ -294,10 +305,14 @@
         "tee:nombre:b: producto SIGAS, medidas de tres conexiones y vía directa/giro pendientes.",
         "manual-total:[\"ref-B-Cocina\",\"codo90\"]: producto SIGAS exacto y vía pendientes. Confirmar normal, MH o roscado y sus medidas; no se elige una variante por defecto.",
         "manual-total:[\"ref-B-Cocina\",\"llave\"]: tipo y producto de llave SIGAS pendientes.",
+        "terminal-medidor: Salida roscada del medidor: identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero.",
+        "terminal-Cocina: Conexión fusión–rosca de Cocina: identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero.",
         "manual-total:[\"ref-M-A\",\"codo90\"]: producto SIGAS exacto y vía pendientes. Confirmar normal, MH o roscado y sus medidas; no se elige una variante por defecto.",
         "tee:nombre:a: producto SIGAS, medidas de tres conexiones y vía directa/giro pendientes.",
         "manual-total:[\"ref-A-Termo\",\"codo90\"]: producto SIGAS exacto y vía pendientes. Confirmar normal, MH o roscado y sus medidas; no se elige una variante por defecto.",
-        "manual-total:[\"ref-A-Termo\",\"llave\"]: tipo y producto de llave SIGAS pendientes."
+        "manual-total:[\"ref-A-Termo\",\"llave\"]: tipo y producto de llave SIGAS pendientes.",
+        "terminal-medidor: Salida roscada del medidor: identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero.",
+        "terminal-Termo: Conexión fusión–rosca de Termo: identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero."
       ],
       "estado": "Preselección condicionada; no diámetro de ejecución"
     },
@@ -552,13 +567,17 @@
         "tee:nombre:b: producto SIGAS, medidas de tres conexiones y vía directa/giro pendientes.",
         "manual-total:[\"ref-B-Calefactor\",\"codo90\"]: producto SIGAS exacto y vía pendientes. Confirmar normal, MH o roscado y sus medidas; no se elige una variante por defecto.",
         "manual-total:[\"ref-B-Calefactor\",\"llave\"]: tipo y producto de llave SIGAS pendientes.",
+        "terminal-medidor: Salida roscada del medidor: identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero.",
+        "terminal-Calefactor: Conexión fusión–rosca de Calefactor: identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero.",
         "referencia-codo19: producto SIGAS exacto y vía pendientes. Confirmar normal, MH o roscado y sus medidas; no se elige una variante por defecto.",
         "manual-total:[\"ref-M-A\",\"codo90\"]: producto SIGAS exacto y vía pendientes. Confirmar normal, MH o roscado y sus medidas; no se elige una variante por defecto.",
         "tee:nombre:a: producto SIGAS, medidas de tres conexiones y vía directa/giro pendientes.",
         "manual-total:[\"ref-A-B\",\"codo90\"]: producto SIGAS exacto y vía pendientes. Confirmar normal, MH o roscado y sus medidas; no se elige una variante por defecto.",
         "tee:nombre:b: producto SIGAS, medidas de tres conexiones y vía directa/giro pendientes.",
         "manual-total:[\"ref-B-Cocina\",\"codo90\"]: producto SIGAS exacto y vía pendientes. Confirmar normal, MH o roscado y sus medidas; no se elige una variante por defecto.",
-        "manual-total:[\"ref-B-Cocina\",\"llave\"]: tipo y producto de llave SIGAS pendientes."
+        "manual-total:[\"ref-B-Cocina\",\"llave\"]: tipo y producto de llave SIGAS pendientes.",
+        "terminal-medidor: Salida roscada del medidor: identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero.",
+        "terminal-Cocina: Conexión fusión–rosca de Cocina: identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero."
       ],
       "estado": "Preselección condicionada; no diámetro de ejecución"
     },
@@ -590,6 +609,15 @@
             "ref-A-Termo"
           ],
           "motivo": "tipo y producto de llave SIGAS pendientes."
+        },
+        {
+          "piezaId": "terminal-Termo",
+          "tipo": "conexion-terminal",
+          "cantidad": null,
+          "tramos": [
+            "ref-A-Termo"
+          ],
+          "motivo": "Conexión fusión–rosca de Termo: identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero."
         }
       ],
       "perdidasSinUbicacion": [],
@@ -810,7 +838,9 @@
         "manual-total:[\"ref-M-A\",\"codo90\"]: producto SIGAS exacto y vía pendientes. Confirmar normal, MH o roscado y sus medidas; no se elige una variante por defecto.",
         "tee:nombre:a: producto SIGAS, medidas de tres conexiones y vía directa/giro pendientes.",
         "manual-total:[\"ref-A-Termo\",\"codo90\"]: producto SIGAS exacto y vía pendientes. Confirmar normal, MH o roscado y sus medidas; no se elige una variante por defecto.",
-        "manual-total:[\"ref-A-Termo\",\"llave\"]: tipo y producto de llave SIGAS pendientes."
+        "manual-total:[\"ref-A-Termo\",\"llave\"]: tipo y producto de llave SIGAS pendientes.",
+        "terminal-medidor: Salida roscada del medidor: identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero.",
+        "terminal-Termo: Conexión fusión–rosca de Termo: identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero."
       ],
       "estado": "Preselección condicionada; no diámetro de ejecución"
     },
@@ -842,6 +872,15 @@
             "ref-B-Calefactor"
           ],
           "motivo": "tipo y producto de llave SIGAS pendientes."
+        },
+        {
+          "piezaId": "terminal-Calefactor",
+          "tipo": "conexion-terminal",
+          "cantidad": null,
+          "tramos": [
+            "ref-B-Calefactor"
+          ],
+          "motivo": "Conexión fusión–rosca de Calefactor: identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero."
         }
       ],
       "perdidasSinUbicacion": [],
@@ -1064,7 +1103,9 @@
         "manual-total:[\"ref-A-B\",\"codo90\"]: producto SIGAS exacto y vía pendientes. Confirmar normal, MH o roscado y sus medidas; no se elige una variante por defecto.",
         "tee:nombre:b: producto SIGAS, medidas de tres conexiones y vía directa/giro pendientes.",
         "manual-total:[\"ref-B-Calefactor\",\"codo90\"]: producto SIGAS exacto y vía pendientes. Confirmar normal, MH o roscado y sus medidas; no se elige una variante por defecto.",
-        "manual-total:[\"ref-B-Calefactor\",\"llave\"]: tipo y producto de llave SIGAS pendientes."
+        "manual-total:[\"ref-B-Calefactor\",\"llave\"]: tipo y producto de llave SIGAS pendientes.",
+        "terminal-medidor: Salida roscada del medidor: identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero.",
+        "terminal-Calefactor: Conexión fusión–rosca de Calefactor: identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero."
       ],
       "estado": "Preselección condicionada; no diámetro de ejecución"
     },
@@ -1105,6 +1146,15 @@
             "ref-B-Cocina"
           ],
           "motivo": "tipo y producto de llave SIGAS pendientes."
+        },
+        {
+          "piezaId": "terminal-Cocina",
+          "tipo": "conexion-terminal",
+          "cantidad": null,
+          "tramos": [
+            "ref-B-Cocina"
+          ],
+          "motivo": "Conexión fusión–rosca de Cocina: identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero."
         }
       ],
       "perdidasSinUbicacion": [],
@@ -1328,7 +1378,9 @@
         "manual-total:[\"ref-A-B\",\"codo90\"]: producto SIGAS exacto y vía pendientes. Confirmar normal, MH o roscado y sus medidas; no se elige una variante por defecto.",
         "tee:nombre:b: producto SIGAS, medidas de tres conexiones y vía directa/giro pendientes.",
         "manual-total:[\"ref-B-Cocina\",\"codo90\"]: producto SIGAS exacto y vía pendientes. Confirmar normal, MH o roscado y sus medidas; no se elige una variante por defecto.",
-        "manual-total:[\"ref-B-Cocina\",\"llave\"]: tipo y producto de llave SIGAS pendientes."
+        "manual-total:[\"ref-B-Cocina\",\"llave\"]: tipo y producto de llave SIGAS pendientes.",
+        "terminal-medidor: Salida roscada del medidor: identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero.",
+        "terminal-Cocina: Conexión fusión–rosca de Cocina: identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero."
       ],
       "estado": "Preselección condicionada; no diámetro de ejecución"
     }
@@ -1385,10 +1437,14 @@
     "tee:nombre:b: producto SIGAS, medidas de tres conexiones y vía directa/giro pendientes.",
     "manual-total:[\"ref-B-Calefactor\",\"codo90\"]: producto SIGAS exacto y vía pendientes. Confirmar normal, MH o roscado y sus medidas; no se elige una variante por defecto.",
     "manual-total:[\"ref-B-Calefactor\",\"llave\"]: tipo y producto de llave SIGAS pendientes.",
+    "terminal-medidor: Salida roscada del medidor: identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero.",
+    "terminal-Calefactor: Conexión fusión–rosca de Calefactor: identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero.",
     "referencia-codo19: producto SIGAS exacto y vía pendientes. Confirmar normal, MH o roscado y sus medidas; no se elige una variante por defecto.",
     "manual-total:[\"ref-B-Cocina\",\"codo90\"]: producto SIGAS exacto y vía pendientes. Confirmar normal, MH o roscado y sus medidas; no se elige una variante por defecto.",
     "manual-total:[\"ref-B-Cocina\",\"llave\"]: tipo y producto de llave SIGAS pendientes.",
+    "terminal-Cocina: Conexión fusión–rosca de Cocina: identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero.",
     "manual-total:[\"ref-A-Termo\",\"codo90\"]: producto SIGAS exacto y vía pendientes. Confirmar normal, MH o roscado y sus medidas; no se elige una variante por defecto.",
-    "manual-total:[\"ref-A-Termo\",\"llave\"]: tipo y producto de llave SIGAS pendientes."
+    "manual-total:[\"ref-A-Termo\",\"llave\"]: tipo y producto de llave SIGAS pendientes.",
+    "terminal-Termo: Conexión fusión–rosca de Termo: identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero."
   ]
 }

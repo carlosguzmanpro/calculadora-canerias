@@ -3,6 +3,12 @@ function entradaPreseleccionSigasGas(){
  if(modulo!=='gas'||CatalogosSistemasGas.identificar(instalacionGas.perfil)!=='sigas')return null;
  const perfil=perfilTecnicoActualGas(),red=redFisicaManualGas(),preparacion=PreparacionDiametrosGas.prepararRed(red,tramos,perfil);
  const inventario=inventarioAccesoriosParaMotorGas(red);
+ // Necesidad terminal independiente: no se transforma en un codo ni se suma a materiales.
+ const entradas=new Set(Object.values(red.orientacion).map(o=>o.hasta));
+ const raices=[...new Set(Object.values(red.orientacion).map(o=>o.desde))].filter(id=>!entradas.has(id));
+ inventario.necesidadesTerminales=[];
+ if(raices.length===1){const ids=Object.entries(red.orientacion).filter(([,o])=>o.desde===raices[0]).map(([id])=>id);inventario.necesidadesTerminales.push({id:'terminal-medidor',nombre:'Salida roscada del medidor',tramos:ids,recorridos:preparacion.recorridos.map(r=>r.artefacto)});}
+ for(const ruta of preparacion.recorridos)inventario.necesidadesTerminales.push({id:'terminal-'+ruta.artefacto,nombre:'Conexión fusión–rosca de '+ruta.artefacto,tramos:ruta.tramos.slice(-1),recorridos:[ruta.artefacto]});
  // El codo autorizado del casillero se mantiene en inventario; no se supone de qué lado del medidor está.
  const entrada=entradaManualMaterialesGas(),casillero=estadoCodoCasilleroGas(entrada);
  if(casillero.adicional===1&&!inventario.fisicas.some(p=>p.id==='casillero-medidor:codo90'))inventario.fisicas.push({id:'casillero-medidor:codo90',tipo:'codo90',cantidad:1,confirmada:true,tramos:[],equivalenteM:null});

@@ -45,3 +45,13 @@ Los candidatos mostrados no son diámetros definitivos ni autorización para eje
 ## Verificación
 
 690 pruebas automáticas aprobadas, sin fallos. Cuatro comprobaciones de navegador aprobadas: trazabilidad nueva en vista móvil, edición compacta, SIGAS y cierre. Se verifica conservación tras recarga, cantidades, ausencia de errores JavaScript y desbordamiento horizontal. Chromium con viewport táctil 390×844; no se dispuso de un dispositivo Android físico. Extracción del PDF, empaquetado autónomo y revisión de espacios del diff correctos.
+
+## Corrección de conexiones y recorridos mixtos
+
+La rama sigas-accesorios-por-tramo parte de 596af04 y conserva las correcciones locales de trazabilidad anteriores. Se reutilizan los conteos guardados, sin volver a ingresarlos.
+Se reconocen automáticamente cuatro necesidades terminales independientes: salida roscada del medidor, termo, calefactor y cocina. No son cuatro piezas nuevas ni se suman a materiales. Falta identificar el producto, sus medidas y su correspondencia física con las piezas declaradas; permanecen pendientes y bloquean la completitud, incluso si se confirma una familia para el grupo de siete codos de M–A. Esa selección explícita no identifica la salida del medidor ni implica que el grupo sea homogéneo por defecto.
+Una pieza no-tee vinculada ambiguamente a varios tramos de distinto diámetro no acepta un producto fijo por coincidir solamente con uno de los diámetros. Debe individualizarse su ubicación/producto; las cantidades no cambian.
+La prueba del recorrido de 36 m M–A–B–Calefactor usa, con productos normales explícitamente confirmados para la prueba, las equivalencias originales correspondientes a 32, 25 y 20 mm respectivamente. Cada contribución registra su tramo y diámetro. Se suman las tres equivalencias locales, no se aplica el diámetro troncal a todo el recorrido. Esta prueba controla aritmética y trazabilidad, no identifica los productos reales de la instalación.
+El adicional de B–Cocina sigue sin producto Normal/MH asumido. La identificación de tees, sus vías y medidas, llaves, terminales, cuplas y condiciones reales de suministro sigue pendiente. La fotografía no se interpreta automáticamente.
+La pantalla aprobada, materiales, tablas originales, PDF, plano y almacenamiento no se modifican para esta corrección; index.html se regenera con los módulos locales.
+Verificación final de esta corrección: 694 pruebas automáticas aprobadas; prueba móvil de trazabilidad y regresión de navegador SIGAS aprobadas. Verificación del PDF fuente y empaquetado correctos. Navegador Chromium con emulación móvil, sin dispositivo Android físico.

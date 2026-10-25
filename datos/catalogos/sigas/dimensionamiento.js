@@ -64,12 +64,16 @@
      const opciones=a.familia&&p.tipo!=='tee'&&diametros.length===1?d.tablas[3].filas.filter(f=>familiaProducto(f)===a.familia&&f.diametroExteriorM*1000===diametros[0]):[];
      const fila=a.familia?(opciones.length===1?opciones[0]:null):d.tablas[3].filas.find(f=>f.id===id);
      const tipoCorrecto=fila&&({codo90:/^Codo.*90/,codo45:/^Codo.*45/,tee:/^Te /,llave:/^Llave /,reduccion:/Reduct|Reduc/,cupla:/Cupla/}[p.tipo]?.test(fila.nombreOriginal));
-     if(!tipoCorrecto||!ubicaciones.some(id=>vector[id]===fila.diametroExteriorM*1000)){pendiente({...p,tramos:ubicaciones},'combinación '+clave+' sin producto/diámetro/vía SIGAS compatible documentado.');continue;}
+     if(!tipoCorrecto||!(p.tipo==='tee'?ubicaciones.some(id=>vector[id]===fila.diametroExteriorM*1000):ubicaciones.every(id=>vector[id]===fila.diametroExteriorM*1000))){pendiente({...p,tramos:ubicaciones},'combinación '+clave+' sin producto/diámetro/vía SIGAS compatible documentado.');continue;}
      if(p.tipo==='tee'&&/^Te Normal /.test(fila.nombreOriginal)&&Array.isArray(p.conexionesDiametro)&&p.conexionesDiametro.some(id=>vector[id]!==fila.diametroExteriorM*1000)){
       pendiente({...p,tramos:ubicaciones},'tee normal incompatible con los diámetros candidatos de sus tres conexiones; identificar configuración y reducciones sin inventarlas.');continue;
      }
      const tramosEnRuta=ubicaciones.filter(id=>r.tramos.includes(id)),tramoId=tramosEnRuta.length===1?tramosEnRuta[0]:null;
-     try{const x=tecnico().accesorio(d,fila.id,p.cantidad);aportes.push({piezaId:p.id,tipo:p.tipo,tramoId,...x});}catch(e){pendiente({...p,tramos:ubicaciones},e.message);}
+     try{const x=tecnico().accesorio(d,fila.id,p.cantidad);aportes.push({piezaId:p.id,tipo:p.tipo,tramoId,diametroExteriorMm:fila.diametroExteriorM*1000,...x});}catch(e){pendiente({...p,tramos:ubicaciones},e.message);}
+    }
+    // Son necesidades, no piezas adicionales: sin vínculo físico inequívoco no atribuirles cero.
+    for(const terminal of inventario.necesidadesTerminales||[])if(terminal.recorridos?.includes(r.artefacto)){
+     pendiente({id:terminal.id,tipo:'conexion-terminal',cantidad:null,tramos:terminal.tramos},terminal.nombre+': identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero.');
     }
     const equivalenteConocidoM=aportes.reduce((n,a)=>n+a.equivalenteTotalM,0),completo=!inventarioInvalido&&!faltantes.length&&!faltantesInventario.length&&config.inventarioPerdidasCompleto===true&&config.fuenteInventario;
     return {...r,indice:ri,aportes,faltantes,perdidasPendientes,equivalenteConocidoM:aportes.length||completo?equivalenteConocidoM:null,equivalenteCompleto:!!completo,longitudConsultaM:r.longitudReal+equivalenteConocidoM,longitudDefinitivaM:completo?r.longitudReal+equivalenteConocidoM:null};
