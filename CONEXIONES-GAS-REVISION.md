@@ -57,3 +57,20 @@ Verificación de entrega: 691 pruebas automáticas aprobadas y tres comprobacion
 Chromium móvil (identificación de terminal SIGAS sin doble conteo, regresión de los
 tres sistemas y pantalla principal compacta). Se comprueba también la recuperación
 de vínculos guardados, migración limitada del codo19 y rechazo de piezas incompatibles.
+
+## Corrección: necesidad automática de rosca (base ad7ae2b)
+
+Rama prueba/gas-necesidad-rosca-terminal. La necesidad se deriva automáticamente de
+cada medidor/artefacto identificado; no depende de que el usuario vincule una pieza.
+El ejemplo reconoce cuatro necesidades (M, Termo, Calefactor, Cocina) conservando
+58 m, 19 codos, 2 tees y 3 llaves. No se convierten esas cuatro necesidades en cuatro
+piezas adicionales de compra. El codo adicional conserva su referencia a B–Cocina.
+
+Quedan independientes necesidad, identificación de geometría/producto y llave.
+La revisión solo ofrece piezas individuales elegibles, nunca grupos, tees ni llaves
+como sustitutos de conexión terminal. También se rechazan vínculos antiguos a una
+llave en acero epoxi. Los registros anteriores se conservan para revisión.
+
+Sin producto verificado, la equivalencia sigue pendiente (null), no cero. Retirar
+un vínculo vuelve pendiente el producto, pero conserva la necesidad automática.
+La cabecera principal, el motor SIGAS y las tablas permanecen sin cambios.

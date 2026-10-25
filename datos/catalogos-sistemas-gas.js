@@ -64,6 +64,14 @@
   if(/hembra/i.test(tipo)&&!/hembra/i.test(f.nombreOriginal)||/macho/i.test(tipo)&&!/macho/i.test(f.nombreOriginal))return false;
   return true;
  }
+ function piezaTerminalElegible(p,sistema,productos=[]){
+  if(!p||p.cantidad!==1||p.confirmada!==true||p.conflicto)return false;
+  const tipo=String(p.tipo||'').trim();
+  // La llave permanece como accesorio independiente aunque tenga extremos roscados.
+  if(/llave|v[aá]lvula/i.test(tipo)||tipo==='tee')return false;
+  if(sistema===IDS.epoxi)return ['codo90','codo45','cupla','otro','transicion'].includes(tipo)||/^(transici[oó]n|conexi[oó]n|uni[oó]n|adaptador|niple|entrerrosca)(?: |$)/i.test(tipo);
+  return productos.some(f=>tipoProductoCompatible(p,f));
+ }
  function conexiones(red,ts,inventario,sistema,registros={},sigas=null,fusiogas=null){
   const extremos=[],intermedias=[],pendientes=[],productos=productosTerminales(sistema,sigas,fusiogas),usadas=new Set();
   const puntos=red.puntos||[],os=Object.entries(red.orientacion||{}),entradas=new Set(os.map(([,o])=>o.hasta));
@@ -76,9 +84,11 @@
    const id=punto.id,registro=registros?.[id],pieza=registro?(inventario.fisicas||[]).find(p=>p.id===registro.piezaId):null;
    const e={id,nombre:punto.nombre,rol:raiz?'medidor':punto.tipo==='artefacto'||punto.artefactoId||Number(red.porTramo?.[enlaces[0]?.[0]])>0?'artefacto':'extremo sin artefacto confirmado',tramos:enlaces.map(([id])=>id),piezaId:pieza?.id||null,producto:null,equivalenteM:null,estado:'pendiente',motivo:''};
    if(red.errores?.length||enlaces.length!==1)e.motivo='Red ambigua o extremo con varias conexiones: revisar antes de identificar la pieza.';
-   else if(!registro)e.motivo=sistema===IDS.epoxi?'Identificar la conexión roscada real, sus medidas y la pieza ya registrada.':'Identificar la transición termofusión–rosca real: recta, codo u otra variante, medidas y pieza ya registrada.';
+   else if(!registro&&!['medidor','artefacto'].includes(e.rol))e.motivo='Confirmar si este extremo corresponde a un artefacto; no se inventa su conexión.';
+   else if(!registro)e.motivo='Necesidad de conexión roscada reconocida automáticamente. Pendiente únicamente identificar geometría, medidas y producto'+(sistema===IDS.epoxi?' roscado compatible.':' de transición termofusión–rosca.');
    else if(registro.sistema!==sistema)e.motivo='La identificación pertenece a otro sistema; se conserva sin reutilizar su equivalente.';
    else if(!pieza||pieza.cantidad!==1||pieza.confirmada!==true||pieza.conflicto)e.motivo='Seleccionar una pieza individual confirmada. Un grupo de varias piezas no identifica cuál está en el extremo.';
+   else if(!piezaTerminalElegible(pieza,sistema,productos))e.motivo='Esta pieza no es una conexión terminal elegible. La llave de paso es independiente y nunca sustituye la conexión roscada.';
    else if(usadas.has(pieza.id)||Object.values(registros||{}).filter(r=>r?.piezaId===pieza.id).length>1)e.motivo='Esa pieza ya está vinculada a otro extremo; no se cuenta dos veces.';
    else if(!pieza.tramos?.some(id=>e.tramos.includes(id)))e.motivo='La pieza no pertenece al tramo del extremo; revisar ubicación.';
    else if(sistema===IDS.epoxi){e.motivo='Pieza roscada vinculada. Faltan producto, medidas y equivalencia aplicable verificados para acero epoxi.';e.estado='pieza vinculada';usadas.add(pieza.id);}
@@ -86,14 +96,19 @@
     if(!f||!tipoProductoCompatible(pieza,f))e.motivo='Elegir un producto terminal del mismo sistema compatible con el tipo declarado; no cambiar la cantidad ni convertir un codo en transición recta.';
     else{e.producto=f;e.equivalenteM=f.longitudEquivalenteM;e.estado='producto identificado';e.motivo='Equivalente documental; verificar medidas, diámetro candidato y condiciones de aplicación.';usadas.add(pieza.id);}
    }
+   e.requiereRosca=['medidor','artefacto'].includes(e.rol)?true:null;
+   e.necesidadConexion=e.requiereRosca?'reconocida automáticamente':'confirmar medidor o artefacto';
+   e.tipoConexionNecesaria=sistema===IDS.epoxi?'conexión roscada compatible':[IDS.sigas,IDS.fusiogas].includes(sistema)?'transición termofusión–rosca':'sistema pendiente';
+   e.identificacionPendiente=e.estado!=='producto identificado';e.llaveIndependiente=true;
+   e.piezasElegibles=(inventario.fisicas||[]).filter(p=>piezaTerminalElegible(p,sistema,productos)&&p.tramos?.some(id=>e.tramos.includes(id))&&!Object.entries(registros||{}).some(([id,r])=>id!==e.id&&r?.piezaId===p.id)).map(p=>p.id);
    extremos.push(e);if(e.estado!=='producto identificado')pendientes.push(e.nombre+': '+e.motivo);
   }
   for(const pieza of inventario.fisicas||[]){const terminal=extremos.find(e=>e.piezaId===pieza.id&&['producto identificado','pieza vinculada'].includes(e.estado));
    const nodo=puntos.find(n=>n.id===pieza.nodo||String(n.nombre).trim().toLowerCase()===String(pieza.nodo||'').trim().toLowerCase());
    intermedias.push({piezaId:pieza.id,rol:terminal?'terminal':nodo&&grados.get(nodo.id)>1?'intermedia':'ubicación en el tramo pendiente',extremo:terminal?.id||null});
   }
-  return {extremos,piezas:intermedias,productos,pendientes,agregadas:0};
+  return {extremos,piezas:intermedias,productos,pendientes,necesidadesRosca:extremos.filter(e=>e.requiereRosca===true).length,llavesIndependientes:(inventario.fisicas||[]).filter(p=>/llave|v[aá]lvula/i.test(String(p.tipo))),agregadas:0};
  }
- const api={conexiones,productosTerminales,tipoProductoCompatible,IDS,identificar,obtener,compatibilidad,prepararAccesorios,largoDocumentado,resultadoPorTramo};
+ const api={piezaTerminalElegible,conexiones,productosTerminales,tipoProductoCompatible,IDS,identificar,obtener,compatibilidad,prepararAccesorios,largoDocumentado,resultadoPorTramo};
  if(typeof module==='object'&&module.exports)module.exports=api;else root.CatalogosSistemasGas=api;
 })(globalThis);
