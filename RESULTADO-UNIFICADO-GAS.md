@@ -39,3 +39,19 @@ prueba de caché por proyecto y de ausencia de planificación duplicada al impri
 El ejercicio sin foto se verificó visualmente en PDF A4 de una página. La nueva
 prueba móvil/desktop comprueba ambas secciones, pendientes, ausencia de controles
 en el PDF y las cantidades 58/16+3/2/3.
+
+## Un solo PDF (base 88a58ab)
+
+Rama prueba/gas-pdf-unico. Se retira de la interfaz el apartado inferior Documento
+PDF de entrega, su revisión y su casilla. El acceso secundario PDF lleva al botón
+GENERAR PDF COMPLETO existente. No se agregan botones ni apartados.
+
+La fotografía sigue siendo opcional y se incluye sin exigir confirmación. Se
+conservan fotos y metadatos históricos de respaldos, sin recrear los controles
+retirados. Los errores de imagen utilizan los avisos existentes. Las pruebas de
+confirmaciones anteriores ahora verifican compatibilidad de datos legados; no
+simulan que esa casilla siga disponible en la interfaz actual.
+
+Verificación: 718 pruebas automáticas y cuatro comprobaciones de navegador,
+incluido PDF sin foto y con foto. Sin cambios en motor, datos técnicos, accesorios,
+materiales, tratamiento de tees ni cabecera principal compacta.

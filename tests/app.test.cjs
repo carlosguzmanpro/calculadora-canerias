@@ -18,10 +18,9 @@ test('persistencia, consumos, especialidades, impresión y foto local',async()=>
  assert.match(await page.locator('#resultadoMateriales').innerText(),/3 tiras.*18 m a comprar.*2 cuplas/s);
  await page.locator('#galeria').setInputFiles({name:'foto.png',mimeType:'image/png',buffer:Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jXioAAAAASUVORK5CYII=','base64')});
  await page.waitForFunction(()=>JSON.parse(localStorage.getItem('canerias-proyectos-v1')).gas.foto);
- await page.getByRole('button',{name:'Revisar croquis para entrega',exact:true}).click();assert.equal(await page.locator('#visor').isVisible(),true);await page.getByRole('button',{name:'Cerrar imagen',exact:true}).click();
- const confirmar=page.locator('label[for="entregaCroquisConfirmado"]');await confirmar.tap();assert.equal(await page.locator('#entregaCroquisConfirmado').isChecked(),true);assert.match(await page.locator('#entregaEstado').innerText(),/CONFIRMADO:/);
- await confirmar.tap();assert.equal(await page.locator('#entregaCroquisConfirmado').isChecked(),false);await confirmar.tap();
- await page.reload();await page.getByRole('button',{name:'🔥 Gas',exact:true}).click();assert.equal(await page.locator('#entregaCroquisConfirmado').isChecked(),true);await confirmar.tap();assert.equal(await page.locator('#entregaCroquisConfirmado').isChecked(),false);
+ await page.getByRole('button',{name:'🔎 Ampliar croquis',exact:true}).click();assert.equal(await page.locator('#visor').isVisible(),true);await page.getByRole('button',{name:'Cerrar imagen',exact:true}).click();
+ assert.equal(await page.locator('#entregaCroquisConfirmado,#entregaGasOpcional').count(),0);
+ await page.reload();await page.getByRole('button',{name:'🔥 Gas',exact:true}).click();assert.ok(await page.evaluate(()=>proyectos.gas.foto));
 
  await page.getByRole('button',{name:'🧮 Consulta de consumos de gas',exact:true}).click();
  await page.locator('#gp').fill('9300');await page.getByRole('button',{name:'Agregar artefacto',exact:true}).click();

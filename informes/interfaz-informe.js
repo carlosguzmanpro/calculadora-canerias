@@ -52,7 +52,7 @@ function imprimirInformeActual(){
  prepararInformeActual();
  const cont=$('informeImpresion'),imagen=cont.querySelector?cont.querySelector('img'):null;
  if(!imagen){window.print();return;}
- const fallo=()=>{$('entregaEstado').textContent='No se pudo preparar la imagen para impresión. Revisá la foto antes de guardar el PDF.';};
+ const fallo=()=>{const mensaje='No se pudo preparar la imagen para impresión. Revisá la foto antes de guardar el PDF.';for(const id of ['estadoFoto','matMensaje'])if($(id))$(id).textContent=mensaje;};
  if(typeof imagen.decode==='function')return imagen.decode().then(()=>window.print(),fallo);
  if(imagen.complete){if(imagen.naturalWidth)window.print();else fallo();return;}
  imagen.onload=()=>window.print();imagen.onerror=fallo;
@@ -63,43 +63,19 @@ function croquisEntregaDisponible(){
  // Confirmación visual voluntaria: no depende de completar ni dimensionar la red.
  return modulo==='gas'&&typeof fotoURL==='string'&&/^(data:image\/(?:png|jpeg|webp);base64,|blob:)/.test(fotoURL);
 }
-function actualizarVistaEntregaGas(){
- const disponible=croquisEntregaDisponible(),casilla=$('entregaCroquisConfirmado');
- const firma=proyectoGasActual().entregaGas?.firmaCroquis;
- casilla.disabled=!disponible;
- casilla.checked=disponible&&!proyectoGasActual().entregaGas?.requiereConfirmacion&&firma===firmaCroquisEntrega();
- $('entregaEstado').textContent=!disponible?'SIN FOTO: cargá una fotografía para poder confirmar su revisión.':casilla.checked?
-  'CONFIRMADO: revisaste visualmente este croquis para los datos actuales. Podés desmarcar la casilla. Esto no valida cálculos ni habilita diámetros.':
-  firma?'NUEVA CONFIRMACIÓN NECESARIA: cambió la fotografía o algún dato de la instalación. La foto se conserva como referencia.':
-  'SIN CONFIRMAR: tocá la casilla después de revisar la foto. No hace falta completar la red para registrar esta confirmación visual.';
-}
-function confirmarCroquisEntrega(){
- if(modulo!=='gas')return;
- const marcado=$('entregaCroquisConfirmado').checked;
- // Estabilizar IDs antes de capturar la firma evita que el guardado la invalide.
- asegurarIdsGas();
- const p=proyectoGasActual();if(!p.entregaGas||typeof p.entregaGas!=='object')p.entregaGas={};
- p.entregaGas.requiereConfirmacion=false;
- p.entregaGas.firmaCroquis=marcado&&croquisEntregaDisponible()?firmaCroquisEntrega():null;
- guardarDatos();actualizarVistaEntregaGas();
-}
+// Compatibilidad con llamadas de carga/guardado anteriores; no existe un segundo documento.
+function actualizarVistaEntregaGas(){}
 function revisarCroquisParaEntrega(){
  if(modulo!=='gas')return;
- mostrarVista('croquis');$('referenciaOpcionalGas').open=true;actualizarVistaEntregaGas();
+ mostrarVista('croquis');$('referenciaOpcionalGas').open=true;
  if(!croquisEntregaDisponible()){
-  $('entregaAccion').textContent='No hay foto disponible. Usá Sacar foto o Galería en la carga de croquis.';
+  $('estadoFoto').textContent='No hay foto disponible. Podés usar Sacar foto o Galería; el PDF completo también funciona sin fotografía.';
   const carga=$('cargaFotoEntrega');if(carga.scrollIntoView)carga.scrollIntoView({block:'start'});if(carga.focus)carga.focus({preventScroll:true});return;
  }
- const visor=$('visor');$('imagenGrande').src=fotoURL;
- $('visorEntregaAyuda').textContent='Revisá la foto. Al cerrar la ampliación podés marcar o desmarcar la confirmación visual; no valida cálculos.';
- const casilla=$('entregaCroquisConfirmado');if(casilla.scrollIntoView)casilla.scrollIntoView({block:'center'});
- if(typeof visor.showModal==='function'){
-  if(!visor.open)visor.showModal();
-  $('entregaAccion').textContent='Foto abierta para revisión. Cerrá la ampliación y marcá o desmarcá la confirmación debajo.';
- }else{
-  $('entregaAccion').textContent='Fotografía localizada. Revisala y volvé a la casilla de confirmación debajo.';
-  const imagen=$('imagen');if(imagen.scrollIntoView)imagen.scrollIntoView({block:'center'});
- }
+ $('imagenGrande').src=fotoURL;$('visorEntregaAyuda').textContent='Fotografía original de referencia para el PDF completo. No valida cálculos.';
+ const imagen=$('imagen');if(imagen.scrollIntoView)imagen.scrollIntoView({block:'center'});
+ const visor=$('visor');if(typeof visor.showModal==='function'){if(!visor.open)visor.showModal();$('estadoFoto').textContent='Foto abierta para revisión como referencia del PDF completo.';}
+ else $('estadoFoto').textContent='Fotografía localizada como referencia del PDF completo.';
 }
 
 function ubicacionLegibleGas(texto,contexto=null){
