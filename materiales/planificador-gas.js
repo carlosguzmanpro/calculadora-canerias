@@ -107,5 +107,84 @@
   }
   return {filas,planes,avisos:[...new Set(avisos)],config,dimensionamientoDefinitivo:false,supuestos:['Configuración usada: largo comercial '+config.largoComercial+' m; reutilización '+(config.reutilizar?'selectiva propuesta':'no propuesta (escenario conservador)')+'; sobrante mínimo '+config.minimoSobrante+' m.','Plan físico independiente del dimensionamiento. Los diámetros propuestos no se convierten en definitivos.','Mínimo teórico = techo de longitud total por medida/material/sistema dividido por largo comercial: solo cota inferior, sin geometría ni desperdicio.','Compra estimada por cortes FFD, no optimización garantizada. Solo se proponen sobrantes del mismo grupo y que cumplan longitud mínima, si se habilita reutilizar.','No se suman sobrantes para fabricar una pieza; esa alternativa requeriría otras cuplas y revisión. No se incluyeron roscas, pérdidas de corte, reserva ni sobrantes preexistentes.','Una cupla por unión propuesta dentro de cada segmento. Posiciones desconocidas producen pendientes. Los accesorios compartidos se cuentan una sola vez por identificación física.',(/epoxi/i.test(entrada.material||'')&&entrada.sistema==='Roscado'?'Las reducciones se listan en materiales y no se agregan a equivalentes del método de clase.':'Las reducciones se listan en materiales. '+reglaReducciones+'.')]};
  }
- const api={planificarCortes,planificarMateriales};if(typeof module==='object'&&module.exports)module.exports=api;else root.MaterialesGas=api;
+ // Preparación de compra: lectura del inventario, nunca cambia pérdidas ni medidas guardadas.
+ function firmaCortesCompra(t,entrada,opciones={}){
+  return JSON.stringify({metros:t.metros,segmentos:t.segmentos||null,material:t.material||entrada.material,sistema:t.sistema||entrada.sistema,largo:opciones.largoComercial??6,accesorios:[...(t.accesorios||[]),...(entrada.extras||[]).filter(a=>a.tramo===t.id||a.ubicacion===t.id||String(a.ubicacion||'').startsWith(t.id+' · '))].map(a=>[a.idFisico||null,a.tipo,a.cantidad,a.nodo||null])});
+ }
+ function validarDistribucionCompra(t,grupos,largo){
+  if(!Array.isArray(grupos)||!grupos.length||grupos.length>1000||grupos.some(g=>!Array.isArray(g)||!g.length||g.length>1000||g.some(m=>!valido(m)||m>largo)))throw Error('Indicá cortes positivos que no superen el largo comercial.');
+  if(Math.abs(grupos.flat().reduce((n,m)=>n+m,0)-t.metros)>1e-8)throw Error('La suma de los cortes debe coincidir con los metros del tramo.');
+  const ss=t.segmentos?.filter(s=>s.metros>0);
+  if(ss?.length&&(ss.length!==grupos.length||ss.some((s,i)=>Math.abs(s.metros-grupos[i].reduce((n,m)=>n+m,0))>1e-8)))throw Error('Los segmentos continuos deben respetar las interrupciones ya registradas; corregí el detalle del tramo si cambió el recorrido.');
+  return grupos;
+ }
+ function prepararCompra(entrada,plan,opciones={},tecnico={}){
+  const largo=opciones.largoComercial??6;if(!valido(largo))throw Error('Largo comercial pendiente o inválido.');
+  const r={version:1,definitiva:false,largoComercial:largo,tramos:[],canos:[],confirmados:[],registrados:[],estimados:[],propuestas:[],pendientes:[],supuestos:['Sin reutilización entre tramos; dentro de cada tramo solo si fue habilitada y existen cortes y medidas compatibles. No incluye pérdidas de corte, roscado ni reserva.','Las tiras por longitud no prueban que los cortes puedan ejecutarse. Las cuplas requieren segmentos continuos definidos.','Diámetros candidatos y medidas manuales sin validación producen cantidades comerciales provisionales.']},bolsas=new Map(),vistas=new Set();
+  const conocido=d=>typeof d==='string'&&d.trim()&&!/pendiente/i.test(d),diametro=(t,s)=>{
+   const f=tecnico.filas?.find(f=>f.id===t.id),d=s?.diametro||t.diametro;
+   return conocido(d)?{valor:d,estado:t.diametroVerificado===true&&tecnico.definitivo===true?'verificado':'manual-sin-verificar'}:f?.candidato?.exteriorMm?{valor:f.candidato.exteriorMm+' mm',estado:'candidato'}:{valor:'Pendiente',estado:'pendiente'};
+  };
+  for(const t of entrada.tramos||[]){
+   const firma=firmaCortesCompra(t,entrada,opciones),guardado=opciones.cortesCompra?.[t.id],vigente=guardado?.firma===firma&&guardado.confirmado===true;
+   let grupos=null,error=null;try{if(vigente)grupos=validarDistribucionCompra(t,guardado.grupos,largo);}catch(e){error=e.message;}
+   if(guardado&&(!vigente||error))r.pendientes.push('Distribución conservada de '+t.id+': revisar cambios de tramo, accesorios o largo comercial'+(error?': '+error:'.'));
+   const ss=t.segmentos?.filter(s=>s.metros>0),continuidad=!!grupos||!!ss?.length;
+   if(ss?.length&&(ss.some(s=>!valido(s.metros))||Math.abs(ss.reduce((n,s)=>n+s.metros,0)-t.metros)>1e-8))throw Error('Segmentos incompatibles con '+t.id);
+   const partes=grupos?grupos.map((g,i)=>({metros:g.reduce((n,m)=>n+m,0),diametro:ss?.[i]?.diametro,cortes:g})):ss?.length?ss:[{metros:t.metros}];
+   const aportaciones=new Map();
+   const fila={id:t.id,metros:t.metros,diametros:[],tiras:0,metrosComerciales:0,sobrante:0,cuplas:continuidad?0:null,cuplasMinimas:continuidad?0:null,continuidad,distribucionVigente:!!grupos,distribucionGuardada:guardado||null,segmentos:[],provisional:true,estado:'estimado'};
+   for(const [i,p]of partes.entries()){
+    const d=diametro(t,p);if(!fila.diametros.some(x=>x.valor===d.valor&&x.estado===d.estado))fila.diametros.push(d);
+    let cortes=continuidad?planificarCortes([{id:t.id+':'+i,metros:p.metros}],{largoComercial:largo}).porSegmento[t.id+':'+i].piezas.map(p=>p.metros):null;
+    if(p.cortes)cortes=p.cortes;
+    const tiras=cortes?.length??Math.ceil(p.metros/largo),cuplas=cortes?cortes.length-1:null;
+    fila.tiras+=tiras;if(cuplas!==null){fila.cuplas+=cuplas;fila.cuplasMinimas+=Math.max(0,Math.ceil(p.metros/largo)-1);}
+    fila.segmentos.push({metros:p.metros,diametro:d.valor,cortes,cuplas});
+    const key=JSON.stringify([d.valor,d.estado,t.material||entrada.material,t.sistema||entrada.sistema,d.estado==='pendiente'?t.id:null]);
+    if(!bolsas.has(key))bolsas.set(key,{diametro:d.valor,estadoDiametro:d.estado,material:t.material||entrada.material,sistema:t.sistema||entrada.sistema,metros:0,tiras:0,tramos:[],cuplas:0,cuplasPendientes:false});
+    const g=bolsas.get(key);g.metros+=p.metros;g.tiras+=tiras;
+    if(!aportaciones.has(key))aportaciones.set(key,{tiras:0,cortes:[]});const aporte=aportaciones.get(key);aporte.tiras+=tiras;if(cortes)aporte.cortes.push(...cortes);if(!g.tramos.includes(t.id))g.tramos.push(t.id);if(cuplas===null)g.cuplasPendientes=true;else g.cuplas+=cuplas;
+   }
+   if(opciones.reutilizar&&continuidad)for(const [key,aporte]of aportaciones){const g=bolsas.get(key);if(g.estadoDiametro==='pendiente'||!g.material||!g.sistema)continue;const calculado=planificarCortes(aporte.cortes.map((metros,i)=>({id:'corte-'+i,metros})),{largoComercial:largo,reutilizar:true,minimoSobrante:opciones.minimoSobrante??.5});const ahorro=aporte.tiras-calculado.compraEstimada;g.tiras-=ahorro;fila.tiras-=ahorro;}
+   fila.metrosComerciales=fila.tiras*largo;fila.sobrante=fila.metrosComerciales-t.metros;r.tramos.push(fila);
+   if(!continuidad)r.pendientes.push('Cuplas en '+t.id+': faltan segmentos continuos y posiciones de accesorios.');
+  }
+  r.canos=[...bolsas.values()].map(g=>({...g,minimoTeorico:Math.ceil(g.metros/largo),metrosComerciales:g.tiras*largo,sobrante:g.tiras*largo-g.metros,provisional:true}));
+  for(const f of plan.filas||[]){
+   if(['cano','cupla-plan'].includes(f.tipo)||f.origen==='manual-cero')continue;
+   const key=f.id;if(key&&vistas.has(key))continue;if(key)vistas.add(key);
+   if(f.origen==='union-propuesta'||f.origen==='union-pendiente'||f.tipo==='reduccion-pendiente'){r.propuestas.push({...f,confirmada:false,afectaCalculo:false});continue;}
+   if(f.cantidad===null||f.conflicto){r.pendientes.push(f.material+' en '+f.ubicacion+': cantidad o coincidencias pendientes.');continue;}
+   const copia={...f};r.registrados.push(copia);(f.estado==='confirmado'&&!f.editado?r.confirmados:r.estimados).push(copia);
+  }
+  // Una cupla ya declarada no se suma otra vez a una unión propuesta por cortes.
+  if(r.registrados.some(f=>f.tipo==='cupla'&&f.cantidad>0)){
+   r.pendientes.push('Cuplas registradas: cotejar su ubicación con las uniones del plan de cortes; no se suman automáticamente.');
+   const declaradas=r.registrados.filter(f=>f.tipo==='cupla'&&f.cantidad>0);
+   const afectadas=new Set();for(const f of declaradas){const ubicadas=r.tramos.filter(t=>f.ubicacion===t.id||String(f.ubicacion||'').startsWith(t.id+' · '));for(const t of r.tramos){if(ubicadas.length&&!ubicadas.includes(t))continue;afectadas.add(t.id);}}
+   for(const f of r.tramos)if(afectadas.has(f.id)){f.cuplasCalculadas=f.cuplas;f.cuplas=null;}
+   for(const g of r.canos)if(g.tramos.some(id=>afectadas.has(id))){g.cuplasCalculadas=g.cuplas;g.cuplasPendientes=true;}
+  }
+  // Comparar nodos físicos una sola vez; nunca fabricar una reducción por cada recorrido.
+  const nodos=new Map((entrada.nodos||[]).map(n=>[n.id,n]));for(const t of entrada.tramos||[])for(const id of [t.red?.desde,t.red?.hasta])if(id&&!nodos.has(id))nodos.set(id,{id});
+  for(const [id]of nodos){
+   const ent=entrada.tramos.filter(t=>t.red?.hasta===id),sal=entrada.tramos.filter(t=>t.red?.desde===id);if(ent.length!==1||!sal.length)continue;
+   const ds=[diametro(ent[0],ent[0].segmentos?.at(-1)),...sal.map(t=>diametro(t,t.segmentos?.[0]))];if(ds.some(d=>d.estado==='pendiente')||ds.every(d=>d.valor===ds[0].valor))continue;
+   const piezas=(plan.filas||[]).filter(f=>f.nodo===id),tee=piezas.find(f=>f.tipo==='tee'),reduccion=piezas.find(f=>f.tipo==='reduccion'&&f.origen==='identificado');
+   if(reduccion&&!reduccion.conflicto)continue;
+   if(tee&&/reductora/i.test(tee.material)&&tee.estado==='confirmado'&&!tee.conflicto)continue;
+   if(!r.propuestas.some(p=>p.nodo===id||p.ubicacion===id))r.propuestas.push({id:'cambio:'+id,tipo:'transicion-pendiente',material:'Cambio de diámetro detectado: verificar conexión'+(tee?' (puede resolverlo una tee reductora)':''),nodo:id,ubicacion:id,diametro:ds.map(d=>d.valor+(d.estado==='verificado'?'':' provisional')).join(' / '),cantidad:null,confirmada:false,afectaCalculo:false});
+  }
+  r.pendientes=[...new Set(r.pendientes)];return r;
+ }
+ function agruparPendientesCompra(mensajes){
+  const grupos=new Map(['Datos del suministro','Diámetros y pérdidas','Conexiones y accesorios','Cortes, cuplas y compra','Verificación normativa'].map(n=>[n,[]]));
+  for(const texto of new Set(mensajes.filter(s=>typeof s==='string'&&s.trim()))){
+   const tema=/normativ|NAG|certific|edición|fabricante|aplicabilidad/i.test(texto)?'Verificación normativa':/cupla|corte|sobrante|comercial|compra|segmentos|tiras/i.test(texto)?'Cortes, cuplas y compra':/suministro|presi[oó]n|densidad|calor[ií]fic|simultaneidad|combustible/i.test(texto)?'Datos del suministro':/tee|codo|llave|rosca|conexi[oó]n|transici[oó]n|accesorio|pieza/i.test(texto)?'Conexiones y accesorios':'Diámetros y pérdidas';
+   grupos.get(tema).push(texto);
+  }return [...grupos].map(([tema,detalles])=>({tema,detalles}));
+ }
+
+ const api={planificarCortes,planificarMateriales,prepararCompra,firmaCortesCompra,validarDistribucionCompra,agruparPendientesCompra};if(typeof module==='object'&&module.exports)module.exports=api;else root.MaterialesGas=api;
 })(globalThis);

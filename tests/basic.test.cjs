@@ -2003,3 +2003,32 @@ test('Resumen principal GAS: agrupa 19 codos, dos tees y tres llaves sin mezclar
  assert.equal(filas.find(f=>f.tipo==='cano').cantidad,58);assert.equal(filas.find(f=>f.tipo==='cupla').pendiente,true);assert.equal(a.run('JSON.stringify(revisionMaterialesGas.plan)'),antes);
  a.run("guardarDatoTerminalSigasGas('terminal-Termo','sexo','macho');guardarDatoTerminalSigasGas('terminal-Termo','codoBase','HH')");assert.ok(a.run('revisionMaterialesGas.plan.propuestasCompraSigas.length')>0);assert.equal(a.run('resumenMaterialesInstalacionGas(revisionMaterialesGas.plan).find(f=>f.tipo==="codo90").cantidad'),19);assert.ok(!a.run('resumenMaterialesInstalacionGas(revisionMaterialesGas.plan).some(f=>f.tipo==="niple")'));
 });
+
+test('Compra GAS: ejemplo 58/19/2/3 conserva motor y agrupa caños candidatos sin mezclarlos',()=>{
+ const a=app();a.run("abrir('gas');abrirEjercicioSigas19Gas()");const antes=a.run('JSON.stringify(calcularPreseleccionSigasGas())'),r=a.run('prepararCompraActualGas(revisionMaterialesGas.plan)');
+ assert.equal(r.tramos.reduce((n,t)=>n+t.metros,0),58);assert.equal(r.canos.reduce((n,g)=>n+g.metros,0),58);assert.deepEqual(Array.from(r.canos,g=>g.diametro).sort(),['20 mm','25 mm','32 mm']);assert.ok(r.canos.every(g=>g.provisional&&g.estadoDiametro==='candidato'));assert.ok(r.tramos.every(t=>t.cuplas===null));
+ assert.ok(r.propuestas.length>0);assert.ok(r.propuestas.every(p=>p.confirmada===false));assert.equal(a.run('JSON.stringify(calcularPreseleccionSigasGas())'),antes);
+ for(const [tipo,n]of [['codo90',19],['tee',2],['llave',3]])assert.equal(cantidadManual(a,tipo),n);
+});
+test('Compra GAS: corregir cortes se guarda por proyecto y no altera longitudes, accesorios ni pérdidas',()=>{
+ const a=app();a.run("abrir('gas');abrirEjercicioSigas19Gas()");const motor=a.run('JSON.stringify(calcularPreseleccionSigasGas())');
+ assert.equal(a.run("guardarDistribucionCompraGas('ref-M-A','4+4+4+3',false).ok"),false);
+ assert.equal(a.run("guardarDistribucionCompraGas('ref-M-A','4+4+4+2',true).ok"),false);
+ assert.equal(a.run("guardarDistribucionCompraGas('ref-M-A','4+4+4+3',true).ok"),true);
+ assert.equal(a.run("prepararCompraActualGas(revisionMaterialesGas.plan).tramos.find(t=>t.id==='ref-M-A').cuplas"),3);assert.equal(a.run('JSON.stringify(calcularPreseleccionSigasGas())'),motor);assert.equal(cantidadManual(a,'codo90'),19);
+ const b=app(a.saved());b.run("abrir('gas');calcularMaterialesManualGas()");assert.equal(b.run("prepararCompraActualGas(revisionMaterialesGas.plan).tramos.find(t=>t.id==='ref-M-A').cuplas"),3);
+ b.run("tramos.find(t=>t.id==='ref-M-A').metros=16;calcularMaterialesManualGas()");assert.equal(b.run("prepararCompraActualGas(revisionMaterialesGas.plan).tramos.find(t=>t.id==='ref-M-A').distribucionVigente"),false);assert.ok(b.run("datosPlanGas().cortesCompra['ref-M-A']"));
+ b.run("crearProyectoGas('Otro proyecto sin cortes')");assert.equal(b.run('JSON.stringify(datosPlanGas().cortesCompra||{})'),'{}');
+});
+test('Compra GAS: PDF incorpora estimaciones separadas, sin controles ni cambios en la planilla',()=>{
+ const a=app();a.run("abrir('gas');abrirEjercicioSigas19Gas();prepararInformeActual()");const d=a.run('modeloInformeActual()');assert.equal(d.preparacionCompra.tramos.length,5);const pdf=a.elements.get('informeImpresion').innerHTML;
+ assert.match(pdf,/Preparación de compra · ESTIMACIÓN PROVISIONAL/);assert.match(pdf,/Cuplas estimadas/);assert.match(pdf,/CONSUMO \(m³\/h\)/);assert.doesNotMatch(pdf,/<(?:button|select|input)\b/);assert.equal(d.preparacionCompra.definitiva,false);assert.equal(a.run('calcularPreseleccionSigasGas().definitivo'),false);
+});
+test('Compra GAS: respaldo JSON completo conserva cortes, proyecto y cantidades sin cambiar el formato',()=>{
+ const a=app();a.run("abrir('gas');abrirEjercicioSigas19Gas();guardarDistribucionCompraGas('ref-M-A','4+4+4+3',true)");let json='';const crear=a.ctx.document.createElement;
+ a.ctx.Blob=class{constructor(p){json=p.join('')}};a.ctx.URL.createObjectURL=()=> 'blob:backup';a.ctx.setTimeout=()=>{};a.ctx.document.createElement=()=>{const e=crear();e.click=()=>{};return e;};a.run('descargarRespaldoCompleto()');const respaldo=JSON.parse(json);assert.equal(respaldo.formato,'canerias-respaldo-v1');
+ const b=app();b.run("abrir('gas')");respaldoPrueba(b,respaldo);const id=b.run("registrosProyectosGas().find(p=>p.datos.referenciaSigas19===true).id");b.run('seleccionarAmbitoGas('+JSON.stringify('proyecto:'+id)+');calcularMaterialesManualGas()');assert.equal(b.run("prepararCompraActualGas(revisionMaterialesGas.plan).tramos.find(t=>t.id==='ref-M-A').cuplas"),3);assert.equal(cantidadManual(b,'codo90'),19);assert.equal(b.run('revisionMaterialesGas.plan.longitudInformada'),58);
+});
+test('Compra GAS: distribución importada incompleta queda pendiente sin impedir consultar materiales',()=>{
+ const a=app();a.run("abrir('gas');abrirEjercicioSigas19Gas();datosPlanGas().cortesCompra={'ref-M-A':{grupos:{dato:'incompleto'},confirmado:true,firma:'anterior'}};calcularMaterialesManualGas()");assert.equal(a.run('revisionMaterialesGas.plan.longitudInformada'),58);assert.equal(cantidadManual(a,'codo90'),19);assert.ok(a.run("prepararCompraActualGas(revisionMaterialesGas.plan).pendientes.some(s=>s.includes('Distribución conservada'))"));assert.ok(descendientesPresentacion(a.elements.get('resumenPrincipalMaterialesGas')).some(n=>n.textContent==='PREPARACIÓN DE COMPRA'));
+});

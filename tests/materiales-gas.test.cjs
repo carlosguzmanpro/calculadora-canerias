@@ -74,3 +74,39 @@ test('materiales: medida propuesta mantiene fila estimada aunque la cantidad est
  const e=entrada([tramo('a',3)]);e.extras=[{tipo:'codo45',cantidad:2,medidas:['1"','1"'],confirmado:true,medidasEstimadas:true}];const f=plan(e).filas.find(f=>f.tipo==='codo45');assert.equal(f.cantidadConfirmada,true);assert.equal(f.estado,'estimado');
  const registro=require('../materiales/resultado-ejercicio.json');for(const caso of registro.casos)assert.deepEqual(plan(registro.entrada,caso.opciones),caso.resultado);
 });
+
+const compra=(e,o={},tecnico={})=>require('../materiales/planificador-gas.js').prepararCompra(e,plan(e,o),o,tecnico);
+test('compra: límites de tiras de 6 m y sobrantes conservan longitud',()=>{
+ for(const [m,t]of [[.5,1],[5,1],[6,1],[6.01,2],[9,2],[12,2],[15,3],[18,3],[18.01,4]]){const r=compra(entrada([tramo('a',m)])),f=r.tramos[0];assert.equal(f.tiras,t);assert.equal(f.metrosComerciales,t*6);assert.ok(Math.abs(f.sobrante-(t*6-m))<1e-9);assert.equal(f.cuplas,t-1);assert.equal(r.definitiva,false);}
+});
+test('compra: 4 m documentados y valores anteriores de 6 m permanecen independientes',()=>{const e=entrada([tramo('a',9)]);assert.equal(compra(e,{largoComercial:4}).tramos[0].tiras,3);assert.equal(compra(e,{largoComercial:6}).tramos[0].tiras,2);});
+test('compra: segmentos interrumpidos por accesorios no suman cuplas entre sí',()=>{
+ const continuo=compra(entrada([tramo('a',10)])),interrumpido=compra(entrada([{...tramo('a',10),segmentos:seg(6,4),accesorios:[{tipo:'codo90',cantidad:1,confirmado:true}]}]));assert.equal(continuo.tramos[0].cuplas,1);assert.equal(interrumpido.tramos[0].cuplas,0);assert.equal(compra(entrada([tramo('a',10,'1"',null)])).tramos[0].cuplas,null);
+});
+test('compra: no intercambia sobrantes entre diámetros, ni supone reutilización entre tramos',()=>{
+ const e=entrada([tramo('a',4),tramo('b',2,'3/4"')]),r=compra(e,{reutilizar:true});assert.equal(r.canos.length,2);assert.equal(r.canos.reduce((n,g)=>n+g.tiras,0),2);
+ const distinto=entrada([{...tramo('a',6),segmentos:[{metros:4,diametro:'1"'},{metros:2,diametro:'3/4"'}]}]);assert.equal(compra(distinto,{reutilizar:true}).canos.length,2);assert.equal(compra(distinto,{reutilizar:true}).tramos[0].tiras,2);
+ const mismo=entrada([{...tramo('a',6),segmentos:seg(4,2)}]);assert.equal(compra(mismo).tramos[0].tiras,2);assert.equal(compra(mismo,{reutilizar:true}).tramos[0].tiras,1);
+});
+test('compra: distribución explícita respeta total e interrupciones y conserva una cupla por unión',()=>{
+ const api=require('../materiales/planificador-gas.js'),e=entrada([tramo('a',10)]),t=e.tramos[0],grupos=[[5,5]],op={largoComercial:6};op.cortesCompra={a:{grupos,confirmado:true,firma:api.firmaCortesCompra(t,e,op)}};
+ const r=compra(e,op);assert.deepEqual(r.tramos[0].segmentos[0].cortes,[5,5]);assert.equal(r.tramos[0].cuplas,1);assert.equal(r.tramos[0].distribucionVigente,true);
+ assert.throws(()=>api.validarDistribucionCompra(t,[[7,3]],6));assert.throws(()=>api.validarDistribucionCompra(t,[[6,3]],6));assert.throws(()=>api.validarDistribucionCompra(t,[[6],[4]],6),/interrupciones/);
+ t.metros=12;t.segmentos=seg(12);const cambiado=compra(e,op);assert.equal(cambiado.tramos[0].distribucionVigente,false);assert.ok(cambiado.pendientes.some(s=>s.includes('Distribución conservada')));
+});
+test('compra: candidatos no pasan a verificados ni cambian inventario',()=>{
+ const e=entrada([tramo('a',9,null,null)]),antes=JSON.stringify(e),r=compra(e,{}, {definitivo:false,filas:[{id:'a',candidato:{exteriorMm:25}}]});assert.equal(r.canos[0].diametro,'25 mm');assert.equal(r.canos[0].estadoDiametro,'candidato');assert.equal(r.tramos[0].cuplas,null);assert.equal(JSON.stringify(e),antes);
+});
+test('compra: tee reductora no agrega reducción y cambios ambiguos quedan como propuestas únicas',()=>{
+ const e=teeCaso(),r=compra(e,{uniones:{A:'tee-reductora'}});assert.equal(r.registrados.filter(f=>f.tipo==='tee').length,1);assert.equal(r.registrados.filter(f=>f.tipo==='reduccion').length,0);
+ const pendiente=compra(e);assert.equal(pendiente.propuestas.length,1);assert.equal(pendiente.propuestas[0].confirmada,false);assert.equal(pendiente.propuestas[0].cantidad,null);assert.equal(pendiente.registrados.filter(f=>f.tipo==='reduccion').length,0);
+});
+test('compra: cuplas declaradas se conservan sin sumarse a las calculadas',()=>{
+ const e=entrada([tramo('a',10)]);e.extras=[{tipo:'cupla',cantidad:1,medidas:['1"'],confirmado:true,ubicacion:'a'}];const r=compra(e);assert.equal(r.registrados.find(f=>f.tipo==='cupla').cantidad,1);assert.equal(r.tramos[0].cuplas,null);assert.equal(r.tramos[0].cuplasCalculadas,1);
+});
+test('compra: agrupar advertencias conserva cada comprobación sin inventar ni perder textos',()=>{
+ const api=require('../materiales/planificador-gas.js'),textos=['Presión pendiente','Diámetro pendiente','Tee: vía pendiente','Cuplas y cortes pendientes','NAG: verificación normativa pendiente','Edición sin verificar'];const r=api.agruparPendientesCompra(textos);assert.equal(r.length,5);assert.deepEqual(r.flatMap(g=>g.detalles).sort(),textos.sort());
+});
+test('compra: una cupla registrada en un tramo no bloquea las uniones conocidas de otro',()=>{
+ const e=entrada([tramo('a',10),tramo('b',10,'3/4"')]);e.extras=[{tipo:'cupla',cantidad:1,medidas:['1"'],confirmado:true,ubicacion:'a'}];const r=compra(e);assert.equal(r.tramos.find(t=>t.id==='a').cuplas,null);assert.equal(r.tramos.find(t=>t.id==='b').cuplas,1);assert.equal(r.registrados.filter(f=>f.tipo==='cupla').reduce((n,f)=>n+f.cantidad,0),1);
+});
