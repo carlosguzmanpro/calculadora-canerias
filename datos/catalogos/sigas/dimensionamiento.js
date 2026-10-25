@@ -119,11 +119,11 @@
      const diametros=[...new Set(ubicaciones.map(id=>vector[id]))];
      if(p.necesidadTerminal&&a.atributos&&diametros.length===1){
       const solucion=resolverConexion(d,a.atributos,diametros[0]);solucionesTerminales.push({piezaId:p.id,necesidad:p.necesidadTerminal,diametro:diametros[0],...solucion});
-      if(solucion.estado==='conjunto'){
-       const coincide=solucion.componentes.filter(c=>!c.reutilizada).some(c=>[...piezas.values()].some(q=>q.id!==p.id&&q.tramos.some(id=>ubicaciones.includes(id))&&(q.tipo===c.tipo||c.tipo==='niple'&&/niple/i.test(q.tipo)||c.tipo==='transicion'&&/transici/i.test(q.tipo))));
-       if(coincide){pendiente({...p,tramos:ubicaciones},'Hay accesorios registrados que podrían pertenecer al conjunto; vincular la coincidencia antes de agregar piezas.');continue;}
-       const tramosEnRuta=ubicaciones.filter(id=>r.tramos.includes(id)),tramoId=tramosEnRuta.length===1?tramosEnRuta[0]:null;
-       try{const componentes=solucion.componentes.map(c=>{const x=tecnico().accesorio(d,c.fila.id,1),idPieza=c.reutilizada?p.id:p.id+'::conjunto:'+c.rol;return {piezaId:idPieza,conjuntoId:p.id,necesidadTerminal:p.necesidadTerminal,identidadesFisicas:c.reutilizada?p.identidadesFisicas?.slice()||null:[idPieza+'::pieza:0'],tipo:c.tipo,tramoId,diametroExteriorMm:c.fila.diametroExteriorM*1000,generadaPorConjunto:!c.reutilizada,...x};});aportes.push(...componentes);}catch(e){pendiente({...p,tramos:ubicaciones},e.message);}continue;
+      if(solucion.estado!=='directa'&&a.atributos.codoBase){
+       // El conjunto es ayuda de compra. Solo el codo existente explícitamente identificado aporta pérdidas reales.
+       const filaReal=d.tablas[3].filas.find(f=>familiaProducto(f)===(a.atributos.codoBase==='HH'?'Codo Normal a 90º':a.atributos.codoBase==='MH'?'Codo MH a 90° de':null)&&f.diametroExteriorM*1000===diametros[0]);const principal=filaReal?{fila:filaReal}:null;
+       if(a.atributos.codoBase&&principal){try{const x=tecnico().accesorio(d,principal.fila.id,p.cantidad),tramosEnRuta=ubicaciones.filter(id=>r.tramos.includes(id));aportes.push({piezaId:p.id,identidadesFisicas:p.identidadesFisicas?.slice()||null,tipo:p.tipo,tramoId:tramosEnRuta.length===1?tramosEnRuta[0]:null,diametroExteriorMm:principal.fila.diametroExteriorM*1000,...x});}catch(e){pendiente({...p,tramos:ubicaciones},e.message);}}
+       pendiente({...p,tramos:ubicaciones},'Adaptación propuesta para compra, sin confirmar: verificar ubicación y productos reales antes de incorporar sus pérdidas. '+solucion.pendientes.join(' '));continue;
       }
       if(solucion.estado!=='directa'){pendiente({...p,tramos:ubicaciones},solucion.pendientes.join(' '));continue;}
      }
@@ -131,7 +131,7 @@
      const terminales=a.atributos&&diametros.length===1&&a.atributos.geometria&&a.atributos.sexo&&a.atributos.rosca?opcionesTerminal(d,a.atributos,diametros[0]):[];
      const fila=a.atributos?(terminales.length===1?terminales[0]:null):a.familia?(opciones.length===1?opciones[0]:null):d.tablas[3].filas.find(f=>f.id===id);
      if(p.necesidadTerminal&&fila&&!atributosTerminal(fila)){pendiente({...p,tramos:ubicaciones},'conexión terminal: producto roscado compatible pendiente; no se utiliza un codo común.');continue;}
-     const tipoCorrecto=fila&&(p.necesidadTerminal?atributosTerminal(fila)?.geometria===(p.geometria||p.tipo):({codo90:/^Codo(?: Normal a 90º | MH a 90° | 90º)/,codo45:/^Codo.*45/,tee:/^Te /,llave:/^Llave /,reduccion:/Reduct|Reduc/,cupla:/Cupla/}[p.tipo]?.test(fila.nombreOriginal)));
+     const tipoCorrecto=fila&&(p.necesidadTerminal?atributosTerminal(fila)?.geometria===(p.geometria||p.tipo):({codo90:/^Codo(?: Normal a 90º | MH a 90° | 90º)/,codo45:/^Codo.*45/,tee:/^Te /,llave:/^Llave /,reduccion:/Reduct|Reduc/,cupla:/Cupla/,niple:/^Niple corto con tope /,transicion:/^Transición /}[p.tipo]?.test(fila.nombreOriginal)));
      if(!tipoCorrecto||!(p.tipo==='tee'?ubicaciones.some(id=>vector[id]===fila.diametroExteriorM*1000):ubicaciones.every(id=>vector[id]===fila.diametroExteriorM*1000))){pendiente({...p,tramos:ubicaciones},'combinación '+clave+' sin producto/diámetro/vía SIGAS compatible documentado.');continue;}
 
      if(p.tipo==='tee'&&/^Te Normal /.test(fila.nombreOriginal)&&Array.isArray(p.conexionesDiametro)&&p.conexionesDiametro.some(id=>vector[id]!==fila.diametroExteriorM*1000)){
@@ -143,7 +143,7 @@
     // Son necesidades, no piezas adicionales: sin vínculo físico inequívoco no atribuirles cero.
     for(const terminal of inventario.necesidadesTerminales||[])if(terminal.recorridos?.includes(r.artefacto)){
      const vinculadas=[...piezas.values()].filter(p=>p.necesidadTerminal===terminal.id&&p.cantidad===1);
-     if(vinculadas.length===1&&aportes.some(a=>a.piezaId===vinculadas[0].id))continue;
+     if(vinculadas.length===1&&aportes.some(a=>a.piezaId===vinculadas[0].id)&&!perdidasPendientes.some(p=>p.piezaId===vinculadas[0].id))continue;
      pendiente({id:terminal.id,tipo:'conexion-terminal',cantidad:null,tramos:terminal.tramos},terminal.nombre+': identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero.');
     }
     const equivalenteConocidoM=aportes.reduce((n,a)=>n+a.equivalenteTotalM,0),completo=!inventarioInvalido&&!faltantes.length&&!faltantesInventario.length&&config.inventarioPerdidasCompleto===true&&config.fuenteInventario;

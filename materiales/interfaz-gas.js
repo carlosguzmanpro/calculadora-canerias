@@ -574,6 +574,7 @@ function planificarVistaMaterialesGas(entrada,opciones){
  const manual=entrada.manualDirecto;
  if(manual?.red){const uniones={...opciones.uniones};for(const p of manual.red.puntos){const id=p.id.replace(/^id:/,'');if(Object.hasOwn(uniones,id))uniones[p.id]=uniones[id];}opciones={...opciones,uniones};}
  const plan=MaterialesGas.planificarMateriales(entrada,opciones);agregarCodoCasilleroAlPlanGas(plan,entrada);if(!manual)return plan;
+ if(entrada.propuestasCompraSigas)plan.propuestasCompraSigas=entrada.propuestasCompraSigas;
  plan.manualDirecto=true;plan.redManual=manual.red;plan.longitudParcial=manual.red?.ambiguos.length>0;plan.longitudInformada=entrada.tramos.reduce((n,t)=>n+t.metros,0);
  plan.avisos.push(...manual.avisos,...manual.pendientes.map(p=>'Cantidad pendiente: '+p+'. Vacío no equivale a cero.'));
  plan.supuestos.unshift('Carga manual directa: las cantidades rápidas son totales por tramo; el detalle no vuelve a sumarse. No se interpretó la foto ni se agregaron conexiones por reglas de IA.');
@@ -717,7 +718,7 @@ function renderListaManualSimpleGas(out,plan,modelo){
   const tr=document.createElement('tr'),nombre=document.createElement('td'),cantidad=document.createElement('td');nombre.textContent=f.material+(f.diametro?' · '+f.diametro:'');
   cantidad.textContent=f.pendiente?(f.cantidad>0?fmt(f.cantidad)+' '+f.unidad+' conocidas · resto pendiente':'Pendiente'):fmt(f.cantidad)+' '+f.unidad+(f.estimado&&f.cantidad>0?' estimadas':'');tr.append(nombre,cantidad);body.append(tr);
  }
- tabla.append(body);out.append(tabla);
+ tabla.append(body);out.append(tabla);if(typeof renderPropuestasCompraSigasGas==='function')renderPropuestasCompraSigasGas(out,plan);
  const pendientes=document.createElement('details'),titulo=document.createElement('summary');pendientes.className='gas-detalles';titulo.textContent='Datos técnicos pendientes';pendientes.append(titulo);for(const s of avisosListaManualGas(plan))texto(pendientes,s);renderEstadoCierreGas(out,pendientes,plan);out.append(pendientes);
  const detalles=document.createElement('details'),sum=document.createElement('summary');sum.textContent='Ver detalle por tramo y consumos';detalles.append(sum);
  const red=plan.redManual;
