@@ -15,7 +15,7 @@ function inventarioAccesoriosParaMotorGas(red){
  const p=proyectoGasActual(),tenia=Object.hasOwn(p,'planCompra'),original=p.planCompra;
  p.planCompra=original?JSON.parse(JSON.stringify(original)):{};
  try{
-  const entrada=entradaManualMaterialesGas();
+  const entrada=entradaManualMaterialesGas(false,true);
   const inventario=CatalogosSistemasGas.prepararAccesorios(piezasConciliacionGas(entrada),red,entrada.tramos.map(t=>({...t,desde:tramos.find(o=>o.id===t.id)?.desde||'',hasta:tramos.find(o=>o.id===t.id)?.hasta||''})),entrada.manualDirecto?.ceros||[],entrada.manualDirecto?.pendientes||[],opcionesMaterialesGas('proyecto'));
   // La aclaración del propietario ubica el adicional, sin identificar su producto ni tocar materiales.
   const extra=p.planCompra?.extras?.find(e=>e.idFisico==='referencia-codo19');

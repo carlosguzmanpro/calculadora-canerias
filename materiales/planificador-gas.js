@@ -35,7 +35,7 @@
    if(!a||typeof a.tipo!=='string'||!a.tipo.trim()||!Number.isInteger(a.cantidad)||a.cantidad<=0)throw Error('Accesorio identificado necesita nombre y cantidad entera positiva.');
    const id=a.tipo==='tee'&&a.nodo?'tee:'+a.nodo:a.idFisico||null;
    const requiere=a.tipo==='tee'?3:a.tipo==='reduccion'?2:1,tieneMedidas=Array.isArray(a.medidas)&&a.medidas.length>=requiere&&a.medidas.every(m=>typeof m==='string'&&m.trim());
-   const f={material:nombre(a.tipo),tipo:a.tipo,medidas:a.medidas||[],diametro:medidas(a),cantidad:a.cantidad,ubicacion:a.ubicacion||t?.id||'Manual',estado:a.confirmado&&!a.medidasEstimadas&&tieneMedidas?'confirmado':'estimado',cantidadConfirmada:!!a.confirmado,evidencia:(a.evidencia||'')+(!tieneMedidas?' Medidas/conexiones pendientes.':''),nodo:a.nodo||null,origen:'identificado',equivalentes:'No se calculan en este plan físico'};
+   const f={material:a.nombreMaterialSigas||nombre(a.tipo),...(a.registroSigas?{registroSigas:a.registroSigas}:{}),tipo:a.tipo,medidas:a.medidas||[],diametro:medidas(a),cantidad:a.cantidad,ubicacion:a.ubicacion||t?.id||'Manual',estado:a.confirmado&&!a.medidasEstimadas&&tieneMedidas?'confirmado':'estimado',cantidadConfirmada:!!a.confirmado,evidencia:(a.evidencia||'')+(!tieneMedidas?' Medidas/conexiones pendientes.':''),nodo:a.nodo||null,origen:'identificado',equivalentes:'No se calculan en este plan físico'};
    if(id&&fisicos.has(id)){
     const previo=fisicos.get(id);if(previo.diametro!==f.diametro||previo.cantidad!==f.cantidad){previo.estado='estimado';previo.conflicto=true;avisos.push('Datos contradictorios para accesorio físico '+id+'. Resolver antes de comprar.');}
     previo.ubicacion+='; referencia '+f.ubicacion;return previo;

@@ -175,7 +175,7 @@ window.addEventListener('afterprint',()=>{$('resultadoMateriales').classList.rem
 function identidadFilaGas(f){return f.claveRevision||JSON.stringify([f.tipo,f.material,f.diametro,f.unidad,f.ubicacion]);}
 function anotarFilasRevisionGas(plan,entrada){
  if(!entrada.manualDirecto&&entrada.origen==='Proyecto manual actual'&&(proyectoGasActual().conciliacionRapidaGas||tramos.some(t=>Object.keys(conteoRapidoDelTramoGas(t)).length)))plan.avisos.push(avisoConciliacionRapidaGas());
- for(const f of plan.filas){if(entrada.origen==='Proyecto manual actual')f.material=etiquetaAccesorioDetectadoGas(f);f.ubicacionNombre=ubicacionLegibleGas(f.ubicacion);const t=(entrada.tramos||[]).find(t=>String(f.ubicacion).startsWith(t.id+' · accesorio '));f.claveRevision=JSON.stringify([f.tipo,f.material,f.diametro,f.unidad,f.ubicacion,...(f.origen==='identificado'?[t?.accesorios||(entrada.extras||[]).filter(a=>!a.idFisico?.startsWith('conciliacion:'))]:[])]);}
+ for(const f of plan.filas){if(entrada.origen==='Proyecto manual actual'&&!f.registroSigas)f.material=etiquetaAccesorioDetectadoGas(f);f.ubicacionNombre=ubicacionLegibleGas(f.ubicacion);const t=(entrada.tramos||[]).find(t=>String(f.ubicacion).startsWith(t.id+' · accesorio '));f.claveRevision=JSON.stringify([f.tipo,f.material,f.diametro,f.unidad,f.ubicacion,...(f.origen==='identificado'?[t?.accesorios||(entrada.extras||[]).filter(a=>!a.idFisico?.startsWith('conciliacion:'))]:[])]);}
  return plan;
 }
 function filasRevisionGas(revision){
@@ -493,7 +493,7 @@ function avisosDeteccionPresentacionGas(avisos){
 
 // Carga manual directa: inventario físico, nunca datos del motor normativo.
 function modoManualGasActivo(){return modulo==='gas'&&proyectoGasActual().planCompra?.opciones?.cargaManualDirecta===true;}
-function entradaManualMaterialesGas(sinSugerencias=false){
+function entradaManualMaterialesGas(sinSugerencias=false,sinRegistroTecnico=false){
  const entrada=entradaMaterialesGas('proyecto',sinSugerencias,true),filas=filasConciliacionGas(entrada),avisos=[],ceros=[],pendientes=[];
  const clave=(a,t,i)=>a.tipo==='tee'&&a.nodo?'tee:'+nodoConciliacionGas(a.nodo):a.idFisico||JSON.stringify([t?'detalle':'manual',t?.id||'',i]);
  const registros=[];
@@ -535,7 +535,7 @@ function entradaManualMaterialesGas(sinSugerencias=false){
  for(const t of entrada.tramos)t.accesorios=[];
  entrada.extras=[...registros.filter(r=>!omitidos.has(r.id)).map(r=>({...r.a,idFisico:r.id,confirmado:true})),...nuevos].map(a=>({...a,nodo:a.tipo==='tee'&&a.nodo?nodoConciliacionGas(a.nodo).replace(/^n:/,''):a.nodo}));
  if(typeof transicionesRectasDeclaradasSigasGas==='function')for(const a of transicionesRectasDeclaradasSigasGas())if(!entrada.extras.some(e=>e.idFisico===a.idFisico))entrada.extras.push(a);
- entrada.manualDirecto={avisos,ceros,pendientes};return filtrarRedManualMaterialesGas(entrada);
+ entrada.manualDirecto={avisos,ceros,pendientes};filtrarRedManualMaterialesGas(entrada);if(!sinRegistroTecnico&&CatalogosSistemasGas.identificar(instalacionGas.perfil)==='sigas'&&typeof proyectarRegistroSigasEnMaterialesGas==='function')proyectarRegistroSigasEnMaterialesGas(entrada);return entrada;
 }
 // Regla de inventario autorizada: no alimenta geometría, equivalentes ni diámetros.
 function estadoCodoCasilleroGas(entrada){
