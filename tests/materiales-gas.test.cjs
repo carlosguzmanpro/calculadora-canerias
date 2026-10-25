@@ -142,3 +142,6 @@ test('cuplas automáticas: diámetros distintos mantienen los conteos independie
  const t=conPosiciones(10,[{tipo:'reduccion',metrosAntes:5,salida:'20 mm'}],5),r=compraPosiciones(t);assert.equal(r.canos.length,2);assert.deepEqual(r.canos.map(g=>[g.diametro,g.cuplas]),[['25 mm',1],['20 mm',1]]);
  t.detalle.accesorios[0].salida='';const incompleto=compraPosiciones(t);assert.ok(incompleto.canos.some(g=>g.estadoDiametro==='pendiente'));assert.equal(incompleto.tramos[0].cuplas,2);
 });
+test('cuplas ubicadas: conserva la cupla registrada como límite y calcula solo las uniones adicionales',()=>{
+ const api=require('../materiales/planificador-gas.js'),t=conPosiciones(10,[{tipo:'cupla',metrosAntes:4}],6),e=entrada([{...tramo('a',10,'25 mm',null),continuidadCuplas:api.continuidadCuplas(t)}]);e.extras=[{tipo:'cupla',cantidad:1,medidas:['25 mm'],confirmado:true,ubicacion:'a'}];const r=compra(e,{largoComercial:4});assert.equal(r.tramos[0].cuplas,2);assert.equal(r.tramos[0].cuplasAdicionalesCalculadas,1);assert.equal(r.tramos[0].cuplasRegistradasContadas,1);assert.equal(r.canos[0].cuplas,2);assert.equal(r.registrados.find(f=>f.tipo==='cupla').cantidad,1);
+});

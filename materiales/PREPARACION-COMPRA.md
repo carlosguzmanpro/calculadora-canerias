@@ -22,3 +22,11 @@ Se leen las distancias relativas `metrosAntes` y `metrosFinal` del detalle exist
 Con posiciones parciales se conservan los intervalos conocidos y su contribución de cuplas, por tramo y por diámetro. El total permanece pendiente. Si los totales rápidos contradicen el detalle o hay piezas adicionales sin posición, no se supone que estén fuera de los intervalos. Los diámetros posteriores a una reducción sin medida permanecen desconocidos.
 
 La información derivada alimenta la planificación física y sus firmas de actualización, sin modificar el proyecto original ni el motor SIGAS. Las distribuciones manuales se conservan y se revisan si cambian sus datos. Las cuplas registradas se mantienen separadas y requieren cotejo antes de sumarse a las uniones calculadas.
+
+## Posiciones faltantes concretas
+
+El ejemplo de referencia contiene cantidades y longitudes, pero no posiciones de sus codos y llaves. Por eso no permite cerrar una cantidad exacta de cuplas. La interfaz indica por tramo qué posiciones faltan y reutiliza las conocidas, incluidas las tees asociadas explícitamente al extremo del tramo.
+
+La opción secundaria de posiciones solicita únicamente distancias desde el origen del tramo, separadas por `;`. No vuelve a pedir cantidades ni productos. Se validan límites, cantidades y posiciones ya declaradas. Sus datos se guardan por proyecto en `planCompra.posicionesCuplas`, con firma y antecedentes. Si cambian longitudes o accesorios, las posiciones anteriores permanecen guardadas para revisar. No se interpretan fotografías ni se modifica el inventario original o el motor SIGAS.
+
+Si las cuplas existentes tienen posiciones completas y una asociación inequívoca al tramo, se reutilizan como uniones ya registradas: el plan de cortes lista solo las adicionales. Con medidas múltiples, posiciones incompletas o una asociación ambigua, se conserva el cotejo pendiente y no se suma por suposición.

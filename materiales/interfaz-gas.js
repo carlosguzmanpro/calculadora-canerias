@@ -581,6 +581,14 @@ function planificarVistaMaterialesGas(entrada,opciones){
  const manual=entrada.manualDirecto;
  if(manual?.red){const uniones={...opciones.uniones};for(const p of manual.red.puntos){const id=p.id.replace(/^id:/,'');if(Object.hasOwn(uniones,id))uniones[p.id]=uniones[id];}opciones={...opciones,uniones};}
  const plan=MaterialesGas.planificarMateriales(entrada,opciones);agregarCodoCasilleroAlPlanGas(plan,entrada);if(!manual)return plan;
+ // Cuando una cupla registrada tiene posición comprobada, listar solo las adicionales en el plan de cortes.
+ if(plan.filas.some(f=>f.tipo==='cupla'&&f.cantidad>0)){
+  const calculo=MaterialesGas.prepararCompra(entrada,plan,{...opciones,cortesCompra:datosPlanGas().cortesCompra||{}});
+  for(const f of plan.filas.filter(f=>f.tipo==='cupla-plan')){const grupo=plan.planes.find(g=>g.diametro===f.diametro&&g.ubicaciones.join(', ')===f.ubicacion),filas=grupo?calculo.tramos.filter(t=>grupo.ubicaciones.includes(t.id)):[];
+   if(filas.length&&filas.every(t=>t.cuplas!==null)&&filas.some(t=>t.cuplasRegistradasContadas)){f.cantidad=filas.reduce((n,t)=>n+t.cuplas-t.cuplasRegistradasContadas,0);f.evidencia='Cuplas adicionales calculadas por segmentos. Las registradas con posición verificada están en su propia fila; no se suman otra vez.';}
+  }
+ }
+
  if(entrada.propuestasCompraSigas)plan.propuestasCompraSigas=entrada.propuestasCompraSigas;
  plan.manualDirecto=true;plan.redManual=manual.red;plan.longitudParcial=manual.red?.ambiguos.length>0;plan.longitudInformada=entrada.tramos.reduce((n,t)=>n+t.metros,0);
  plan.avisos.push(...manual.avisos,...manual.pendientes.map(p=>'Cantidad pendiente: '+p+'. Vacío no equivale a cero.'));
@@ -724,17 +732,61 @@ function resumenMaterialesInstalacionGas(plan,compra=null){
   if(!grupos.has(clave))grupos.set(clave,{...f,material:agrupar?nombres[f.tipo]:f.material,diametro:agrupar?'':f.diametro,cantidad:0,pendiente:false,estimado:false});
   const g=grupos.get(clave);g.cantidad+=f.cantidad;g.pendiente||=f.pendiente;g.estimado||=f.estimado;
  }
- if(compra&&!compra.registrados.some(f=>f.tipo==='cupla'&&f.cantidad>0))for(const g of grupos.values())if(g.tipo==='cupla'){
-  g.cantidad=compra.tramos.reduce((n,t)=>n+(t.cuplasConocidas??t.cuplas??0),0);g.pendiente=compra.tramos.some(t=>t.cuplas===null);g.estimado=true;
+ if(compra)for(const g of grupos.values())if(g.tipo==='cupla'){
+  g.cantidad=compra.tramos.reduce((n,t)=>n+(t.cuplasConocidas??t.cuplas??0),0)+Math.max(0,compra.registrados.filter(f=>f.tipo==='cupla').reduce((n,f)=>n+f.cantidad,0)-compra.tramos.reduce((n,t)=>n+(t.cuplasRegistradasContadas||0),0));g.pendiente=compra.tramos.some(t=>t.cuplas===null);g.estimado=true;
  }
  return [...grupos.values()];
 }
+// Medidas geométricas para compra: reutiliza cantidades; no crea accesorios ni toca SIGAS.
+function datosPosicionesCuplasGas(t){
+ const rapidos=conteoRapidoDelTramoGas(t),detalle=t.detalle?.accesorios||[],extra=datosPlanGas().extras.filter(a=>a.tramo===t.id||a.ubicacion===t.id||String(a.ubicacion||'').startsWith(t.id+' · ')||proyectoGasActual().referenciaSigas19&&t.id==='ref-B-Cocina'&&a.idFisico==='referencia-codo19').filter(a=>!detalle.some(b=>b.idFisico&&b.idFisico===a.idFisico));
+ const nombres={codo90:'Codos de 90°',codo45:'Codos de 45°',tee:'Tees',reduccion:'Reducciones',llave:'Llaves de paso',cupla:'Cuplas registradas'},totales={},conocidas=[];let posicion=0,valida=true;
+ for(const a of detalle){if(Number.isFinite(a.metrosAntes)&&a.metrosAntes>=0&&valida)posicion+=a.metrosAntes;else valida=false;let p=valida&&posicion<=t.metros?posicion:null;
+  if(a.tipo==='tee'&&a.nodo){if(nombrePuntoManualGas(a.nodo)===nombrePuntoManualGas(t.hasta))p=t.metros;else if(nombrePuntoManualGas(a.nodo)===nombrePuntoManualGas(t.desde))p=0;}
+  if(p!==null)conocidas.push({tipo:a.tipo,posicion:p,salida:a.salida||null});
+ }
+ for(const tipo of Object.keys(nombres)){const base=Number.isSafeInteger(rapidos[tipo])&&rapidos[tipo]>=0?rapidos[tipo]:tipo==='llave'?cantidadLlavesHeredadasGas(t)??0:detalle.filter(a=>a.tipo===tipo).length;totales[tipo]=base+extra.filter(a=>a.tipo===tipo).reduce((n,a)=>n+(Number.isSafeInteger(a.cantidad)?a.cantidad:0),0);}
+ const filas=Object.entries(totales).filter(([,cantidad])=>cantidad>0).map(([tipo,cantidad])=>({tipo,nombre:nombres[tipo],cantidad,conocidas:conocidas.filter(a=>a.tipo===tipo).slice(0,cantidad)}));
+ return {filas,totales,firma:JSON.stringify({desde:t.desde,hasta:t.hasta,metros:t.metros,detalle:t.detalle||null,totales}),extraDesconocido:extra.some(a=>!Object.hasOwn(nombres,a.tipo))};
+}
+function geometriaPosicionesCuplasGas(t,datos,items){
+ if(datos.extraDesconocido)throw Error('Falta identificar la función geométrica de otro accesorio registrado.');
+ if(!Array.isArray(items)||items.length>1000||items.some(a=>!a||!Object.hasOwn(datos.totales,a.tipo)||!Number.isFinite(a.posicion)||a.posicion<0||a.posicion>t.metros))throw Error('Las posiciones deben estar entre 0 y '+t.metros+' m desde '+t.desde+'.');
+ for(const [tipo,cantidad]of Object.entries(datos.totales))if(items.filter(a=>a.tipo===tipo).length!==cantidad)throw Error('Faltan posiciones de '+tipo+': se necesitan '+cantidad+'. Las cantidades no se modificaron.');
+ for(const fila of datos.filas){const restantes=items.filter(a=>a.tipo===fila.tipo);for(const conocido of fila.conocidas){const indice=restantes.findIndex(a=>Math.abs(a.posicion-conocido.posicion)<1e-8);if(indice<0)throw Error('Conservá la posición registrada de '+fila.nombre+' en '+conocido.posicion+' m; corregila en el detalle del croquis si cambió.');restantes.splice(indice,1);}}
+ let anterior=0;const accesorios=[...items].sort((a,b)=>a.posicion-b.posicion).map(a=>{const coincidentes=items.filter(b=>Math.abs(b.posicion-a.posicion)<1e-8),salida=coincidentes.length>1&&coincidentes.some(b=>b.tipo==='reduccion')?'':datos.filas.find(f=>f.tipo===a.tipo)?.conocidas.find(c=>Math.abs(c.posicion-a.posicion)<1e-8)?.salida||'';const acc={tipo:a.tipo,metrosAntes:a.posicion-anterior,salida};anterior=a.posicion;return acc;});
+ return {...t,llave:false,detalle:{estado:accesorios.length?'completo':'ninguno',accesorios,metrosFinal:t.metros-anterior}};
+}
+function guardarPosicionesCuplasGas(id,valores){
+ try{
+  const t=tramos.find(t=>t.id===id);if(!t)throw Error('Tramo no disponible.');const datos=datosPosicionesCuplasGas(t),items=[];
+  for(const fila of datos.filas){const texto=String(valores[fila.tipo]??'').trim(),partes=texto?texto.split(';'):[];for(const p of partes){const s=p.trim();if(!/^\d+(?:[.,]\d+)?$/.test(s))throw Error('Indicá posiciones en metros separadas por ;. Un campo vacío no es cero.');items.push({tipo:fila.tipo,posicion:Number(s.replace(',','.'))});}}
+  geometriaPosicionesCuplasGas(t,datos,items);const d=datosPlanGas();d.posicionesCuplas||={};const anterior=d.posicionesCuplas[id];d.posicionesCuplas[id]={firma:datos.firma,items,...(anterior?{anterior}:{})};guardarDatos();calcularMaterialesManualGas();return {ok:true,mensaje:'Posiciones actualizadas. '+$('estadoGuardado').textContent+' Las cantidades y el motor SIGAS se conservaron.'};
+ }catch(e){return {ok:false,mensaje:e.message};}
+}
+function renderPosicionesPendientesCuplasGas(out,compra){
+ const filas=compra.tramos.filter(t=>t.cuplas===null);if(!filas.length)return;
+ const d=document.createElement('details'),s=document.createElement('summary');d.className='gas-detalles';s.textContent='Cuplas pendientes: ver qué posiciones faltan';d.append(s);
+ const texto=(padre,s)=>{const p=document.createElement('p');p.textContent=s;padre.append(p);};texto(d,'Las longitudes y cantidades están cargadas. Para calcular uniones faltan las distancias entre accesorios. Una fotografía de referencia no se interpreta automáticamente.');
+ for(const f of filas){const t=tramos.find(t=>t.id===f.id);if(!t)continue;const datos=datosPosicionesCuplasGas(t),guardado=datosPlanGas().posicionesCuplas?.[t.id],card=document.createElement('details'),sc=document.createElement('summary');card.className='gas-detalles';sc.textContent=t.desde+'–'+t.hasta;card.append(sc);
+  if(guardado&&guardado.firma!==datos.firma)texto(card,'Las posiciones anteriores se conservaron, pero cambió el tramo o sus accesorios. Revisalas antes de aplicarlas.');
+  const faltantes=datos.filas.filter(a=>a.conocidas.length<a.cantidad);for(const a of faltantes)texto(card,a.nombre+': '+a.cantidad+' registradas; faltan '+(a.cantidad-a.conocidas.length)+' posiciones.');
+  if(!faltantes.length){texto(card,'No faltan posiciones de los accesorios identificados. Revisá el cotejo de cuplas registradas, las medidas o las comprobaciones geométricas del tramo.');d.append(card);continue;}
+  const editor=document.createElement('details'),se=document.createElement('summary');se.textContent='Completar solo posiciones (opcional)';editor.append(se);texto(editor,'Distancia de cada accesorio desde '+t.desde+', entre 0 y '+t.metros+' m. Separá posiciones con ;. No vuelvas a cargar cantidades ni productos.');const inputs={};
+  for(const a of datos.filas){const l=document.createElement('label'),i=document.createElement('input');l.textContent=a.nombre+' · '+a.cantidad+' posiciones desde '+t.desde+' (m)';i.type='text';const anteriores=Array.isArray(guardado?.items)?guardado.items.filter(x=>x&&x.tipo===a.tipo):[];i.value=(anteriores.length?anteriores:a.conocidas).map(x=>x.posicion).join(';');inputs[a.tipo]=i;l.append(i);editor.append(l);}
+  const b=document.createElement('button'),m=document.createElement('p');b.type='button';b.textContent='Guardar posiciones y actualizar cuplas';m.setAttribute?.('role','status');b.onclick=()=>{const r=guardarPosicionesCuplasGas(t.id,Object.fromEntries(Object.entries(inputs).map(([tipo,i])=>[tipo,i.value])));if(r.ok){const p=document.createElement('p');p.textContent=r.mensaje;$('resumenPrincipalMaterialesGas').append(p);}else m.textContent=r.mensaje;};editor.append(b,m);card.append(editor);d.append(card);
+ }out.append(d);
+}
+
 function completarContinuidadCompraGas(entrada){
  if(typeof MaterialesGas==='undefined'||typeof MaterialesGas.continuidadCuplas!=='function')return entrada;
  for(const t of entrada.tramos){
   const original=tramos.find(o=>o.id===t.id);if(!original)continue;
   const adicionales=datosPlanGas().extras.filter(a=>a.tramo===t.id||a.ubicacion===t.id||String(a.ubicacion||'').startsWith(t.id+' · ')||proyectoGasActual().referenciaSigas19&&t.id==='ref-B-Cocina'&&a.idFisico==='referencia-codo19').filter(a=>!original.detalle?.accesorios?.some(b=>b.idFisico&&b.idFisico===a.idFisico));
-  t.continuidadCuplas=MaterialesGas.continuidadCuplas(original,{conteos:conteoRapidoDelTramoGas(original),adicionales});if(t.continuidadCuplas.bloqueada)t.segmentos=null;else if(!t.segmentos&&t.continuidadCuplas.completa)t.segmentos=t.continuidadCuplas.segmentos.map((s,i)=>({...s,diametro:s.diametroPendiente?'Pendiente ('+t.id+':'+i+')':s.diametro}));
+  const datosPosiciones=datosPosicionesCuplasGas(original),posiciones=datosPlanGas().posicionesCuplas?.[t.id];let geometria=original,conteos=conteoRapidoDelTramoGas(original),sinPosiciones=adicionales;
+  if(posiciones?.firma===datosPosiciones.firma)try{geometria=geometriaPosicionesCuplasGas(original,datosPosiciones,posiciones.items);conteos=datosPosiciones.totales;sinPosiciones=[];}catch(e){/* Se conservan las posiciones inválidas para revisión, sin aplicarlas. */}
+  if(geometria!==original)t.segmentos=null;
+  t.continuidadCuplas=MaterialesGas.continuidadCuplas(geometria,{conteos,adicionales:sinPosiciones});if(t.continuidadCuplas.bloqueada)t.segmentos=null;else if(!t.segmentos&&t.continuidadCuplas.completa)t.segmentos=t.continuidadCuplas.segmentos.map((s,i)=>({...s,diametro:s.diametroPendiente?'Pendiente ('+t.id+':'+i+')':s.diametro}));
  }
  return entrada;
 }
@@ -772,6 +824,7 @@ function renderPreparacionCompraGas(out,plan,preparada=null){
  for(const g of compra.canos){const card=document.createElement('article');card.className='gas-compra-cano';const nombre=document.createElement('strong');nombre.textContent=medida(g);card.append(nombre);texto(card,fmt(g.metros)+' m reales · '+g.tiras+' tiras estimadas (mínimo teórico: '+g.minimoTeorico+')');texto(card,fmt(g.metrosComerciales)+' m comerciales · '+fmt(g.sobrante)+' m de sobrante estimado');texto(card,'Cuplas: '+(g.cuplasPendientes?(g.cuplas?g.cuplas+' calculadas en segmentos conocidos; resto pendiente':'Pendiente'):g.cuplas+' calculadas por segmentos (estimadas para compra)'));canos.append(card);}caja.append(canos);
  const cuplasConocidas=compra.tramos.reduce((n,t)=>n+(t.cuplasConocidas??t.cuplas??0),0),cuplasPendientes=compra.tramos.some(t=>t.cuplas===null);
  texto(caja,cuplasPendientes?'Cuplas: '+(cuplasConocidas?cuplasConocidas+' estimadas en segmentos definidos; otras pendientes.':'Pendiente: faltan continuidad, posiciones o cotejo de uniones registradas.'):'Cuplas estimadas: '+cuplasConocidas+'. Uniones dentro de segmentos continuos; no incluye conexiones de codos ni tees.');
+ renderPosicionesPendientesCuplasGas(caja,compra);
  const registrados=document.createElement('details'),sr=document.createElement('summary');registrados.className='gas-detalles';sr.textContent='Accesorios por medida · confirmados y pendientes';registrados.append(sr);
  texto(registrados,'Materiales confirmados (cantidad y medida): '+compra.confirmados.length+' registros. Las cantidades conocidas con medidas candidatas siguen provisionales.');
  for(const f of resumenListaManualGas(plan).filter(f=>f.tipo!=='cano'))texto(registrados,f.material+' · '+(f.pendiente?'Pendiente':fmt(f.cantidad)+' '+f.unidad)+' · '+(f.diametro||'medida pendiente'));
@@ -781,7 +834,8 @@ function renderPreparacionCompraGas(out,plan,preparada=null){
   const d=document.createElement('details'),s=document.createElement('summary');d.className='gas-detalles';s.textContent=ubicacionLegibleGas(t.id)+' · '+fmt(t.metros)+' m';d.append(s);
   texto(d,t.diametros.map(x=>x.valor+(x.estado==='candidato'?' candidato (pendiente de verificación)':x.estado==='manual-sin-verificar'?' manual, sin verificar':'')).join(' / '));
   texto(d,t.tiras+' tiras estimadas · '+fmt(t.metrosComerciales)+' m comerciales · '+fmt(t.sobrante)+' m de sobrante. '+(t.continuidad?'Cortes por segmentos definidos.':'Estimación por longitud; distribución de cortes pendiente.'));
-  texto(d,'Cuplas: '+(t.cuplas===null?(t.cuplasConocidas?t.cuplasConocidas+' calculadas en segmentos conocidos; resto pendiente':'Pendiente'):t.cuplas+' estimadas según la distribución; mínimo por segmentos: '+t.cuplasMinimas)+'.');
+  if(t.cuplasRegistradasContadas)texto(d,'Incluye '+t.cuplasRegistradasContadas+' cuplas ya registradas y '+t.cuplasAdicionalesCalculadas+' uniones adicionales calculadas. No se suman otra vez las registradas.');
+  texto(d,'Cuplas: '+(t.cuplas===null?(t.cuplasConocidas?t.cuplasConocidas+' calculadas en segmentos conocidos; resto pendiente':'Pendiente'):t.cuplas+' estimadas según la distribución; '+(t.cuplasRegistradasContadas?'mínimo adicional por segmentos: ':'mínimo por segmentos: ')+t.cuplasMinimas)+'.');
   const editar=document.createElement('details'),se=document.createElement('summary');se.textContent='Corregir distribución de cortes (opcional)';editar.append(se);
   texto(editar,'Escribí los cortes unidos por + dentro de cada segmento continuo. Separá segmentos interrumpidos por accesorios con ;. Ejemplo con el largo actual: '+compra.largoComercial+'+'+(compra.largoComercial/2)+';'+(compra.largoComercial/2)+'. No cambia el croquis ni sus longitudes.');
   const label=document.createElement('label'),input=document.createElement('input');label.textContent='Cortes de '+ubicacionLegibleGas(t.id)+' (m)';input.type='text';input.value=(Array.isArray(t.distribucionGuardada?.grupos)&&t.distribucionGuardada.grupos.every(Array.isArray)?t.distribucionGuardada.grupos.map(g=>g.join('+')).join(';'):'')||(t.continuidad?t.segmentos:[]).filter(g=>g.cortes).map(g=>g.cortes.join('+')).join(';');label.append(input);editar.append(label);

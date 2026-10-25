@@ -135,7 +135,7 @@
   else if(anterioresCompletos&&suma<=t.metros){agregar(t.metros-suma,'resto exacto de la longitud registrada');finalConocido=true;}
   else r.pendientes.push('Distancia posterior al último accesorio pendiente.');
   if(suma>t.metros+1e-8||anterioresCompletos&&finalConocido&&Math.abs(suma-t.metros)>1e-8)return {...r,bloqueada:true,segmentos:[],completa:false,metrosPendientes:t.metros,pendientes:['Las posiciones no coinciden con la longitud del tramo: revisar antes de calcular cuplas.']};
-  r.completa=anterioresCompletos&&finalConocido;r.metrosPendientes=Math.max(0,t.metros-suma);return r;
+  r.completa=anterioresCompletos&&finalConocido;r.cuplasUbicadas=r.completa?as.filter(a=>a.tipo==='cupla').length:0;r.metrosPendientes=Math.max(0,t.metros-suma);return r;
  }
  function firmaCortesCompra(t,entrada,opciones={}){
   return JSON.stringify({metros:t.metros,segmentos:t.segmentos||null,...(!t.segmentos&&t.continuidadCuplas?.segmentos.length?{continuidadCuplas:t.continuidadCuplas}:{}),material:t.material||entrada.material,sistema:t.sistema||entrada.sistema,largo:opciones.largoComercial??6,accesorios:[...(t.accesorios||[]),...(entrada.extras||[]).filter(a=>a.tramo===t.id||a.ubicacion===t.id||String(a.ubicacion||'').startsWith(t.id+' · '))].map(a=>[a.idFisico||null,a.tipo,a.cantidad,a.nodo||null])});
@@ -165,7 +165,7 @@
    if(ss?.length&&(ss.some(s=>!valido(s.metros))||Math.abs(ss.reduce((n,s)=>n+s.metros,0)-t.metros)>1e-8))throw Error('Segmentos incompatibles con '+t.id);
    const partes=grupos?grupos.map((g,i)=>({metros:g.reduce((n,m)=>n+m,0),diametro:ss?.[i]?.diametro,cortes:g})):ss?.length?ss:parciales.length?[...parciales,...(auto.metrosPendientes>0?[{metros:auto.metrosPendientes,continuidadPendiente:true,diametroPendiente:!!auto.diametroVariable}]:[])]:[{metros:t.metros,continuidadPendiente:true}];
    const aportaciones=new Map();
-   const fila={id:t.id,metros:t.metros,diametros:[],tiras:0,metrosComerciales:0,sobrante:0,cuplas:continuidad?0:null,cuplasConocidas:0,cuplasPendientes:!continuidad,cuplasMinimas:continuidad?0:null,continuidad,distribucionVigente:!!grupos,distribucionGuardada:guardado||null,segmentos:[],provisional:true,estado:'estimado'};
+   const fila={id:t.id,metros:t.metros,diametros:[],tiras:0,metrosComerciales:0,sobrante:0,cuplas:continuidad?0:null,cuplasConocidas:0,cuplasRegistradasContadas:0,cuplasRegistradasUbicadas:auto?.completa?auto.cuplasUbicadas||0:0,cuplasPendientes:!continuidad,cuplasMinimas:continuidad?0:null,continuidad,distribucionVigente:!!grupos,distribucionGuardada:guardado||null,segmentos:[],provisional:true,estado:'estimado'};
    for(const [i,p]of partes.entries()){
     const d=diametro(t,p);if(!fila.diametros.some(x=>x.valor===d.valor&&x.estado===d.estado))fila.diametros.push(d);
     let cortes=(continuidad||parciales.length&&!p.continuidadPendiente)?planificarCortes([{id:t.id+':'+i,metros:p.metros}],{largoComercial:largo}).porSegmento[t.id+':'+i].piezas.map(p=>p.metros):null;
@@ -193,10 +193,18 @@
   }
   // Una cupla ya declarada no se suma otra vez a una unión propuesta por cortes.
   if(r.registrados.some(f=>f.tipo==='cupla'&&f.cantidad>0)){
-   r.pendientes.push('Cuplas registradas: cotejar su ubicación con las uniones del plan de cortes; no se suman automáticamente.');
-   const declaradas=r.registrados.filter(f=>f.tipo==='cupla'&&f.cantidad>0);
-   const afectadas=new Set();for(const f of declaradas){const ubicadas=r.tramos.filter(t=>f.ubicacion===t.id||String(f.ubicacion||'').startsWith(t.id+' · '));for(const t of r.tramos){if(ubicadas.length&&!ubicadas.includes(t))continue;afectadas.add(t.id);}}
-   for(const f of r.tramos)if(afectadas.has(f.id)){f.cuplasCalculadas=f.cuplas;f.cuplasConocidasCalculadas=f.cuplasConocidas;f.cuplas=null;f.cuplasConocidas=0;f.cuplasPendientes=true;f.estadoCuplas='pendiente-cotejo';}
+   const declaradas=r.registrados.filter(f=>f.tipo==='cupla'&&f.cantidad>0),asociadas=new Map();
+   for(const f of declaradas){const ubicadas=r.tramos.filter(t=>f.ubicacion===t.id||String(f.ubicacion||'').startsWith(t.id+' · '));asociadas.set(f,ubicadas);}
+   const verificadas=new Set();for(const t of r.tramos){
+    const propias=declaradas.filter(f=>asociadas.get(f).length===1&&asociadas.get(f)[0]===t),cantidad=propias.reduce((n,f)=>n+f.cantidad,0);
+    if(!cantidad||t.cuplas===null||t.diametros.length!==1||t.cuplasRegistradasUbicadas!==cantidad||propias.some(f=>f.conflicto))continue;
+    t.cuplasAdicionalesCalculadas=t.cuplas;t.cuplas+=cantidad;t.cuplasConocidas+=cantidad;t.cuplasRegistradasContadas=cantidad;t.estadoCuplas='calculadas-con-registradas';
+    for(const g of r.canos)if(g.tramos.includes(t.id)){g.cuplas+=cantidad;g.cuplasPorTramo[t.id]=(g.cuplasPorTramo[t.id]||0)+cantidad;}
+    propias.forEach(f=>verificadas.add(f));
+   }
+   const afectadas=new Set();for(const f of declaradas.filter(f=>!verificadas.has(f))){const ubicadas=asociadas.get(f);for(const t of r.tramos){if(ubicadas.length&&!ubicadas.includes(t))continue;afectadas.add(t.id);}}
+   if(afectadas.size)r.pendientes.push('Cuplas registradas: cotejar su ubicación con las uniones del plan de cortes; no se suman automáticamente.');
+   for(const f of r.tramos)if(afectadas.has(f.id)){f.cuplasCalculadas=f.cuplas;f.cuplasConocidasCalculadas=f.cuplasConocidas;f.cuplas=null;f.cuplasConocidas=0;f.cuplasPendientes=true;f.estadoCuplas='pendiente-cotejo';f.cuplasRegistradasContadas=0;}
    for(const g of r.canos)if(g.tramos.some(id=>afectadas.has(id))){g.cuplasCalculadas=g.cuplas;g.cuplasPendientes=true;g.cuplas=Object.entries(g.cuplasPorTramo).filter(([id])=>!afectadas.has(id)).reduce((n,[,cantidad])=>n+cantidad,0);}
   }
   // Comparar nodos físicos una sola vez; nunca fabricar una reducción por cada recorrido.
