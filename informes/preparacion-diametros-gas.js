@@ -16,7 +16,13 @@ function inventarioAccesoriosParaMotorGas(red){
  p.planCompra=original?JSON.parse(JSON.stringify(original)):{};
  try{
   const entrada=entradaManualMaterialesGas();
-  return CatalogosSistemasGas.prepararAccesorios(piezasConciliacionGas(entrada),red,entrada.tramos.map(t=>({...t,desde:tramos.find(o=>o.id===t.id)?.desde||'',hasta:tramos.find(o=>o.id===t.id)?.hasta||''})),entrada.manualDirecto?.ceros||[],entrada.manualDirecto?.pendientes||[],opcionesMaterialesGas('proyecto'));
+  const piezas=piezasConciliacionGas(entrada).map(pieza=>{const extra=p.planCompra?.extras?.find(e=>e.idFisico===pieza.id);return extra?.tramoTecnicoConfirmado&&tramos.some(t=>t.id===extra.tramoTecnicoConfirmado)?{...pieza,ubicaciones:[...(pieza.ubicaciones||[]),extra.tramoTecnicoConfirmado]}:pieza;});
+  const inventario=CatalogosSistemasGas.prepararAccesorios(piezas,red,entrada.tramos.map(t=>({...t,desde:tramos.find(o=>o.id===t.id)?.desde||'',hasta:tramos.find(o=>o.id===t.id)?.hasta||''})),entrada.manualDirecto?.ceros||[],entrada.manualDirecto?.pendientes||[],opcionesMaterialesGas('proyecto'));
+  const sistema=CatalogosSistemasGas.identificar(instalacionGas.perfil);
+  const conexiones=CatalogosSistemasGas.conexiones(red,tramos,inventario,sistema,p.conexionesTerminalesGas,SIGAS_ED15_2025,FUSIOGAS_V1_2026);
+  for(const pieza of inventario.fisicas){const clasificacion=conexiones.piezas.find(c=>c.piezaId===pieza.id);pieza.rolConexion=clasificacion?.rol;const terminal=conexiones.extremos.find(e=>e.piezaId===pieza.id&&e.estado==='producto identificado');if(terminal)pieza.productoConexionId=terminal.producto.id;}
+  inventario.conexiones=conexiones;inventario.pendientes.push(...conexiones.pendientes);
+  return inventario;
  }finally{if(tenia)p.planCompra=original;else delete p.planCompra;}
 }
 function mostrarPreparacionDiametrosGas(){

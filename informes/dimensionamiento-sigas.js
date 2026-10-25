@@ -31,7 +31,7 @@ function renderPreseleccionSigasGas(out,plan=null){
 function abrirEjercicioSigas19Gas(){
  if(modulo!=='gas')return false;
  const existente=registrosProyectosGas().find(p=>p.datos.referenciaSigas19===true);
- if(existente){seleccionarAmbitoGas('proyecto:'+existente.id);calcularMaterialesManualGas();return true;}
+ if(existente){seleccionarAmbitoGas('proyecto:'+existente.id);ubicarCodoAdicionalReferenciaGas();guardarDatos();calcularMaterialesManualGas();return true;}
  if(!crearProyectoGas('Referencia SIGAS · 58 m · 19 codos'))return false;
  const filas=[['M','A',15,7,1,0,''],['A','B',5,1,1,0,''],['A','Termo',9,1,0,1,'Termotanque'],['B','Calefactor',16,4,0,1,'Calefactor'],['B','Cocina',13,5,0,1,'Cocina']];
  tramos=filas.map(([desde,hasta,metros,codos,tees,llaves,artefacto])=>({id:'ref-'+desde+'-'+hasta,desde,hasta,metros,artefacto,consumo:null,diametro:null,detalle:{estado:'pendiente',accesorios:tees?[{tipo:'tee',nodo:hasta,idFisico:'referencia-tee-'+hasta}]:[]}}));
@@ -40,7 +40,7 @@ function abrirEjercicioSigas19Gas(){
  const p=proyectoGasActual();p.referenciaSigas19=true;p.conteosRapidosGas=Object.fromEntries(filas.map((f,i)=>[tramos[i].id,{codo90:f[3],codo45:0,tee:f[4],reduccion:0,llave:f[5]}]));
  datosPlanGas().opciones.cargaManualDirecta=true;
  datosPlanGas().extras.push({idFisico:'referencia-codo19',tipo:'codo90',cantidad:1,ubicacion:'Codo 19 del ejercicio · ubicación técnica por verificar',medidas:[],confirmado:true,evidencia:'Cantidad confirmada por el propietario, adicional a los 18 declarados en los cinco tramos. Sin inferir orientación ni pérdidas.'});
- guardarDatos();renderTramos();renderGas();renderAmbitoGas();calcularMaterialesManualGas();return true;
+ ubicarCodoAdicionalReferenciaGas();guardarDatos();renderTramos();renderGas();renderAmbitoGas();calcularMaterialesManualGas();return true;
 }
 
 function guardarVinculoSigasGas(piezaId,recorrido,productoId,tramoAplicacion=null){
@@ -68,6 +68,7 @@ function renderVinculosSigasGas(out,r){
  for(const p of entrada.inventario.fisicas){
   const caja=document.createElement('details');caja.className='sigas-vinculo';const titulo=document.createElement('summary');titulo.textContent=p.cantidad+' × '+p.tipo+' · '+(p.tramos.map(id=>entrada.preparacion.porTramo.find(t=>t.id===id)?.nombre||id).join(', ')||'ubicación técnica pendiente');caja.append(titulo);
   if(p.tipo==='tee'){const nota=document.createElement('p');nota.textContent='Falta confirmar la variante real (normal o reductora), las medidas de sus tres conexiones y qué recorrido pasa a través o gira 90°. La red de conexiones sola no determina esa vía. No se asigna una tee por defecto.';caja.append(nota);}
+  if(p.rolConexion==='terminal'&&p.productoConexionId){const nota=document.createElement('p');nota.textContent='Producto terminal identificado en Conexiones terminales e intermedias. Se usa esa pieza una sola vez; modificá su vínculo allí.';caja.append(nota);detalles.append(caja);continue;}
   const v=entrada.config.vinculos?.[p.id]||{};
   const ub=document.createElement('select');for(const [valor,texto]of [['','Ubicación de la pérdida pendiente'],...entrada.preparacion.porTramo.map(t=>[t.id,t.nombre])]){const o=document.createElement('option');o.value=valor;o.textContent=texto;ub.append(o);}ub.value=p.tramos[0]||v.tramoAplicacion||'';
   if(!p.tramos.length){const l=document.createElement('label');l.textContent='Asociar al tramo solo si la pieza pertenece al circuito calculado';l.append(ub);caja.append(l);}
@@ -91,4 +92,39 @@ function textoCuplasSigasGas(plan){
  const filas=plan?.filas?.filter(f=>['cupla','cupla-plan'].includes(f.tipo))||[];
  if(!filas.length||filas.some(f=>!Number.isFinite(f.cantidad))||plan.planes?.some(g=>g.hipotesis))return 'Posibles cuplas: pendiente de confirmar. Faltan posiciones o continuidad de caños; los candidatos de diámetro se pueden consultar.';
  return 'Cuplas '+(filas.every(f=>f.cantidadConfirmada&&!f.editado)?'declaradas':'estimadas')+': '+filas.reduce((n,f)=>n+f.cantidad,0)+'. Revisar las uniones propuestas antes de comprar.';
+}
+
+function guardarConexionTerminalGas(puntoId,piezaId,productoId){
+ if(modulo!=='gas')return false;
+ const red=redFisicaManualGas(),inventario=inventarioAccesoriosParaMotorGas(red),p=proyectoGasActual(),sistema=CatalogosSistemasGas.identificar(instalacionGas.perfil);
+ const registros={...(p.conexionesTerminalesGas||{})};
+ if(!piezaId)delete registros[puntoId];else registros[puntoId]={piezaId,productoId:productoId||null,sistema};
+ const revision=CatalogosSistemasGas.conexiones(red,tramos,inventario,sistema,registros,SIGAS_ED15_2025,FUSIOGAS_V1_2026),extremo=revision.extremos.find(e=>e.id===puntoId);
+ if(!extremo||piezaId&&!['producto identificado','pieza vinculada'].includes(extremo.estado)){$('matMensaje').textContent=extremo?.motivo||'Extremo no disponible en la red actual.';return false;}
+ p.conexionesTerminalesGas=registros;guardarDatos();renderResumenPrincipalGas();$('matMensaje').textContent='Conexión vinculada a una pieza existente. Cantidades sin cambios; aplicación técnica pendiente.';return true;
+}
+function renderConexionesTerminalesGas(out){
+ if(modulo!=='gas')return;
+ const red=redFisicaManualGas(),inventario=inventarioAccesoriosParaMotorGas(red),r=inventario.conexiones;if(!r?.extremos.length)return;
+ const detalle=document.createElement('details'),sum=document.createElement('summary');detalle.className='gas-detalles';sum.textContent='Conexiones terminales e intermedias · revisión técnica';detalle.append(sum);
+ const texto=s=>{const p=document.createElement('p');p.textContent=s;detalle.append(p);};
+ texto('Medidor y artefactos son extremos; una tee de derivación es intermedia. No toda conexión terminal es un codo. Vinculá piezas ya registradas: no se agregan cantidades. Un grupo de varias piezas no identifica una pieza individual.');
+ for(const e of r.extremos){
+  const grupo=document.createElement('details'),titulo=document.createElement('summary');grupo.className='conexion-terminal-gas';titulo.textContent=e.nombre+' · '+e.rol+' · '+e.estado;grupo.append(titulo);const nota=document.createElement('p');nota.textContent=e.motivo;grupo.append(nota);
+  const pieza=document.createElement('select'),producto=document.createElement('select');const lp=document.createElement('label'),lf=document.createElement('label');lp.textContent='Pieza individual ya registrada';lf.textContent='Producto terminal del sistema seleccionado';
+  const o=document.createElement('option');o.value='';o.textContent='Pendiente: ninguna pieza vinculada';pieza.append(o);
+  for(const p of inventario.fisicas.filter(p=>p.cantidad===1&&p.confirmada===true&&!p.conflicto&&p.tramos.some(t=>e.tramos.includes(t)))){const o=document.createElement('option');o.value=p.id;o.textContent=p.tipo+' · '+p.tramos.map(id=>tramos.find(t=>t.id===id)).filter(Boolean).map(t=>t.desde+'–'+t.hasta).join(', ');pieza.append(o);}pieza.value=e.piezaId||'';
+  const cargar=()=>{producto.replaceChildren();const o=document.createElement('option');o.value='';o.textContent='Pendiente: tipo, medidas y rosca por identificar';producto.append(o);const p=inventario.fisicas.find(p=>p.id===pieza.value);for(const f of r.productos.filter(f=>CatalogosSistemasGas.tipoProductoCompatible(p,f))){const o=document.createElement('option');o.value=f.id;o.textContent=f.nombreOriginal+' · p.'+f.pagina+' · '+f.longitudEquivalenteM+' m documentales';producto.append(o);}};
+  cargar();producto.value=e.producto?.id||'';pieza.onchange=cargar;lp.append(pieza);lf.append(producto);grupo.append(lp,lf);
+  if(e.equivalenteM!==null){const p=document.createElement('p');p.textContent='Equivalente documental de esta pieza: '+e.equivalenteM+' m. Diámetro y aplicación todavía deben verificarse.';grupo.append(p);}
+  const guardar=document.createElement('button');guardar.className='alt';guardar.textContent='Guardar identificación sin sumar piezas';guardar.onclick=()=>guardarConexionTerminalGas(e.id,pieza.value,producto.value);grupo.append(guardar);detalle.append(grupo);
+ }
+ const intermedias=r.piezas.filter(p=>p.rol==='intermedia').length;texto('Piezas intermedias identificadas por nodo: '+intermedias+'. Las restantes conservan pendiente su posición terminal/intermedia.');out.append(detalle);
+}
+function ubicarCodoAdicionalReferenciaGas(){
+ const p=proyectoGasActual();if(p.referenciaSigas19!==true||!tramos.some(t=>t.id==='ref-B-Cocina'))return;
+ const extra=p.planCompra?.extras?.find(e=>e.idFisico==='referencia-codo19');
+ if(extra&&extra.tipo==='codo90'&&extra.cantidad===1&&extra.ubicacion==='Codo 19 del ejercicio · ubicación técnica por verificar'){
+  extra.ubicacionAnterior=extra.ubicacion;extra.ubicacion='Codo 19 del ejercicio · B–Cocina (adicional)';extra.tramoTecnicoConfirmado='ref-B-Cocina';extra.evidenciaAnterior=extra.evidencia;extra.evidencia='Ubicación B–Cocina confirmada por el propietario. No confirma posición terminal, variante ni equivalencia.';
+ }
 }

@@ -28,7 +28,7 @@
  }
  function prepararAccesorios(piezas,red,ts,ceros=[],pendientesCarga=[],opciones={}){
   const fisicas=new Map(),pendientes=[...pendientesCarga],ids=new Set(ts.map(t=>t.id));
-  const ubicar=p=>[...new Set((p.ubicaciones||[]).flatMap(u=>ts.filter(t=>u===t.id||String(u).startsWith(t.id+' · accesorio ')||String(u).startsWith(t.id+' · cantidad manual')).map(t=>t.id)))];
+  const ubicar=p=>[...new Set((p.ubicaciones||[]).flatMap(u=>ts.filter(t=>u===t.id||String(u).startsWith(t.id+' · accesorio ')||String(u).startsWith(t.id+' · cantidad manual')||u===t.desde+'–'+t.hasta||u===t.hasta+'–'+t.desde).map(t=>t.id)))];
   for(const p of piezas){
    if(!p.id||!Number.isSafeInteger(p.cantidad)||p.cantidad<=0){pendientes.push('Cantidad o identidad pendiente de una pieza; no se convierte a cero.');continue;}
    if(fisicas.has(p.id)){const anterior=fisicas.get(p.id);anterior.tramos=[...new Set([...anterior.tramos,...ubicar(p)])];if(anterior.tipo!==p.tipo||anterior.cantidad!==p.cantidad){anterior.conflicto=true;pendientes.push('Identidad física contradictoria: '+p.id+'.');}continue;}
@@ -50,6 +50,50 @@
   const valido=catalogoHabilitado===true&&verificacionTecnica===true&&resultado?.estado==='calculado'&&resultado.prueba===false&&resultado.verificacionTecnica===true&&resultado.catalogoHabilitado===true&&typeof firmaActual==='string'&&firmaActual===firmaResultado;
   return ts.map(t=>({tramo:t.desde+'–'+t.hasta,diametro:valido&&typeof resultado.diametros?.[t.id]==='string'?resultado.diametros[t.id]:'Pendiente',estado:valido&&resultado.diametros?.[t.id]?'Verificado':'Pendiente de verificación técnica'}));
  }
- const api={IDS,identificar,obtener,compatibilidad,prepararAccesorios,largoDocumentado,resultadoPorTramo};
+ // Conexiones son referencias a piezas existentes: nunca generan cantidades nuevas.
+ function productosTerminales(sistema,sigas,fusiogas){
+  const filas=sistema===IDS.sigas&&sigas?.id==='sigas'?sigas?.tablas?.[3]?.filas:sistema===IDS.fusiogas&&fusiogas?.id==='fusiogas'?fusiogas?.accesorios:[];
+  return (filas||[]).filter(f=>/transici[oó]n|rosca/i.test(f.nombreOriginal)).map(f=>({...f,sistema}));
+ }
+ function tipoProductoCompatible(p,f){
+  if(!p||!f)return false;
+  if(p.tipo==='codo90')return /^Codo.*90/.test(f.nombreOriginal);
+  if(p.tipo==='codo45')return /^Codo.*45/.test(f.nombreOriginal);
+  const tipo=String(p.tipo).trim();
+  if(!(['otro','transicion'].includes(tipo)||/^Transici[oó]n(?: |$)/i.test(tipo))||!/^Transici[oó]n/i.test(f.nombreOriginal))return false;
+  if(/hembra/i.test(tipo)&&!/hembra/i.test(f.nombreOriginal)||/macho/i.test(tipo)&&!/macho/i.test(f.nombreOriginal))return false;
+  return true;
+ }
+ function conexiones(red,ts,inventario,sistema,registros={},sigas=null,fusiogas=null){
+  const extremos=[],intermedias=[],pendientes=[],productos=productosTerminales(sistema,sigas,fusiogas),usadas=new Set();
+  const puntos=red.puntos||[],os=Object.entries(red.orientacion||{}),entradas=new Set(os.map(([,o])=>o.hasta));
+  const grados=new Map(puntos.map(p=>[p.id,os.filter(([,o])=>o.desde===p.id||o.hasta===p.id).length]));
+  for(const punto of puntos){
+   const enlaces=os.filter(([,o])=>o.desde===punto.id||o.hasta===punto.id);
+   const raiz=!entradas.has(punto.id)&&(punto.tipo==='medidor'||String(punto.nombre).trim().toLowerCase()==='m');
+   const final=entradas.has(punto.id)&&!os.some(([,o])=>o.desde===punto.id);
+   if(!raiz&&!final)continue;
+   const id=punto.id,registro=registros?.[id],pieza=registro?(inventario.fisicas||[]).find(p=>p.id===registro.piezaId):null;
+   const e={id,nombre:punto.nombre,rol:raiz?'medidor':punto.tipo==='artefacto'||punto.artefactoId||Number(red.porTramo?.[enlaces[0]?.[0]])>0?'artefacto':'extremo sin artefacto confirmado',tramos:enlaces.map(([id])=>id),piezaId:pieza?.id||null,producto:null,equivalenteM:null,estado:'pendiente',motivo:''};
+   if(red.errores?.length||enlaces.length!==1)e.motivo='Red ambigua o extremo con varias conexiones: revisar antes de identificar la pieza.';
+   else if(!registro)e.motivo=sistema===IDS.epoxi?'Identificar la conexión roscada real, sus medidas y la pieza ya registrada.':'Identificar la transición termofusión–rosca real: recta, codo u otra variante, medidas y pieza ya registrada.';
+   else if(registro.sistema!==sistema)e.motivo='La identificación pertenece a otro sistema; se conserva sin reutilizar su equivalente.';
+   else if(!pieza||pieza.cantidad!==1||pieza.confirmada!==true||pieza.conflicto)e.motivo='Seleccionar una pieza individual confirmada. Un grupo de varias piezas no identifica cuál está en el extremo.';
+   else if(usadas.has(pieza.id)||Object.values(registros||{}).filter(r=>r?.piezaId===pieza.id).length>1)e.motivo='Esa pieza ya está vinculada a otro extremo; no se cuenta dos veces.';
+   else if(!pieza.tramos?.some(id=>e.tramos.includes(id)))e.motivo='La pieza no pertenece al tramo del extremo; revisar ubicación.';
+   else if(sistema===IDS.epoxi){e.motivo='Pieza roscada vinculada. Faltan producto, medidas y equivalencia aplicable verificados para acero epoxi.';e.estado='pieza vinculada';usadas.add(pieza.id);}
+   else{const f=productos.find(f=>f.id===registro.productoId);
+    if(!f||!tipoProductoCompatible(pieza,f))e.motivo='Elegir un producto terminal del mismo sistema compatible con el tipo declarado; no cambiar la cantidad ni convertir un codo en transición recta.';
+    else{e.producto=f;e.equivalenteM=f.longitudEquivalenteM;e.estado='producto identificado';e.motivo='Equivalente documental; verificar medidas, diámetro candidato y condiciones de aplicación.';usadas.add(pieza.id);}
+   }
+   extremos.push(e);if(e.estado!=='producto identificado')pendientes.push(e.nombre+': '+e.motivo);
+  }
+  for(const pieza of inventario.fisicas||[]){const terminal=extremos.find(e=>e.piezaId===pieza.id&&['producto identificado','pieza vinculada'].includes(e.estado));
+   const nodo=puntos.find(n=>n.id===pieza.nodo||String(n.nombre).trim().toLowerCase()===String(pieza.nodo||'').trim().toLowerCase());
+   intermedias.push({piezaId:pieza.id,rol:terminal?'terminal':nodo&&grados.get(nodo.id)>1?'intermedia':'ubicación en el tramo pendiente',extremo:terminal?.id||null});
+  }
+  return {extremos,piezas:intermedias,productos,pendientes,agregadas:0};
+ }
+ const api={conexiones,productosTerminales,tipoProductoCompatible,IDS,identificar,obtener,compatibilidad,prepararAccesorios,largoDocumentado,resultadoPorTramo};
  if(typeof module==='object'&&module.exports)module.exports=api;else root.CatalogosSistemasGas=api;
 })(globalThis);
