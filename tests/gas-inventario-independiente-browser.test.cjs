@@ -7,6 +7,7 @@ test('GAS móvil: cantidades independientes y variantes sin recorrer diámetros 
   await page.goto('https://inventario.invalid/');await page.getByRole('button',{name:'🔥 Gas',exact:true}).tap();
   await page.locator('#ejerciciosGasSeparados > summary').tap();await page.getByRole('button',{name:'Abrir ejercicio SIGAS · 58 m y 19 codos (proyecto separado)',exact:true}).tap();
   const panel=page.locator('#resumenPrincipalMaterialesGas');assert.equal(await page.evaluate(()=>revisionMaterialesGas.plan.longitudInformada),58);
+  await panel.getByText('VER DETALLES TÉCNICOS',{exact:true}).tap();
   const links=panel.getByText('Identificar productos SIGAS para las pérdidas (sin repetir cantidades)',{exact:true});await links.tap();await panel.getByText(/^Accesorios reconocidos ·/).tap();
   const grupo=panel.locator('.sigas-vinculo').filter({hasText:'Recorrido de termofusión · 6 codos comunes'});await grupo.locator(':scope > summary').tap();
   assert.match(await grupo.innerText(),/6 × Codo Normal a 90º · 32 mm candidato/);

@@ -1895,8 +1895,8 @@ test('motor SIGAS: edición de consumos invalida la preselección anterior y no 
 test('motor SIGAS: nombre de referencia ocupado no sobrescribe un proyecto del usuario',()=>{
  const a=app();iniciarRedFlexible(a);a.run("crearProyectoGas('Referencia SIGAS · 58 m · 19 codos');proyectoGasActual().foto='data:image/jpeg;base64,PROPIA';guardarDatos()");const antes=a.saved(),ambito=a.run('ambitoGas');assert.equal(a.run('abrirEjercicioSigas19Gas()'),false);assert.equal(a.saved(),antes);assert.equal(a.run('ambitoGas'),ambito);assert.equal(a.run('proyectoGasActual().foto'),'data:image/jpeg;base64,PROPIA');
 });
-test('pantalla móvil SIGAS: tabla de diámetros primero y una sola lista de materiales, sin acciones duplicadas',()=>{
- const a=app();a.run("abrir('gas');abrirEjercicioSigas19Gas()");const ns=descendientesPresentacion(a.elements.get('resumenPrincipalMaterialesGas')),tablas=ns.filter(n=>n.tagName==='TABLE');assert.equal(tablas.length,2);assert.equal(tablas[0].className,'tabla sigas-diametros');assert.equal(tablas[1].className,'tabla gas-lista-simple');assert.equal(tablas[0].children[1].children.length,5);assert.doesNotMatch(html,/>Generar lista de mi proyecto</);assert.doesNotMatch(html,/>Obtener materiales de mi proyecto</);assert.match(html,/id="ejerciciosGasSeparados"/);assert.match(a.text('estadoAmbitoGas'),/^EJERCICIO SIGAS/);assert.equal(cantidadManual(a,'codo90'),19);
+test('pantalla móvil SIGAS: materiales primero y diámetros dentro del detalle técnico, sin acciones duplicadas',()=>{
+ const a=app();a.run("abrir('gas');abrirEjercicioSigas19Gas()");const ns=descendientesPresentacion(a.elements.get('resumenPrincipalMaterialesGas')),tablas=ns.filter(n=>n.tagName==='TABLE');assert.equal(tablas.length,2);assert.equal(tablas[0].className,'tabla gas-lista-simple');assert.equal(tablas[1].className,'tabla sigas-diametros');assert.equal(tablas[1].children[1].children.length,5);assert.doesNotMatch(html,/>Generar lista de mi proyecto</);assert.doesNotMatch(html,/>Obtener materiales de mi proyecto</);assert.match(html,/id="ejerciciosGasSeparados"/);assert.match(a.text('estadoAmbitoGas'),/^EJERCICIO SIGAS/);assert.equal(cantidadManual(a,'codo90'),19);
 });
 test('pantalla SIGAS: posibles cuplas conserva pendientes y muestra estimaciones y ceros reales',()=>{
  const a=app();assert.match(a.run('textoCuplasSigasGas({filas:[{tipo:"cupla-plan",cantidad:null}]})'),/^Posibles cuplas: pendiente de confirmar/);assert.match(a.run('textoCuplasSigasGas({filas:[{tipo:"cupla-plan",cantidad:3}],planes:[]})'),/Cuplas estimadas: 3/);assert.match(a.run('textoCuplasSigasGas({filas:[{tipo:"cupla-plan",cantidad:0}],planes:[]})'),/Cuplas estimadas: 0/);assert.match(a.run('textoCuplasSigasGas({filas:[{tipo:"cupla-plan",cantidad:3}],planes:[{hipotesis:true}]})'),/^Posibles cuplas: pendiente de confirmar/);
@@ -1982,4 +1982,24 @@ test('SIGAS: codos comunes reutilizan familia y medida del tramo sin confirmacio
  const comunes=r.piezas.filter(p=>p.clasificacionAutomatica?.startsWith('Codo común')||p.familiaAutomatica);assert.ok(comunes.length>=3);
  for(const p of comunes){assert.ok(p.cantidad>0);assert.equal(p.producto.familia,'Codo Normal a 90º');assert.ok(p.candidatoMm>0);assert.ok(p.usos.length>0);}
  assert.equal(r.calculo.definitivo,false);assert.ok(r.calculo.recorridos.some(r=>r.perdidasPendientes.length));assert.equal(cantidadManual(a,'codo90'),19);
+});
+
+
+test('Resultados GAS: un único detalle cerrado contiene todos los selectores técnicos',()=>{
+ const a=app();a.run("abrir('gas');abrirEjercicioSigas19Gas()");const raiz=a.elements.get('resumenPrincipalMaterialesGas'),ns=descendientesPresentacion(raiz),tecnico=ns.find(n=>n.id==='detallesTecnicosResultadoGas');
+ assert.ok(tecnico);assert.notEqual(tecnico.open,true);assert.equal(tecnico.children[0].textContent,'VER DETALLES TÉCNICOS');assert.equal(raiz.children[0].textContent,'MATERIALES DE LA INSTALACIÓN');
+ const dentro=new Set(descendientesPresentacion(tecnico));assert.ok(ns.some(n=>n.tagName==='SELECT'));assert.ok(ns.filter(n=>n.tagName==='SELECT').every(n=>dentro.has(n)));
+ for(const nombre of ['Datos técnicos pendientes','Diámetros por tramo · SIGAS GN','Ver detalle por tramo y consumos','Identificar productos SIGAS para las pérdidas (sin repetir cantidades)'])assert.ok([...dentro].some(n=>n.textContent===nombre));
+ assert.equal(cantidadManual(a,'codo90'),19);assert.equal(cantidadManual(a,'tee'),2);assert.equal(cantidadManual(a,'llave'),3);assert.equal(a.run('revisionMaterialesGas.plan.longitudInformada'),58);
+});
+test('Resultados GAS: reordenar la presentación conserva el modelo PDF, datos y candidatos',()=>{
+ const a=app();a.run("abrir('gas');abrirEjercicioSigas19Gas();guardarDatos()");const antes=a.saved(),pdf=a.run('JSON.stringify(modeloInformeActual())'),motor=a.run('JSON.stringify(calcularPreseleccionSigasGas())');
+ a.run('renderResumenPrincipalGas()');assert.equal(a.saved(),antes);assert.equal(a.run('JSON.stringify(modeloInformeActual())'),pdf);assert.equal(a.run('JSON.stringify(calcularPreseleccionSigasGas())'),motor);assert.equal(a.run('calcularPreseleccionSigasGas().definitivo'),false);
+});
+
+test('Resumen principal GAS: agrupa 19 codos, dos tees y tres llaves sin mezclar propuestas ni modificar el detalle',()=>{
+ const a=app();a.run("abrir('gas');abrirEjercicioSigas19Gas()");const antes=a.run('JSON.stringify(revisionMaterialesGas.plan)'),filas=a.run('resumenMaterialesInstalacionGas(revisionMaterialesGas.plan)');
+ for(const [tipo,n]of [['codo90',19],['tee',2],['llave',3]]){const fs=filas.filter(f=>f.tipo===tipo);assert.equal(fs.length,1);assert.equal(fs[0].cantidad,n);}
+ assert.equal(filas.find(f=>f.tipo==='cano').cantidad,58);assert.equal(filas.find(f=>f.tipo==='cupla').pendiente,true);assert.equal(a.run('JSON.stringify(revisionMaterialesGas.plan)'),antes);
+ a.run("guardarDatoTerminalSigasGas('terminal-Termo','sexo','macho');guardarDatoTerminalSigasGas('terminal-Termo','codoBase','HH')");assert.ok(a.run('revisionMaterialesGas.plan.propuestasCompraSigas.length')>0);assert.equal(a.run('resumenMaterialesInstalacionGas(revisionMaterialesGas.plan).find(f=>f.tipo==="codo90").cantidad'),19);assert.ok(!a.run('resumenMaterialesInstalacionGas(revisionMaterialesGas.plan).some(f=>f.tipo==="niple")'));
 });
