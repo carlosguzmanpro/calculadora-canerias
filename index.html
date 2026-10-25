@@ -8812,8 +8812,9 @@ function avisoDeteccionGas(){
      const diametros=[...new Set(ubicaciones.map(id=>vector[id]))];
      const opciones=a.familia&&p.tipo!=='tee'&&diametros.length===1?d.tablas[3].filas.filter(f=>familiaProducto(f)===a.familia&&f.diametroExteriorM*1000===diametros[0]):[];
      const fila=a.familia?(opciones.length===1?opciones[0]:null):d.tablas[3].filas.find(f=>f.id===id);
-     const tipoCorrecto=fila&&({codo90:/^Codo.*90/,codo45:/^Codo.*45/,tee:/^Te /,llave:/^Llave /,reduccion:/Reduct|Reduc/,cupla:/Cupla/}[p.tipo]?.test(fila.nombreOriginal));
+     const tipoCorrecto=fila&&({codo90:/^Codo(?: Normal a 90º | MH a 90° | 90º)/,codo45:/^Codo.*45/,tee:/^Te /,llave:/^Llave /,reduccion:/Reduct|Reduc/,cupla:/Cupla/}[p.tipo]?.test(fila.nombreOriginal));
      if(!tipoCorrecto||!(p.tipo==='tee'?ubicaciones.some(id=>vector[id]===fila.diametroExteriorM*1000):ubicaciones.every(id=>vector[id]===fila.diametroExteriorM*1000))){pendiente({...p,tramos:ubicaciones},'combinación '+clave+' sin producto/diámetro/vía SIGAS compatible documentado.');continue;}
+     if(p.necesidadTerminal&&!/rosca|H\.larga|H\.extra/i.test(fila.nombreOriginal)){pendiente({...p,tramos:ubicaciones},'conexión terminal: producto roscado compatible pendiente; no se utiliza un codo común.');continue;}
      if(p.tipo==='tee'&&/^Te Normal /.test(fila.nombreOriginal)&&Array.isArray(p.conexionesDiametro)&&p.conexionesDiametro.some(id=>vector[id]!==fila.diametroExteriorM*1000)){
       pendiente({...p,tramos:ubicaciones},'tee normal incompatible con los diámetros candidatos de sus tres conexiones; identificar configuración y reducciones sin inventarlas.');continue;
      }
@@ -8822,6 +8823,8 @@ function avisoDeteccionGas(){
     }
     // Son necesidades, no piezas adicionales: sin vínculo físico inequívoco no atribuirles cero.
     for(const terminal of inventario.necesidadesTerminales||[])if(terminal.recorridos?.includes(r.artefacto)){
+     const vinculadas=[...piezas.values()].filter(p=>p.necesidadTerminal===terminal.id&&p.cantidad===1);
+     if(vinculadas.length===1&&aportes.some(a=>a.piezaId===vinculadas[0].id))continue;
      pendiente({id:terminal.id,tipo:'conexion-terminal',cantidad:null,tramos:terminal.tramos},terminal.nombre+': identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero.');
     }
     const equivalenteConocidoM=aportes.reduce((n,a)=>n+a.equivalenteTotalM,0),completo=!inventarioInvalido&&!faltantes.length&&!faltantesInventario.length&&config.inventarioPerdidasCompleto===true&&config.fuenteInventario;
@@ -8872,7 +8875,13 @@ function entradaPreseleccionSigasGas(){
  // El codo autorizado del casillero se mantiene en inventario; no se supone de qué lado del medidor está.
  const entrada=entradaManualMaterialesGas(),casillero=estadoCodoCasilleroGas(entrada);
  if(casillero.adicional===1&&!inventario.fisicas.some(p=>p.id==='casillero-medidor:codo90'))inventario.fisicas.push({id:'casillero-medidor:codo90',tipo:'codo90',cantidad:1,confirmada:true,tramos:[],equivalenteM:null});
- return {preparacion,perfil,inventario,config:proyectoGasActual().calculoSigas||{}};
+ const config=proyectoGasActual().calculoSigas||{};
+ inventario.fisicas=inventario.fisicas.flatMap(p=>{
+  const separacion=config.desgloses?.[p.id];if(!separacion)return [p];
+  if(separacion.cantidad!==p.cantidad){inventario.pendientes.push('Cambió la cantidad de '+p.tipo+': revisar identificaciones individuales conservadas.');return [{...p,conflicto:true}];}
+  return Array.from({length:p.cantidad},(_,i)=>{const id=p.id+'::unidad:'+i;return {...p,id,cantidad:1,grupoOriginal:p.id,numeroUnidad:i+1,necesidadTerminal:config.vinculos?.[id]?.necesidadTerminal||null};});
+ });
+ return {preparacion,perfil,inventario,config};
 }
 function calcularPreseleccionSigasGas(){const entrada=entradaPreseleccionSigasGas();return entrada?DimensionamientoSigas.resolver(SIGAS_ED15_2025,entrada):null;
 }
@@ -8920,6 +8929,19 @@ function abrirEjercicioSigas19Gas(){
  guardarDatos();renderTramos();renderGas();renderAmbitoGas();calcularMaterialesManualGas();return true;
 }
 
+function separarProductosSigasGas(piezaId){
+ const e=entradaPreseleccionSigasGas(),p=e?.inventario.fisicas.find(p=>p.id===piezaId);
+ if(!p||p.grupoOriginal||p.tipo==='tee'||p.cantidad<2||p.cantidad>200)return false;
+ const c=proyectoGasActual().calculoSigas||={version:1,vinculos:{}};c.desgloses||={};c.desgloses[p.id]={cantidad:p.cantidad};
+ // No copiar un producto común a piezas distintas: conservar el vínculo antiguo como respaldo.
+ guardarDatos();renderResumenPrincipalGas();return true;
+}
+function identificarConexionSigasGas(piezaId,necesidad){
+ const e=entradaPreseleccionSigasGas(),p=e?.inventario.fisicas.find(p=>p.id===piezaId);
+ if(!p||p.cantidad!==1||necesidad&&!e.inventario.necesidadesTerminales.some(n=>n.id===necesidad&&n.tramos.some(t=>p.tramos.includes(t))))return false;
+ const c=proyectoGasActual().calculoSigas||={version:1,vinculos:{}};c.vinculos||={};const v=c.vinculos[piezaId]||={porRecorrido:{}};v.necesidadTerminal=necesidad||null;
+ guardarDatos();renderResumenPrincipalGas();return true;
+}
 function guardarVinculoSigasGas(piezaId,recorrido,productoId,tramoAplicacion=null){
  const entrada=entradaPreseleccionSigasGas();if(!entrada||!entrada.inventario.fisicas.some(p=>p.id===piezaId))return false;
  const r=DimensionamientoSigas.resolver(SIGAS_ED15_2025,entrada),vector=r.historia.at(-1)?.diametrosExteriorMm;
@@ -8940,11 +8962,15 @@ function renderVinculosSigasGas(out,r){
  const entrada=entradaPreseleccionSigasGas();if(!entrada)return;
  const detalles=document.createElement('details'),sum=document.createElement('summary');sum.textContent='Identificar productos SIGAS para las pérdidas (sin repetir cantidades)';detalles.append(sum);
  const aviso=document.createElement('p');aviso.textContent='Elegí solo el producto y vía reales. Las cantidades ya están cargadas. Codos y llaves de familia confirmada siguen el diámetro tabulado. Las tees requieren producto y vía por recorrido, con revisión si cambian las conexiones. Si el grupo contiene productos distintos, identificá las piezas por separado; no asignes una familia común. No confirma normativa ni suministro.';detalles.append(aviso);
- const patrones={codo90:/^Codo.*90/,codo45:/^Codo.*45/,tee:/^Te /,llave:/^Llave /,reduccion:/Reduct|Reduc/,cupla:/Cupla/},vector=r.historia.at(-1)?.diametrosExteriorMm;
+ const patrones={codo90:/^Codo(?: Normal a 90º | MH a 90° | 90º)/,codo45:/^Codo.*45/,tee:/^Te /,llave:/^Llave /,reduccion:/Reduct|Reduc/,cupla:/Cupla/},vector=r.historia.at(-1)?.diametrosExteriorMm;
  if(!vector){out.append(detalles);return;}
  const ids=entrada.preparacion.porTramo.map(t=>t.id),clave=ids.map(id=>vector[id]).join('/');
  for(const p of entrada.inventario.fisicas){
   const caja=document.createElement('details');caja.className='sigas-vinculo';const titulo=document.createElement('summary');titulo.textContent=p.cantidad+' × '+p.tipo+' · '+(p.tramos.map(id=>entrada.preparacion.porTramo.find(t=>t.id===id)?.nombre||id).join(', ')||'ubicación técnica pendiente');caja.append(titulo);
+  if(p.grupoOriginal)titulo.textContent+=' · pieza '+p.numeroUnidad+' (cantidad ya registrada)';
+  if(p.cantidad>1&&p.tipo!=='tee'&&!p.grupoOriginal){const b=document.createElement('button');b.type='button';b.textContent='Identificar las '+p.cantidad+' piezas por separado';b.onclick=()=>separarProductosSigasGas(p.id);caja.append(b);}
+  if(p.cantidad===1){const necesidades=entrada.inventario.necesidadesTerminales.filter(n=>n.tramos.some(id=>p.tramos.includes(id)));if(necesidades.length){const l=document.createElement('label'),sel=document.createElement('select');l.textContent='Función de esta pieza (sin agregar cantidades)';sel.ariaLabel=l.textContent;for(const [id,nombre]of [['','Recorrido o conexión sin identificar'],...necesidades.map(n=>[n.id,n.nombre])]){const o=document.createElement('option');o.value=id;o.textContent=nombre;sel.append(o);}sel.value=p.necesidadTerminal||'';sel.onchange=()=>identificarConexionSigasGas(p.id,sel.value);l.append(sel);caja.append(l);}}
+
   if(p.tipo==='tee'){const nota=document.createElement('p');nota.textContent='Falta confirmar la variante real (normal o reductora), las medidas de sus tres conexiones y qué recorrido pasa a través o gira 90°. La red de conexiones sola no determina esa vía. No se asigna una tee por defecto.';caja.append(nota);}
   const v=entrada.config.vinculos?.[p.id]||{};
   const ub=document.createElement('select');for(const [valor,texto]of [['','Ubicación de la pérdida pendiente'],...entrada.preparacion.porTramo.map(t=>[t.id,t.nombre])]){const o=document.createElement('option');o.value=valor;o.textContent=texto;ub.append(o);}ub.value=p.tramos[0]||v.tramoAplicacion||'';
@@ -8952,10 +8978,10 @@ function renderVinculosSigasGas(out,r){
   let renderizados=0;for(const ruta of entrada.preparacion.recorridos){
    if(p.tipo!=='tee'&&renderizados)continue;
    if(p.tramos.length&&!p.tramos.some(id=>ruta.tramos.includes(id)))continue;
-   const label=document.createElement('label'),select=document.createElement('select');label.textContent=p.tipo==='tee'?'Producto/vía hacia '+ruta.artefacto:'Producto SIGAS (se reutiliza en los recorridos)';renderizados++;
+   const label=document.createElement('label'),select=document.createElement('select');label.textContent=p.tipo==='tee'?'Producto/vía hacia '+ruta.artefacto:'Producto SIGAS (se reutiliza en los recorridos)';renderizados++;select.ariaLabel=label.textContent;
    const vacio=document.createElement('option');vacio.value='';vacio.textContent='Pendiente: no se asigna pérdida cero';select.append(vacio);
-   if(p.tipo!=='tee'){for(const familia of [...new Set(SIGAS_ED15_2025.tablas[3].filas.filter(f=>patrones[p.tipo]?.test(f.nombreOriginal)).map(DimensionamientoSigas.familiaProducto).filter(Boolean))]){const o=document.createElement('option');o.value='familia:'+familia;o.textContent=familia+' · seguir diámetro candidato (confirmar producto real)';select.append(o);}}
-   for(const f of SIGAS_ED15_2025.tablas[3].filas.filter(f=>patrones[p.tipo]?.test(f.nombreOriginal))){const o=document.createElement('option');o.value=f.id;o.textContent=f.nombreOriginal+' · '+f.longitudEquivalenteM+' m · p.'+f.pagina;select.append(o);}
+   if(p.tipo!=='tee'){for(const familia of [...new Set(SIGAS_ED15_2025.tablas[3].filas.filter(f=>patrones[p.tipo]?.test(f.nombreOriginal)&&(!p.necesidadTerminal||/rosca|H\.larga|H\.extra/i.test(f.nombreOriginal))).map(DimensionamientoSigas.familiaProducto).filter(Boolean))]){const o=document.createElement('option');o.value='familia:'+familia;o.textContent=familia+' · seguir diámetro candidato (confirmar producto real)';select.append(o);}}
+   for(const f of SIGAS_ED15_2025.tablas[3].filas.filter(f=>patrones[p.tipo]?.test(f.nombreOriginal)&&(!p.necesidadTerminal||/rosca|H\.larga|H\.extra/i.test(f.nombreOriginal)))){const o=document.createElement('option');o.value=f.id;o.textContent=f.nombreOriginal+' · '+f.longitudEquivalenteM+' m · p.'+f.pagina;select.append(o);}
    const asignado=p.tipo==='tee'?v.porRecorrido?.[ruta.artefacto]:v.producto;select.value=asignado?.familia?'familia:'+asignado.familia:asignado?.productos?.[(asignado.tramosDiametro||ids).map(id=>vector[id]).join('/')]||'';
    select.onchange=()=>{if(!p.tramos.length&&!ub.value){$('matMensaje').textContent='Indicá primero si esta pérdida pertenece a un tramo del circuito; no se inventó su ubicación.';select.value='';return;}guardarVinculoSigasGas(p.id,ruta.artefacto,select.value,p.tramos.length?null:ub.value);};
    label.append(select);caja.append(label);
