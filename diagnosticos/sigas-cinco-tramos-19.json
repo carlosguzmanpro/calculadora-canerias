@@ -39,6 +39,45 @@
     {
       "id": "ref-M-A",
       "tramo": "M–A",
+      "cantidadesRegistradas": {
+        "codo90": 7,
+        "tee": 1,
+        "llave": 0
+      },
+      "equivalenteConocidoTramoM": null,
+      "aportesLocales": [],
+      "perdidasPendientesTramo": [
+        {
+          "piezaId": "manual-total:[\"ref-M-A\",\"codo90\"]",
+          "tipo": "codo90",
+          "cantidad": 7,
+          "tramos": [
+            "ref-M-A"
+          ],
+          "motivo": "producto SIGAS exacto y vía pendientes. Confirmar normal, MH o roscado y sus medidas; no se elige una variante por defecto."
+        },
+        {
+          "piezaId": "tee:nombre:a",
+          "tipo": "tee",
+          "cantidad": 1,
+          "tramos": [
+            "ref-M-A"
+          ],
+          "motivo": "producto SIGAS, medidas de tres conexiones y vía directa/giro pendientes."
+        }
+      ],
+      "perdidasSinUbicacion": [],
+      "verificacionConsulta": {
+        "tabla": 4,
+        "pagina": 22,
+        "filaM": 36,
+        "capacidadM3h": 4.541,
+        "demandaM3h": 3.139784946236559,
+        "cubreConsulta": true,
+        "parcial": true,
+        "diametroDefinitivo": false,
+        "convergente": true
+      },
       "longitudRealM": 15,
       "consumoKcal": 29200,
       "caudalM3h": 3.139784946236559,
@@ -242,31 +281,68 @@
       ],
       "diametroDefinitivo": null,
       "pendientes": [
-        "referencia-codo19: ubicación respecto del recorrido/medidor pendiente.",
-        "manual-total:[\"ref-M-A\",\"codo90\"]: producto SIGAS exacto y vía pendientes.",
-        "tee:nombre:a: producto SIGAS exacto y vía pendientes.",
-        "manual-total:[\"ref-A-B\",\"codo90\"]: producto SIGAS exacto y vía pendientes.",
-        "tee:nombre:b: producto SIGAS exacto y vía pendientes.",
-        "manual-total:[\"ref-B-Calefactor\",\"codo90\"]: producto SIGAS exacto y vía pendientes.",
-        "manual-total:[\"ref-B-Calefactor\",\"llave\"]: producto SIGAS exacto y vía pendientes.",
-        "referencia-codo19: ubicación respecto del recorrido/medidor pendiente.",
-        "manual-total:[\"ref-M-A\",\"codo90\"]: producto SIGAS exacto y vía pendientes.",
-        "tee:nombre:a: producto SIGAS exacto y vía pendientes.",
-        "manual-total:[\"ref-A-B\",\"codo90\"]: producto SIGAS exacto y vía pendientes.",
-        "tee:nombre:b: producto SIGAS exacto y vía pendientes.",
-        "manual-total:[\"ref-B-Cocina\",\"codo90\"]: producto SIGAS exacto y vía pendientes.",
-        "manual-total:[\"ref-B-Cocina\",\"llave\"]: producto SIGAS exacto y vía pendientes.",
-        "referencia-codo19: ubicación respecto del recorrido/medidor pendiente.",
-        "manual-total:[\"ref-M-A\",\"codo90\"]: producto SIGAS exacto y vía pendientes.",
-        "tee:nombre:a: producto SIGAS exacto y vía pendientes.",
-        "manual-total:[\"ref-A-Termo\",\"codo90\"]: producto SIGAS exacto y vía pendientes.",
-        "manual-total:[\"ref-A-Termo\",\"llave\"]: producto SIGAS exacto y vía pendientes."
+        "manual-total:[\"ref-M-A\",\"codo90\"]: producto SIGAS exacto y vía pendientes. Confirmar normal, MH o roscado y sus medidas; no se elige una variante por defecto.",
+        "tee:nombre:a: producto SIGAS, medidas de tres conexiones y vía directa/giro pendientes.",
+        "manual-total:[\"ref-A-B\",\"codo90\"]: producto SIGAS exacto y vía pendientes. Confirmar normal, MH o roscado y sus medidas; no se elige una variante por defecto.",
+        "tee:nombre:b: producto SIGAS, medidas de tres conexiones y vía directa/giro pendientes.",
+        "manual-total:[\"ref-B-Calefactor\",\"codo90\"]: producto SIGAS exacto y vía pendientes. Confirmar normal, MH o roscado y sus medidas; no se elige una variante por defecto.",
+        "manual-total:[\"ref-B-Calefactor\",\"llave\"]: tipo y producto de llave SIGAS pendientes.",
+        "referencia-codo19: producto SIGAS exacto y vía pendientes. Confirmar normal, MH o roscado y sus medidas; no se elige una variante por defecto.",
+        "manual-total:[\"ref-M-A\",\"codo90\"]: producto SIGAS exacto y vía pendientes. Confirmar normal, MH o roscado y sus medidas; no se elige una variante por defecto.",
+        "tee:nombre:a: producto SIGAS, medidas de tres conexiones y vía directa/giro pendientes.",
+        "manual-total:[\"ref-A-B\",\"codo90\"]: producto SIGAS exacto y vía pendientes. Confirmar normal, MH o roscado y sus medidas; no se elige una variante por defecto.",
+        "tee:nombre:b: producto SIGAS, medidas de tres conexiones y vía directa/giro pendientes.",
+        "manual-total:[\"ref-B-Cocina\",\"codo90\"]: producto SIGAS exacto y vía pendientes. Confirmar normal, MH o roscado y sus medidas; no se elige una variante por defecto.",
+        "manual-total:[\"ref-B-Cocina\",\"llave\"]: tipo y producto de llave SIGAS pendientes.",
+        "manual-total:[\"ref-M-A\",\"codo90\"]: producto SIGAS exacto y vía pendientes. Confirmar normal, MH o roscado y sus medidas; no se elige una variante por defecto.",
+        "tee:nombre:a: producto SIGAS, medidas de tres conexiones y vía directa/giro pendientes.",
+        "manual-total:[\"ref-A-Termo\",\"codo90\"]: producto SIGAS exacto y vía pendientes. Confirmar normal, MH o roscado y sus medidas; no se elige una variante por defecto.",
+        "manual-total:[\"ref-A-Termo\",\"llave\"]: tipo y producto de llave SIGAS pendientes."
       ],
       "estado": "Preselección condicionada; no diámetro de ejecución"
     },
     {
       "id": "ref-A-B",
       "tramo": "A–B",
+      "cantidadesRegistradas": {
+        "codo90": 1,
+        "tee": 1,
+        "llave": 0
+      },
+      "equivalenteConocidoTramoM": null,
+      "aportesLocales": [],
+      "perdidasPendientesTramo": [
+        {
+          "piezaId": "manual-total:[\"ref-A-B\",\"codo90\"]",
+          "tipo": "codo90",
+          "cantidad": 1,
+          "tramos": [
+            "ref-A-B"
+          ],
+          "motivo": "producto SIGAS exacto y vía pendientes. Confirmar normal, MH o roscado y sus medidas; no se elige una variante por defecto."
+        },
+        {
+          "piezaId": "tee:nombre:b",
+          "tipo": "tee",
+          "cantidad": 1,
+          "tramos": [
+            "ref-A-B"
+          ],
+          "motivo": "producto SIGAS, medidas de tres conexiones y vía directa/giro pendientes."
+        }
+      ],
+      "perdidasSinUbicacion": [],
+      "verificacionConsulta": {
+        "tabla": 4,
+        "pagina": 22,
+        "filaM": 36,
+        "capacidadM3h": 2.063,
+        "demandaM3h": 1.4193548387096775,
+        "cubreConsulta": true,
+        "parcial": true,
+        "diametroDefinitivo": false,
+        "convergente": true
+      },
       "longitudRealM": 5,
       "consumoKcal": 13200,
       "caudalM3h": 1.4193548387096775,
@@ -470,26 +546,64 @@
       ],
       "diametroDefinitivo": null,
       "pendientes": [
-        "referencia-codo19: ubicación respecto del recorrido/medidor pendiente.",
-        "manual-total:[\"ref-M-A\",\"codo90\"]: producto SIGAS exacto y vía pendientes.",
-        "tee:nombre:a: producto SIGAS exacto y vía pendientes.",
-        "manual-total:[\"ref-A-B\",\"codo90\"]: producto SIGAS exacto y vía pendientes.",
-        "tee:nombre:b: producto SIGAS exacto y vía pendientes.",
-        "manual-total:[\"ref-B-Calefactor\",\"codo90\"]: producto SIGAS exacto y vía pendientes.",
-        "manual-total:[\"ref-B-Calefactor\",\"llave\"]: producto SIGAS exacto y vía pendientes.",
-        "referencia-codo19: ubicación respecto del recorrido/medidor pendiente.",
-        "manual-total:[\"ref-M-A\",\"codo90\"]: producto SIGAS exacto y vía pendientes.",
-        "tee:nombre:a: producto SIGAS exacto y vía pendientes.",
-        "manual-total:[\"ref-A-B\",\"codo90\"]: producto SIGAS exacto y vía pendientes.",
-        "tee:nombre:b: producto SIGAS exacto y vía pendientes.",
-        "manual-total:[\"ref-B-Cocina\",\"codo90\"]: producto SIGAS exacto y vía pendientes.",
-        "manual-total:[\"ref-B-Cocina\",\"llave\"]: producto SIGAS exacto y vía pendientes."
+        "manual-total:[\"ref-M-A\",\"codo90\"]: producto SIGAS exacto y vía pendientes. Confirmar normal, MH o roscado y sus medidas; no se elige una variante por defecto.",
+        "tee:nombre:a: producto SIGAS, medidas de tres conexiones y vía directa/giro pendientes.",
+        "manual-total:[\"ref-A-B\",\"codo90\"]: producto SIGAS exacto y vía pendientes. Confirmar normal, MH o roscado y sus medidas; no se elige una variante por defecto.",
+        "tee:nombre:b: producto SIGAS, medidas de tres conexiones y vía directa/giro pendientes.",
+        "manual-total:[\"ref-B-Calefactor\",\"codo90\"]: producto SIGAS exacto y vía pendientes. Confirmar normal, MH o roscado y sus medidas; no se elige una variante por defecto.",
+        "manual-total:[\"ref-B-Calefactor\",\"llave\"]: tipo y producto de llave SIGAS pendientes.",
+        "referencia-codo19: producto SIGAS exacto y vía pendientes. Confirmar normal, MH o roscado y sus medidas; no se elige una variante por defecto.",
+        "manual-total:[\"ref-M-A\",\"codo90\"]: producto SIGAS exacto y vía pendientes. Confirmar normal, MH o roscado y sus medidas; no se elige una variante por defecto.",
+        "tee:nombre:a: producto SIGAS, medidas de tres conexiones y vía directa/giro pendientes.",
+        "manual-total:[\"ref-A-B\",\"codo90\"]: producto SIGAS exacto y vía pendientes. Confirmar normal, MH o roscado y sus medidas; no se elige una variante por defecto.",
+        "tee:nombre:b: producto SIGAS, medidas de tres conexiones y vía directa/giro pendientes.",
+        "manual-total:[\"ref-B-Cocina\",\"codo90\"]: producto SIGAS exacto y vía pendientes. Confirmar normal, MH o roscado y sus medidas; no se elige una variante por defecto.",
+        "manual-total:[\"ref-B-Cocina\",\"llave\"]: tipo y producto de llave SIGAS pendientes."
       ],
       "estado": "Preselección condicionada; no diámetro de ejecución"
     },
     {
       "id": "ref-A-Termo",
       "tramo": "A–Termo",
+      "cantidadesRegistradas": {
+        "codo90": 1,
+        "tee": 0,
+        "llave": 1
+      },
+      "equivalenteConocidoTramoM": null,
+      "aportesLocales": [],
+      "perdidasPendientesTramo": [
+        {
+          "piezaId": "manual-total:[\"ref-A-Termo\",\"codo90\"]",
+          "tipo": "codo90",
+          "cantidad": 1,
+          "tramos": [
+            "ref-A-Termo"
+          ],
+          "motivo": "producto SIGAS exacto y vía pendientes. Confirmar normal, MH o roscado y sus medidas; no se elige una variante por defecto."
+        },
+        {
+          "piezaId": "manual-total:[\"ref-A-Termo\",\"llave\"]",
+          "tipo": "llave",
+          "cantidad": 1,
+          "tramos": [
+            "ref-A-Termo"
+          ],
+          "motivo": "tipo y producto de llave SIGAS pendientes."
+        }
+      ],
+      "perdidasSinUbicacion": [],
+      "verificacionConsulta": {
+        "tabla": 4,
+        "pagina": 22,
+        "filaM": 24,
+        "capacidadM3h": 2.526,
+        "demandaM3h": 1.7204301075268817,
+        "cubreConsulta": true,
+        "parcial": true,
+        "diametroDefinitivo": false,
+        "convergente": true
+      },
       "longitudRealM": 9,
       "consumoKcal": 16000,
       "caudalM3h": 1.7204301075268817,
@@ -693,17 +807,55 @@
       ],
       "diametroDefinitivo": null,
       "pendientes": [
-        "referencia-codo19: ubicación respecto del recorrido/medidor pendiente.",
-        "manual-total:[\"ref-M-A\",\"codo90\"]: producto SIGAS exacto y vía pendientes.",
-        "tee:nombre:a: producto SIGAS exacto y vía pendientes.",
-        "manual-total:[\"ref-A-Termo\",\"codo90\"]: producto SIGAS exacto y vía pendientes.",
-        "manual-total:[\"ref-A-Termo\",\"llave\"]: producto SIGAS exacto y vía pendientes."
+        "manual-total:[\"ref-M-A\",\"codo90\"]: producto SIGAS exacto y vía pendientes. Confirmar normal, MH o roscado y sus medidas; no se elige una variante por defecto.",
+        "tee:nombre:a: producto SIGAS, medidas de tres conexiones y vía directa/giro pendientes.",
+        "manual-total:[\"ref-A-Termo\",\"codo90\"]: producto SIGAS exacto y vía pendientes. Confirmar normal, MH o roscado y sus medidas; no se elige una variante por defecto.",
+        "manual-total:[\"ref-A-Termo\",\"llave\"]: tipo y producto de llave SIGAS pendientes."
       ],
       "estado": "Preselección condicionada; no diámetro de ejecución"
     },
     {
       "id": "ref-B-Calefactor",
       "tramo": "B–Calefactor",
+      "cantidadesRegistradas": {
+        "codo90": 4,
+        "tee": 0,
+        "llave": 1
+      },
+      "equivalenteConocidoTramoM": null,
+      "aportesLocales": [],
+      "perdidasPendientesTramo": [
+        {
+          "piezaId": "manual-total:[\"ref-B-Calefactor\",\"codo90\"]",
+          "tipo": "codo90",
+          "cantidad": 4,
+          "tramos": [
+            "ref-B-Calefactor"
+          ],
+          "motivo": "producto SIGAS exacto y vía pendientes. Confirmar normal, MH o roscado y sus medidas; no se elige una variante por defecto."
+        },
+        {
+          "piezaId": "manual-total:[\"ref-B-Calefactor\",\"llave\"]",
+          "tipo": "llave",
+          "cantidad": 1,
+          "tramos": [
+            "ref-B-Calefactor"
+          ],
+          "motivo": "tipo y producto de llave SIGAS pendientes."
+        }
+      ],
+      "perdidasSinUbicacion": [],
+      "verificacionConsulta": {
+        "tabla": 4,
+        "pagina": 22,
+        "filaM": 36,
+        "capacidadM3h": 0.932,
+        "demandaM3h": 0.3225806451612903,
+        "cubreConsulta": true,
+        "parcial": true,
+        "diametroDefinitivo": false,
+        "convergente": true
+      },
       "longitudRealM": 16,
       "consumoKcal": 3000,
       "caudalM3h": 0.3225806451612903,
@@ -907,19 +1059,66 @@
       ],
       "diametroDefinitivo": null,
       "pendientes": [
-        "referencia-codo19: ubicación respecto del recorrido/medidor pendiente.",
-        "manual-total:[\"ref-M-A\",\"codo90\"]: producto SIGAS exacto y vía pendientes.",
-        "tee:nombre:a: producto SIGAS exacto y vía pendientes.",
-        "manual-total:[\"ref-A-B\",\"codo90\"]: producto SIGAS exacto y vía pendientes.",
-        "tee:nombre:b: producto SIGAS exacto y vía pendientes.",
-        "manual-total:[\"ref-B-Calefactor\",\"codo90\"]: producto SIGAS exacto y vía pendientes.",
-        "manual-total:[\"ref-B-Calefactor\",\"llave\"]: producto SIGAS exacto y vía pendientes."
+        "manual-total:[\"ref-M-A\",\"codo90\"]: producto SIGAS exacto y vía pendientes. Confirmar normal, MH o roscado y sus medidas; no se elige una variante por defecto.",
+        "tee:nombre:a: producto SIGAS, medidas de tres conexiones y vía directa/giro pendientes.",
+        "manual-total:[\"ref-A-B\",\"codo90\"]: producto SIGAS exacto y vía pendientes. Confirmar normal, MH o roscado y sus medidas; no se elige una variante por defecto.",
+        "tee:nombre:b: producto SIGAS, medidas de tres conexiones y vía directa/giro pendientes.",
+        "manual-total:[\"ref-B-Calefactor\",\"codo90\"]: producto SIGAS exacto y vía pendientes. Confirmar normal, MH o roscado y sus medidas; no se elige una variante por defecto.",
+        "manual-total:[\"ref-B-Calefactor\",\"llave\"]: tipo y producto de llave SIGAS pendientes."
       ],
       "estado": "Preselección condicionada; no diámetro de ejecución"
     },
     {
       "id": "ref-B-Cocina",
       "tramo": "B–Cocina",
+      "cantidadesRegistradas": {
+        "codo90": 6,
+        "tee": 0,
+        "llave": 1
+      },
+      "equivalenteConocidoTramoM": null,
+      "aportesLocales": [],
+      "perdidasPendientesTramo": [
+        {
+          "piezaId": "referencia-codo19",
+          "tipo": "codo90",
+          "cantidad": 1,
+          "tramos": [
+            "ref-B-Cocina"
+          ],
+          "motivo": "producto SIGAS exacto y vía pendientes. Confirmar normal, MH o roscado y sus medidas; no se elige una variante por defecto."
+        },
+        {
+          "piezaId": "manual-total:[\"ref-B-Cocina\",\"codo90\"]",
+          "tipo": "codo90",
+          "cantidad": 5,
+          "tramos": [
+            "ref-B-Cocina"
+          ],
+          "motivo": "producto SIGAS exacto y vía pendientes. Confirmar normal, MH o roscado y sus medidas; no se elige una variante por defecto."
+        },
+        {
+          "piezaId": "manual-total:[\"ref-B-Cocina\",\"llave\"]",
+          "tipo": "llave",
+          "cantidad": 1,
+          "tramos": [
+            "ref-B-Cocina"
+          ],
+          "motivo": "tipo y producto de llave SIGAS pendientes."
+        }
+      ],
+      "perdidasSinUbicacion": [],
+      "verificacionConsulta": {
+        "tabla": 4,
+        "pagina": 22,
+        "filaM": 34,
+        "capacidadM3h": 2.123,
+        "demandaM3h": 1.096774193548387,
+        "cubreConsulta": true,
+        "parcial": true,
+        "diametroDefinitivo": false,
+        "convergente": true
+      },
       "longitudRealM": 13,
       "consumoKcal": 10200,
       "caudalM3h": 1.096774193548387,
@@ -1123,13 +1322,13 @@
       ],
       "diametroDefinitivo": null,
       "pendientes": [
-        "referencia-codo19: ubicación respecto del recorrido/medidor pendiente.",
-        "manual-total:[\"ref-M-A\",\"codo90\"]: producto SIGAS exacto y vía pendientes.",
-        "tee:nombre:a: producto SIGAS exacto y vía pendientes.",
-        "manual-total:[\"ref-A-B\",\"codo90\"]: producto SIGAS exacto y vía pendientes.",
-        "tee:nombre:b: producto SIGAS exacto y vía pendientes.",
-        "manual-total:[\"ref-B-Cocina\",\"codo90\"]: producto SIGAS exacto y vía pendientes.",
-        "manual-total:[\"ref-B-Cocina\",\"llave\"]: producto SIGAS exacto y vía pendientes."
+        "referencia-codo19: producto SIGAS exacto y vía pendientes. Confirmar normal, MH o roscado y sus medidas; no se elige una variante por defecto.",
+        "manual-total:[\"ref-M-A\",\"codo90\"]: producto SIGAS exacto y vía pendientes. Confirmar normal, MH o roscado y sus medidas; no se elige una variante por defecto.",
+        "tee:nombre:a: producto SIGAS, medidas de tres conexiones y vía directa/giro pendientes.",
+        "manual-total:[\"ref-A-B\",\"codo90\"]: producto SIGAS exacto y vía pendientes. Confirmar normal, MH o roscado y sus medidas; no se elige una variante por defecto.",
+        "tee:nombre:b: producto SIGAS, medidas de tres conexiones y vía directa/giro pendientes.",
+        "manual-total:[\"ref-B-Cocina\",\"codo90\"]: producto SIGAS exacto y vía pendientes. Confirmar normal, MH o roscado y sus medidas; no se elige una variante por defecto.",
+        "manual-total:[\"ref-B-Cocina\",\"llave\"]: tipo y producto de llave SIGAS pendientes."
       ],
       "estado": "Preselección condicionada; no diámetro de ejecución"
     }
@@ -1172,20 +1371,24 @@
     "Dato de suministro pendiente: presionMinima.",
     "Dato de suministro pendiente: perdidaMaxima.",
     "Dato de suministro pendiente: fuentePresiones.",
-    "Ubicación técnica pendiente de codo90; se conserva la cantidad conocida.",
     "Tee en nombre:a: identificar vía directa/giro y configuración reductora.",
     "Tee en nombre:b: identificar vía directa/giro y configuración reductora.",
     "Tipo real de llave pendiente; no se supone válvula macho, globo o esclusa.",
-    "referencia-codo19: ubicación respecto del recorrido/medidor pendiente.",
-    "manual-total:[\"ref-M-A\",\"codo90\"]: producto SIGAS exacto y vía pendientes.",
-    "tee:nombre:a: producto SIGAS exacto y vía pendientes.",
-    "manual-total:[\"ref-A-B\",\"codo90\"]: producto SIGAS exacto y vía pendientes.",
-    "tee:nombre:b: producto SIGAS exacto y vía pendientes.",
-    "manual-total:[\"ref-B-Calefactor\",\"codo90\"]: producto SIGAS exacto y vía pendientes.",
-    "manual-total:[\"ref-B-Calefactor\",\"llave\"]: producto SIGAS exacto y vía pendientes.",
-    "manual-total:[\"ref-B-Cocina\",\"codo90\"]: producto SIGAS exacto y vía pendientes.",
-    "manual-total:[\"ref-B-Cocina\",\"llave\"]: producto SIGAS exacto y vía pendientes.",
-    "manual-total:[\"ref-A-Termo\",\"codo90\"]: producto SIGAS exacto y vía pendientes.",
-    "manual-total:[\"ref-A-Termo\",\"llave\"]: producto SIGAS exacto y vía pendientes."
+    "Cuplas de M–A: segmentos continuos pendientes; largo comercial ya configurado 4 m. No se suponen cero uniones.",
+    "Cuplas de A–B: segmentos continuos pendientes; largo comercial ya configurado 4 m. No se suponen cero uniones.",
+    "Cuplas de A–Termo: segmentos continuos pendientes; largo comercial ya configurado 4 m. No se suponen cero uniones.",
+    "Cuplas de B–Calefactor: segmentos continuos pendientes; largo comercial ya configurado 4 m. No se suponen cero uniones.",
+    "Cuplas de B–Cocina: segmentos continuos pendientes; largo comercial ya configurado 4 m. No se suponen cero uniones.",
+    "manual-total:[\"ref-M-A\",\"codo90\"]: producto SIGAS exacto y vía pendientes. Confirmar normal, MH o roscado y sus medidas; no se elige una variante por defecto.",
+    "tee:nombre:a: producto SIGAS, medidas de tres conexiones y vía directa/giro pendientes.",
+    "manual-total:[\"ref-A-B\",\"codo90\"]: producto SIGAS exacto y vía pendientes. Confirmar normal, MH o roscado y sus medidas; no se elige una variante por defecto.",
+    "tee:nombre:b: producto SIGAS, medidas de tres conexiones y vía directa/giro pendientes.",
+    "manual-total:[\"ref-B-Calefactor\",\"codo90\"]: producto SIGAS exacto y vía pendientes. Confirmar normal, MH o roscado y sus medidas; no se elige una variante por defecto.",
+    "manual-total:[\"ref-B-Calefactor\",\"llave\"]: tipo y producto de llave SIGAS pendientes.",
+    "referencia-codo19: producto SIGAS exacto y vía pendientes. Confirmar normal, MH o roscado y sus medidas; no se elige una variante por defecto.",
+    "manual-total:[\"ref-B-Cocina\",\"codo90\"]: producto SIGAS exacto y vía pendientes. Confirmar normal, MH o roscado y sus medidas; no se elige una variante por defecto.",
+    "manual-total:[\"ref-B-Cocina\",\"llave\"]: tipo y producto de llave SIGAS pendientes.",
+    "manual-total:[\"ref-A-Termo\",\"codo90\"]: producto SIGAS exacto y vía pendientes. Confirmar normal, MH o roscado y sus medidas; no se elige una variante por defecto.",
+    "manual-total:[\"ref-A-Termo\",\"llave\"]: tipo y producto de llave SIGAS pendientes."
   ]
 }

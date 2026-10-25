@@ -41,39 +41,49 @@
   pendientes.push('Criterio de recorrido/fila superior y simultaneidad: validar con método aplicable. No se añadieron 15 m EPOXI.','Presión disponible, mínima de artefactos y pérdida admisible: confirmar alcance de la tabla; caída impresa 10 mm no es suministro.','Cuplas y otras pérdidas no identificadas permanecen pendientes; no se suponen nulas ni bloquean esta preselección parcial.');
   if(!perfil.densidadRelativa)pendientes.push('Densidad del suministro pendiente de confirmar frente a 0,65 tabulado.');
   for(const k of ['presionDisponible','presionMinima','perdidaMaxima','fuentePresiones'])if(!perfil[k])pendientes.push('Dato de suministro pendiente: '+k+'.');
-  const faltantesInventario=(inventario.pendientes||[]).filter(s=>!String(s).startsWith('Cuplas de '));
+  const faltantesInventario=[...(inventario.pendientes||[])];
   pendientes.push(...faltantesInventario);
   const base=new Map(ts.map(t=>[t.id,t])),firma=v=>JSON.stringify(ts.map(t=>v[t.id]??null));let vector={},vistos=new Set(),ultimo=null;
   const max=config.maxIteraciones===undefined?30:config.maxIteraciones;
   if(!Number.isSafeInteger(max)||max<1||max>100){errores.push('Límite de iteraciones inválido.');return salida;}
   for(let iteracion=0;iteracion<max;iteracion++){
    const rutasCalculadas=rutas.map((r,ri)=>{
-    const aportes=[],faltantes=[],aplicadas=new Set();
+    const aportes=[],faltantes=[],perdidasPendientes=[],aplicadas=new Set();
+    const pendiente=(p,motivo)=>{faltantes.push(p.id+': '+motivo);perdidasPendientes.push({piezaId:p.id,tipo:p.tipo,cantidad:p.cantidad,tramos:p.tramos,motivo});};
     for(const p of piezas.values()){
      // Una identidad física aporta una sola vez a cada recorrido; nunca suma referencias duplicadas.
      const vinculo=config.vinculos?.[p.id],ubicaciones=p.tramos.length?p.tramos:vinculo?.tramoAplicacion&&base.has(vinculo.tramoAplicacion)?[vinculo.tramoAplicacion]:[],enRuta=ubicaciones.some(id=>r.tramos.includes(id))||(Array.isArray(vinculo?.recorridos)&&vinculo.recorridos.includes(r.artefacto));
-     if(!enRuta){if(!ubicaciones.length&&!vinculo?.recorridos)faltantes.push(p.id+': ubicación respecto del recorrido/medidor pendiente.');continue;}
+     if(!enRuta){if(!ubicaciones.length&&!vinculo?.recorridos)pendiente({...p,tramos:ubicaciones},'ubicación respecto del recorrido/medidor pendiente.');continue;}
      if(aplicadas.has(p.id))continue;aplicadas.add(p.id);
-     if(p.conflicto||p.confirmada!==true){faltantes.push(p.id+': identidad/cantidad por verificar.');continue;}
+     if(p.conflicto||p.confirmada!==true){pendiente({...p,tramos:ubicaciones},'identidad/cantidad por verificar.');continue;}
      const a=vinculo?.porRecorrido?.[r.artefacto]||vinculo?.producto;
-     if(!a||a.confirmado!==true||(!a.familia&&(!Array.isArray(a.tramosDiametro)||!a.tramosDiametro.length||a.tramosDiametro.some(id=>!base.has(id))))){faltantes.push(p.id+': producto SIGAS exacto y vía pendientes.');continue;}
-     if(iteracion===0){faltantes.push(p.id+': semilla sin equivalentes, no es pérdida cero.');continue;}
+     if(!a||a.confirmado!==true||(!a.familia&&(!Array.isArray(a.tramosDiametro)||!a.tramosDiametro.length||a.tramosDiametro.some(id=>!base.has(id))))){pendiente({...p,tramos:ubicaciones},p.tipo==='tee'?'producto SIGAS, medidas de tres conexiones y vía directa/giro pendientes.':p.tipo==='llave'?'tipo y producto de llave SIGAS pendientes.':'producto SIGAS exacto y vía pendientes.'+(p.tipo==='codo90'?' Confirmar normal, MH o roscado y sus medidas; no se elige una variante por defecto.':''));continue;}
+     if(iteracion===0){pendiente({...p,tramos:ubicaciones},'semilla sin equivalentes, no es pérdida cero.');continue;}
      const clave=(a.tramosDiametro||[]).map(id=>vector[id]).join('/'),id=a.productos?.[clave];
      const diametros=[...new Set(ubicaciones.map(id=>vector[id]))];
      const opciones=a.familia&&p.tipo!=='tee'&&diametros.length===1?d.tablas[3].filas.filter(f=>familiaProducto(f)===a.familia&&f.diametroExteriorM*1000===diametros[0]):[];
      const fila=a.familia?(opciones.length===1?opciones[0]:null):d.tablas[3].filas.find(f=>f.id===id);
      const tipoCorrecto=fila&&({codo90:/^Codo.*90/,codo45:/^Codo.*45/,tee:/^Te /,llave:/^Llave /,reduccion:/Reduct|Reduc/,cupla:/Cupla/}[p.tipo]?.test(fila.nombreOriginal));
-     if(!tipoCorrecto||!ubicaciones.some(id=>vector[id]===fila.diametroExteriorM*1000)){faltantes.push(p.id+': combinación '+clave+' sin producto/diámetro/vía SIGAS compatible documentado.');continue;}
-     try{const x=tecnico().accesorio(d,fila.id,p.cantidad);aportes.push({piezaId:p.id,tipo:p.tipo,...x});}catch(e){faltantes.push(p.id+': '+e.message);}
+     if(!tipoCorrecto||!ubicaciones.some(id=>vector[id]===fila.diametroExteriorM*1000)){pendiente({...p,tramos:ubicaciones},'combinación '+clave+' sin producto/diámetro/vía SIGAS compatible documentado.');continue;}
+     if(p.tipo==='tee'&&/^Te Normal /.test(fila.nombreOriginal)&&Array.isArray(p.conexionesDiametro)&&p.conexionesDiametro.some(id=>vector[id]!==fila.diametroExteriorM*1000)){
+      pendiente({...p,tramos:ubicaciones},'tee normal incompatible con los diámetros candidatos de sus tres conexiones; identificar configuración y reducciones sin inventarlas.');continue;
+     }
+     const tramosEnRuta=ubicaciones.filter(id=>r.tramos.includes(id)),tramoId=tramosEnRuta.length===1?tramosEnRuta[0]:null;
+     try{const x=tecnico().accesorio(d,fila.id,p.cantidad);aportes.push({piezaId:p.id,tipo:p.tipo,tramoId,...x});}catch(e){pendiente({...p,tramos:ubicaciones},e.message);}
     }
     const equivalenteConocidoM=aportes.reduce((n,a)=>n+a.equivalenteTotalM,0),completo=!inventarioInvalido&&!faltantes.length&&!faltantesInventario.length&&config.inventarioPerdidasCompleto===true&&config.fuenteInventario;
-    return {...r,indice:ri,aportes,faltantes,equivalenteConocidoM:aportes.length||completo?equivalenteConocidoM:null,equivalenteCompleto:!!completo,longitudConsultaM:r.longitudReal+equivalenteConocidoM,longitudDefinitivaM:completo?r.longitudReal+equivalenteConocidoM:null};
+    return {...r,indice:ri,aportes,faltantes,perdidasPendientes,equivalenteConocidoM:aportes.length||completo?equivalenteConocidoM:null,equivalenteCompleto:!!completo,longitudConsultaM:r.longitudReal+equivalenteConocidoM,longitudDefinitivaM:completo?r.longitudReal+equivalenteConocidoM:null};
    });
    const filas=ts.map(t=>{
     const propias=rutasCalculadas.filter(r=>r.tramos.includes(t.id)),ruta=propias.reduce((a,b)=>!a||b.longitudConsultaM>a.longitudConsultaM?b:a,null);
     const caudal=positivo(pcs)&&fuentePCS&&positivo(t.consumoKcal)?t.consumoKcal/pcs:null;
     const q=ruta?seleccionar(d,ruta.longitudConsultaM,caudal):{candidato:null,consultas:[],pendientes:['Recorrido pendiente.']};
-    return {id:t.id,tramo:t.nombre,longitudRealM:t.longitudReal,consumoKcal:t.consumoKcal,caudalM3h:caudal,poderCalorifico:positivo(pcs)&&fuentePCS?pcs:null,fuentePCS:fuentePCS||null,recorridoControl:ruta?.artefacto||null,longitudConsultaM:ruta?.longitudConsultaM??null,equivalenteConocidoRutaM:ruta?.equivalenteConocidoM??null,longitudDefinitivaM:ruta?.longitudDefinitivaM??null,candidato:q.candidato,consultas:q.consultas,diametroDefinitivo:null,pendientes:[...q.pendientes,...propias.flatMap(r=>r.faltantes)],estado:q.candidato?'Preselección condicionada; no diámetro de ejecución':'Pendiente'};
+    const locales=propias.flatMap(r=>r.perdidasPendientes.filter(p=>p.tramos.includes(t.id))),sinUbicacion=propias.flatMap(r=>r.perdidasPendientes.filter(p=>!p.tramos.length));
+    const unicos=xs=>{const m=new Map();for(const p of xs){const previo=m.get(p.piezaId);if(previo){if(!previo.motivo.includes(p.motivo))previo.motivo+=' / '+p.motivo;}else m.set(p.piezaId,{...p});}return [...m.values()];};
+    const aportesLocales=(ruta?.aportes||[]).filter(a=>a.tramoId===t.id),equivalenteConocidoTramoM=aportesLocales.length?aportesLocales.reduce((n,a)=>n+a.equivalenteTotalM,0):ruta?.equivalenteCompleto?0:null;
+    const verificacionConsulta=q.candidato?{tabla:4,pagina:22,filaM:q.candidato.longitudFilaM,capacidadM3h:q.candidato.capacidadM3h,demandaM3h:caudal,cubreConsulta:q.candidato.capacidadM3h>=caudal,parcial:!ruta?.equivalenteCompleto,diametroDefinitivo:false}:null;
+    const cantidadesRegistradas=Object.fromEntries(['codo90','tee','llave'].map(tipo=>[tipo,[...piezas.values()].filter(p=>p.tipo===tipo&&p.tramos.includes(t.id)).reduce((n,p)=>n+p.cantidad,0)]));
+    return {id:t.id,tramo:t.nombre,cantidadesRegistradas,equivalenteConocidoTramoM,aportesLocales,perdidasPendientesTramo:unicos(locales),perdidasSinUbicacion:unicos(sinUbicacion),verificacionConsulta,longitudRealM:t.longitudReal,consumoKcal:t.consumoKcal,caudalM3h:caudal,poderCalorifico:positivo(pcs)&&fuentePCS?pcs:null,fuentePCS:fuentePCS||null,recorridoControl:ruta?.artefacto||null,longitudConsultaM:ruta?.longitudConsultaM??null,equivalenteConocidoRutaM:ruta?.equivalenteConocidoM??null,longitudDefinitivaM:ruta?.longitudDefinitivaM??null,candidato:q.candidato,consultas:q.consultas,diametroDefinitivo:null,pendientes:[...q.pendientes,...propias.flatMap(r=>r.faltantes)],estado:q.candidato?'Preselección condicionada; no diámetro de ejecución':'Pendiente'};
    });
    const nuevo=Object.fromEntries(filas.map(f=>[f.id,f.candidato?.exteriorMm??null]));
    salida.historia.push({iteracion,fase:iteracion===0?'semilla-real-sin-perdidas':'recálculo-equivalentes-identificados',diametrosExteriorMm:nuevo,filas,recorridos:rutasCalculadas});
@@ -84,6 +94,8 @@
   }
   Object.assign(salida,ultimo);
   if(salida.estado==='pendiente'){salida.estado='limite-iteraciones';pendientes.push('Límite de iteraciones alcanzado; resultado sin convergencia.');}
+  for(const f of salida.filas){if(f.verificacionConsulta){f.verificacionConsulta.convergente=salida.convergente;f.verificacionConsulta.parcial||=!salida.convergente;}if(!salida.convergente)f.longitudDefinitivaM=null;}
+  if(!salida.convergente)for(const r of salida.recorridos)r.longitudDefinitivaM=null;
   pendientes.push(...salida.filas.flatMap(f=>f.pendientes));salida.pendientes=[...new Set(pendientes)];
   salida.advertencia='PRESELECCIÓN CONDICIONADA. Pérdidas desconocidas no son cero. No acredita presión final, método normativo ni aptitud de instalación. No se asignan diámetros a los tramos guardados.';
   return salida;
