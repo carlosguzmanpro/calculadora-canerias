@@ -535,7 +535,11 @@ function entradaManualMaterialesGas(sinSugerencias=false,sinRegistroTecnico=fals
  for(const t of entrada.tramos)t.accesorios=[];
  entrada.extras=[...registros.filter(r=>!omitidos.has(r.id)).map(r=>({...r.a,idFisico:r.id,confirmado:true})),...nuevos].map(a=>({...a,nodo:a.tipo==='tee'&&a.nodo?nodoConciliacionGas(a.nodo).replace(/^n:/,''):a.nodo}));
  if(typeof transicionesRectasDeclaradasSigasGas==='function')for(const a of transicionesRectasDeclaradasSigasGas())if(!entrada.extras.some(e=>e.idFisico===a.idFisico))entrada.extras.push(a);
- entrada.manualDirecto={avisos,ceros,pendientes};filtrarRedManualMaterialesGas(entrada);if(!sinRegistroTecnico&&CatalogosSistemasGas.identificar(instalacionGas.perfil)==='sigas'&&typeof proyectarRegistroSigasEnMaterialesGas==='function')proyectarRegistroSigasEnMaterialesGas(entrada);return entrada;
+ entrada.manualDirecto={avisos,ceros,pendientes};filtrarRedManualMaterialesGas(entrada);if(!sinRegistroTecnico&&CatalogosSistemasGas.identificar(instalacionGas.perfil)==='sigas'&&typeof proyectarRegistroSigasEnMaterialesGas==='function'){
+  // El inventario manual existe antes del cálculo técnico. Una falla del catálogo no lo modifica.
+  try{return proyectarRegistroSigasEnMaterialesGas(JSON.parse(JSON.stringify(entrada)));}
+  catch(e){entrada.manualDirecto.avisos.push('Cantidades registradas conservadas. Diámetros, productos y pérdidas pendientes: '+e.message+'. No se asignaron pérdidas cero ni se confirmaron medidas.');}
+ }return entrada;
 }
 // Regla de inventario autorizada: no alimenta geometría, equivalentes ni diámetros.
 function estadoCodoCasilleroGas(entrada){

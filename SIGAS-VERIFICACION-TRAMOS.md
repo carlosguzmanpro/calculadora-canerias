@@ -139,3 +139,13 @@ Si el usuario ya declaró un niple y una transición reales y sus productos exac
 Las propuestas con reducción siguen disponibles como ayuda de compra, con sus productos documentados y advertencia de ubicación/pérdida por verificar antes del cierre. Se conserva la nota del manual SIGAS p28 sobre cambios inmediatamente después de una tee y el modelado de longitudes por diámetro; no se inventan ubicaciones, longitudes ni equivalencias. Cambiar la familia de una reducción propuesta no modifica las pérdidas reales del codo existente.
 Se mantienen58m/19codos/2tees/3llaves, cuatro roscas confirmadas, proyectos, croquis, PDF, edición y respaldos. Se reconstruyen las propuestas desde las decisiones guardadas sin convertirlas en piezas reales al reabrir. FUSIOGAS/EPOXI, AGUA y CLOACAS no cambian.
 Verificación:742 pruebas automáticas y una prueba móvil Chromium, incluyendo propuestas de reducción visibles, ausencia de aportes/filas reales generados, pérdidas reales identificadas, persistencia y conservación de cantidades. Las pruebas anteriores de compatibilidad se conservan; se actualizan las expectativas que antes imputaban pérdidas de conjuntos propuestos. Sin dispositivo Android físico.
+
+## Inventario antes del catálogo técnico
+
+La carga manual conserva cantidades y red física sin consultar equivalencias para contarlas. El puente SIGAS se aplica sobre una copia del inventario: si el catálogo o su cálculo fallan, se conservan los materiales y consumos parciales, se informa el fallo y no se asignan pérdidas cero. No se alteran proyectos ni respaldos por esa falla.
+
+Los grupos comunes siguen una familia de producto y el diámetro del tramo automáticamente. La revisión avanzada muestra la cantidad registrada y permite corregir una excepción; no exige identificar cada unidad. Las familias no ofrecen filas con todos los diámetros: la medida procede del motor. Los productos especiales se restringen al diámetro candidato local; las tees mantienen sus configuraciones de varias bocas y vías sin asumirlas.
+
+Una cantidad registrada no verifica su medida ni su pérdida. Mientras el motor conserve candidatos condicionados, la interfaz los llama candidatos y las medidas de compra siguen provisionales. La evaluación de capacidad y las pérdidas se realimentan iterativamente cuando cambia el diámetro; esta corrección no sustituye ese método por una selección definitiva sin pérdidas.
+
+Las propuestas del resolvedor de compra siguen separadas de los accesorios reales. Las cuplas siguen pendientes sin continuidad y distribución suficientes. No se interpreta la fotografía, ni se agregan codos o llaves por consultar un catálogo. SIGAS, FUSIOGAS y EPOXI conservan sus fuentes independientes.
