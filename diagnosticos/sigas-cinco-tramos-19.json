@@ -77,7 +77,7 @@
           "tramos": [
             "ref-M-A"
           ],
-          "motivo": "combinación  sin producto/diámetro/vía SIGAS compatible documentado."
+          "motivo": "Completar solo diámetro candidato, geometría, sexo o medida de rosca faltantes."
         },
         {
           "piezaId": "tee:nombre:a",
@@ -313,24 +313,24 @@
       ],
       "diametroDefinitivo": null,
       "pendientes": [
-        "manual-total:[\"ref-M-A\",\"codo90\"]::medidor: combinación  sin producto/diámetro/vía SIGAS compatible documentado.",
+        "manual-total:[\"ref-M-A\",\"codo90\"]::medidor: Completar solo diámetro candidato, geometría, sexo o medida de rosca faltantes.",
         "tee:nombre:a: producto SIGAS, medidas de tres conexiones y vía directa/giro pendientes.",
         "tee:nombre:b: producto SIGAS, medidas de tres conexiones y vía directa/giro pendientes.",
-        "manual-total:[\"ref-B-Calefactor\",\"codo90\"]::terminal: combinación  sin producto/diámetro/vía SIGAS compatible documentado.",
+        "manual-total:[\"ref-B-Calefactor\",\"codo90\"]::terminal: Completar solo diámetro candidato, geometría, sexo o medida de rosca faltantes.",
         "manual-total:[\"ref-B-Calefactor\",\"llave\"]: tipo y producto de llave SIGAS pendientes.",
         "terminal-medidor: Salida roscada del medidor: identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero.",
         "terminal-Calefactor: Conexión fusión–rosca de Calefactor: identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero.",
         "referencia-codo19: producto SIGAS exacto y vía pendientes. Confirmar normal, MH o roscado y sus medidas; no se elige una variante por defecto.",
-        "manual-total:[\"ref-M-A\",\"codo90\"]::medidor: combinación  sin producto/diámetro/vía SIGAS compatible documentado.",
+        "manual-total:[\"ref-M-A\",\"codo90\"]::medidor: Completar solo diámetro candidato, geometría, sexo o medida de rosca faltantes.",
         "tee:nombre:a: producto SIGAS, medidas de tres conexiones y vía directa/giro pendientes.",
         "tee:nombre:b: producto SIGAS, medidas de tres conexiones y vía directa/giro pendientes.",
-        "manual-total:[\"ref-B-Cocina\",\"codo90\"]::terminal: combinación  sin producto/diámetro/vía SIGAS compatible documentado.",
+        "manual-total:[\"ref-B-Cocina\",\"codo90\"]::terminal: Completar solo diámetro candidato, geometría, sexo o medida de rosca faltantes.",
         "manual-total:[\"ref-B-Cocina\",\"llave\"]: tipo y producto de llave SIGAS pendientes.",
         "terminal-medidor: Salida roscada del medidor: identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero.",
         "terminal-Cocina: Conexión fusión–rosca de Cocina: identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero.",
-        "manual-total:[\"ref-M-A\",\"codo90\"]::medidor: combinación  sin producto/diámetro/vía SIGAS compatible documentado.",
+        "manual-total:[\"ref-M-A\",\"codo90\"]::medidor: Completar solo diámetro candidato, geometría, sexo o medida de rosca faltantes.",
         "tee:nombre:a: producto SIGAS, medidas de tres conexiones y vía directa/giro pendientes.",
-        "manual-total:[\"ref-A-Termo\",\"codo90\"]: combinación  sin producto/diámetro/vía SIGAS compatible documentado.",
+        "manual-total:[\"ref-A-Termo\",\"codo90\"]: Completar solo diámetro candidato, geometría, sexo o medida de rosca faltantes.",
         "manual-total:[\"ref-A-Termo\",\"llave\"]: tipo y producto de llave SIGAS pendientes.",
         "terminal-medidor: Salida roscada del medidor: identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero.",
         "terminal-Termo: Conexión fusión–rosca de Termo: identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero."
@@ -591,18 +591,18 @@
       ],
       "diametroDefinitivo": null,
       "pendientes": [
-        "manual-total:[\"ref-M-A\",\"codo90\"]::medidor: combinación  sin producto/diámetro/vía SIGAS compatible documentado.",
+        "manual-total:[\"ref-M-A\",\"codo90\"]::medidor: Completar solo diámetro candidato, geometría, sexo o medida de rosca faltantes.",
         "tee:nombre:a: producto SIGAS, medidas de tres conexiones y vía directa/giro pendientes.",
         "tee:nombre:b: producto SIGAS, medidas de tres conexiones y vía directa/giro pendientes.",
-        "manual-total:[\"ref-B-Calefactor\",\"codo90\"]::terminal: combinación  sin producto/diámetro/vía SIGAS compatible documentado.",
+        "manual-total:[\"ref-B-Calefactor\",\"codo90\"]::terminal: Completar solo diámetro candidato, geometría, sexo o medida de rosca faltantes.",
         "manual-total:[\"ref-B-Calefactor\",\"llave\"]: tipo y producto de llave SIGAS pendientes.",
         "terminal-medidor: Salida roscada del medidor: identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero.",
         "terminal-Calefactor: Conexión fusión–rosca de Calefactor: identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero.",
         "referencia-codo19: producto SIGAS exacto y vía pendientes. Confirmar normal, MH o roscado y sus medidas; no se elige una variante por defecto.",
-        "manual-total:[\"ref-M-A\",\"codo90\"]::medidor: combinación  sin producto/diámetro/vía SIGAS compatible documentado.",
+        "manual-total:[\"ref-M-A\",\"codo90\"]::medidor: Completar solo diámetro candidato, geometría, sexo o medida de rosca faltantes.",
         "tee:nombre:a: producto SIGAS, medidas de tres conexiones y vía directa/giro pendientes.",
         "tee:nombre:b: producto SIGAS, medidas de tres conexiones y vía directa/giro pendientes.",
-        "manual-total:[\"ref-B-Cocina\",\"codo90\"]::terminal: combinación  sin producto/diámetro/vía SIGAS compatible documentado.",
+        "manual-total:[\"ref-B-Cocina\",\"codo90\"]::terminal: Completar solo diámetro candidato, geometría, sexo o medida de rosca faltantes.",
         "manual-total:[\"ref-B-Cocina\",\"llave\"]: tipo y producto de llave SIGAS pendientes.",
         "terminal-medidor: Salida roscada del medidor: identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero.",
         "terminal-Cocina: Conexión fusión–rosca de Cocina: identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero."
@@ -627,7 +627,7 @@
           "tramos": [
             "ref-A-Termo"
           ],
-          "motivo": "combinación  sin producto/diámetro/vía SIGAS compatible documentado."
+          "motivo": "Completar solo diámetro candidato, geometría, sexo o medida de rosca faltantes."
         },
         {
           "piezaId": "manual-total:[\"ref-A-Termo\",\"llave\"]",
@@ -863,9 +863,9 @@
       ],
       "diametroDefinitivo": null,
       "pendientes": [
-        "manual-total:[\"ref-M-A\",\"codo90\"]::medidor: combinación  sin producto/diámetro/vía SIGAS compatible documentado.",
+        "manual-total:[\"ref-M-A\",\"codo90\"]::medidor: Completar solo diámetro candidato, geometría, sexo o medida de rosca faltantes.",
         "tee:nombre:a: producto SIGAS, medidas de tres conexiones y vía directa/giro pendientes.",
-        "manual-total:[\"ref-A-Termo\",\"codo90\"]: combinación  sin producto/diámetro/vía SIGAS compatible documentado.",
+        "manual-total:[\"ref-A-Termo\",\"codo90\"]: Completar solo diámetro candidato, geometría, sexo o medida de rosca faltantes.",
         "manual-total:[\"ref-A-Termo\",\"llave\"]: tipo y producto de llave SIGAS pendientes.",
         "terminal-medidor: Salida roscada del medidor: identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero.",
         "terminal-Termo: Conexión fusión–rosca de Termo: identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero."
@@ -910,7 +910,7 @@
           "tramos": [
             "ref-B-Calefactor"
           ],
-          "motivo": "combinación  sin producto/diámetro/vía SIGAS compatible documentado."
+          "motivo": "Completar solo diámetro candidato, geometría, sexo o medida de rosca faltantes."
         },
         {
           "piezaId": "manual-total:[\"ref-B-Calefactor\",\"llave\"]",
@@ -1146,10 +1146,10 @@
       ],
       "diametroDefinitivo": null,
       "pendientes": [
-        "manual-total:[\"ref-M-A\",\"codo90\"]::medidor: combinación  sin producto/diámetro/vía SIGAS compatible documentado.",
+        "manual-total:[\"ref-M-A\",\"codo90\"]::medidor: Completar solo diámetro candidato, geometría, sexo o medida de rosca faltantes.",
         "tee:nombre:a: producto SIGAS, medidas de tres conexiones y vía directa/giro pendientes.",
         "tee:nombre:b: producto SIGAS, medidas de tres conexiones y vía directa/giro pendientes.",
-        "manual-total:[\"ref-B-Calefactor\",\"codo90\"]::terminal: combinación  sin producto/diámetro/vía SIGAS compatible documentado.",
+        "manual-total:[\"ref-B-Calefactor\",\"codo90\"]::terminal: Completar solo diámetro candidato, geometría, sexo o medida de rosca faltantes.",
         "manual-total:[\"ref-B-Calefactor\",\"llave\"]: tipo y producto de llave SIGAS pendientes.",
         "terminal-medidor: Salida roscada del medidor: identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero.",
         "terminal-Calefactor: Conexión fusión–rosca de Calefactor: identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero."
@@ -1204,7 +1204,7 @@
           "tramos": [
             "ref-B-Cocina"
           ],
-          "motivo": "combinación  sin producto/diámetro/vía SIGAS compatible documentado."
+          "motivo": "Completar solo diámetro candidato, geometría, sexo o medida de rosca faltantes."
         },
         {
           "piezaId": "manual-total:[\"ref-B-Cocina\",\"llave\"]",
@@ -1441,10 +1441,10 @@
       "diametroDefinitivo": null,
       "pendientes": [
         "referencia-codo19: producto SIGAS exacto y vía pendientes. Confirmar normal, MH o roscado y sus medidas; no se elige una variante por defecto.",
-        "manual-total:[\"ref-M-A\",\"codo90\"]::medidor: combinación  sin producto/diámetro/vía SIGAS compatible documentado.",
+        "manual-total:[\"ref-M-A\",\"codo90\"]::medidor: Completar solo diámetro candidato, geometría, sexo o medida de rosca faltantes.",
         "tee:nombre:a: producto SIGAS, medidas de tres conexiones y vía directa/giro pendientes.",
         "tee:nombre:b: producto SIGAS, medidas de tres conexiones y vía directa/giro pendientes.",
-        "manual-total:[\"ref-B-Cocina\",\"codo90\"]::terminal: combinación  sin producto/diámetro/vía SIGAS compatible documentado.",
+        "manual-total:[\"ref-B-Cocina\",\"codo90\"]::terminal: Completar solo diámetro candidato, geometría, sexo o medida de rosca faltantes.",
         "manual-total:[\"ref-B-Cocina\",\"llave\"]: tipo y producto de llave SIGAS pendientes.",
         "terminal-medidor: Salida roscada del medidor: identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero.",
         "terminal-Cocina: Conexión fusión–rosca de Cocina: identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero."
@@ -1498,18 +1498,18 @@
     "Cuplas de A–Termo: segmentos continuos pendientes; largo comercial ya configurado 4 m. No se suponen cero uniones.",
     "Cuplas de B–Calefactor: segmentos continuos pendientes; largo comercial ya configurado 4 m. No se suponen cero uniones.",
     "Cuplas de B–Cocina: segmentos continuos pendientes; largo comercial ya configurado 4 m. No se suponen cero uniones.",
-    "manual-total:[\"ref-M-A\",\"codo90\"]::medidor: combinación  sin producto/diámetro/vía SIGAS compatible documentado.",
+    "manual-total:[\"ref-M-A\",\"codo90\"]::medidor: Completar solo diámetro candidato, geometría, sexo o medida de rosca faltantes.",
     "tee:nombre:a: producto SIGAS, medidas de tres conexiones y vía directa/giro pendientes.",
     "tee:nombre:b: producto SIGAS, medidas de tres conexiones y vía directa/giro pendientes.",
-    "manual-total:[\"ref-B-Calefactor\",\"codo90\"]::terminal: combinación  sin producto/diámetro/vía SIGAS compatible documentado.",
+    "manual-total:[\"ref-B-Calefactor\",\"codo90\"]::terminal: Completar solo diámetro candidato, geometría, sexo o medida de rosca faltantes.",
     "manual-total:[\"ref-B-Calefactor\",\"llave\"]: tipo y producto de llave SIGAS pendientes.",
     "terminal-medidor: Salida roscada del medidor: identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero.",
     "terminal-Calefactor: Conexión fusión–rosca de Calefactor: identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero.",
     "referencia-codo19: producto SIGAS exacto y vía pendientes. Confirmar normal, MH o roscado y sus medidas; no se elige una variante por defecto.",
-    "manual-total:[\"ref-B-Cocina\",\"codo90\"]::terminal: combinación  sin producto/diámetro/vía SIGAS compatible documentado.",
+    "manual-total:[\"ref-B-Cocina\",\"codo90\"]::terminal: Completar solo diámetro candidato, geometría, sexo o medida de rosca faltantes.",
     "manual-total:[\"ref-B-Cocina\",\"llave\"]: tipo y producto de llave SIGAS pendientes.",
     "terminal-Cocina: Conexión fusión–rosca de Cocina: identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero.",
-    "manual-total:[\"ref-A-Termo\",\"codo90\"]: combinación  sin producto/diámetro/vía SIGAS compatible documentado.",
+    "manual-total:[\"ref-A-Termo\",\"codo90\"]: Completar solo diámetro candidato, geometría, sexo o medida de rosca faltantes.",
     "manual-total:[\"ref-A-Termo\",\"llave\"]: tipo y producto de llave SIGAS pendientes.",
     "terminal-Termo: Conexión fusión–rosca de Termo: identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero."
   ]
