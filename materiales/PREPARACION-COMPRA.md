@@ -30,3 +30,11 @@ El ejemplo de referencia contiene cantidades y longitudes, pero no posiciones de
 La opción secundaria de posiciones solicita únicamente distancias desde el origen del tramo, separadas por `;`. No vuelve a pedir cantidades ni productos. Se validan límites, cantidades y posiciones ya declaradas. Sus datos se guardan por proyecto en `planCompra.posicionesCuplas`, con firma y antecedentes. Si cambian longitudes o accesorios, las posiciones anteriores permanecen guardadas para revisar. No se interpretan fotografías ni se modifica el inventario original o el motor SIGAS.
 
 Si las cuplas existentes tienen posiciones completas y una asociación inequívoca al tramo, se reutilizan como uniones ya registradas: el plan de cortes lista solo las adicionales. Con medidas múltiples, posiciones incompletas o una asociación ambigua, se conserva el cotejo pendiente y no se suma por suposición.
+
+## Modo sencillo predeterminado: estimación sin posiciones
+
+Obtener materiales provisionales no exige fotografía, plano ni posiciones. El resultado principal muestra tiras y una estimación orientativa de cuplas. Cuando faltan posiciones, el escenario considera cada tramo —o parte aún sin ubicar— como continuo: techo(longitud/largo comercial) menos uno. No distribuye codos ni resta sus cantidades por una posición supuesta. Ese escenario no es un mínimo ni un máximo garantizado: las interrupciones y los cortes reales pueden cambiar la cantidad.
+
+Si existen segmentos definidos se utiliza su cálculo. Las cuplas registradas quedan comprendidas en la cantidad orientativa, sin sumarse otra vez; una distribución ambigua conserva sus datos de cotejo en el detalle. El cálculo exacto y los formularios de posiciones continúan disponibles dentro de VER DETALLES TÉCNICOS, cerrados inicialmente.
+
+Para el ejemplo SIGAS sin posiciones y con largo comercial de 4 m: 17 tiras estimadas y 12 cuplas orientativas (3 + 1 + 2 + 3 + 3 por tramo). No son cantidades definitivas ni certifican diámetros. La estimación nunca modifica las tablas SIGAS, su motor, el inventario, las cantidades registradas ni sus pérdidas equivalentes.

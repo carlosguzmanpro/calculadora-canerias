@@ -733,7 +733,7 @@ function resumenMaterialesInstalacionGas(plan,compra=null){
   const g=grupos.get(clave);g.cantidad+=f.cantidad;g.pendiente||=f.pendiente;g.estimado||=f.estimado;
  }
  if(compra)for(const g of grupos.values())if(g.tipo==='cupla'){
-  g.cantidad=compra.tramos.reduce((n,t)=>n+(t.cuplasConocidas??t.cuplas??0),0)+Math.max(0,compra.registrados.filter(f=>f.tipo==='cupla').reduce((n,f)=>n+f.cantidad,0)-compra.tramos.reduce((n,t)=>n+(t.cuplasRegistradasContadas||0),0));g.pendiente=compra.tramos.some(t=>t.cuplas===null);g.estimado=true;
+  g.cantidad=compra.tramos.reduce((n,t)=>n+(t.cuplasConocidas??t.cuplas??0),0)+Math.max(0,compra.registrados.filter(f=>f.tipo==='cupla').reduce((n,f)=>n+f.cantidad,0)-compra.tramos.reduce((n,t)=>n+(t.cuplasRegistradasContadas||0),0));g.pendiente=compra.tramos.some(t=>t.cuplas===null);g.estimado=true;if(compra.estimacionCuplas){g.cantidad=compra.estimacionCuplas.total;g.pendiente=false;g.orientativo=compra.estimacionCuplas.orientativo;}
  }
  return [...grupos.values()];
 }
@@ -794,7 +794,7 @@ function prepararCompraActualGas(plan){
  const entrada=entradaManualMaterialesGas(false,true),opciones=opcionesMaterialesGas('proyecto');
  completarContinuidadCompraGas(entrada);
  let tecnico={};try{tecnico=calcularPreseleccionSigasGas()||{};}catch(e){/* El inventario sigue disponible sin catálogo. */}
- return MaterialesGas.prepararCompra(entrada,plan,{...opciones,cortesCompra:datosPlanGas().cortesCompra||{}},tecnico);
+ const compra=MaterialesGas.prepararCompra(entrada,plan,{...opciones,cortesCompra:datosPlanGas().cortesCompra||{}},tecnico);compra.estimacionCuplas=MaterialesGas.estimarCuplasCompra(compra);return compra;
 }
 function renderPendientesAgrupadosCompraGas(out,mensajes){
  for(const g of MaterialesGas.agruparPendientesCompra(mensajes)){
@@ -821,10 +821,10 @@ function renderPreparacionCompraGas(out,plan,preparada=null){
  const medida=g=>g.diametro+(g.estadoDiametro==='candidato'?' candidato':g.estadoDiametro==='manual-sin-verificar'?' manual, sin verificar':'');
  const largo=estadoLargoComercialGas();texto(caja,'Estimación provisional · tiras de '+compra.largoComercial+' m. '+(largo.pendiente?'El manual indica '+largo.documentado+' m; se conservó el valor guardado. Revisalo antes de comprar.':'Sin reutilización automática entre tramos.'));
  const canos=document.createElement('div');canos.className='gas-compra-canos';
- for(const g of compra.canos){const card=document.createElement('article');card.className='gas-compra-cano';const nombre=document.createElement('strong');nombre.textContent=medida(g);card.append(nombre);texto(card,fmt(g.metros)+' m reales · '+g.tiras+' tiras estimadas (mínimo teórico: '+g.minimoTeorico+')');texto(card,fmt(g.metrosComerciales)+' m comerciales · '+fmt(g.sobrante)+' m de sobrante estimado');texto(card,'Cuplas: '+(g.cuplasPendientes?(g.cuplas?g.cuplas+' calculadas en segmentos conocidos; resto pendiente':'Pendiente'):g.cuplas+' calculadas por segmentos (estimadas para compra)'));canos.append(card);}caja.append(canos);
- const cuplasConocidas=compra.tramos.reduce((n,t)=>n+(t.cuplasConocidas??t.cuplas??0),0),cuplasPendientes=compra.tramos.some(t=>t.cuplas===null);
- texto(caja,cuplasPendientes?'Cuplas: '+(cuplasConocidas?cuplasConocidas+' estimadas en segmentos definidos; otras pendientes.':'Pendiente: faltan continuidad, posiciones o cotejo de uniones registradas.'):'Cuplas estimadas: '+cuplasConocidas+'. Uniones dentro de segmentos continuos; no incluye conexiones de codos ni tees.');
- renderPosicionesPendientesCuplasGas(caja,compra);
+ for(const g of compra.canos){const card=document.createElement('article');card.className='gas-compra-cano';const nombre=document.createElement('strong');nombre.textContent=medida(g);card.append(nombre);const accesorios=plan.filas.filter(f=>['codo90','codo45','llave'].includes(f.tipo)&&Number.isFinite(f.cantidad)&&(f.diametro===g.diametro||/pendiente|candidato/i.test(f.diametro||'')&&f.registroSigas?.candidatoMm&&g.diametro===f.registroSigas.candidatoMm+' mm'));const cantidades=[['codo90','Codos 90°'],['codo45','Codos 45°'],['llave','Llaves']].map(([tipo,n])=>[n,accesorios.filter(f=>f.tipo===tipo).reduce((s,f)=>s+f.cantidad,0)]).filter(([,n])=>n>0);if(cantidades.length)texto(card,cantidades.map(([n,c])=>n+': '+c).join(' · ')+' (medidas provisionales)');texto(card,fmt(g.metros)+' m reales · '+g.tiras+' tiras estimadas (mínimo teórico: '+g.minimoTeorico+')');texto(card,fmt(g.metrosComerciales)+' m comerciales · '+fmt(g.sobrante)+' m de sobrante estimado');const estimada=compra.estimacionCuplas?.porDiametro.find(e=>e.diametro===g.diametro&&JSON.stringify(e.tramos)===JSON.stringify(g.tramos));texto(card,'Cuplas: '+(estimada?estimada.cantidad+(estimada.orientativo?' estimadas · orientativas':' calculadas por segmentos (estimadas para compra)'):g.cuplasPendientes?(g.cuplas?g.cuplas+' calculadas en segmentos conocidos; resto pendiente':'Pendiente'):g.cuplas+' calculadas por segmentos (estimadas para compra)'));canos.append(card);}caja.append(canos);
+ const estimacion=compra.estimacionCuplas;
+ texto(caja,estimacion?'Cuplas: '+estimacion.total+(estimacion.orientativo?' estimadas · orientativas. No hace falta cargar posiciones para esta estimación.':' calculadas por segmentos; cantidades provisionales para compra.'):'Cuplas: revisar datos de compra.');
+ const criterio=document.createElement('details'),sc=document.createElement('summary');criterio.className='gas-detalles';sc.textContent='Cómo se estimaron las cuplas';criterio.append(sc);texto(criterio,estimacion?.criterio||'Pendiente');caja.append(criterio);
  const registrados=document.createElement('details'),sr=document.createElement('summary');registrados.className='gas-detalles';sr.textContent='Accesorios por medida · confirmados y pendientes';registrados.append(sr);
  texto(registrados,'Materiales confirmados (cantidad y medida): '+compra.confirmados.length+' registros. Las cantidades conocidas con medidas candidatas siguen provisionales.');
  for(const f of resumenListaManualGas(plan).filter(f=>f.tipo!=='cano'))texto(registrados,f.material+' · '+(f.pendiente?'Pendiente':fmt(f.cantidad)+' '+f.unidad)+' · '+(f.diametro||'medida pendiente'));
@@ -834,6 +834,7 @@ function renderPreparacionCompraGas(out,plan,preparada=null){
   const d=document.createElement('details'),s=document.createElement('summary');d.className='gas-detalles';s.textContent=ubicacionLegibleGas(t.id)+' · '+fmt(t.metros)+' m';d.append(s);
   texto(d,t.diametros.map(x=>x.valor+(x.estado==='candidato'?' candidato (pendiente de verificación)':x.estado==='manual-sin-verificar'?' manual, sin verificar':'')).join(' / '));
   texto(d,t.tiras+' tiras estimadas · '+fmt(t.metrosComerciales)+' m comerciales · '+fmt(t.sobrante)+' m de sobrante. '+(t.continuidad?'Cortes por segmentos definidos.':'Estimación por longitud; distribución de cortes pendiente.'));
+  const aproximada=compra.estimacionCuplas?.tramos.find(e=>e.id===t.id);if(aproximada?.orientativo)texto(d,'Estimación sin posiciones: '+aproximada.cantidad+' cuplas orientativas. El cálculo exacto por segmentos sigue disponible como opción.');
   if(t.cuplasRegistradasContadas)texto(d,'Incluye '+t.cuplasRegistradasContadas+' cuplas ya registradas y '+t.cuplasAdicionalesCalculadas+' uniones adicionales calculadas. No se suman otra vez las registradas.');
   texto(d,'Cuplas: '+(t.cuplas===null?(t.cuplasConocidas?t.cuplasConocidas+' calculadas en segmentos conocidos; resto pendiente':'Pendiente'):t.cuplas+' estimadas según la distribución; '+(t.cuplasRegistradasContadas?'mínimo adicional por segmentos: ':'mínimo por segmentos: ')+t.cuplasMinimas)+'.');
   const editar=document.createElement('details'),se=document.createElement('summary');se.textContent='Corregir distribución de cortes (opcional)';editar.append(se);
@@ -859,13 +860,13 @@ function renderListaManualSimpleGas(out,plan,modelo){
  const tabla=document.createElement('table');tabla.className='tabla gas-lista-simple';if(filasResumen.some(f=>!f.diametro)){const caption=document.createElement('caption');caption.textContent='Diámetros: pendientes de verificación.';tabla.append(caption);}const head=document.createElement('thead'),hr=document.createElement('tr');for(const s of ['Material','Cantidad']){const th=document.createElement('th');th.textContent=s;hr.append(th);}head.append(hr);tabla.append(head);const body=document.createElement('tbody');
  for(const f of filasResumen){
   const tr=document.createElement('tr'),nombre=document.createElement('td'),cantidad=document.createElement('td');nombre.textContent=f.material+(f.diametro?' · '+f.diametro:'');
-  cantidad.textContent=f.pendiente?(f.cantidad>0?fmt(f.cantidad)+' '+f.unidad+' conocidas · resto pendiente':'Pendiente'):fmt(f.cantidad)+' '+f.unidad+(f.estimado&&f.cantidad>0?' estimadas':'');tr.append(nombre,cantidad);body.append(tr);
+  cantidad.textContent=f.pendiente?(f.cantidad>0?fmt(f.cantidad)+' '+f.unidad+' conocidas · resto pendiente':'Pendiente'):fmt(f.cantidad)+' '+f.unidad+(f.orientativo?' estimadas · orientativas':f.estimado&&f.cantidad>0?' estimadas':'');tr.append(nombre,cantidad);body.append(tr);
  }
  tabla.append(body);out.append(tabla);
  texto(out,'Cantidades registradas; diámetros y medidas pendientes conservan su estado. No es una lista de compra definitiva.');
  renderPreparacionCompraGas(out,plan,compra);
  const pendientes=document.createElement('details'),titulo=document.createElement('summary');pendientes.className='gas-detalles';titulo.textContent='Datos técnicos pendientes';pendientes.append(titulo);renderEstadoCierreGas(tecnicos,pendientes,plan);tecnicos.append(pendientes);
- renderPreseleccionSigasGas(tecnicos,plan);
+ renderPreseleccionSigasGas(tecnicos,plan);if(compra)renderPosicionesPendientesCuplasGas(tecnicos,compra);
  const detalles=document.createElement('details'),sum=document.createElement('summary');sum.textContent='Ver detalle por tramo y consumos';detalles.append(sum);
  const red=plan.redManual;
  if(red)texto(detalles,red.total===null?'Consumo total conectado: Pendiente. Los consumos parciales conocidos se conservan.':'Consumo total conectado: '+fmt(red.total)+' kcal/h, sin aplicar reducción por simultaneidad. No dimensiona diámetros.');

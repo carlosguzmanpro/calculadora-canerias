@@ -145,3 +145,12 @@ test('cuplas automáticas: diámetros distintos mantienen los conteos independie
 test('cuplas ubicadas: conserva la cupla registrada como límite y calcula solo las uniones adicionales',()=>{
  const api=require('../materiales/planificador-gas.js'),t=conPosiciones(10,[{tipo:'cupla',metrosAntes:4}],6),e=entrada([{...tramo('a',10,'25 mm',null),continuidadCuplas:api.continuidadCuplas(t)}]);e.extras=[{tipo:'cupla',cantidad:1,medidas:['25 mm'],confirmado:true,ubicacion:'a'}];const r=compra(e,{largoComercial:4});assert.equal(r.tramos[0].cuplas,2);assert.equal(r.tramos[0].cuplasAdicionalesCalculadas,1);assert.equal(r.tramos[0].cuplasRegistradasContadas,1);assert.equal(r.canos[0].cuplas,2);assert.equal(r.registrados.find(f=>f.tipo==='cupla').cantidad,1);
 });
+test('estimación simple: da una referencia por longitud sin inventar posiciones ni modificar el cálculo exacto',()=>{
+ const api=require('../materiales/planificador-gas.js'),e=entrada([tramo('a',10,'25 mm',null)]),c=compra(e,{largoComercial:4}),antes=JSON.stringify(c),r=api.estimarCuplasCompra(c);assert.equal(r.total,2);assert.equal(r.orientativo,true);assert.equal(c.tramos[0].cuplas,null);assert.equal(JSON.stringify(c),antes);assert.match(r.criterio,/No supone posiciones reales/);
+});
+test('estimación simple: respeta segmentos definidos y no coloca cuplas en codos',()=>{
+ const api=require('../materiales/planificador-gas.js');for(const [ms,total]of [[[4,4],0],[[5,5],2]]){const c=compra(entrada([{...tramo('a',ms.reduce((n,m)=>n+m,0)),segmentos:seg(...ms)}]),{largoComercial:4});assert.equal(api.estimarCuplasCompra(c).total,total);assert.equal(api.estimarCuplasCompra(c).orientativo,false);}
+});
+test('estimación simple: no suma por segunda vez cuplas registradas y mantiene diámetros separados',()=>{
+ const api=require('../materiales/planificador-gas.js'),e=entrada([tramo('a',10,'25 mm',null),tramo('b',5,'20 mm',null)]);e.extras=[{tipo:'cupla',cantidad:1,medidas:['25 mm'],ubicacion:'a',confirmado:true}];const r=api.estimarCuplasCompra(compra(e,{largoComercial:4}));assert.equal(r.total,3);assert.equal(r.registradas,1);assert.deepEqual(r.porDiametro.map(g=>[g.diametro,g.cantidad]),[['25 mm',2],['20 mm',1]]);
+});

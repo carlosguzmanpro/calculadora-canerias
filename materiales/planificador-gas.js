@@ -219,6 +219,24 @@
   }
   r.pendientes=[...new Set(r.pendientes)];return r;
  }
+ // Escenario orientativo de compra, separado del cálculo geométrico exacto y del inventario.
+ function estimarCuplasCompra(compra){
+  const L=compra.largoComercial;if(!valido(L))throw Error('Largo comercial inválido.');
+  const declaradas=compra.registrados.filter(f=>f.tipo==='cupla'&&Number.isFinite(f.cantidad)),porTramo=new Map();
+  for(const t of compra.tramos){
+   const propias=declaradas.filter(f=>f.ubicacion===t.id||String(f.ubicacion||'').startsWith(t.id+' · ')).reduce((n,f)=>n+f.cantidad,0);
+   const segmentos=t.segmentos.map(s=>({diametro:s.diametro,cantidad:s.cuplas??Math.max(0,Math.ceil(s.metros/L)-1),orientativo:s.cuplas===null}));
+   const base=segmentos.reduce((n,s)=>n+s.cantidad,0),cantidad=t.cuplas??Math.max(base,propias,t.cuplasConocidas||0);
+   porTramo.set(t.id,{id:t.id,cantidad,orientativo:t.cuplas===null,registradas:propias,segmentos});
+  }
+  const tramos=[...porTramo.values()],totalTramos=tramos.reduce((n,t)=>n+t.cantidad,0),registradas=declaradas.reduce((n,f)=>n+f.cantidad,0),total=Math.max(totalTramos,registradas);
+  const porDiametro=compra.canos.map(g=>{
+   let cantidad=0;for(const id of g.tramos){const t=porTramo.get(id),partes=t.segmentos.filter(s=>s.diametro===g.diametro);cantidad+=partes.reduce((n,s)=>n+s.cantidad,0);const original=compra.tramos.find(t=>t.id===id);if(original.diametros.length===1)cantidad+=Math.max(0,t.cantidad-t.segmentos.reduce((n,s)=>n+s.cantidad,0));}
+   return {diametro:g.diametro,tramos:g.tramos,cantidad,orientativo:g.cuplasPendientes};
+  });
+  return {total,registradas,incluyeRegistradas:true,orientativo:tramos.some(t=>t.orientativo)||total!==totalTramos,tramos,porDiametro,pendienteDistribucion:total!==totalTramos,criterio:'Sin posiciones: escenario por longitud de cada tramo o parte sin ubicar, techo(metros/largo comercial) − 1. No supone posiciones reales, no descuenta codos sin ubicación y no es un mínimo ni un máximo garantizado. Con segmentos conocidos se reutilizan sus uniones calculadas. No sumar las cuplas registradas nuevamente.'};
+ }
+
  function agruparPendientesCompra(mensajes){
   const grupos=new Map(['Datos del suministro','Diámetros y pérdidas','Conexiones y accesorios','Cortes, cuplas y compra','Verificación normativa'].map(n=>[n,[]]));
   for(const texto of new Set(mensajes.filter(s=>typeof s==='string'&&s.trim()))){
@@ -227,5 +245,5 @@
   }return [...grupos].map(([tema,detalles])=>({tema,detalles}));
  }
 
- const api={planificarCortes,planificarMateriales,prepararCompra,continuidadCuplas,firmaCortesCompra,validarDistribucionCompra,agruparPendientesCompra};if(typeof module==='object'&&module.exports)module.exports=api;else root.MaterialesGas=api;
+ const api={planificarCortes,planificarMateriales,prepararCompra,estimarCuplasCompra,continuidadCuplas,firmaCortesCompra,validarDistribucionCompra,agruparPendientesCompra};if(typeof module==='object'&&module.exports)module.exports=api;else root.MaterialesGas=api;
 })(globalThis);
