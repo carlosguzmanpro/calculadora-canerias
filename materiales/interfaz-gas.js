@@ -535,7 +535,10 @@ function entradaManualMaterialesGas(sinSugerencias=false,sinRegistroTecnico=fals
  for(const t of entrada.tramos)t.accesorios=[];
  entrada.extras=[...registros.filter(r=>!omitidos.has(r.id)).map(r=>({...r.a,idFisico:r.id,confirmado:true})),...nuevos].map(a=>({...a,nodo:a.tipo==='tee'&&a.nodo?nodoConciliacionGas(a.nodo).replace(/^n:/,''):a.nodo}));
  if(typeof transicionesRectasDeclaradasSigasGas==='function')for(const a of transicionesRectasDeclaradasSigasGas())if(!entrada.extras.some(e=>e.idFisico===a.idFisico))entrada.extras.push(a);
- entrada.manualDirecto={avisos,ceros,pendientes};filtrarRedManualMaterialesGas(entrada);if(!sinRegistroTecnico&&CatalogosSistemasGas.identificar(instalacionGas.perfil)==='sigas'&&typeof proyectarRegistroSigasEnMaterialesGas==='function'){
+ entrada.manualDirecto={avisos,ceros,pendientes};
+ const posicionesCuplas=tramos.filter(t=>t.detalle&&(Number.isFinite(t.detalle.metrosFinal)||t.detalle.accesorios?.some(a=>Number.isFinite(a.metrosAntes)))).map(t=>({id:t.id,estado:t.detalle.estado,metrosFinal:t.detalle.metrosFinal??null,accesorios:(t.detalle.accesorios||[]).map(a=>({tipo:a.tipo,metrosAntes:a.metrosAntes??null,salida:a.salida??null}))}));
+ if(posicionesCuplas.length)entrada.manualDirecto.posicionesCuplas=posicionesCuplas;
+ filtrarRedManualMaterialesGas(entrada);completarContinuidadCompraGas(entrada);if(!sinRegistroTecnico&&CatalogosSistemasGas.identificar(instalacionGas.perfil)==='sigas'&&typeof proyectarRegistroSigasEnMaterialesGas==='function'){
   // El inventario manual existe antes del cálculo técnico. Una falla del catálogo no lo modifica.
   try{return proyectarRegistroSigasEnMaterialesGas(JSON.parse(JSON.stringify(entrada)));}
   catch(e){entrada.manualDirecto.avisos.push('Cantidades registradas conservadas. Diámetros, productos y pérdidas pendientes: '+e.message+'. No se asignaron pérdidas cero ni se confirmaron medidas.');}
@@ -722,12 +725,22 @@ function resumenMaterialesInstalacionGas(plan,compra=null){
   const g=grupos.get(clave);g.cantidad+=f.cantidad;g.pendiente||=f.pendiente;g.estimado||=f.estimado;
  }
  if(compra&&!compra.registrados.some(f=>f.tipo==='cupla'&&f.cantidad>0))for(const g of grupos.values())if(g.tipo==='cupla'){
-  g.cantidad=compra.tramos.filter(t=>t.cuplas!==null).reduce((n,t)=>n+t.cuplas,0);g.pendiente=compra.tramos.some(t=>t.cuplas===null);g.estimado=true;
+  g.cantidad=compra.tramos.reduce((n,t)=>n+(t.cuplasConocidas??t.cuplas??0),0);g.pendiente=compra.tramos.some(t=>t.cuplas===null);g.estimado=true;
  }
  return [...grupos.values()];
 }
+function completarContinuidadCompraGas(entrada){
+ if(typeof MaterialesGas==='undefined'||typeof MaterialesGas.continuidadCuplas!=='function')return entrada;
+ for(const t of entrada.tramos){
+  const original=tramos.find(o=>o.id===t.id);if(!original)continue;
+  const adicionales=datosPlanGas().extras.filter(a=>a.tramo===t.id||a.ubicacion===t.id||String(a.ubicacion||'').startsWith(t.id+' · ')||proyectoGasActual().referenciaSigas19&&t.id==='ref-B-Cocina'&&a.idFisico==='referencia-codo19').filter(a=>!original.detalle?.accesorios?.some(b=>b.idFisico&&b.idFisico===a.idFisico));
+  t.continuidadCuplas=MaterialesGas.continuidadCuplas(original,{conteos:conteoRapidoDelTramoGas(original),adicionales});if(t.continuidadCuplas.bloqueada)t.segmentos=null;else if(!t.segmentos&&t.continuidadCuplas.completa)t.segmentos=t.continuidadCuplas.segmentos.map((s,i)=>({...s,diametro:s.diametroPendiente?'Pendiente ('+t.id+':'+i+')':s.diametro}));
+ }
+ return entrada;
+}
 function prepararCompraActualGas(plan){
  const entrada=entradaManualMaterialesGas(false,true),opciones=opcionesMaterialesGas('proyecto');
+ completarContinuidadCompraGas(entrada);
  let tecnico={};try{tecnico=calcularPreseleccionSigasGas()||{};}catch(e){/* El inventario sigue disponible sin catálogo. */}
  return MaterialesGas.prepararCompra(entrada,plan,{...opciones,cortesCompra:datosPlanGas().cortesCompra||{}},tecnico);
 }
@@ -741,7 +754,7 @@ function guardarDistribucionCompraGas(id,texto,confirmado){
  if(modulo!=='gas')return {ok:false,mensaje:'Elegí GAS.'};
  try{
   if(!confirmado)throw Error('Confirmá únicamente si los grupos representan segmentos continuos reales; no se inventaron posiciones.');
-  const entrada=entradaManualMaterialesGas(false,true),t=entrada.tramos.find(t=>t.id===id);if(!t)throw Error('El tramo ya no está disponible.');
+  const entrada=completarContinuidadCompraGas(entradaManualMaterialesGas(false,true)),t=entrada.tramos.find(t=>t.id===id);if(!t)throw Error('El tramo ya no está disponible.');
   const grupos=String(texto).split(';').map(g=>g.split('+').map(x=>{const s=x.trim();return /^\d+(?:[.,]\d+)?$/.test(s)?Number(s.replace(',','.')):NaN;}));
   const opciones=opcionesMaterialesGas('proyecto');MaterialesGas.validarDistribucionCompra(t,grupos,opciones.largoComercial);
   const datos=datosPlanGas();datos.cortesCompra||={};const anterior=datos.cortesCompra[id];
@@ -756,8 +769,8 @@ function renderPreparacionCompraGas(out,plan,preparada=null){
  const medida=g=>g.diametro+(g.estadoDiametro==='candidato'?' candidato':g.estadoDiametro==='manual-sin-verificar'?' manual, sin verificar':'');
  const largo=estadoLargoComercialGas();texto(caja,'Estimación provisional · tiras de '+compra.largoComercial+' m. '+(largo.pendiente?'El manual indica '+largo.documentado+' m; se conservó el valor guardado. Revisalo antes de comprar.':'Sin reutilización automática entre tramos.'));
  const canos=document.createElement('div');canos.className='gas-compra-canos';
- for(const g of compra.canos){const card=document.createElement('article');card.className='gas-compra-cano';const nombre=document.createElement('strong');nombre.textContent=medida(g);card.append(nombre);texto(card,fmt(g.metros)+' m reales · '+g.tiras+' tiras estimadas (mínimo teórico: '+g.minimoTeorico+')');texto(card,fmt(g.metrosComerciales)+' m comerciales · '+fmt(g.sobrante)+' m de sobrante estimado');canos.append(card);}caja.append(canos);
- const cuplasConocidas=compra.tramos.filter(t=>Number.isFinite(t.cuplas)).reduce((n,t)=>n+t.cuplas,0),cuplasPendientes=compra.tramos.some(t=>t.cuplas===null);
+ for(const g of compra.canos){const card=document.createElement('article');card.className='gas-compra-cano';const nombre=document.createElement('strong');nombre.textContent=medida(g);card.append(nombre);texto(card,fmt(g.metros)+' m reales · '+g.tiras+' tiras estimadas (mínimo teórico: '+g.minimoTeorico+')');texto(card,fmt(g.metrosComerciales)+' m comerciales · '+fmt(g.sobrante)+' m de sobrante estimado');texto(card,'Cuplas: '+(g.cuplasPendientes?(g.cuplas?g.cuplas+' calculadas en segmentos conocidos; resto pendiente':'Pendiente'):g.cuplas+' calculadas por segmentos (estimadas para compra)'));canos.append(card);}caja.append(canos);
+ const cuplasConocidas=compra.tramos.reduce((n,t)=>n+(t.cuplasConocidas??t.cuplas??0),0),cuplasPendientes=compra.tramos.some(t=>t.cuplas===null);
  texto(caja,cuplasPendientes?'Cuplas: '+(cuplasConocidas?cuplasConocidas+' estimadas en segmentos definidos; otras pendientes.':'Pendiente: faltan continuidad, posiciones o cotejo de uniones registradas.'):'Cuplas estimadas: '+cuplasConocidas+'. Uniones dentro de segmentos continuos; no incluye conexiones de codos ni tees.');
  const registrados=document.createElement('details'),sr=document.createElement('summary');registrados.className='gas-detalles';sr.textContent='Accesorios por medida · confirmados y pendientes';registrados.append(sr);
  texto(registrados,'Materiales confirmados (cantidad y medida): '+compra.confirmados.length+' registros. Las cantidades conocidas con medidas candidatas siguen provisionales.');
@@ -768,10 +781,10 @@ function renderPreparacionCompraGas(out,plan,preparada=null){
   const d=document.createElement('details'),s=document.createElement('summary');d.className='gas-detalles';s.textContent=ubicacionLegibleGas(t.id)+' · '+fmt(t.metros)+' m';d.append(s);
   texto(d,t.diametros.map(x=>x.valor+(x.estado==='candidato'?' candidato (pendiente de verificación)':x.estado==='manual-sin-verificar'?' manual, sin verificar':'')).join(' / '));
   texto(d,t.tiras+' tiras estimadas · '+fmt(t.metrosComerciales)+' m comerciales · '+fmt(t.sobrante)+' m de sobrante. '+(t.continuidad?'Cortes por segmentos definidos.':'Estimación por longitud; distribución de cortes pendiente.'));
-  texto(d,'Cuplas: '+(t.cuplas===null?'Pendiente':t.cuplas+' estimadas según la distribución; mínimo por segmentos: '+t.cuplasMinimas)+'.');
+  texto(d,'Cuplas: '+(t.cuplas===null?(t.cuplasConocidas?t.cuplasConocidas+' calculadas en segmentos conocidos; resto pendiente':'Pendiente'):t.cuplas+' estimadas según la distribución; mínimo por segmentos: '+t.cuplasMinimas)+'.');
   const editar=document.createElement('details'),se=document.createElement('summary');se.textContent='Corregir distribución de cortes (opcional)';editar.append(se);
   texto(editar,'Escribí los cortes unidos por + dentro de cada segmento continuo. Separá segmentos interrumpidos por accesorios con ;. Ejemplo con el largo actual: '+compra.largoComercial+'+'+(compra.largoComercial/2)+';'+(compra.largoComercial/2)+'. No cambia el croquis ni sus longitudes.');
-  const label=document.createElement('label'),input=document.createElement('input');label.textContent='Cortes de '+ubicacionLegibleGas(t.id)+' (m)';input.type='text';input.value=(Array.isArray(t.distribucionGuardada?.grupos)&&t.distribucionGuardada.grupos.every(Array.isArray)?t.distribucionGuardada.grupos.map(g=>g.join('+')).join(';'):'')||t.segmentos.filter(g=>g.cortes).map(g=>g.cortes.join('+')).join(';');label.append(input);editar.append(label);
+  const label=document.createElement('label'),input=document.createElement('input');label.textContent='Cortes de '+ubicacionLegibleGas(t.id)+' (m)';input.type='text';input.value=(Array.isArray(t.distribucionGuardada?.grupos)&&t.distribucionGuardada.grupos.every(Array.isArray)?t.distribucionGuardada.grupos.map(g=>g.join('+')).join(';'):'')||(t.continuidad?t.segmentos:[]).filter(g=>g.cortes).map(g=>g.cortes.join('+')).join(';');label.append(input);editar.append(label);
   const lc=document.createElement('label'),check=document.createElement('input');check.type='checkbox';check.style.width='auto';lc.append(check,document.createTextNode(' Confirmo la continuidad y las interrupciones de esta distribución'));editar.append(lc);
   const b=document.createElement('button'),msg=document.createElement('p');b.type='button';b.textContent='Guardar distribución';msg.setAttribute?.('role','status');b.onclick=()=>{const r=guardarDistribucionCompraGas(t.id,input.value,check.checked);if(r.ok){const nuevo=$('resumenPrincipalMaterialesGas');const aviso=document.createElement('p');aviso.textContent=r.mensaje;nuevo.append(aviso);}else msg.textContent=r.mensaje;};editar.append(b,msg);d.append(editar);detalle.append(d);
  }

@@ -108,13 +108,43 @@
   return {filas,planes,avisos:[...new Set(avisos)],config,dimensionamientoDefinitivo:false,supuestos:['Configuración usada: largo comercial '+config.largoComercial+' m; reutilización '+(config.reutilizar?'selectiva propuesta':'no propuesta (escenario conservador)')+'; sobrante mínimo '+config.minimoSobrante+' m.','Plan físico independiente del dimensionamiento. Los diámetros propuestos no se convierten en definitivos.','Mínimo teórico = techo de longitud total por medida/material/sistema dividido por largo comercial: solo cota inferior, sin geometría ni desperdicio.','Compra estimada por cortes FFD, no optimización garantizada. Solo se proponen sobrantes del mismo grupo y que cumplan longitud mínima, si se habilita reutilizar.','No se suman sobrantes para fabricar una pieza; esa alternativa requeriría otras cuplas y revisión. No se incluyeron roscas, pérdidas de corte, reserva ni sobrantes preexistentes.','Una cupla por unión propuesta dentro de cada segmento. Posiciones desconocidas producen pendientes. Los accesorios compartidos se cuentan una sola vez por identificación física.',(/epoxi/i.test(entrada.material||'')&&entrada.sistema==='Roscado'?'Las reducciones se listan en materiales y no se agregan a equivalentes del método de clase.':'Las reducciones se listan en materiales. '+reglaReducciones+'.')]};
  }
  // Preparación de compra: lectura del inventario, nunca cambia pérdidas ni medidas guardadas.
+ // Distancias relativas declaradas: no interpreta fotografías ni completa posiciones faltantes.
+ function continuidadCuplas(t,{conteos={},adicionales=[]}={}){
+  const r={segmentos:[],completa:false,metrosPendientes:t.metros,pendientes:[]},d=t.detalle,as=d?.accesorios||[],tipos=new Set(['codo90','codo45','tee','reduccion','llave','cupla']);
+  const pendiente=s=>{r.bloqueada=true;r.pendientes.push(s);return r;};
+  if(!valido(t.metros)||!Array.isArray(as))return pendiente('Longitud o detalle de accesorios inválido.');
+  if(adicionales.some(a=>a.tipo!=='cupla'&&a.cantidad>0))return pendiente('Hay accesorios adicionales sin posiciones: no se supone que estén fuera de los segmentos conocidos.');
+  const ids=new Set();for(const a of as){if(!a||!tipos.has(a.tipo))return pendiente('Falta determinar cómo interrumpe la continuidad un accesorio registrado.');if(typeof a.metrosAntes==='number'&&(!Number.isFinite(a.metrosAntes)||a.metrosAntes<0))return pendiente('Distancia inválida antes de un accesorio.');if(a.idFisico&&ids.has(a.idFisico))return pendiente('Accesorio físico repetido en las posiciones: revisar sin duplicar uniones.');if(a.idFisico)ids.add(a.idFisico);}
+  for(const [tipo,cantidad]of Object.entries(conteos))if(Number.isSafeInteger(cantidad)&&cantidad>=0&&cantidad!==as.filter(a=>a.tipo===tipo).length)return pendiente('El total de '+tipo+' no coincide con los accesorios posicionados.');
+  if(typeof d?.metrosFinal==='number'&&(!Number.isFinite(d.metrosFinal)||d.metrosFinal<0))return pendiente('Distancia final inválida.');
+  if(t.llave&&!as.some(a=>a.tipo==='llave'))return pendiente('Llave registrada sin posición: confirmar su interrupción de continuidad.');
+  r.diametroVariable=as.some(a=>a.tipo==='reduccion'||a.entrada&&a.salida&&a.entrada!==a.salida);
+  if(!as.length){
+   const ceroExplicito=['codo90','codo45','tee','reduccion','llave'].every(tipo=>conteos[tipo]===0);
+   if(d?.estado!=='ninguno'&&!ceroExplicito)return pendiente('Falta declarar la continuidad o posiciones de accesorios.');
+   r.segmentos=[{metros:t.metros,diametro:t.diametro||null,origen:'recta declarada sin accesorios'}];r.completa=true;r.metrosPendientes=0;return r;
+  }
+  let diametro=t.diametro||null,diametroPendiente=false,anterioresCompletos=true,suma=0;
+  const agregar=(metros,origen)=>{if(metros>0)r.segmentos.push({metros,diametro,diametroPendiente,origen});suma+=metros;};
+  for(const [i,a]of as.entries()){
+   if(typeof a.metrosAntes==='number'&&Number.isFinite(a.metrosAntes)&&a.metrosAntes>=0)agregar(a.metrosAntes,'antes del accesorio '+(i+1));else{anterioresCompletos=false;r.pendientes.push('Distancia anterior al accesorio '+(i+1)+' pendiente.');}
+   if(typeof a.salida==='string'&&a.salida.trim()&&!/pendiente/i.test(a.salida)){diametro=a.salida.trim();diametroPendiente=false;}else if(a.tipo==='reduccion'){diametro=null;diametroPendiente=true;}
+  }
+  let finalConocido=typeof d.metrosFinal==='number'&&Number.isFinite(d.metrosFinal)&&d.metrosFinal>=0;
+  if(finalConocido)agregar(d.metrosFinal,'después del último accesorio');
+  else if(anterioresCompletos&&suma<=t.metros){agregar(t.metros-suma,'resto exacto de la longitud registrada');finalConocido=true;}
+  else r.pendientes.push('Distancia posterior al último accesorio pendiente.');
+  if(suma>t.metros+1e-8||anterioresCompletos&&finalConocido&&Math.abs(suma-t.metros)>1e-8)return {...r,bloqueada:true,segmentos:[],completa:false,metrosPendientes:t.metros,pendientes:['Las posiciones no coinciden con la longitud del tramo: revisar antes de calcular cuplas.']};
+  r.completa=anterioresCompletos&&finalConocido;r.metrosPendientes=Math.max(0,t.metros-suma);return r;
+ }
  function firmaCortesCompra(t,entrada,opciones={}){
-  return JSON.stringify({metros:t.metros,segmentos:t.segmentos||null,material:t.material||entrada.material,sistema:t.sistema||entrada.sistema,largo:opciones.largoComercial??6,accesorios:[...(t.accesorios||[]),...(entrada.extras||[]).filter(a=>a.tramo===t.id||a.ubicacion===t.id||String(a.ubicacion||'').startsWith(t.id+' · '))].map(a=>[a.idFisico||null,a.tipo,a.cantidad,a.nodo||null])});
+  return JSON.stringify({metros:t.metros,segmentos:t.segmentos||null,...(!t.segmentos&&t.continuidadCuplas?.segmentos.length?{continuidadCuplas:t.continuidadCuplas}:{}),material:t.material||entrada.material,sistema:t.sistema||entrada.sistema,largo:opciones.largoComercial??6,accesorios:[...(t.accesorios||[]),...(entrada.extras||[]).filter(a=>a.tramo===t.id||a.ubicacion===t.id||String(a.ubicacion||'').startsWith(t.id+' · '))].map(a=>[a.idFisico||null,a.tipo,a.cantidad,a.nodo||null])});
  }
  function validarDistribucionCompra(t,grupos,largo){
   if(!Array.isArray(grupos)||!grupos.length||grupos.length>1000||grupos.some(g=>!Array.isArray(g)||!g.length||g.length>1000||g.some(m=>!valido(m)||m>largo)))throw Error('Indicá cortes positivos que no superen el largo comercial.');
   if(Math.abs(grupos.flat().reduce((n,m)=>n+m,0)-t.metros)>1e-8)throw Error('La suma de los cortes debe coincidir con los metros del tramo.');
-  const ss=t.segmentos?.filter(s=>s.metros>0);
+  const ss=(t.segmentos||(t.continuidadCuplas?.completa?t.continuidadCuplas.segmentos:null))?.filter(s=>s.metros>0);
+  if(!ss?.length&&t.continuidadCuplas?.segmentos.length){let desde=0;for(const s of t.continuidadCuplas.segmentos){const indice=grupos.findIndex((g,i)=>i>=desde&&Math.abs(g.reduce((n,m)=>n+m,0)-s.metros)<1e-8);if(indice<0)throw Error('Conservá las distancias conocidas entre accesorios al corregir los cortes.');desde=indice+1;}}
   if(ss?.length&&(ss.length!==grupos.length||ss.some((s,i)=>Math.abs(s.metros-grupos[i].reduce((n,m)=>n+m,0))>1e-8)))throw Error('Los segmentos continuos deben respetar las interrupciones ya registradas; corregí el detalle del tramo si cambió el recorrido.');
   return grupos;
  }
@@ -122,6 +152,7 @@
   const largo=opciones.largoComercial??6;if(!valido(largo))throw Error('Largo comercial pendiente o inválido.');
   const r={version:1,definitiva:false,largoComercial:largo,tramos:[],canos:[],confirmados:[],registrados:[],estimados:[],propuestas:[],pendientes:[],supuestos:['Sin reutilización entre tramos; dentro de cada tramo solo si fue habilitada y existen cortes y medidas compatibles. No incluye pérdidas de corte, roscado ni reserva.','Las tiras por longitud no prueban que los cortes puedan ejecutarse. Las cuplas requieren segmentos continuos definidos.','Diámetros candidatos y medidas manuales sin validación producen cantidades comerciales provisionales.']},bolsas=new Map(),vistas=new Set();
   const conocido=d=>typeof d==='string'&&d.trim()&&!/pendiente/i.test(d),diametro=(t,s)=>{
+   if(s?.diametroPendiente)return {valor:'Pendiente',estado:'pendiente'};
    const f=tecnico.filas?.find(f=>f.id===t.id),d=s?.diametro||t.diametro;
    return conocido(d)?{valor:d,estado:t.diametroVerificado===true&&tecnico.definitivo===true?'verificado':'manual-sin-verificar'}:f?.candidato?.exteriorMm?{valor:f.candidato.exteriorMm+' mm',estado:'candidato'}:{valor:'Pendiente',estado:'pendiente'};
   };
@@ -129,26 +160,28 @@
    const firma=firmaCortesCompra(t,entrada,opciones),guardado=opciones.cortesCompra?.[t.id],vigente=guardado?.firma===firma&&guardado.confirmado===true;
    let grupos=null,error=null;try{if(vigente)grupos=validarDistribucionCompra(t,guardado.grupos,largo);}catch(e){error=e.message;}
    if(guardado&&(!vigente||error))r.pendientes.push('Distribución conservada de '+t.id+': revisar cambios de tramo, accesorios o largo comercial'+(error?': '+error:'.'));
-   const ss=t.segmentos?.filter(s=>s.metros>0),continuidad=!!grupos||!!ss?.length;
+   const auto=t.continuidadCuplas,ss=(t.segmentos|| (auto?.completa?auto.segmentos:null))?.filter(s=>s.metros>0),continuidad=!!grupos||!!ss?.length;
+   const parciales=!continuidad?auto?.segmentos||[]:[];
    if(ss?.length&&(ss.some(s=>!valido(s.metros))||Math.abs(ss.reduce((n,s)=>n+s.metros,0)-t.metros)>1e-8))throw Error('Segmentos incompatibles con '+t.id);
-   const partes=grupos?grupos.map((g,i)=>({metros:g.reduce((n,m)=>n+m,0),diametro:ss?.[i]?.diametro,cortes:g})):ss?.length?ss:[{metros:t.metros}];
+   const partes=grupos?grupos.map((g,i)=>({metros:g.reduce((n,m)=>n+m,0),diametro:ss?.[i]?.diametro,cortes:g})):ss?.length?ss:parciales.length?[...parciales,...(auto.metrosPendientes>0?[{metros:auto.metrosPendientes,continuidadPendiente:true,diametroPendiente:!!auto.diametroVariable}]:[])]:[{metros:t.metros,continuidadPendiente:true}];
    const aportaciones=new Map();
-   const fila={id:t.id,metros:t.metros,diametros:[],tiras:0,metrosComerciales:0,sobrante:0,cuplas:continuidad?0:null,cuplasMinimas:continuidad?0:null,continuidad,distribucionVigente:!!grupos,distribucionGuardada:guardado||null,segmentos:[],provisional:true,estado:'estimado'};
+   const fila={id:t.id,metros:t.metros,diametros:[],tiras:0,metrosComerciales:0,sobrante:0,cuplas:continuidad?0:null,cuplasConocidas:0,cuplasPendientes:!continuidad,cuplasMinimas:continuidad?0:null,continuidad,distribucionVigente:!!grupos,distribucionGuardada:guardado||null,segmentos:[],provisional:true,estado:'estimado'};
    for(const [i,p]of partes.entries()){
     const d=diametro(t,p);if(!fila.diametros.some(x=>x.valor===d.valor&&x.estado===d.estado))fila.diametros.push(d);
-    let cortes=continuidad?planificarCortes([{id:t.id+':'+i,metros:p.metros}],{largoComercial:largo}).porSegmento[t.id+':'+i].piezas.map(p=>p.metros):null;
+    let cortes=(continuidad||parciales.length&&!p.continuidadPendiente)?planificarCortes([{id:t.id+':'+i,metros:p.metros}],{largoComercial:largo}).porSegmento[t.id+':'+i].piezas.map(p=>p.metros):null;
     if(p.cortes)cortes=p.cortes;
     const tiras=cortes?.length??Math.ceil(p.metros/largo),cuplas=cortes?cortes.length-1:null;
-    fila.tiras+=tiras;if(cuplas!==null){fila.cuplas+=cuplas;fila.cuplasMinimas+=Math.max(0,Math.ceil(p.metros/largo)-1);}
-    fila.segmentos.push({metros:p.metros,diametro:d.valor,cortes,cuplas});
+    fila.tiras+=tiras;if(cuplas!==null){fila.cuplasConocidas+=cuplas;if(continuidad){fila.cuplas+=cuplas;fila.cuplasMinimas+=Math.max(0,Math.ceil(p.metros/largo)-1);}}
+    fila.segmentos.push({metros:p.metros,diametro:d.valor,cortes,cuplas,origen:p.origen||null,continuidadConocida:cuplas!==null});
     const key=JSON.stringify([d.valor,d.estado,t.material||entrada.material,t.sistema||entrada.sistema,d.estado==='pendiente'?t.id:null]);
-    if(!bolsas.has(key))bolsas.set(key,{diametro:d.valor,estadoDiametro:d.estado,material:t.material||entrada.material,sistema:t.sistema||entrada.sistema,metros:0,tiras:0,tramos:[],cuplas:0,cuplasPendientes:false});
+    if(!bolsas.has(key))bolsas.set(key,{diametro:d.valor,estadoDiametro:d.estado,material:t.material||entrada.material,sistema:t.sistema||entrada.sistema,metros:0,tiras:0,tramos:[],cuplas:0,cuplasPendientes:false,cuplasPorTramo:{}});
     const g=bolsas.get(key);g.metros+=p.metros;g.tiras+=tiras;
-    if(!aportaciones.has(key))aportaciones.set(key,{tiras:0,cortes:[]});const aporte=aportaciones.get(key);aporte.tiras+=tiras;if(cortes)aporte.cortes.push(...cortes);if(!g.tramos.includes(t.id))g.tramos.push(t.id);if(cuplas===null)g.cuplasPendientes=true;else g.cuplas+=cuplas;
+    if(!aportaciones.has(key))aportaciones.set(key,{tiras:0,cortes:[]});const aporte=aportaciones.get(key);aporte.tiras+=tiras;if(cortes)aporte.cortes.push(...cortes);if(!g.tramos.includes(t.id))g.tramos.push(t.id);if(cuplas===null)g.cuplasPendientes=true;else{g.cuplas+=cuplas;g.cuplasPorTramo[t.id]=(g.cuplasPorTramo[t.id]||0)+cuplas;}
    }
    if(opciones.reutilizar&&continuidad)for(const [key,aporte]of aportaciones){const g=bolsas.get(key);if(g.estadoDiametro==='pendiente'||!g.material||!g.sistema)continue;const calculado=planificarCortes(aporte.cortes.map((metros,i)=>({id:'corte-'+i,metros})),{largoComercial:largo,reutilizar:true,minimoSobrante:opciones.minimoSobrante??.5});const ahorro=aporte.tiras-calculado.compraEstimada;g.tiras-=ahorro;fila.tiras-=ahorro;}
+   fila.estadoCuplas=continuidad?'calculadas-segun-distribucion':fila.cuplasConocidas?'parcial':'pendiente';
    fila.metrosComerciales=fila.tiras*largo;fila.sobrante=fila.metrosComerciales-t.metros;r.tramos.push(fila);
-   if(!continuidad)r.pendientes.push('Cuplas en '+t.id+': faltan segmentos continuos y posiciones de accesorios.');
+   if(!continuidad){for(const g of bolsas.values())if(g.tramos.includes(t.id))g.cuplasPendientes=true;r.pendientes.push('Cuplas en '+t.id+': faltan segmentos continuos y posiciones de accesorios.');for(const s of auto?.pendientes||[])r.pendientes.push(t.id+': '+s);}
   }
   r.canos=[...bolsas.values()].map(g=>({...g,minimoTeorico:Math.ceil(g.metros/largo),metrosComerciales:g.tiras*largo,sobrante:g.tiras*largo-g.metros,provisional:true}));
   for(const f of plan.filas||[]){
@@ -163,8 +196,8 @@
    r.pendientes.push('Cuplas registradas: cotejar su ubicación con las uniones del plan de cortes; no se suman automáticamente.');
    const declaradas=r.registrados.filter(f=>f.tipo==='cupla'&&f.cantidad>0);
    const afectadas=new Set();for(const f of declaradas){const ubicadas=r.tramos.filter(t=>f.ubicacion===t.id||String(f.ubicacion||'').startsWith(t.id+' · '));for(const t of r.tramos){if(ubicadas.length&&!ubicadas.includes(t))continue;afectadas.add(t.id);}}
-   for(const f of r.tramos)if(afectadas.has(f.id)){f.cuplasCalculadas=f.cuplas;f.cuplas=null;}
-   for(const g of r.canos)if(g.tramos.some(id=>afectadas.has(id))){g.cuplasCalculadas=g.cuplas;g.cuplasPendientes=true;}
+   for(const f of r.tramos)if(afectadas.has(f.id)){f.cuplasCalculadas=f.cuplas;f.cuplasConocidasCalculadas=f.cuplasConocidas;f.cuplas=null;f.cuplasConocidas=0;f.cuplasPendientes=true;f.estadoCuplas='pendiente-cotejo';}
+   for(const g of r.canos)if(g.tramos.some(id=>afectadas.has(id))){g.cuplasCalculadas=g.cuplas;g.cuplasPendientes=true;g.cuplas=Object.entries(g.cuplasPorTramo).filter(([id])=>!afectadas.has(id)).reduce((n,[,cantidad])=>n+cantidad,0);}
   }
   // Comparar nodos físicos una sola vez; nunca fabricar una reducción por cada recorrido.
   const nodos=new Map((entrada.nodos||[]).map(n=>[n.id,n]));for(const t of entrada.tramos||[])for(const id of [t.red?.desde,t.red?.hasta])if(id&&!nodos.has(id))nodos.set(id,{id});
@@ -186,5 +219,5 @@
   }return [...grupos].map(([tema,detalles])=>({tema,detalles}));
  }
 
- const api={planificarCortes,planificarMateriales,prepararCompra,firmaCortesCompra,validarDistribucionCompra,agruparPendientesCompra};if(typeof module==='object'&&module.exports)module.exports=api;else root.MaterialesGas=api;
+ const api={planificarCortes,planificarMateriales,prepararCompra,continuidadCuplas,firmaCortesCompra,validarDistribucionCompra,agruparPendientesCompra};if(typeof module==='object'&&module.exports)module.exports=api;else root.MaterialesGas=api;
 })(globalThis);

@@ -110,3 +110,35 @@ test('compra: agrupar advertencias conserva cada comprobación sin inventar ni p
 test('compra: una cupla registrada en un tramo no bloquea las uniones conocidas de otro',()=>{
  const e=entrada([tramo('a',10),tramo('b',10,'3/4"')]);e.extras=[{tipo:'cupla',cantidad:1,medidas:['1"'],confirmado:true,ubicacion:'a'}];const r=compra(e);assert.equal(r.tramos.find(t=>t.id==='a').cuplas,null);assert.equal(r.tramos.find(t=>t.id==='b').cuplas,1);assert.equal(r.registrados.filter(f=>f.tipo==='cupla').reduce((n,f)=>n+f.cantidad,0),1);
 });
+
+const conPosiciones=(metros,accesorios,metrosFinal)=>({id:'a',metros,diametro:'25 mm',detalle:{estado:'pendiente',accesorios,metrosFinal}});
+function compraPosiciones(t){const api=require('../materiales/planificador-gas.js'),e=entrada([{...tramo(t.id,t.metros,t.diametro,null),continuidadCuplas:api.continuidadCuplas(t)}]);return compra(e,{largoComercial:4});}
+test('cuplas automáticas: recta 10 m, 4+4 con codo y 5+5 con codo',()=>{
+ const recta={id:'a',metros:10,diametro:'25 mm',detalle:{estado:'ninguno',accesorios:[]}},codo4=conPosiciones(8,[{tipo:'codo90',metrosAntes:4}],4),codo5=conPosiciones(10,[{tipo:'codo90',metrosAntes:5}],5);
+ for(const [t,n]of [[recta,2],[codo4,0],[codo5,2]]){const r=compraPosiciones(t);assert.equal(r.tramos[0].cuplas,n);assert.equal(r.tramos[0].cuplasConocidas,n);assert.equal(r.canos[0].cuplas,n);assert.equal(r.tramos[0].cuplasPendientes,false);}
+});
+test('cuplas automáticas: codos 45, tees, llaves y reducciones interrumpen sin agregar cupla en el accesorio',()=>{
+ for(const tipo of ['codo45','tee','llave','reduccion']){const t=conPosiciones(10,[{tipo,metrosAntes:5,salida:'25 mm'}],5);const r=compraPosiciones(t);assert.equal(r.tramos[0].cuplas,2);assert.equal(r.tramos[0].segmentos.length,2);}
+});
+test('cuplas automáticas: calcula solo intervalos conocidos aunque falte otra posición',()=>{
+ const t=conPosiciones(17,[{tipo:'codo90',metrosAntes:10},{tipo:'codo45',metrosAntes:null}],5),r=compraPosiciones(t);assert.equal(r.tramos[0].cuplas,null);assert.equal(r.tramos[0].cuplasConocidas,3);assert.equal(r.tramos[0].estadoCuplas,'parcial');assert.equal(r.canos[0].cuplas,3);assert.equal(r.canos[0].cuplasPendientes,true);assert.equal(r.tramos[0].segmentos.find(s=>s.continuidadConocida===false).metros,2);
+});
+test('cuplas automáticas: un intervalo relativo conocido después de otro desconocido sigue siendo utilizable',()=>{
+ const t=conPosiciones(16,[{tipo:'codo90',metrosAntes:null},{tipo:'tee',metrosAntes:10}],null),r=compraPosiciones(t);assert.equal(r.tramos[0].cuplasConocidas,2);assert.equal(r.tramos[0].cuplas,null);
+});
+test('cuplas automáticas: cambios de medidas actualizan los resultados sin tocar accesorios',()=>{
+ const t=conPosiciones(10,[{tipo:'codo90',metrosAntes:5}],5),antes=JSON.stringify(t);assert.equal(compraPosiciones(t).tramos[0].cuplas,2);assert.equal(JSON.stringify(t),antes);t.detalle.accesorios[0].metrosAntes=4;t.detalle.metrosFinal=6;assert.equal(compraPosiciones(t).tramos[0].cuplas,1);
+});
+test('cuplas automáticas: posiciones contradictorias o accesorios no ubicados no se convierten en cero',()=>{
+ const api=require('../materiales/planificador-gas.js'),t=conPosiciones(10,[{tipo:'codo90',metrosAntes:8}],8);assert.equal(compraPosiciones(t).tramos[0].cuplas,null);assert.equal(compraPosiciones(t).tramos[0].cuplasConocidas,0);
+ t.detalle.metrosFinal=2;const r=api.continuidadCuplas(t,{conteos:{codo90:2}});assert.equal(r.segmentos.length,0);assert.equal(r.completa,false);assert.ok(r.pendientes.length);
+ assert.equal(api.continuidadCuplas(t,{adicionales:[{tipo:'tee',cantidad:1}]}).segmentos.length,0);
+});
+test('cuplas automáticas: reconoce ceros declarados y deduce solo el resto único del tramo',()=>{
+ const api=require('../materiales/planificador-gas.js');const r=api.continuidadCuplas({id:'a',metros:10},{conteos:{codo90:0,codo45:0,tee:0,reduccion:0,llave:0}});assert.equal(r.completa,true);assert.equal(r.segmentos[0].metros,10);
+ const t=conPosiciones(10,[{tipo:'codo90',metrosAntes:4}],null);assert.equal(compraPosiciones(t).tramos[0].cuplas,1);assert.equal(compraPosiciones(t).tramos[0].segmentos[1].metros,6);
+});
+test('cuplas automáticas: diámetros distintos mantienen los conteos independientes',()=>{
+ const t=conPosiciones(10,[{tipo:'reduccion',metrosAntes:5,salida:'20 mm'}],5),r=compraPosiciones(t);assert.equal(r.canos.length,2);assert.deepEqual(r.canos.map(g=>[g.diametro,g.cuplas]),[['25 mm',1],['20 mm',1]]);
+ t.detalle.accesorios[0].salida='';const incompleto=compraPosiciones(t);assert.ok(incompleto.canos.some(g=>g.estadoDiametro==='pendiente'));assert.equal(incompleto.tramos[0].cuplas,2);
+});

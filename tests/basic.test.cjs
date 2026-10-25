@@ -2032,3 +2032,25 @@ test('Compra GAS: respaldo JSON completo conserva cortes, proyecto y cantidades 
 test('Compra GAS: distribución importada incompleta queda pendiente sin impedir consultar materiales',()=>{
  const a=app();a.run("abrir('gas');abrirEjercicioSigas19Gas();datosPlanGas().cortesCompra={'ref-M-A':{grupos:{dato:'incompleto'},confirmado:true,firma:'anterior'}};calcularMaterialesManualGas()");assert.equal(a.run('revisionMaterialesGas.plan.longitudInformada'),58);assert.equal(cantidadManual(a,'codo90'),19);assert.ok(a.run("prepararCompraActualGas(revisionMaterialesGas.plan).pendientes.some(s=>s.includes('Distribución conservada'))"));assert.ok(descendientesPresentacion(a.elements.get('resumenPrincipalMaterialesGas')).some(n=>n.textContent==='PREPARACIÓN DE COMPRA'));
 });
+
+function proyectoCuplasAutomaticas(a,metros,acc,final){
+ a.run("abrir('gas');crearProyectoGas('Cuplas automáticas');seleccionarCatalogoSistemaGas('sigas')");
+ a.ctx.casoCuplas={id:'cuplas-t',desde:'M',hasta:'Calefactor',metros,diametro:null,consumo:null,detalle:{estado:acc.length?'pendiente':'ninguno',accesorios:acc,metrosFinal:final}};
+ a.run("tramos=[casoCuplas];artefactos=[{id:'cal',nombre:'Calefactor',consumo:3000}];proyectoGasActual().conteosRapidosGas={'cuplas-t':{codo90:casoCuplas.detalle.accesorios.filter(a=>a.tipo==='codo90').length,codo45:casoCuplas.detalle.accesorios.filter(a=>a.tipo==='codo45').length,tee:0,reduccion:0,llave:0}};guardarDatos();calcularMaterialesManualGas()");
+}
+test('Cuplas: resultados principales, tramo y diámetro reutilizan las posiciones ya cargadas',()=>{
+ const a=app();proyectoCuplasAutomaticas(a,10,[{tipo:'codo90',metrosAntes:5,salida:''}],5);const c=a.run('prepararCompraActualGas(revisionMaterialesGas.plan)');assert.equal(c.largoComercial,4);assert.equal(c.tramos[0].cuplas,2);assert.equal(c.canos[0].cuplas,2);
+ const ns=descendientesPresentacion(a.elements.get('resumenPrincipalMaterialesGas'));assert.ok(ns.some(n=>n.textContent==='2 unidad estimadas'));assert.ok(ns.some(n=>/^Cuplas: 2 calculadas por segmentos/.test(n.textContent)));assert.equal(cantidadManual(a,'codo90'),1);
+});
+test('Cuplas: posiciones parciales muestran solo las calculadas y mantienen el resto pendiente',()=>{
+ const a=app();proyectoCuplasAutomaticas(a,17,[{tipo:'codo90',metrosAntes:10,salida:''},{tipo:'codo45',metrosAntes:null,salida:''}],5);const c=a.run('prepararCompraActualGas(revisionMaterialesGas.plan)');assert.equal(c.tramos[0].cuplasConocidas,3);assert.equal(c.tramos[0].cuplas,null);const ns=descendientesPresentacion(a.elements.get('resumenPrincipalMaterialesGas'));assert.ok(ns.some(n=>n.textContent==='3 unidad conocidas · resto pendiente'));
+});
+test('Cuplas: guardar una modificación de posiciones recalcula sin pulsar calcular otra vez',()=>{
+ const a=app();proyectoCuplasAutomaticas(a,10,[{tipo:'codo90',metrosAntes:5,salida:''}],5);a.run("tramos[0].detalle.accesorios[0].metrosAntes=4;tramos[0].detalle.metrosFinal=6;guardarDatos()");assert.equal(a.run('prepararCompraActualGas(revisionMaterialesGas.plan).tramos[0].cuplas'),1);assert.ok(descendientesPresentacion(a.elements.get('resumenPrincipalMaterialesGas')).some(n=>n.textContent==='1 unidad estimadas'));
+ const b=app(a.saved());b.run("abrir('gas');calcularMaterialesManualGas()");assert.equal(b.run('prepararCompraActualGas(revisionMaterialesGas.plan).tramos[0].cuplas'),1);
+ a.run("proyectoGasActual().conteosRapidosGas['cuplas-t'].codo90=2;guardarDatos()");assert.equal(a.run('prepararCompraActualGas(revisionMaterialesGas.plan).tramos[0].cuplas'),null);
+});
+test('Cuplas: cálculo parcial se incluye en PDF como parcial y mantiene intacto el ejemplo SIGAS',()=>{
+ const a=app();proyectoCuplasAutomaticas(a,17,[{tipo:'codo90',metrosAntes:10,salida:''},{tipo:'codo45',metrosAntes:null,salida:''}],5);a.run('prepararInformeActual()');assert.match(a.elements.get('informeImpresion').innerHTML,/3 calculadas; resto pendiente/);
+ a.run('abrirEjercicioSigas19Gas()');assert.equal(a.run('revisionMaterialesGas.plan.longitudInformada'),58);for(const [tipo,n]of [['codo90',19],['tee',2],['llave',3]])assert.equal(cantidadManual(a,tipo),n);assert.deepEqual(Array.from(a.run('calcularPreseleccionSigasGas().filas'),f=>f.candidato.exteriorMm),[32,25,25,20,25]);assert.equal(a.run('calcularPreseleccionSigasGas().definitivo'),false);
+});

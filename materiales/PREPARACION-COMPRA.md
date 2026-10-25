@@ -14,3 +14,11 @@ Se parte del inventario físico conciliado existente. El motor SIGAS, sus tablas
 - El PDF único incluye la preparación comercial como estimación separada. No se suman sus filas a los materiales como nuevas piezas.
 
 Pendientes reales: posiciones y continuidad no declaradas; cotejo de uniones registradas; medidas y productos terminales; configuración y vías de tees; diámetros definitivos y condiciones técnicas; confirmación del largo del producto; tolerancias de corte y aprobación profesional. Pasar pruebas de software no valida una instalación de gas.
+
+## Cuplas desde posiciones registradas
+
+Se leen las distancias relativas `metrosAntes` y `metrosFinal` del detalle existente. Codos de 90°/45°, tees, reducciones, llaves y conexiones registradas delimitan segmentos; no se agrega otra cupla en sus extremos. Si todos los intervalos anteriores están informados, el resto único se obtiene de la longitud total. Un campo desconocido no se transforma en cero.
+
+Con posiciones parciales se conservan los intervalos conocidos y su contribución de cuplas, por tramo y por diámetro. El total permanece pendiente. Si los totales rápidos contradicen el detalle o hay piezas adicionales sin posición, no se supone que estén fuera de los intervalos. Los diámetros posteriores a una reducción sin medida permanecen desconocidos.
+
+La información derivada alimenta la planificación física y sus firmas de actualización, sin modificar el proyecto original ni el motor SIGAS. Las distribuciones manuales se conservan y se revisan si cambian sus datos. Las cuplas registradas se mantienen separadas y requieren cotejo antes de sumarse a las uniones calculadas.
