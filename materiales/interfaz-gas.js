@@ -674,14 +674,15 @@ function avisosListaManualGas(plan){
 function renderListaManualSimpleGas(out,plan,modelo){
  const texto=(padre,s)=>{const p=document.createElement('p');p.textContent=textoMaterialPantallaGas(s);padre.append(p);};
  texto(out,ambitoGas==='demostracion'?'DEMOSTRACIÓN · lista de materiales':ambitoGas==='proyecto'&&!proyectos.gas.nombreProyecto?'MI PROYECTO · lista de materiales':nombreProyectoGas()+' · lista de materiales');
- renderPreseleccionSigasGas(out,plan);
- const tabla=document.createElement('table');tabla.className='tabla gas-lista-simple';if(resumenListaManualGas(plan).some(f=>!f.diametro)){const caption=document.createElement('caption');caption.textContent='Diámetros: pendientes de verificación.';tabla.append(caption);}const head=document.createElement('thead'),hr=document.createElement('tr');for(const s of ['Material','Cantidad']){const th=document.createElement('th');th.textContent=s;hr.append(th);}head.append(hr);tabla.append(head);const body=document.createElement('tbody');
- for(const f of resumenListaManualGas(plan)){
+ const unificado=resultadoUnificadoGas(plan);renderTablaTecnicaUnificadaGas(out,unificado);
+ const tituloMateriales=document.createElement('h3');tituloMateriales.textContent='Materiales necesarios';out.append(tituloMateriales);
+ const tabla=document.createElement('table');tabla.className='tabla gas-lista-simple';if(unificado.materiales.some(f=>!f.diametro)){const caption=document.createElement('caption');caption.textContent='Diámetros: pendientes de verificación.';tabla.append(caption);}const head=document.createElement('thead'),hr=document.createElement('tr');for(const s of ['Material','Cantidad']){const th=document.createElement('th');th.textContent=s;hr.append(th);}head.append(hr);tabla.append(head);const body=document.createElement('tbody');
+ for(const f of unificado.materiales){
   const tr=document.createElement('tr'),nombre=document.createElement('td'),cantidad=document.createElement('td');nombre.textContent=f.material+(f.diametro?' · '+f.diametro:'');
   cantidad.textContent=f.pendiente?(f.cantidad>0?fmt(f.cantidad)+' '+f.unidad+' conocidas · resto pendiente':'Pendiente'):fmt(f.cantidad)+' '+f.unidad+(f.estimado&&f.cantidad>0?' estimadas':'');tr.append(nombre,cantidad);body.append(tr);
  }
  tabla.append(body);out.append(tabla);
- const pendientes=document.createElement('details'),titulo=document.createElement('summary');pendientes.className='gas-detalles';titulo.textContent='Datos técnicos pendientes';pendientes.append(titulo);for(const s of avisosListaManualGas(plan))texto(pendientes,s);renderEstadoCierreGas(out,pendientes,plan);out.append(pendientes);renderConexionesTerminalesGas(out);
+ const pendientes=document.createElement('details'),titulo=document.createElement('summary');pendientes.className='gas-detalles';titulo.textContent='Datos técnicos pendientes';pendientes.append(titulo);for(const s of avisosListaManualGas(plan))texto(pendientes,s);renderEstadoCierreGas(out,pendientes,plan);const longitudes=document.createElement('p');longitudes.textContent=unificado.notaLongitud;pendientes.append(longitudes);renderPreseleccionSigasGas(pendientes,plan,{resultado:unificado.tecnico,ocultarTabla:true});renderConexionesTerminalesGas(pendientes);out.append(pendientes);
  const detalles=document.createElement('details'),sum=document.createElement('summary');sum.textContent='Ver detalle por tramo y consumos';detalles.append(sum);
  const red=plan.redManual;
  if(red)texto(detalles,red.total===null?'Consumo total conectado: Pendiente. Los consumos parciales conocidos se conservan.':'Consumo total conectado: '+fmt(red.total)+' kcal/h, sin aplicar reducción por simultaneidad. No dimensiona diámetros.');
@@ -701,4 +702,49 @@ function renderEstadoRedManualGas(out){
  for(const s of [...r.errores,...r.avisos,...r.faltantes])texto(s);
  texto(r.total===null?'Consumo conectado total: Pendiente.':'Consumo conectado total: '+fmt(r.total)+' kcal/h.');
  for(const t of tramos)texto(t.desde+'–'+t.hasta+': '+(Number.isFinite(r.porTramo[t.id])?fmt(r.porTramo[t.id])+' kcal/h acumulados':'Consumo pendiente'));
+}
+
+// Vista única derivada del plan vigente: pantalla y PDF comparten estos mismos datos.
+let cacheResultadoUnificadoGas=null;
+function resultadoUnificadoGas(plan=revisionMaterialesGas?.plan){
+ if(!plan)return null;
+ const perfil=perfilTecnicoActualGas(),clave=JSON.stringify({ambito:ambitoGas,firma:firmaMaterialesGas(),plan,perfil,tramos,artefactos,config:proyectoGasActual().calculoSigas,conexiones:proyectoGasActual().conexionesTerminalesGas});
+ if(cacheResultadoUnificadoGas?.clave===clave)return cacheResultadoUnificadoGas.modelo;
+ let entrada=null,tecnico=null;try{entrada=entradaPreseleccionSigasGas();tecnico=entrada?DimensionamientoSigas.resolver(SIGAS_ED15_2025,entrada):null;}catch(e){tecnico={filas:[],recorridos:[],historia:[],errores:[e.message],pendientes:[]};}
+ const inventario=entrada?.inventario||inventarioAccesoriosParaMotorGas(plan.redManual||redFisicaManualGas()),conexiones=inventario.conexiones;
+ const pcs=Number(perfil.poderCalorifico),caudalValido=Number.isFinite(pcs)&&pcs>0&&!(plan.redManual?.errores||[]).length;
+ const planilla=tramos.map(t=>{
+  const f=tecnico?.filas.find(f=>f.id===t.id),ruta=tecnico?.recorridos.find(r=>r.artefacto===f?.recorridoControl),piezas=inventario.fisicas.filter(p=>p.tramos.includes(t.id));
+  const aportes=(ruta?.aportes||[]).filter(a=>piezas.some(p=>p.id===a.piezaId&&p.tramos.length===1));
+  const completo=!!ruta?.equivalenteCompleto&&piezas.every(p=>p.tramos.length===1&&aportes.some(a=>a.piezaId===p.id));
+  const conocido=aportes.length?aportes.reduce((n,a)=>n+a.equivalenteTotalM,0):null,equivalente=completo?(conocido??0):null;
+  return {tramo:t.desde+'–'+t.hasta,real:t.metros,equivalente,equivalenteConocido:conocido,definitivo:equivalente===null?null:t.metros+equivalente,consumo:f?f.caudalM3h:(caudalValido&&Number.isFinite(plan.redManual?.porTramo[t.id])?plan.redManual.porTramo[t.id]/pcs:null),diametro:t.diametro?t.diametro+' (manual; no validado)':f?.candidato?f.candidato.exteriorMm+' mm exterior (candidato condicionado)':'Pendiente',recorridoControl:f?.recorridoControl||null};
+ });
+ let materiales=resumenListaManualGas(plan).map(f=>({...f}));
+ const codos=materiales.filter(f=>f.tipo==='codo90'),clasificacion=conexiones?.clasificacionPorTramo||[],totalClasificado=clasificacion.reduce((n,c)=>n+c.codosRegistrados,0),terminales=clasificacion.reduce((n,c)=>n+c.codosTerminalesFusionRosca,0);
+ if(codos.length===1&&terminales>0&&!codos[0].pendiente&&codos[0].cantidad===totalClasificado){
+  const base=codos[0];materiales=materiales.flatMap(f=>f!==base?[f]:[{...f,material:'Codos 90° comunes',cantidad:f.cantidad-terminales},{...f,tipo:'codo90-terminal',material:'Codos 90° terminales fusión–rosca',cantidad:terminales}]);
+ }
+ const modelo={plan,tecnico,conexiones,planilla,materiales,perfil,advertencia:'Diámetros candidatos condicionados; definitivos BLOQUEADOS. Pérdidas pendientes no son cero. Verificación profesional y normativa requerida.',notaLongitud:'DEFINITIVO de esta planilla = REAL + EQUIVALENTE completo del tramo. El diámetro candidato utiliza el recorrido de control del motor, disponible en los detalles técnicos.'};
+ cacheResultadoUnificadoGas={clave,modelo};return modelo;
+}
+function valorTecnicoUnificadoGas(f,campo){
+ const v=f[campo];return Number.isFinite(v)?Number(v).toLocaleString('es-AR',{maximumFractionDigits:3}):campo==='equivalente'&&Number.isFinite(f.equivalenteConocido)?'Pendiente ('+Number(f.equivalenteConocido).toLocaleString('es-AR',{maximumFractionDigits:3})+' m conocidos)':'Pendiente';
+}
+function renderTablaTecnicaUnificadaGas(out,modelo){
+ const h=document.createElement('h3');h.textContent='Cálculo técnico por tramo';out.append(h);
+ const tabla=document.createElement('table');tabla.className='tabla sigas-diametros gas-tecnica-unificada';const head=document.createElement('thead'),fila=document.createElement('tr');
+ for(const s of ['TRAMO','REAL (m)','EQUIVALENTE (m)','DEFINITIVO (m)','CONSUMO (m³/h)','DIÁMETRO']){const th=document.createElement('th');th.textContent=s;fila.append(th);}head.append(fila);tabla.append(head);const body=document.createElement('tbody');
+ for(const f of modelo.planilla){const tr=document.createElement('tr');for(const s of [f.tramo,...['real','equivalente','definitivo','consumo'].map(k=>valorTecnicoUnificadoGas(f,k)),f.diametro]){const td=document.createElement('td');td.textContent=s;tr.append(td);}body.append(tr);}tabla.append(body);out.append(tabla);
+ const nota=document.createElement('p');nota.className='nota-unificada';nota.textContent=modelo.advertencia;out.append(nota);
+}
+
+function generarPdfCompletoGas(){
+ if(modulo!=='gas')return false;
+ if(fuenteMaterialesGas!=='proyecto'){$('matMensaje').textContent='El ejemplo de materiales es una vista separada. Seleccioná tu proyecto o demostración para generar su PDF completo.';return false;}
+ const borrador=['desde','hasta','metros'].some(id=>String($(id).value||'').trim()!=='');
+ if(borrador||!revisionMaterialesGas||revisionMaterialesGas.firma!==firmaMaterialesGas()){
+  $('matMensaje').textContent='Presioná CALCULAR CAÑERÍA para actualizar el resultado antes de generar el PDF. Los datos y el respaldo se conservan.';if($('matMensaje').scrollIntoView)$('matMensaje').scrollIntoView({block:'center'});return false;
+ }
+ imprimirInformeActual();return true;
 }

@@ -1,6 +1,17 @@
 let ultimoDocumentoPreparado=null;
 function modeloInformeActual(){
  const gas=modulo==='gas',d={titulo:({gas:'GAS',agua:'AGUA',cloacas:'CLOACAS'})[modulo]||'Sin proyecto seleccionado',ambito:gas?(ambitoGas==='demostracion'?'DEMOSTRACIÓN · datos de práctica separados':ambitoGas==='proyecto'&&!proyectos.gas.nombreProyecto?'MI PROYECTO':'PROYECTO · '+nombreProyectoGas()):'MI PROYECTO',tramos:gas?tramos:[],artefactos:gas?artefactos:[],filas:[],resumen:[],observaciones:$('duda').value.trim(),advertencia:gas?'Diámetros automáticos definitivos BLOQUEADOS. Cantidades estimadas y datos pendientes conservan su condición. Informe de revisión; no aprueba una instalación real.':''};
+ if(gas&&fuenteMaterialesGas==='proyecto'&&revisionMaterialesGas?.plan?.manualDirecto&&revisionMaterialesGas.firma!==firmaMaterialesGas()){
+  d.resultadoUnificado=true;d.planilla=tramos.map(t=>({tramo:t.desde+'–'+t.hasta,real:t.metros,equivalente:null,definitivo:null,consumo:null,diametro:'Pendiente'}));d.materialesAgrupados=[];d.resumen=['Resultado desactualizado: presioná CALCULAR CAÑERÍA para actualizar ambos apartados. El respaldo anterior se conserva.'];return d;
+ }
+ if(gas&&fuenteMaterialesGas==='proyecto'&&revisionMaterialesGas?.plan?.manualDirecto&&revisionMaterialesGas.firma===firmaMaterialesGas()){
+  const u=resultadoUnificadoGas();d.resultadoUnificado=true;d.planilla=u.planilla;d.materialesAgrupados=u.materiales.map(f=>({...f,diametro:f.diametro||'Pendiente',cantidad:f.pendiente?null:f.cantidad,estado:f.pendiente?'pendiente':f.estimado?'estimado':'informado',revisado:false,ubicaciones:[]}));d.filas=u.plan.filas;
+  d.resumen=['Sistema: '+(u.perfil.catalogoTecnicoGas||'Pendiente')+' · combustible: '+(u.perfil.gas||'Pendiente')+'.',u.notaLongitud,'Longitud total informada: '+u.plan.longitudInformada+' m. Consumo total: '+(u.plan.redManual?.total??'Pendiente')+' kcal/h.','Medidor: conexión roscada requerida; pieza exacta pendiente si no está identificada. Cuplas y reducciones por cambios de diámetro: pendientes donde falten datos.'];d.advertencia=u.advertencia;
+  const avisos=avisosListaManualGas(u.plan);d.resumen.push(...avisos.filter(t=>/Cantidad pendiente|casillero M/.test(t)));
+  if(fotoURL&&/^(data:image\/(?:png|jpeg|webp);base64,|blob:)/.test(fotoURL))d.croquis={url:fotoURL,confirmado:croquisEntregaDisponible()&&!proyectoGasActual().entregaGas?.requiereConfirmacion&&proyectoGasActual().entregaGas?.firmaCroquis===firmaCroquisEntrega()};
+  return d;
+ }
+
  if(gas){
   d.resumen.push(modoManualGasActivo()?'Cálculo manual: cantidades ingresadas una sola vez, sin segunda confirmación; revisión técnica pendiente.':avisoConciliacionRapidaGas());
   const avisoDeteccion=avisoDeteccionGas();if(avisoDeteccion)d.resumen.push(avisoDeteccion);
