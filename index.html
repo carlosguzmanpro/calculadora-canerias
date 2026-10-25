@@ -63,6 +63,14 @@ dialog img{max-height:78vh;max-width:90vw}
 }
 
 /* Presentación GAS: controles únicos, sin alterar datos ni cálculos. */
+#menuGas .gas-selector-proyectos label{flex:1 1 150px}
+#menuGas .gas-selector-proyectos button{padding:10px;font-size:14px}
+#menuGas>p:empty{display:none}
+#estadoAmbitoGas{font-size:13px;line-height:1.3;margin:8px 0}
+#menuGas>label{margin-top:8px}
+.gas-acciones-principales{margin-top:12px}
+#calcularCaneriaGas{font-weight:bold;min-height:48px}
+
 .gas-materiales-tarjetas{display:grid;gap:8px;min-width:0}
 .gas-material-card{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:5px 10px;align-content:start;border:1px solid #cbdcdd;border-radius:10px;padding:10px;background:#fff;min-width:0;overflow-wrap:anywhere}
 .gas-material-card h3{grid-column:1/-1;margin:0;color:#126458;font-size:17px}
@@ -152,26 +160,26 @@ section{box-shadow:none}
 
 <section id="trabajo" class="oculto">
 <button class="alt" onclick="volver()">← Cambiar especialidad</button>
-<h2 id="titulo"></h2><button class="alt" onclick="imprimirInformeActual()">Imprimir informe / guardar PDF</button>
+<h2 id="titulo"></h2><button id="imprimirGeneral" class="alt" onclick="imprimirInformeActual()">Imprimir informe / guardar PDF</button>
 
 <div id="menuGas" class="oculto">
-<div class="gas-selector-proyectos"><label>Proyecto de GAS <select id="ambitoGas" onchange="seleccionarAmbitoGas(this.value)"><option value="proyecto">Mi proyecto</option><option value="demostracion">Demostración separada</option></select></label><button class="alt" onclick="mostrarEditorProyectoGas('crear')">Nuevo proyecto</button><button class="alt" onclick="mostrarEditorProyectoGas('renombrar')">Renombrar proyecto</button></div>
+<div class="gas-selector-proyectos"><label>Proyecto de GAS <select id="ambitoGas" onchange="seleccionarAmbitoGas(this.value)"><option value="proyecto">Mi proyecto</option><option value="demostracion">Demostración separada</option></select></label><button class="alt" onclick="mostrarEditorProyectoGas('crear')">Nuevo proyecto</button></div>
 <div id="editorProyectosGas" class="detalle oculto"><label for="nombreProyectoGas">Nombre del proyecto</label><input id="nombreProyectoGas" type="text" maxlength="80" placeholder="Ej.: Casa de Ana"><button id="guardarNombreProyectoGas" onclick="guardarNombreProyectoGas()">Crear proyecto vacío</button><button class="alt" onclick="cancelarEditorProyectoGas()">Cancelar</button></div><p id="mensajeProyectosGas" role="status" aria-live="polite"></p><p id="estadoAmbitoGas"></p>
-<label for="catalogoSistemaGas">Sistema de cañería · se conserva por proyecto</label><select id="catalogoSistemaGas" onchange="seleccionarCatalogoSistemaGas(this.value)"><option value="">Pendiente de seleccionar</option><option value="acero-epoxi-roscado-gn">Acero epoxi · roscado</option><option value="sigas">SIGAS Thermofusión · manual ed.15 / 2025</option><option value="fusiogas">FUSIOGAS Thermofusión · V.1.2026</option></select><p id="estadoCatalogoSistemaGas" role="status" aria-live="polite"></p>
-<label for="combustibleSistemaGas">Combustible del proyecto</label><select id="combustibleSistemaGas" onchange="seleccionarCombustibleGas(this.value)"><option value="">Pendiente / revisar datos guardados</option><option value="GN">Gas natural</option><option value="GLP">GLP (composición por verificar)</option><option value="propano-gaseoso">Propano gaseoso identificado (SIGAS Tabla 5)</option></select><p id="estadoCombustibleGas" role="status" aria-live="polite"></p><details class="gas-detalles"><summary>Largo comercial del caño</summary><p id="estadoLargoComercialGas"></p><button id="usarLargoDocumentadoGas" class="alt oculto" onclick="usarLargoDocumentadoGas()">Usar largo documentado de 4 m para este proyecto</button></details>
-<details class="gas-detalles solo-pantalla"><summary>Entrada al casillero del medidor M</summary><label for="entradaCasilleroGas">¿Por dónde entra la cañería?</label><select id="entradaCasilleroGas" onchange="guardarCasilleroMedidorGas()"><option value="desconocida">No está indicada / pendiente</option><option value="lateral">Por un lateral</option><option value="posterior">Por atrás</option><option value="superior">Por arriba</option></select><div id="cotejoCodoCasilleroGas" class="oculto"><label for="codoCasilleroGas">Codo de 90° dentro del casillero</label><select id="codoCasilleroGas" onchange="guardarCasilleroMedidorGas()"><option value="pendiente">No sé si ya está contado</option><option value="incluido">Ya está incluido en mis cantidades o detalle</option><option value="no-incluido">No está incluido: agregar un codo</option></select></div><p id="estadoCasilleroGas" role="status" aria-live="polite"></p><p class="nota">Solo conteo de materiales. No se agregan cuplas, uniones dobles, entrerroscas ni otras conexiones del medidor.</p></details>
-<div class="detalle solo-pantalla"><h3>Datos de tu instalación GAS</h3><p>Cargá tramos, artefactos y cantidades una sola vez. La foto y el plano son opcionales. No necesitás confirmar nuevamente los accesorios.</p><button onclick="mostrarVista('croquis');$('editarTramosGas').open=true;desplazarResultadoMaterialesGas('formularioGas')">Cargar o editar tramos y cantidades</button><details class="gas-detalles"><summary>Herramientas de revisión anteriores (opcionales)</summary><button class="alt" onclick="desplazarResultadoMaterialesGas()">Ir al resultado actual</button></details><button class="alt" onclick="mostrarPlanoOpcionalGas()">Agregar plano (opcional)</button></div>
+<label for="catalogoSistemaGas">Sistema de cañería</label><select id="catalogoSistemaGas" onchange="seleccionarCatalogoSistemaGas(this.value)"><option value="">Pendiente de seleccionar</option><option value="acero-epoxi-roscado-gn">Acero epoxi · roscado</option><option value="sigas">SIGAS Thermofusión · manual ed.15 / 2025</option><option value="fusiogas">FUSIOGAS Thermofusión · V.1.2026</option></select>
+<label for="combustibleSistemaGas">Tipo de combustible</label><select id="combustibleSistemaGas" onchange="seleccionarCombustibleGas(this.value)"><option value="">Pendiente / revisar datos guardados</option><option value="GN">Gas natural</option><option value="GLP">GLP (composición por verificar)</option><option value="propano-gaseoso">Propano gaseoso identificado (SIGAS Tabla 5)</option></select><div class="gas-acciones-principales"><button id="editarDatosGas" class="alt" onclick="mostrarVista('croquis');$('editarTramosGas').open=true;desplazarResultadoMaterialesGas('formularioGas')">Cargar o editar tramos</button><button id="calcularCaneriaGas" onclick="calcularMaterialesManualGas()">CALCULAR CAÑERÍA</button></div>
 <details id="ejerciciosGasSeparados" class="gas-detalles solo-pantalla"><summary>Ejercicios y demostraciones · separados de mis proyectos</summary><p>Datos de prueba: no reemplazan tus instalaciones ni interpretan fotografías.</p><button class="alt" onclick="abrirEjercicioSigas19Gas()">Abrir ejercicio SIGAS · 58 m y 19 codos (proyecto separado)</button><button class="alt" onclick="generarPlanGas('ejemplo')">Probar materiales: calefón y cocina</button></details>
-<details id="herramientasGasOpcionales" class="gas-detalles solo-pantalla"><summary>Croquis, PDF y opciones avanzadas</summary>
+<details id="herramientasGasOpcionales" class="gas-detalles solo-pantalla"><summary>Revisiones y opciones avanzadas</summary><button class="alt" onclick="mostrarEditorProyectoGas('renombrar')">Renombrar proyecto</button><p id="estadoCatalogoSistemaGas" role="status" aria-live="polite"></p><p id="estadoCombustibleGas" role="status" aria-live="polite"></p><details class="gas-detalles"><summary>Largo comercial del caño</summary><p id="estadoLargoComercialGas"></p><button id="usarLargoDocumentadoGas" class="alt oculto" onclick="usarLargoDocumentadoGas()">Usar largo documentado de 4 m para este proyecto</button></details>
+<details class="gas-detalles solo-pantalla"><summary>Entrada al casillero del medidor M</summary><label for="entradaCasilleroGas">¿Por dónde entra la cañería?</label><select id="entradaCasilleroGas" onchange="guardarCasilleroMedidorGas()"><option value="desconocida">No está indicada / pendiente</option><option value="lateral">Por un lateral</option><option value="posterior">Por atrás</option><option value="superior">Por arriba</option></select><div id="cotejoCodoCasilleroGas" class="oculto"><label for="codoCasilleroGas">Codo de 90° dentro del casillero</label><select id="codoCasilleroGas" onchange="guardarCasilleroMedidorGas()"><option value="pendiente">No sé si ya está contado</option><option value="incluido">Ya está incluido en mis cantidades o detalle</option><option value="no-incluido">No está incluido: agregar un codo</option></select></div><p id="estadoCasilleroGas" role="status" aria-live="polite"></p><p class="nota">Solo conteo de materiales. No se agregan cuplas, uniones dobles, entrerroscas ni otras conexiones del medidor.</p></details>
+
 <nav class="opciones solo-pantalla" aria-label="Accesos directos de GAS">
-<button class="alt" onclick="irSeccionGas('tramos')">Ir a tramos</button><button class="alt" onclick="irSeccionGas('foto')">Ir a fotografía</button>
+
 <button class="alt" onclick="irSeccionGas('conciliacion')">Conciliación avanzada (opcional)</button><button class="alt" onclick="irSeccionGas('materiales')">Ver materiales</button>
 <button class="alt" onclick="irSeccionGas('pdf')">Documento PDF</button>
 </nav>
 <button onclick="mostrarVista('dimensionGas')">Calcular diámetros · diagnóstico</button>
 <button class="alt" onclick="mostrarVista('redGas')">Instalación: datos y conexiones de GAS</button>
 <button class="alt" onclick="mostrarVista('revisionCroquis')">Revisar croquis y ejemplos</button>
-<button onclick="mostrarVista('croquis')">📷 Trabajar con croquis y tramos</button>
+
 <button class="alt" onclick="mostrarVista('consumos')">🧮 Consulta de consumos de gas</button>
 </details>
 </div>
@@ -382,13 +390,13 @@ section{box-shadow:none}
 <p>No se leyó la fotografía. Las conexiones permiten proponer piezas, pero no prueban su existencia ni la normativa. Solo las confirmadas se incorporan; las desconocidas quedan pendientes. Las cuplas confirmadas se cotejan con el plan existente, sin sumar dos veces sus uniones.</p>
 <p id="deteccionMensaje" role="status" aria-live="polite"></p><div id="deteccionFilas"></div>
 </section>
-</details><button onclick="calcularMaterialesManualGas()">Calcular materiales</button><details class="gas-detalles"><summary>Referencia de cálculo y detección anterior</summary><button onclick="calcularMaterialesConSugerenciasGas()">🧮 CALCULAR MATERIALES · referencia anterior</button>
+</details><details class="gas-detalles"><summary>Referencia de cálculo y detección anterior</summary><button onclick="calcularMaterialesConSugerenciasGas()">🧮 CALCULAR MATERIALES · referencia anterior</button>
 <p class="nota">Con detección activa, los accesorios confirmados están en la lista revisable del plan de compra. El resumen clásico de tiras se conserva aparte.</p>
 <div id="resultadoMateriales" class="resultado" aria-live="polite">Agregá tramos y tocá CALCULAR MATERIALES.</div>
-</details><button class="alt" onclick="abrirPlanGas()">Ver lista y opciones de compra</button>
+</details>
 <section id="planCompraGas" class="oculto">
 <h3>GAS · diámetros y materiales para revisión</h3><div id="resumenPrincipalMaterialesGas" class="resultado" aria-live="polite"></div>
-<div class="aviso">Los diámetros definitivos siguen bloqueados. Cantidad identificada no significa medida confirmada. La compra y las cuplas quedan pendientes si faltan posiciones de accesorios. El cálculo anterior de tiras de 6 m se conserva como referencia separada.</div>
+<details class="gas-detalles"><summary>Alcance técnico de los resultados</summary><p>Diámetros definitivos bloqueados. Cantidades y medidas tienen verificaciones independientes. Compra y cuplas pendientes si faltan posiciones. La referencia de tiras de 6 m se conserva en opciones avanzadas.</p></details>
 <details id="opcionesAvanzadasPlanGas" class="gas-detalles"><summary>Opciones de compra y revisión avanzada (opcionales)</summary><label>Largo comercial del caño (m)<input id="matLargo" type="number" min="0.01" step="any" value="6" onchange="guardarOpcionesMaterialesGas()"></label>
 <label><input id="matReusar" type="checkbox" style="width:auto" onchange="guardarOpcionesMaterialesGas()"> Proponer reutilización de sobrantes compatibles entre segmentos</label>
 <label>Sobrante mínimo recuperable (m)<input id="matSobrante" type="number" min="0" step="any" value="0.5" onchange="guardarOpcionesMaterialesGas()"></label>
@@ -414,21 +422,21 @@ section{box-shadow:none}
 </details>
 </details><p id="matMensaje" aria-live="polite"></p>
 <details id="ajustesAvanzadosGas" class="gas-detalles"><summary>Detalle técnico y edición avanzada de materiales</summary><div id="matResultado" class="resultado" aria-live="polite"></div></details>
-<button class="alt" onclick="imprimirMaterialesGas()">Imprimir lista revisada</button>
-<button class="alt" onclick="descargarMaterialesGas()">Descargar lista revisada (CSV)</button>
+<details id="exportarListaGas" class="gas-detalles"><summary>Lista de compras · PDF y CSV</summary><button class="alt" onclick="imprimirMaterialesGas()">Imprimir lista revisada</button>
+<button class="alt" onclick="descargarMaterialesGas()">Descargar lista revisada (CSV)</button></details>
 </section>
-<div class="aviso">
+<details class="gas-detalles"><summary>Supuestos de compra y advertencia profesional</summary><p>
 Estimación de compra sin reutilizar sobrantes: tiras de 6 m por segmento continuo y cuplas solo entre tiras del mismo segmento. Tees, codos y reducciones se cuentan según los datos revisados. Los tramos pendientes conservan la estimación anterior por longitud, marcada como provisoria; no confirman ausencia de accesorios. No verifica diámetros ni incluye conexiones adicionales exigidas por el sistema constructivo. Antes de construir, un profesional habilitado debe comprobar el diseño y la normativa de gas.
-</div>
+</p></details>
 </div>
 <details class="solo-pantalla"><summary>Respaldos y ajustes de resultados anteriores</summary><button class="alt" onclick="descargarRespaldoCompleto()">Descargar respaldo completo JSON</button><label>Recuperar respaldo completo JSON<input id="importarRespaldo" type="file" accept="application/json,.json"></label><p id="estadoRespaldo" role="status"></p><div id="respaldosGas"></div></details>
-<details class="gas-detalles solo-pantalla" id="planoOpcionalGas"><summary>Plano opcional · mismos datos del proyecto</summary><div id="estadoPlanoOpcionalGas"></div><button class="alt" onclick="revisarCroquisParaEntrega()">Ver fotografía de referencia</button><button class="alt" onclick="irSeccionGas('tramos')">Completar sólo los datos faltantes en los tramos</button></details>
-<h3 id="documentoEntregaGas">Documento de entrega de GAS</h3>
+<details class="gas-detalles solo-pantalla" id="planoOpcionalGas"><summary>Plano opcional · mismos datos del proyecto</summary><button class="alt" onclick="mostrarPlanoOpcionalGas()">Agregar plano (opcional)</button><div id="estadoPlanoOpcionalGas"></div><button class="alt" onclick="revisarCroquisParaEntrega()">Ver fotografía de referencia</button><button class="alt" onclick="irSeccionGas('tramos')">Completar sólo los datos faltantes en los tramos</button></details>
+<details id="entregaGasOpcional" class="gas-detalles"><summary>Documento PDF de entrega</summary><h3 id="documentoEntregaGas">Documento de entrega de GAS</h3>
 <button id="revisarEntrega" class="alt" onclick="revisarCroquisParaEntrega()">Revisar croquis para entrega</button>
 <label class="confirmacion-entrega" for="entregaCroquisConfirmado"><input id="entregaCroquisConfirmado" type="checkbox" aria-describedby="entregaEstado" onchange="confirmarCroquisEntrega()"><span>Confirmo que la foto es legible y muestra los tramos, artefactos y posiciones de esta red actual.</span></label>
 <p id="entregaAccion" role="status" aria-live="polite"></p>
 <p id="entregaEstado" role="status" aria-live="polite">Croquis pendiente de revisión. La planilla y los materiales se imprimen aunque no haya croquis confirmado.</p>
-<button class="alt" onclick="window.print()">Imprimir o guardar esta revisión</button>
+<button class="alt" onclick="window.print()">Imprimir o guardar esta revisión</button></details>
 </div>
 
 <div id="consumos" class="oculto">
@@ -16968,6 +16976,7 @@ function abrir(m){
  $('trabajo').classList.remove('oculto');
  $('titulo').textContent={gas:'🔥 GAS',agua:'💧 AGUA',cloacas:'🚽 CLOACAS'}[m];
  $('menuGas').classList.toggle('oculto',m!=='gas');
+ $('imprimirGeneral').classList.toggle('oculto',m==='gas');
  if(m==='gas'){renderAmbitoGas();actualizarDerivadosGas();if(ambitoGas.startsWith('proyecto:')&&tramos.length&&proyectoGasActual().planCompra?.revisiones?.proyecto)generarPlanGas('proyecto');}
  $('pendiente').classList.toggle('oculto',m==='gas');
  mostrarVista(m==='gas'?'croquis':'pendiente');
@@ -16989,6 +16998,7 @@ function irSeccionGas(destino){
  if(['conciliacion','materiales'].includes(destino))abrirPlanGas();
  const elemento=$(ids[destino]);if(!elemento)return;
  if(destino==='conciliacion')elemento.open=true;
+ for(let padre=elemento.parentElement;padre;padre=padre.parentElement)if(padre.tagName==='DETAILS')padre.open=true;
  if(elemento.scrollIntoView)elemento.scrollIntoView({block:'start'});
 }
 function editarDetalleDesdeConciliacionGas(id){
