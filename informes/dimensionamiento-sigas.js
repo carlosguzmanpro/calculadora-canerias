@@ -103,6 +103,20 @@ function entradaPreseleccionSigasGas(){
   if(llaveId)llaves[0].artefactoAsociado=ruta.artefacto;
   return {artefacto:ruta.artefacto,tramo,llaveId,estado:llaveId?'Llave registrada asociada; tipo exacto pendiente':cantidad===0?'Llave no identificada en este tramo; no se añadió una':'Asociación de llaves ambigua; revisar ubicación sin cambiar cantidades',conexionRequerida:'Transición fusión–rosca',geometria:inventario.fisicas.find(p=>p.necesidadTerminal==='terminal-'+ruta.artefacto)?.geometria||null,medidaRosca:config.terminales?.['terminal-'+ruta.artefacto]?.rosca||null};
  });
+ // Una revisión del inventario se conserva solo mientras no cambien red, cantidades o productos.
+ const firma=JSON.stringify({tramos:tramos.map(t=>({id:t.id,desde:t.desde,hasta:t.hasta,metros:t.metros,detalle:t.detalle})),piezas:inventario.fisicas,ceros:inventario.ceros,vinculos:config.vinculos,terminales:config.terminales,perfil});
+ const revisada=config.revisionInventario?.firma===firma&&typeof config.revisionInventario.fuente==='string'&&config.revisionInventario.fuente.trim();
+ config.inventarioPerdidasCompleto=!!revisada;config.fuenteInventario=revisada?config.revisionInventario.fuente:null;
+ config.firmaInventarioActual=firma;
+ if(revisada){
+  // Es una declaración de inventario real, nunca la estimación comercial de cuplas.
+  inventario.pendientes=inventario.pendientes.filter(t=>!/^Cuplas de /.test(t));
+  const L=estadoLargoComercialGas().configurado;
+  for(const t of tramos){
+   const ps=inventario.fisicas.filter(p=>p.tramos.includes(t.id)),interrupciones=ps.filter(p=>['codo90','codo45','tee','reduccion','llave'].includes(p.tipo)).reduce((n,p)=>n+p.cantidad,0),cuplas=ps.filter(p=>p.tipo==='cupla').reduce((n,p)=>n+p.cantidad,0);
+   if(L>0&&Math.max(0,Math.ceil(t.metros/L)-1-interrupciones)>cuplas)inventario.pendientes.push(t.desde+'–'+t.hasta+': las uniones registradas no alcanzan para las longitudes y accesorios declarados; revisar cuplas reales sin usar la estimación de compra como dato confirmado.');
+  }
+ }
  return {preparacion,perfil,inventario,config};
 }
 let cacheRegistroAccesoriosSigasGas=null;
@@ -125,7 +139,7 @@ function registroAccesoriosSigasGas(){
   const principal=piezas.find(p=>p.id===solucion.piezaId),tramo=principal?.tramos.map(id=>calculo.filas.find(f=>f.id===id)?.tramo||id).join(', ')||'Ubicación pendiente';
   propuestasCompra.push({id:'propuesta:'+clave,tramo,necesidad:solucion.necesidad,diametroMm:solucion.diametro,rosca:entrada.config.terminales?.[solucion.necesidad]?.rosca||null,estado:'propuesta-sin-confirmar',confirmada:false,afectaCalculo:false,requiereUbicacionEnTee:propuesta.requiereUbicacionEnTee,componentes:propuesta.componentes.map(c=>({productoId:c.fila.id,nombre:c.fila.nombreOriginal,tipo:c.tipo,cantidad:1,reutilizada:c.reutilizada,pagina:c.fila.pagina,coincidencias:c.reutilizada?[solucion.piezaId]:piezas.filter(p=>p.id!==solucion.piezaId&&p.tramos.some(id=>principal?.tramos.includes(id))&&(p.tipo===c.tipo||c.tipo==='niple'&&/niple/i.test(p.tipo)||c.tipo==='transicion'&&/transici/i.test(p.tipo))).map(p=>p.id)}))});
  }
- const registro={version:1,piezas,propuestasCompra,calculo,entradaTecnica:entrada,roscasConfirmadas:roscasConfirmadasEjercicioSigasGas()};cacheRegistroAccesoriosSigasGas={firma,registro};return registro;
+ const registro={version:1,piezas,propuestasCompra,calculo,verificacion:DimensionamientoSigas.verificar(SIGAS_ED15_2025,entrada,calculo),entradaTecnica:entrada,roscasConfirmadas:roscasConfirmadasEjercicioSigasGas()};cacheRegistroAccesoriosSigasGas={firma,registro};return registro;
 }
 function proyectarRegistroSigasEnMaterialesGas(entrada){
  const registro=registroAccesoriosSigasGas();if(!registro)return entrada;
@@ -165,6 +179,7 @@ function renderPreseleccionSigasGas(out,plan=null){
  const texto=s=>{const p=document.createElement('p');p.textContent=s;detalles.append(p);};texto(r.advertencia||'Diámetros definitivos bloqueados.');
  for(const h of r.historia){texto('Iteración '+h.iteracion+' · '+h.fase);for(const ruta of h.recorridos){texto(ruta.artefacto+': '+ruta.longitudReal+' m reales; '+(ruta.equivalenteConocidoM===null?'equivalentes pendientes':ruta.equivalenteConocidoM+' m equivalentes conocidos')+'; consulta '+ruta.longitudConsultaM+' m.');for(const a of ruta.aportes)texto(a.cantidad+' × '+a.nombre+' · Tabla 3 p.'+a.pagina+' · '+a.equivalenteUnitarioM+' m/unidad = '+a.equivalenteTotalM+' m.');}for(const f of h.filas)for(const q of f.consultas)texto(f.tramo+': exterior '+q.exteriorMm+' mm / fila '+q.longitudFilaM+' m / '+q.capacidadM3h+' m³/h · '+(q.cubre?'cubre solo esta consulta':'capacidad insuficiente'));}
  for(const s of [...r.errores,...r.pendientes])texto(s);out.append(detalles);
+ renderVerificacionTabularSigasGas(out);
  renderVinculosSigasGas(out,r);
  const nota=document.createElement('p');nota.textContent=textoCuplasSigasGas(plan);out.append(nota);
 }
@@ -244,7 +259,7 @@ function renderVinculosSigasGas(out,r){
  const registro=registroAccesoriosSigasGas(),entrada=registro?.entradaTecnica;if(!entrada)return;
  const detalles=document.createElement('details'),sum=document.createElement('summary');sum.textContent='Identificar productos SIGAS para las pérdidas (sin repetir cantidades)';detalles.append(sum);
  const aviso=document.createElement('p');aviso.textContent='Las cantidades ya están cargadas. Identificá solo conexiones o variantes pendientes; los grupos comunes siguen el diámetro candidato. Podés corregir la variante si el croquis indica otra pieza.';detalles.append(aviso);
- const patrones={codo90:/^Codo(?: Normal a 90º | MH a 90° | 90º)/,codo45:/^Codo.*45/,tee:/^Te /,llave:/^Llave /,reduccion:/Reduct|Reduc/,cupla:/Cupla/,niple:/^Niple corto con tope /,transicion:/^Transición /},vector=r.historia.at(-1)?.diametrosExteriorMm;
+ const patrones={codo90:/^Codo(?: Normal a 90º | MH a 90° | 90º)/,codo45:/^Codo.*45/,tee:/^Te /,llave:/^Llave /,reduccion:/Reduct|Reduc/,cupla:/^(Cupla|Unión Normal) /,niple:/^Niple corto con tope /,transicion:/^Transición /},vector=r.historia.at(-1)?.diametrosExteriorMm;
  if(!vector){out.append(detalles);return;}
  const ids=entrada.preparacion.porTramo.map(t=>t.id),clave=ids.map(id=>vector[id]).join('/');
  const asociaciones=document.createElement('details'),sa=document.createElement('summary');sa.textContent='Conexiones y llaves de los artefactos';asociaciones.append(sa);
@@ -311,4 +326,40 @@ function renderPropuestasCompraSigasGas(out,plan){
   if(p.requiereUbicacionEnTee){const n=document.createElement('p');n.textContent='Reducción propuesta: ubicación y pérdida pendientes. Manual SIGAS p.28: verificar cambio de diámetro inmediatamente después de una tee y las longitudes por diámetro.';d.append(n);}grupo.append(d);
  }
  out.append(grupo);
+}
+
+// Los controles completan el perfil ya existente; no se guardan catálogos o fórmulas en respaldos.
+function guardarVerificacionSigasGas(form){
+ const campo=id=>form.querySelector('[name="'+id+'"]');
+ if(modulo!=='gas'||CatalogosSistemasGas.identificar(instalacionGas.perfil)!=='sigas')return false;
+ const p=instalacionGas.perfil,campos={sigasPresion:'presionDisponible',sigasMinima:'presionMinima',sigasPerdida:'perdidaMaxima',sigasUnidad:'unidadPresion',sigasFuente:'fuentePresiones',sigasDensidad:'densidadRelativa',sigasPCS:'poderCalorifico',sigasFuenteGas:'fuenteGas',sigasNorma:'referenciaNormativa',sigasDemanda:'criterioDemanda'};
+ const error=campo('sigasVerificacionMensaje');
+ for(const id of ['sigasPresion','sigasMinima','sigasPerdida','sigasDensidad','sigasPCS'])if(campo(id).value!==''&&!(Number.isFinite(Number(campo(id).value))&&Number(campo(id).value)>0)){error.textContent='Revisá los valores: deben ser positivos. No se guardaron cambios.';return false;}
+ if(!['','Pa','mbar','mmca'].includes(campo('sigasUnidad').value)||!['','placa-total'].includes(campo('sigasDemanda').value)){error.textContent='Unidad o criterio no reconocido. No se guardaron cambios.';return false;}
+ if(campo('sigasInventario').checked&&!campo('sigasFuenteInventario').value.trim()){error.textContent='Indicá la fuente de revisión del inventario real. No se guardaron cambios.';return false;}
+ for(const [id,k]of Object.entries(campos))p[k]=campo(id).value.trim();
+ if(p.poderCalorifico&&p.fuenteGas&&p.densidadRelativa)p.condicionesCombustiblePendientes=false;
+ const c=proyectoGasActual().calculoSigas||={version:1,vinculos:{}};
+ c.metodoTabularSigas=campo('sigasMetodo').checked?'nag200-recorrido-completo':null;
+ const entrada=entradaPreseleccionSigasGas(),fuente=campo('sigasFuenteInventario').value.trim();
+ if(campo('sigasInventario').checked&&fuente)c.revisionInventario={firma:entrada.config.firmaInventarioActual,fuente};
+ else if(!campo('sigasInventario').checked)c.revisionInventario=null;
+
+ guardarDatos();calcularMaterialesManualGas();return true;
+}
+function renderVerificacionTabularSigasGas(out){
+ const registro=registroAccesoriosSigasGas();if(!registro||registro.entradaTecnica.perfil.gas!=='GN')return;
+ const v=registro.verificacion,entrada=registro.entradaTecnica,p=entrada.perfil;
+ const d=document.createElement('details'),sum=document.createElement('summary');sum.textContent='Verificar capacidad y límite de caída · SIGAS GN';d.append(sum);
+ const texto=s=>{const n=document.createElement('p');n.textContent=s;d.append(n);};
+ texto(v.estado==='comprobacion-tabular-satisfecha'?'Comprobación tabular satisfecha a 10 mmca (98,0665 Pa); presión final al menos '+fmt(v.presionFinalMinimaPa)+' Pa. No es una pérdida exacta ni aprobación de instalación.':'Comprobación tabular pendiente. Las equivalencias conocidas y candidatos parciales se conservan.');
+ for(const r of v.recorridos)texto(r.artefacto+': '+(r.completa?fmt(r.longitudCalculoM)+' m de cálculo · '+(r.cumpleCapacidad?'capacidades cubiertas a la referencia de tabla':'capacidad insuficiente'):'equivalencias reales incompletas; pérdida total pendiente')+'.');
+ texto(v.nota);for(const aviso of v.pendientes)texto(aviso);
+ const form=document.createElement('details'),st=document.createElement('summary');st.textContent='Completar datos una sola vez para este proyecto';form.append(st);
+ const campos=[['sigasUnidad','Unidad común de presión','unidadPresion','select',['','Pa','mbar','mmca']],['sigasPresion','Presión disponible a la salida del medidor','presionDisponible','number'],['sigasMinima','Presión mínima más exigente de los artefactos','presionMinima','number'],['sigasPerdida','Pérdida máxima admisible','perdidaMaxima','number'],['sigasFuente','Fuente de presiones y pérdida admisible','fuentePresiones','text'],['sigasDensidad','Densidad relativa del suministro (tabla GN: 0,65)','densidadRelativa','number'],['sigasPCS','Poder calorífico (kcal/m³)','poderCalorifico','number'],['sigasFuenteGas','Fuente de propiedades del gas','fuenteGas','text'],['sigasNorma','Referencia normativa y requisitos de distribuidora','referenciaNormativa','text'],['sigasDemanda','Demanda','criterioDemanda','select',['','placa-total']]];
+ for(const [id,nombre,k,tipo,opciones] of campos){const l=document.createElement('label'),i=document.createElement(tipo==='select'?'select':'input');l.textContent=nombre;i.name=id;i.ariaLabel=nombre;if(tipo==='select')for(const val of opciones){const o=document.createElement('option');o.value=val;o.textContent=val==='placa-total'?'Sumar consumos de placa sin simultaneidad':val||'Pendiente';i.append(o);}else{i.type=tipo;i.step='any';if(tipo==='number')i.min='0';else i.maxLength=300;}i.value=p[k]??'';l.append(i);form.append(l);}
+ for(const [id,nombre,checked] of [['sigasMetodo','Revisé que el método por recorrido completo NAG-200 5.10 y Tabla 4 SIGAS corresponde al alcance de este proyecto de baja presión (no certifica normativa).',entrada.config.metodoTabularSigas==='nag200-recorrido-completo'],['sigasInventario','Verifiqué que todos los accesorios y cuplas reales del circuito están registrados, incluidas cantidades cero comprobadas. No usar las cuplas estimadas de compra como inventario real.',entrada.config.inventarioPerdidasCompleto]]){const l=document.createElement('label'),i=document.createElement('input');i.type='checkbox';i.style.width='auto';i.name=id;i.checked=checked;l.append(i,document.createTextNode(nombre));form.append(l);}
+ const l=document.createElement('label'),f=document.createElement('input');l.textContent='Fuente de revisión del inventario (croquis/listado real revisado)';f.name='sigasFuenteInventario';f.maxLength=300;f.value=entrada.config.revisionInventario?.fuente||'';l.append(f);form.append(l);
+ const nota=document.createElement('p');nota.textContent='No hacen falta posiciones dentro de un tramo uniforme. Sí deben conocerse las cantidades reales y el producto de sus uniones. Si faltan cuplas reales, registralas en accesorios; esta revisión no agrega piezas ni cambia estimaciones. Un cambio de red, productos o condiciones deja la revisión anterior pendiente.';form.append(nota);
+ const b=document.createElement('button');b.type='button';b.textContent='Guardar datos y verificar';b.onclick=()=>guardarVerificacionSigasGas(form);form.append(b);const msg=document.createElement('p');msg.setAttribute?.('name','sigasVerificacionMensaje');msg.setAttribute?.('role','status');form.append(msg);d.append(form);out.append(d);
 }

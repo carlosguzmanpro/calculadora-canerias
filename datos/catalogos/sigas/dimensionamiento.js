@@ -4,7 +4,7 @@
  const tecnico=()=>typeof module==='object'&&module.exports?require('./diagnostico-ed15.js'):root.SigasTecnico;
  const positivo=x=>typeof x==='number'&&Number.isFinite(x)&&x>0;
  function familiaProducto(f){
-  return /^(Codo Normal a (45º|90º)|Codo MH a (45°|90°) de|Llave Esférica) \d+\s*mm$/i.test(f.nombreOriginal)?f.nombreOriginal.replace(/ \d+\s*mm$/i,''):null;
+  return /^(Codo Normal a (45º|90º)|Codo MH a (45°|90°) de|Llave Esférica|Unión Normal) \d+\s*mm$/i.test(f.nombreOriginal)?f.nombreOriginal.replace(/ \d+\s*mm$/i,''):null;
  }
  function atributosTerminal(f){
   const n=f.nombreOriginal,rosca=n.match(/(\d+\/\d+|\d+(?: \d+\/\d+)?)(?:["”])?(?:\s*ST)?$/i)?.[1];
@@ -80,7 +80,7 @@
   const pcs=Number(perfil.poderCalorifico),fuentePCS=typeof perfil.fuenteGas==='string'&&perfil.fuenteGas.trim();
   if(!positivo(pcs)||!fuentePCS)pendientes.push('Poder calorífico y su fuente pendientes; no se aplica 9300 por defecto.');
   const presion=Number(perfil.presionDisponible),minima=Number(perfil.presionMinima),perdida=Number(perfil.perdidaMaxima);
-  salida.condiciones={gas:perfil.gas,densidadTabla:.65,caidaImpresa:d.tablas[4].caidaPresionImpresa,poderCalorifico:positivo(pcs)&&fuentePCS?pcs:null,fuentePCS:fuentePCS||null,simultaneidad:'Consumos sumados sin reducción; criterio técnico por verificar',presupuestoDisponiblePa:perfil.unidadPresion==='Pa'&&positivo(presion)&&positivo(minima)?presion-minima:null};
+  salida.condiciones={gas:perfil.gas,densidadTabla:.65,caidaImpresa:d.tablas[4].caidaPresionImpresa,poderCalorifico:positivo(pcs)&&fuentePCS?pcs:null,fuentePCS:fuentePCS||null,simultaneidad:perfil.criterioDemanda==='placa-total'?'Consumos de placa sumados sin reducción; criterio declarado en el proyecto':'Consumos sumados sin reducción; criterio técnico por verificar',presupuestoDisponiblePa:perfil.unidadPresion==='Pa'&&positivo(presion)&&positivo(minima)?presion-minima:null};
   if(perfil.unidadPresion==='Pa'&&positivo(presion)&&positivo(minima)&&positivo(perdida)&&(presion<=minima||perdida>presion-minima))pendientes.push('Presupuesto de presión incompatible con los valores ingresados; preselección no verifica suministro.');
   const piezas=new Map();let inventarioInvalido=false;
   for(const p of inventario.fisicas||[]){
@@ -94,10 +94,14 @@
    for(const id of p.identidadesFisicas){const previo=identidades.get(id);if(previo&&previo.id!==p.id){previo.conflicto=true;p.conflicto=true;inventarioInvalido=true;pendientes.push('Identidad física compartida por grupos: '+id+'; no se suman ambos.');}else identidades.set(id,p);}
   }
   if(errores.length)return salida;
-  pendientes.push('Criterio de recorrido/fila superior y simultaneidad: validar con método aplicable. No se añadieron 15 m EPOXI.','Presión disponible, mínima de artefactos y pérdida admisible: confirmar alcance de la tabla; caída impresa 10 mm no es suministro.','Cuplas y otras pérdidas no identificadas permanecen pendientes; no se suponen nulas ni bloquean esta preselección parcial.');
+  if(config.metodoTabularSigas!=='nag200-recorrido-completo'||perfil.criterioDemanda!=='placa-total')pendientes.push('Criterio de recorrido/fila superior y simultaneidad: validar con método aplicable. No se añadieron 15 m EPOXI.');
+  if(!['presionDisponible','presionMinima','perdidaMaxima','fuentePresiones'].every(k=>perfil[k]))pendientes.push('Presión disponible, mínima de artefactos y pérdida admisible: confirmar alcance de la tabla; caída impresa 10 mm no es suministro.');
+  if(config.inventarioPerdidasCompleto!==true||!config.fuenteInventario)pendientes.push('Cuplas y otras pérdidas no identificadas permanecen pendientes; no se suponen nulas ni bloquean esta preselección parcial.');
   if(!perfil.densidadRelativa)pendientes.push('Densidad del suministro pendiente de confirmar frente a 0,65 tabulado.');
   for(const k of ['presionDisponible','presionMinima','perdidaMaxima','fuentePresiones'])if(!perfil[k])pendientes.push('Dato de suministro pendiente: '+k+'.');
-  const faltantesInventario=[...(inventario.pendientes||[])];
+  // Los avisos genéricos de tees/llaves no sustituyen la comprobación real por pieza y recorrido.
+  // Sus productos pendientes siguen siendo comprobados en cada iteración.
+  const faltantesInventario=[...(inventario.pendientes||[])].filter(t=>!/^Tee en .*: identificar vía directa\/giro y configuración reductora\.$|^Tipo real de llave pendiente;/.test(t));
   pendientes.push(...faltantesInventario);
   const base=new Map(ts.map(t=>[t.id,t])),firma=v=>JSON.stringify(ts.map(t=>v[t.id]??null));let vector={},vistos=new Set(),ultimo=null;
   const max=config.maxIteraciones===undefined?30:config.maxIteraciones;
@@ -131,7 +135,7 @@
      const terminales=a.atributos&&diametros.length===1&&a.atributos.geometria&&a.atributos.sexo&&a.atributos.rosca?opcionesTerminal(d,a.atributos,diametros[0]):[];
      const fila=a.atributos?(terminales.length===1?terminales[0]:null):a.familia?(opciones.length===1?opciones[0]:null):d.tablas[3].filas.find(f=>f.id===id);
      if(p.necesidadTerminal&&fila&&!atributosTerminal(fila)){pendiente({...p,tramos:ubicaciones},'conexión terminal: producto roscado compatible pendiente; no se utiliza un codo común.');continue;}
-     const tipoCorrecto=fila&&(p.necesidadTerminal?atributosTerminal(fila)?.geometria===(p.geometria||p.tipo):({codo90:/^Codo(?: Normal a 90º | MH a 90° | 90º)/,codo45:/^Codo.*45/,tee:/^Te /,llave:/^Llave /,reduccion:/Reduct|Reduc/,cupla:/Cupla/,niple:/^Niple corto con tope /,transicion:/^Transición /}[p.tipo]?.test(fila.nombreOriginal)));
+     const tipoCorrecto=fila&&(p.necesidadTerminal?atributosTerminal(fila)?.geometria===(p.geometria||p.tipo):({codo90:/^Codo(?: Normal a 90º | MH a 90° | 90º)/,codo45:/^Codo.*45/,tee:/^Te /,llave:/^Llave /,reduccion:/Reduct|Reduc/,cupla:/^(Cupla|Unión Normal) /,niple:/^Niple corto con tope /,transicion:/^Transición /}[p.tipo]?.test(fila.nombreOriginal)));
      if(!tipoCorrecto||!(p.tipo==='tee'?ubicaciones.some(id=>vector[id]===fila.diametroExteriorM*1000):ubicaciones.every(id=>vector[id]===fila.diametroExteriorM*1000))){pendiente({...p,tramos:ubicaciones},'combinación '+clave+' sin producto/diámetro/vía SIGAS compatible documentado.');continue;}
 
      if(p.tipo==='tee'&&/^Te Normal /.test(fila.nombreOriginal)&&Array.isArray(p.conexionesDiametro)&&p.conexionesDiametro.some(id=>vector[id]!==fila.diametroExteriorM*1000)){
@@ -175,5 +179,44 @@
   salida.advertencia='PRESELECCIÓN CONDICIONADA. Pérdidas desconocidas no son cero. No acredita presión final, método normativo ni aptitud de instalación. No se asignan diámetros a los tramos guardados.';
   return salida;
  }
- const api={consultar,resolver,familiaProducto,atributosTerminal,opcionesTerminal,puertosProducto,fusionCompatible,resolverConexion};if(typeof module==='object'&&module.exports)module.exports=api;else root.DimensionamientoSigas=api;
+ // Verificación tabular, NO una fórmula de pérdida hidráulica. NAG-200 5.3 y 5.10;
+ // capacidades/interiores/equivalencias exclusivamente SIGAS ed15 pp.22,24–25.
+ function presionPa(valor,unidad){
+  if(valor===null||valor===undefined||valor===''||!positivo(Number(valor)))return null;
+  const factor={Pa:1,mbar:100,mmca:9.80665}[unidad];return factor?Number(valor)*factor:null;
+ }
+ function verificar(d,entrada,resultado){
+  const r=resultado||resolver(d,entrada),p=entrada.perfil||{},pendientes=[];
+  const v={estado:'pendiente',metodo:'capacidad-tabular-recorrido-completo',fuente:'NAG-200 (1982), 5.2.8, 5.3 y 5.10; SIGAS ed15/2025 Tabla4 p.22 y Tabla3 pp.24–25',perdidaCalculadaPa:null,cotaTabularPa:null,presionFinalMinimaPa:null,definitivo:false,filas:[],recorridos:[],pendientes};
+  const revision=tecnico().validar(d);
+  if(revision.errores.length||p.catalogoTecnicoGas!=='sigas'||p.gas!=='GN'||d.tablas[4].caidaPresionImpresa?.valor!==10||d.tablas[4].caidaPresionImpresa?.unidad!=='mm'){
+   pendientes.push(...revision.errores,'Verificación disponible solo para SIGAS GN Tabla4 original a 10 mm de columna de agua.');return v;
+  }
+  const limite=10*9.80665,disponible=presionPa(p.presionDisponible,p.unidadPresion),minima=presionPa(p.presionMinima,p.unidadPresion),admisible=presionPa(p.perdidaMaxima,p.unidadPresion);
+  if(Number(p.densidadRelativa)!==.65)pendientes.push('Confirmar densidad del suministro compatible con 0,65 tabulado; no se corrige por otra densidad.');
+  if(!disponible||!minima||!admisible||!(typeof p.fuentePresiones==='string'&&p.fuentePresiones.trim()))pendientes.push('Completar presiones disponible, mínima, pérdida admisible, unidad y fuente.');
+  if(disponible&&minima&&admisible&&(disponible<=minima||admisible>disponible-minima+1e-8))pendientes.push('Presupuesto de presión incompatible con los datos ingresados.');
+  if(admisible&&admisible+1e-8<limite)pendientes.push('La tabla a 10 mmca no prueba una pérdida menor que ese límite; hace falta un método documentado para el presupuesto indicado.');
+  if(disponible&&minima&&disponible-minima+1e-8<limite)pendientes.push('El margen disponible no cubre el límite tabulado de 10 mmca.');
+  if(p.criterioDemanda!=='placa-total')pendientes.push('Confirmar suma de consumos de placa sin reducción por simultaneidad.');
+  if(!(typeof p.referenciaNormativa==='string'&&p.referenciaNormativa.trim()))pendientes.push('Registrar referencia normativa y requisitos aplicables de la distribuidora; esto no equivale a su aprobación.');
+  if(entrada.config?.metodoTabularSigas!=='nag200-recorrido-completo')pendientes.push('Revisar alcance del método por recorrido completo NAG-200 5.10 con Tabla4 SIGAS, para este proyecto de baja presión.');
+  if(!r.convergente||r.errores.length||!r.filas.length)pendientes.push(...r.errores,'Cálculo sin vector convergente y completo de candidatos.');
+  for(const ruta of r.recorridos){
+   const filas=r.filas.filter(f=>ruta.tramos.includes(f.id));
+   const completa=ruta.equivalenteCompleto===true&&ruta.longitudDefinitivaM!==null&&filas.length===ruta.tramos.length;
+   const cumple=completa&&r.convergente&&filas.every(f=>f.candidato?.cubre&&f.verificacionConsulta?.cubreConsulta);
+   v.recorridos.push({artefacto:ruta.artefacto,tramos:ruta.tramos.slice(),equivalenteConocidoM:ruta.equivalenteConocidoM,longitudCalculoM:ruta.longitudDefinitivaM,completa,cumpleCapacidad:!!cumple,cotaTabularPa:cumple?limite:null,perdidaCalculadaPa:null,presionFinalMinimaPa:cumple&&disponible?disponible-limite:null});
+   if(!completa)pendientes.push(ruta.artefacto+': completar productos, vías y registro de todas las pérdidas reales; las desconocidas no son cero.');
+   else if(!cumple)pendientes.push(ruta.artefacto+': no supera la comprobación de capacidades tabuladas.');
+  }
+  v.filas=r.filas.map(f=>({tramo:f.tramo,candidatoMm:f.candidato?.exteriorMm||null,longitudConsultaM:f.longitudConsultaM,filaM:f.candidato?.longitudFilaM||null,capacidadM3h:f.candidato?.capacidadM3h||null,caudalM3h:f.caudalM3h,equivalenteCompleto:f.verificacionConsulta?.parcial===false,cumpleCapacidad:!!f.verificacionConsulta?.cubreConsulta}));
+  v.pendientes=[...new Set(pendientes)];
+  if(v.recorridos.length&&v.pendientes.length===0&&v.recorridos.every(x=>x.cumpleCapacidad)){
+   v.estado='comprobacion-tabular-satisfecha';v.cotaTabularPa=limite;v.presionFinalMinimaPa=disponible-limite;
+  }
+  v.nota='La cota de 10 mmca (98,0665 Pa) corresponde al recorrido completo verificado; no se suma 10 mmca por tramo. No es la pérdida exacta ni una certificación. No se escala caudal al cuadrado ni se interpolan tablas. La aplicación normativa y el suministro necesitan revisión profesional.';
+  return v;
+ }
+ const api={consultar,resolver,familiaProducto,atributosTerminal,opcionesTerminal,puertosProducto,fusionCompatible,resolverConexion,presionPa,verificar};if(typeof module==='object'&&module.exports)module.exports=api;else root.DimensionamientoSigas=api;
 })(globalThis);

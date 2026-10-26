@@ -1,0 +1,23 @@
+{
+  "url": "https://www.enargas.gob.ar/secciones/normativa/pdf/normas-tecnicas/NAG-200.pdf",
+  "listado": "https://www.enargas.gob.ar/secciones/normativa/normas-tecnicas-items.php?grupo=2",
+  "identificacion": "NAG-200 (1982) según listado oficial; PDF consultado con modificaciones. No certifica totalidad/vigencia/aplicabilidad.",
+  "sha256Original": "3fb0619ff76458d5f7ce14691ba1a81e99b05a864054ff965df60d74a078d50c",
+  "paginasPDFOriginal": [
+    84,
+    85,
+    87,
+    88,
+    89
+  ],
+  "paginasImpresas": [
+    123,
+    124,
+    126,
+    127,
+    128
+  ],
+  "contenido": "5.2.8: cantidad/tipo de accesorios y equivalentes; 5.3: cálculo tabular a 10 mmca; 5.10: recorridos completos, fila superior y accesorios por diámetro local. Extracto documental, no transcripción de tablas numéricas.",
+  "formulaDePerdidaExactaVerificada": false,
+  "restriccion": "No adoptar coeficientes ni exclusión de reducciones de los ejemplos de acero para SIGAS. Capacidades/equivalentes SIGAS se conservan originales."
+}

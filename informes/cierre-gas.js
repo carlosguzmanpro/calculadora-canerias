@@ -37,7 +37,7 @@ function diagnosticoVisibleGas(plan=null){
   const faltan=campos.filter(([k])=>!perfil[k]).map(([,n])=>n);
   if(faltan.length)agregar('calculo','suministro','Suministro: falta '+faltan.join(', ')+'.');
   if(!r.condiciones?.poderCalorifico)agregar('calculo','pcs','Completar poder calorífico y su fuente.');
-  agregar('calculo','metodo','Validar el criterio de recorrido completo, fila superior y demanda/simultaneidad para el suministro y método aplicables.');
+  if(registro.entradaTecnica.config.metodoTabularSigas!=='nag200-recorrido-completo'||perfil.criterioDemanda!=='placa-total')agregar('calculo','metodo','Validar el criterio de recorrido completo, fila superior y demanda/simultaneidad para el suministro y método aplicables.');
   for(const p of registro.piezas){
    if(!p.pendientes.length)continue;
    const donde=p.tramos.map(id=>r.filas.find(f=>f.id===id)?.tramo||id).join(', ');

@@ -5,6 +5,7 @@ function modeloInformeActual(){
   d.resumen.push(modoManualGasActivo()?'Cálculo manual: cantidades ingresadas una sola vez, sin segunda confirmación; revisión técnica pendiente.':avisoConciliacionRapidaGas());
   const avisoDeteccion=avisoDeteccionGas();if(avisoDeteccion)d.resumen.push(avisoDeteccion);
   const perfilInforme=perfilTecnicoActualGas(),instInforme={...instalacionGas,perfil:perfilInforme};
+  if(CatalogosSistemasGas.identificar(instalacionGas.perfil)==='sigas'&&perfilInforme.gas==='GN'){const v=registroAccesoriosSigasGas()?.verificacion;if(v)d.resumen.push(v.estado==='comprobacion-tabular-satisfecha'?'SIGAS GN: comprobación tabular satisfecha a 10 mmca (98,0665 Pa); presión final al menos '+fmt(v.presionFinalMinimaPa)+' Pa, bajo las condiciones declaradas. No es pérdida exacta ni aprobación normativa.':'SIGAS GN: comprobación tabular pendiente; pérdida exacta no calculada. '+v.pendientes.join(' '));}
   d.resumen.push('Sistema: '+(CatalogosSistemasGas.identificar(instalacionGas.perfil)||'Pendiente')+' · combustible: '+(perfilInforme.gas||'Pendiente')+'.',...combustibleTecnicoGas().pendientes);
   const resultado=motorClaseAceroGas(tramos,artefactos,instInforme,catalogoParaGas(instInforme));
   const red=analizarRedGas();
