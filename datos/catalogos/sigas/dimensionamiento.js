@@ -13,6 +13,14 @@
   if(/^Codo 90º (con rosca hembra|C\/base H\.)/i.test(n))return {geometria:'codo90',sexo:'hembra',rosca,variante:/extra/i.test(n)?'base-extra-larga':/base/i.test(n)?'base-larga':'estandar'};
   return null;
  }
+ // Medidas declaradas en el nombre original. Es una condición necesaria de
+ // compatibilidad, no identifica por sí sola la vía directa/giro de una tee.
+ function medidasTee(f){
+  const n=f?.nombreOriginal||'',normal=n.match(/^Te Normal (\d+)\s*mm/i),central=n.match(/^Te Reduc\. Central (\d+) x (\d+)/i),tres=n.match(/Te (\d+) X (\d+) X (\d+)/i);
+  if(normal)return Array(3).fill(Number(normal[1]));
+  if(central)return [Number(central[1]),Number(central[1]),Number(central[2])];
+  return tres?tres.slice(1).map(Number):null;
+ }
  function opcionesTerminal(d,atributos={},diametro){
   return d.tablas[3].filas.filter(f=>{const a=atributosTerminal(f);return a&&(!diametro||f.diametroExteriorM*1000===diametro)&&['geometria','sexo','rosca','variante'].every(k=>!atributos[k]||atributos[k]===a[k]);});
  }
@@ -141,6 +149,12 @@
      if(p.tipo==='tee'&&/^Te Normal /.test(fila.nombreOriginal)&&Array.isArray(p.conexionesDiametro)&&p.conexionesDiametro.some(id=>vector[id]!==fila.diametroExteriorM*1000)){
       pendiente({...p,tramos:ubicaciones},'tee normal incompatible con los diámetros candidatos de sus tres conexiones; identificar configuración y reducciones sin inventarlas.');continue;
      }
+     if(p.tipo==='tee'&&Array.isArray(p.conexionesDiametro)){
+      const medidas=medidasTee(fila),conexiones=p.conexionesDiametro.map(id=>vector[id]);
+      if(conexiones.length!==3||!medidas||JSON.stringify([...medidas].sort((a,b)=>a-b))!==JSON.stringify([...conexiones].sort((a,b)=>a-b))){
+       pendiente({...p,tramos:ubicaciones},'tee incompatible con las tres medidas candidatas ('+conexiones.join('/')+' mm); verificar configuración real y vía sin añadir reducciones por suposición.');continue;
+      }
+     }
      const tramosEnRuta=ubicaciones.filter(id=>r.tramos.includes(id)),tramoId=tramosEnRuta.length===1?tramosEnRuta[0]:null;
      try{const x=tecnico().accesorio(d,fila.id,p.cantidad);aportes.push({piezaId:p.id,identidadesFisicas:p.identidadesFisicas?.slice()||null,tipo:p.tipo,tramoId,diametroExteriorMm:fila.diametroExteriorM*1000,...x});}catch(e){pendiente({...p,tramos:ubicaciones},e.message);}
     }
@@ -218,5 +232,5 @@
   v.nota='La cota de 10 mmca (98,0665 Pa) corresponde al recorrido completo verificado; no se suma 10 mmca por tramo. No es la pérdida exacta ni una certificación. No se escala caudal al cuadrado ni se interpolan tablas. La aplicación normativa y el suministro necesitan revisión profesional.';
   return v;
  }
- const api={consultar,resolver,familiaProducto,atributosTerminal,opcionesTerminal,puertosProducto,fusionCompatible,resolverConexion,presionPa,verificar};if(typeof module==='object'&&module.exports)module.exports=api;else root.DimensionamientoSigas=api;
+ const api={consultar,resolver,familiaProducto,atributosTerminal,opcionesTerminal,puertosProducto,fusionCompatible,resolverConexion,presionPa,verificar,medidasTee};if(typeof module==='object'&&module.exports)module.exports=api;else root.DimensionamientoSigas=api;
 })(globalThis);

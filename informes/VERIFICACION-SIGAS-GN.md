@@ -38,3 +38,25 @@ Las excepciones de producto siguen en la identificación existente de SIGAS: sex
 Conserva 58 m, 19 codos, 2 tees, 3 llaves, 29.200 kcal/h; candidatos parciales 32/25/25/20/25 mm; compra 17 tiras de 4 m y 12 cuplas orientativas. La comprobación completa del ejemplo sigue pendiente de suministro, productos/vías y uniones reales. No se le asignan condiciones de ensayos automatizados.
 
 Ensayo aislado completo (no agregado al proyecto): dos tramos uniformes de 2 m, dos codos roscados SIGAS 20 × ½ hembra (0,651 m cada uno), una llave esférica 20 mm (0,678 m), 1 m³/h. Equivalente 1,98 m, recorrido 5,98 m, fila6, capacidad2,284 m³/h y candidato20 mm. A condiciones explícitas de ensayo suficientes, supera la comprobación tabular. El valor de pérdida exacta permanece nulo; no es un ejercicio certificado.
+
+## Cálculo sencillo y verificación separados (base 7c722f4)
+
+La revisión de NAG-200 y SIGAS confirma el alcance tabular descrito arriba. No hay en las fuentes incorporadas una fórmula verificada para calcular una caída exacta distinta del límite de referencia. No se habilita interpolación, otra densidad, GLP ni un suministro fuera de ese alcance por completar un formulario.
+
+El cálculo sencillo presenta los resultados derivados del mismo registro/motor, fuera del catálogo avanzado: metros físicos por tramo, consumo acumulado, candidato y equivalente conocido. La longitud de consulta parcial es la del recorrido completo de control con los equivalentes conocidos; no es la longitud física del tramo ni se presenta como longitud definitiva cuando faltan pérdidas. El suministro, la revisión normativa y las excepciones de productos siguen siendo opcionales para obtener materiales y resultados parciales.
+
+Se corrige una comprobación insuficiente de tees: un producto no es compatible porque coincida una sola conexión. Se comparan las tres medidas candidatas con las medidas explícitas del producto (normal, reducción central o tres medidas impresas). Esto es una condición necesaria; no deduce la vía de paso/giro ni confirma una pieza desconocida. Las cantidades y los datos originales permanecen intactos.
+
+También se corrigen etiquetas que decían siempre “parcial” incluso con equivalentes completos. La comprobación tabular, el inventario físico y la aprobación normativa conservan estados independientes.
+
+Ejercicio conservado:
+
+| Tramo | Metros reales | Consumo kcal/h | Candidato SIGAS exterior |
+|---|---:|---:|---:|
+| M–A |15|29200|32 mm|
+| A–B |5|13200|25 mm|
+| A–Termo |9|16000|25 mm|
+| B–Calefactor |16|3000|20 mm|
+| B–Cocina |13|10200|25 mm|
+
+Rutas reales: Termo24 m, Calefactor36 m, Cocina33 m. Total físico58 m;19 codos;2 tees;3 llaves. Los candidatos siguen condicionados; no se suman los tramos compartidos varias veces a materiales. Sin cambios en fórmulas, valores originales de las tablas, estimaciones comerciales, guardado o PDF.

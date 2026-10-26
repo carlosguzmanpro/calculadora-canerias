@@ -864,6 +864,7 @@ function renderListaManualSimpleGas(out,plan,modelo){
  }
  tabla.append(body);out.append(tabla);
  texto(out,'Cantidades registradas; diámetros y medidas pendientes conservan su estado. No es una lista de compra definitiva.');
+ renderCalculoSencilloGas(out);
  renderPreparacionCompraGas(out,plan,compra);
  const pendientes=document.createElement('details'),titulo=document.createElement('summary');pendientes.className='gas-detalles';titulo.textContent='Datos técnicos pendientes';pendientes.append(titulo);renderEstadoCierreGas(tecnicos,pendientes,plan);tecnicos.append(pendientes);
  renderPreseleccionSigasGas(tecnicos,plan);if(compra)renderPosicionesPendientesCuplasGas(tecnicos,compra);
