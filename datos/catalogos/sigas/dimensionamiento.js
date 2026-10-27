@@ -264,6 +264,26 @@
   salida.advertencia='PRESELECCIÓN CONDICIONADA. Pérdidas desconocidas no son cero. No acredita presión final, método normativo ni aptitud de instalación. No se asignan diámetros a los tramos guardados.';
   return salida;
  }
+ // Proyección de la misma ejecución: no modifica el inventario ni ejecuta otro motor.
+ function memoriaCalculo(resultado){
+  const inicial=resultado.historia?.[0];
+  return (resultado.filas||[]).map(f=>{
+   const rutas=(resultado.recorridos||[]).filter(r=>r.tramos.includes(f.id));
+   const control=rutas.reduce((a,b)=>!a||b.longitudConsultaM>a.longitudConsultaM?b:a,null);
+   return {id:f.id,tramo:f.tramo,longitudRealM:f.longitudRealM,
+    longitudCalculoRealM:rutas.length?Math.max(...rutas.map(r=>r.longitudReal)):null,
+    consumoKcal:f.consumoKcal,caudalM3h:f.caudalM3h,
+    diametroProvisorioMm:inicial?.diametrosExteriorMm?.[f.id]??null,
+    equivalenteRecorridoConocidoM:control?.equivalenteConocidoM??null,
+    equivalenteCompleto:rutas.length>0&&rutas.every(r=>r.equivalenteCompleto),
+    longitudTotalConsultaM:control?.longitudConsultaM??null,
+    longitudTotalVerificadaM:f.longitudDefinitivaM,
+    diametroVerificadoMm:f.comprobadoPorTabla?f.diametroCalculadoMm:null,
+    recorridoControl:control?.artefacto??null,
+    recorridos:rutas.map(r=>({artefacto:r.artefacto,tramos:r.tramos.slice(),realM:r.longitudReal,equivalenteConocidoM:r.equivalenteConocidoM,totalConsultaM:r.longitudConsultaM,completo:r.equivalenteCompleto})),
+    tabla:f.verificacionConsulta?{...f.verificacionConsulta}:null};
+  });
+ }
  // Verificación tabular, NO una fórmula de pérdida hidráulica. NAG-200 5.3 y 5.10;
  // capacidades/interiores/equivalencias exclusivamente SIGAS ed15 pp.22,24–25.
  function presionPa(valor,unidad){
@@ -311,5 +331,5 @@
   v.nota='La cota de 10 mmca (98,0665 Pa) corresponde al recorrido completo verificado; no se suma 10 mmca por tramo. No es la pérdida exacta ni una certificación. No se escala caudal al cuadrado ni se interpolan tablas. La aplicación normativa y el suministro necesitan revisión profesional.';
   return v;
  }
- const api={consultar,resolver,familiaProducto,atributosTerminal,opcionesTerminal,puertosProducto,fusionCompatible,resolverConexion,presionPa,verificar,medidasTee,deducirTerminal,tipoTee,viaTee,opcionesTee,interpretarTeeVectorial,resolverTee};if(typeof module==='object'&&module.exports)module.exports=api;else root.DimensionamientoSigas=api;
+ const api={memoriaCalculo,consultar,resolver,familiaProducto,atributosTerminal,opcionesTerminal,puertosProducto,fusionCompatible,resolverConexion,presionPa,verificar,medidasTee,deducirTerminal,tipoTee,viaTee,opcionesTee,interpretarTeeVectorial,resolverTee};if(typeof module==='object'&&module.exports)module.exports=api;else root.DimensionamientoSigas=api;
 })(globalThis);

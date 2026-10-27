@@ -159,6 +159,7 @@ section{box-shadow:none}
 }
 .gas-calculo-sencillo{padding:12px;margin:12px 0;background:#f4f8f8;box-shadow:none}.gas-calculo-sencillo h3{font-size:16px;margin:0 0 8px}.gas-calculo-tramo{padding:10px 0;border-top:1px solid #c5dbd8;min-width:0;overflow-wrap:anywhere}.gas-calculo-tramo p{font-size:14px;line-height:1.4;margin:4px 0}.gas-calculo-tramo p:last-child{color:#526675;font-size:13px}
 .sigas-vias-visuales{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}.sigas-vias-visuales button{font-size:12px;padding:8px 3px;overflow-wrap:anywhere}.sigas-vias-visuales button.sigas-via-activa{background:#087e6a;color:white}.sigas-vias-visuales pre{font-size:13px;line-height:1.15;margin:0 0 4px;text-align:center;white-space:pre}
+@media(max-width:700px){.sigas-memoria,.sigas-memoria tbody,.sigas-memoria tr,.sigas-memoria td{display:block;width:auto}.sigas-memoria thead{display:none}.sigas-memoria tr{border:1px solid #9ba7b4;border-radius:8px;margin:8px 0;padding:6px}.sigas-memoria td{padding:4px 6px;overflow-wrap:anywhere}.sigas-memoria td:before{content:attr(data-label) ": ";font-weight:600}}
 </style>
 </head>
 <body>
@@ -9322,6 +9323,26 @@ function avisoDeteccionGas(){
   salida.advertencia='PRESELECCIÓN CONDICIONADA. Pérdidas desconocidas no son cero. No acredita presión final, método normativo ni aptitud de instalación. No se asignan diámetros a los tramos guardados.';
   return salida;
  }
+ // Proyección de la misma ejecución: no modifica el inventario ni ejecuta otro motor.
+ function memoriaCalculo(resultado){
+  const inicial=resultado.historia?.[0];
+  return (resultado.filas||[]).map(f=>{
+   const rutas=(resultado.recorridos||[]).filter(r=>r.tramos.includes(f.id));
+   const control=rutas.reduce((a,b)=>!a||b.longitudConsultaM>a.longitudConsultaM?b:a,null);
+   return {id:f.id,tramo:f.tramo,longitudRealM:f.longitudRealM,
+    longitudCalculoRealM:rutas.length?Math.max(...rutas.map(r=>r.longitudReal)):null,
+    consumoKcal:f.consumoKcal,caudalM3h:f.caudalM3h,
+    diametroProvisorioMm:inicial?.diametrosExteriorMm?.[f.id]??null,
+    equivalenteRecorridoConocidoM:control?.equivalenteConocidoM??null,
+    equivalenteCompleto:rutas.length>0&&rutas.every(r=>r.equivalenteCompleto),
+    longitudTotalConsultaM:control?.longitudConsultaM??null,
+    longitudTotalVerificadaM:f.longitudDefinitivaM,
+    diametroVerificadoMm:f.comprobadoPorTabla?f.diametroCalculadoMm:null,
+    recorridoControl:control?.artefacto??null,
+    recorridos:rutas.map(r=>({artefacto:r.artefacto,tramos:r.tramos.slice(),realM:r.longitudReal,equivalenteConocidoM:r.equivalenteConocidoM,totalConsultaM:r.longitudConsultaM,completo:r.equivalenteCompleto})),
+    tabla:f.verificacionConsulta?{...f.verificacionConsulta}:null};
+  });
+ }
  // Verificación tabular, NO una fórmula de pérdida hidráulica. NAG-200 5.3 y 5.10;
  // capacidades/interiores/equivalencias exclusivamente SIGAS ed15 pp.22,24–25.
  function presionPa(valor,unidad){
@@ -9369,7 +9390,7 @@ function avisoDeteccionGas(){
   v.nota='La cota de 10 mmca (98,0665 Pa) corresponde al recorrido completo verificado; no se suma 10 mmca por tramo. No es la pérdida exacta ni una certificación. No se escala caudal al cuadrado ni se interpolan tablas. La aplicación normativa y el suministro necesitan revisión profesional.';
   return v;
  }
- const api={consultar,resolver,familiaProducto,atributosTerminal,opcionesTerminal,puertosProducto,fusionCompatible,resolverConexion,presionPa,verificar,medidasTee,deducirTerminal,tipoTee,viaTee,opcionesTee,interpretarTeeVectorial,resolverTee};if(typeof module==='object'&&module.exports)module.exports=api;else root.DimensionamientoSigas=api;
+ const api={memoriaCalculo,consultar,resolver,familiaProducto,atributosTerminal,opcionesTerminal,puertosProducto,fusionCompatible,resolverConexion,presionPa,verificar,medidasTee,deducirTerminal,tipoTee,viaTee,opcionesTee,interpretarTeeVectorial,resolverTee};if(typeof module==='object'&&module.exports)module.exports=api;else root.DimensionamientoSigas=api;
 })(globalThis);
 
 </script>
@@ -9581,6 +9602,18 @@ function renderCalculoSencilloGas(out){
  if(!r.filas.length){const n=document.createElement('p');n.textContent='Sin candidatos: revisar conexiones, consumos y propiedades del gas en Verificación técnica. Los materiales manuales no se bloquean.';section.append(n);}
  out.append(section);
 }
+function renderMemoriaCalculoSigasGas(out,r){
+ const d=document.createElement('details'),sum=document.createElement('summary');sum.textContent='Ver memoria de cálculo';d.append(sum);
+ const nota=document.createElement('p');nota.textContent='Tabla 4 SIGAS p.22 y equivalencias Tabla 3 pp.24–25. La longitud base es el mayor recorrido real alimentado; la consulta final gobierna por real + equivalentes, y puede corresponder a otro recorrido. Equivalentes y total son del recorrido de control, no solo del tramo. Comprobado por tabla no significa aprobación normativa ni pérdida exacta calculada.';d.append(nota);
+ const encabezados=['Tramo','Longitud real (m)','Longitud de cálculo por recorridos (m)','Consumo acumulado (m³/h)','Diámetro provisorio (mm)','Equivalente de accesorios (m)','Longitud total de cálculo (m)','Diámetro final verificado por tabla (mm)'];
+ const tabla=document.createElement('table');tabla.className='tabla sigas-memoria';const head=document.createElement('thead'),hr=document.createElement('tr');for(const t of encabezados){const th=document.createElement('th');th.textContent=t;hr.append(th);}head.append(hr);tabla.append(head);const body=document.createElement('tbody');
+ for(const f of DimensionamientoSigas.memoriaCalculo(r)){
+  const tr=document.createElement('tr'),metros=n=>Number.isFinite(n)?metrosResultadoSigasGas(n):'Pendiente';
+  const valores=[f.tramo,metros(f.longitudRealM),metros(f.longitudCalculoRealM),Number.isFinite(f.caudalM3h)?f.caudalM3h.toLocaleString('es-AR',{maximumFractionDigits:6}):'Pendiente',f.diametroProvisorioMm??'Pendiente',metros(f.equivalenteRecorridoConocidoM)+(f.equivalenteCompleto?'':' · parcial'),metros(f.longitudTotalConsultaM)+(f.longitudTotalVerificadaM===null?' · parcial':''),f.diametroVerificadoMm??'Pendiente'];
+  valores.forEach((valor,i)=>{const td=document.createElement('td');td.setAttribute?.('data-label',encabezados[i]);td.textContent=String(valor);tr.append(td);});body.append(tr);
+ }
+ tabla.append(body);d.append(tabla);out.append(d);
+}
 function renderPreseleccionSigasGas(out,plan=null){
  let r;try{r=calcularPreseleccionSigasGas();}catch(e){const p=document.createElement('p');p.textContent='Preselección SIGAS pendiente: '+e.message+'. Los datos guardados se conservaron.';out.append(p);return;}
  if(!r)return;
@@ -9589,6 +9622,7 @@ function renderPreseleccionSigasGas(out,plan=null){
  const aviso=document.createElement('p');aviso.textContent=r.filas.length?(completo?'Equivalentes completos y capacidades consultadas; la aprobación normativa sigue pendiente.':'Preselección parcial, sin validación de instalación. Pérdidas pendientes no equivalen a cero.'):'No hay preselección: '+r.errores.join(' ');out.append(aviso);
  const tabla=document.createElement('table');tabla.className='tabla sigas-diametros';const head=document.createElement('thead'),hr=document.createElement('tr');for(const s of ['Tramo','Inicial → recalculado · estado tabular']){const th=document.createElement('th');th.textContent=s;hr.append(th);}head.append(hr);tabla.append(head);const body=document.createElement('tbody');
  for(const f of r.filas){const tr=document.createElement('tr');for(const s of [f.tramo,f.candidato?(r.historia[0]?.diametrosExteriorMm[f.id]??'Pendiente')+' → '+f.candidato.exteriorMm+' mm · '+(f.comprobadoPorTabla?'comprobado por tabla':'provisional'):'Sin candidato: '+(f.pendientes[0]||'Revisar conexiones, combustible y poder calorífico')]){const td=document.createElement('td');td.textContent=s;tr.append(td);}body.append(tr);}tabla.append(body);if(r.filas.length)out.append(tabla);
+ renderMemoriaCalculoSigasGas(out,r);
  const resumen=document.createElement('details'),sr=document.createElement('summary');sr.textContent='Ver caudales, capacidades y recorridos por tramo';resumen.append(sr);
  const lista=document.createElement('div');lista.className='sigas-candidatos';
  for(const f of r.filas){
