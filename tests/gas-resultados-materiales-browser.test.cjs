@@ -11,7 +11,7 @@ test('Resultados GAS móvil: materiales visibles primero, catálogo cerrado y re
   assert.equal(await panel.locator('select').evaluateAll(es=>es.every(e=>e.closest('#detallesTecnicosResultadoGas'))),true);
   const antes=await page.evaluate(()=>({pdf:JSON.stringify(modeloInformeActual()),datos:localStorage.getItem('canerias-proyectos-v1'),calculo:JSON.stringify(calcularPreseleccionSigasGas())}));
   await panel.locator(':scope > h3').scrollIntoViewIfNeeded();await page.screenshot({path:'/tmp/gas-resultados-materiales-movil.png'});
-  await summary.tap();assert.equal(await panel.locator('.sigas-diametros').isVisible(),true);assert.match(await technical.innerText(),/condicionado/);
+  await summary.tap();assert.equal(await panel.locator('.sigas-diametros').isVisible(),true);assert.match(await technical.innerText(),/provisional/);
   const identificacion=technical.getByText('Identificar productos SIGAS para las pérdidas (sin repetir cantidades)',{exact:true});await identificacion.tap();await technical.getByText(/^Accesorios reconocidos ·/).tap();const grupo=technical.locator('.sigas-vinculo').filter({hasText:'Recorrido de termofusión · 6 codos comunes'});await grupo.locator(':scope > summary').tap();await grupo.getByText('Corregir una excepción del producto',{exact:true}).tap();assert.ok(await grupo.locator('select:visible').count()>0);
   await summary.tap();assert.equal(await panel.locator('select:visible').count(),0);assert.equal(await materials.isVisible(),true);
   assert.deepEqual(await page.evaluate(()=>({pdf:JSON.stringify(modeloInformeActual()),datos:localStorage.getItem('canerias-proyectos-v1'),calculo:JSON.stringify(calcularPreseleccionSigasGas())})),antes);

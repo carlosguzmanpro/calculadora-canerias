@@ -16,6 +16,15 @@ function modeloInformeActual(){
   const resultado=motorClaseAceroGas(tramos,artefactos,instInforme,catalogoParaGas(instInforme));
   const red=analizarRedGas();
   d.planilla=InformeProyecto.planilla(tramos,resultado,{caudalAplicable:perfilInforme.gas==='GN'&&Number(perfilInforme.poderCalorifico)===9300&&red.errores.length===0});
+  if(CatalogosSistemasGas.identificar(instalacionGas.perfil)==='sigas'&&perfilInforme.gas==='GN'){
+   const r=registroAccesoriosSigasGas()?.calculo;
+   for(const [i,t]of tramos.entries()){
+    const f=r?.filas.find(f=>f.id===t.id);if(!f?.comprobadoPorTabla)continue;
+    Object.assign(d.planilla[i],{equivalente:f.equivalenteConocidoTramoM,definitivo:f.longitudDefinitivaM,consumo:f.caudalM3h,diametro:(t.diametro?d.planilla[i].diametro+'; cálculo SIGAS: ':'')+f.diametroCalculadoMm+' mm · calculado y comprobado por tabla SIGAS; sin aprobación normativa'});
+    d.resumen.push(f.tramo+': longitud '+metrosResultadoSigasGas(f.longitudConsultaM)+' m; Tabla '+f.candidato.tabla+' p.'+f.candidato.pagina+', fila '+metrosResultadoSigasGas(f.candidato.longitudFilaM)+' m; capacidad '+f.candidato.capacidadM3h+' m³/h ≥ requerido '+f.caudalM3h.toLocaleString('es-AR',{maximumFractionDigits:6})+' m³/h.');
+   }
+  }
+
   if(fotoURL&&/^(data:image\/(?:png|jpeg|webp);base64,|blob:)/.test(fotoURL))d.croquis={url:fotoURL,confirmado:croquisEntregaDisponible()&&!proyectoGasActual().entregaGas?.requiereConfirmacion&&proyectoGasActual().entregaGas?.firmaCroquis===firmaCroquisEntrega()};
   else d.resumen.push('Fotografía original: Pendiente.');
  }

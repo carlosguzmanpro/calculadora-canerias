@@ -188,6 +188,17 @@
   if(salida.estado==='pendiente'){salida.estado='limite-iteraciones';pendientes.push('Límite de iteraciones alcanzado; resultado sin convergencia.');}
   for(const f of salida.filas){if(f.verificacionConsulta){f.verificacionConsulta.convergente=salida.convergente;f.verificacionConsulta.parcial||=!salida.convergente;}if(!salida.convergente)f.longitudDefinitivaM=null;}
   if(!salida.convergente)for(const r of salida.recorridos)r.longitudDefinitivaM=null;
+  for(const f of salida.filas){
+   const rutas=salida.recorridos.filter(r=>r.tramos.includes(f.id));
+   // Una consulta parcial suficiente no verifica el diámetro: deben conocerse
+   // todas las rutas alimentadas, incluidas las que aún podrían ser desfavorables.
+   const comprobado=salida.convergente&&rutas.length>0&&rutas.every(r=>r.equivalenteCompleto&&r.longitudDefinitivaM!==null)&&f.verificacionConsulta?.cubreConsulta===true;
+   f.comprobadoPorTabla=!!comprobado;f.diametroCalculadoMm=comprobado?f.candidato.exteriorMm:null;
+   if(f.verificacionConsulta)f.verificacionConsulta.parcial=!comprobado;
+   if(!comprobado)f.longitudDefinitivaM=null;
+   if(comprobado)f.estado='Diámetro calculado y comprobado por tabla SIGAS';
+  }
+
   pendientes.push(...salida.filas.flatMap(f=>f.pendientes));salida.pendientes=[...new Set(pendientes)];
   salida.advertencia='PRESELECCIÓN CONDICIONADA. Pérdidas desconocidas no son cero. No acredita presión final, método normativo ni aptitud de instalación. No se asignan diámetros a los tramos guardados.';
   return salida;

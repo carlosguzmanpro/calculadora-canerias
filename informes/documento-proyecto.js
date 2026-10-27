@@ -1,6 +1,7 @@
 /* Formato de entrega: presentación de datos, sin dimensionar ni dibujar recorridos supuestos. */
 (function(root){
  const esc=v=>String(v??'PENDIENTE').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ const metros=v=>Number.isFinite(v)?v.toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2}):'Pendiente';
  const numero=v=>Number.isFinite(v)?v.toLocaleString('es-AR',{maximumFractionDigits:3}):'Pendiente';
  function agruparMateriales(filas){
   const grupos=new Map();
@@ -41,7 +42,7 @@
   const celda=v=>esc(etiqueta(v));
   const tabla=(titulo,cab,filas,clase='')=>!filas.length?'':'<h2>'+esc(titulo)+'</h2><table'+(clase?' class="'+clase+'"':'')+'><thead><tr>'+cab.map(x=>'<th>'+esc(x)+'</th>').join('')+'</tr></thead><tbody>'+filas.map(f=>'<tr>'+f.map((v,i)=>'<td>'+celda(clase&&i===5&&typeof v==='string'?v.replace(/; /g,';\n'):v)+'</td>').join('')+'</tr>').join('')+'</tbody></table>';
   const imagen=d.croquis&&/^(data:image\/(?:png|jpeg|webp);base64,|blob:)/.test(d.croquis.url)?'<figure class="croquis-entrega"><h2>Fotografía original del croquis</h2><img src="'+esc(d.croquis.url)+'" alt="Croquis aportado por el usuario"><figcaption>'+(d.croquis.confirmado?'Legibilidad y correspondencia confirmadas por el usuario.':'Referencia aportada: correspondencia con la red actual pendiente de confirmar.')+' Sin escala verificada.</figcaption></figure>':'';
-  const dimensiones=d.planilla?tabla('Planilla de dimensionamiento',['TRAMO','REAL (m)','EQUIVALENTE (m)','DEFINITIVO (m)','CONSUMO (m³/h)','DIÁMETRO'],d.planilla.map(t=>[t.tramo,numero(t.real),numero(t.equivalente),numero(t.definitivo),numero(t.consumo),t.diametro])):
+  const dimensiones=d.planilla?tabla('Planilla de dimensionamiento',['TRAMO','REAL (m)','EQUIVALENTE (m)','DEFINITIVO (m)','CONSUMO (m³/h)','DIÁMETRO'],d.planilla.map(t=>[t.tramo,(gas?metros:numero)(t.real),(gas?metros:numero)(t.equivalente),(gas?metros:numero)(t.definitivo),numero(t.consumo),t.diametro])):
    tabla('Tramos',['Tramo','Longitud (m)','Diámetro','Estado'],d.tramos.map(t=>[t.desde+'–'+t.hasta,t.metros,t.diametro||'PENDIENTE',t.detalle?.estado==='pendiente'?'Accesorios pendientes':'Registrado; medidas manuales']));
   const materiales=d.materialesAgrupados?tabla('Materiales para revisión',['Material / accesorio','Diámetro','Cantidad','Unidad','Estado','Ubicación'],d.materialesAgrupados.map(f=>[f.material,f.diametro,f.cantidad,f.unidad,(f.estado==='estimado'?'PROVISIONAL (ESTIMADO)':f.estado.toUpperCase())+' · '+(f.revisado?'Revisado':'Sin revisar'),f.ubicaciones.join('; ')]),gas?'materiales-entrega':''):
    tabla('Materiales para revisión',['Material / accesorio','Diámetro','Cantidad','Unidad','Ubicación','Estado / observaciones'],d.filas.map(f=>[f.material,f.diametro,f.cantidad,f.unidad,f.ubicacion,(f.cantidad==null||/pendiente/i.test(f.diametro)?'PENDIENTE':String(f.estado).toUpperCase())+' · '+(f.revisado?'Revisado':'Sin revisar')+' · '+(f.evidencia||'')+(f.editado?' · Ajuste manual':'')]),gas?'materiales-entrega':'');

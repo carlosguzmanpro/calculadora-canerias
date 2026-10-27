@@ -69,3 +69,13 @@ Rutas reales: Termo24 m, Calefactor36 m, Cocina33 m. Total físico58 m;19 codos;
 - **Aprobación normativa:** siempre pendiente de revisión profesional, independientemente de los dos estados anteriores. Completar el campo de referencia no certifica la instalación.
 
 No cambian tablas, caudales, candidatos, cantidades, equivalentes impresos ni estimaciones de cuplas. No se exige ninguna posición dentro de tramos uniformes. PDF y pantalla presentan los tres estados separados. El resultado legado `estado` representa ahora exclusivamente la capacidad tabular; no debe interpretarse como compatibilidad de suministro ni aprobación.
+
+## Diámetro calculado y comprobado por tabla (base 0d3a4eb)
+
+Cada tramo publica `comprobadoPorTabla` y `diametroCalculadoMm` solo después de converger, con capacidad suficiente y **todos** sus recorridos alimentados completos. Una ruta control conocida no basta si otra ruta alimentada conserva pérdidas desconocidas. Esto no modifica la selección numérica ni asigna un diámetro definitivo aprobado a los tramos guardados.
+
+Pantalla y PDF distinguen «Diámetro calculado y comprobado por tabla SIGAS» de un diámetro provisional. El resultado muestra longitud de consulta, fila igual/superior, capacidad y demanda; los pendientes se proyectan desde el mismo registro, evitando repetir la necesidad terminal y su pieza vinculada. Las cantidades y roscas conocidas se reutilizan. Los datos de suministro y aprobación normativa siguen separados.
+
+Las longitudes calculadas se muestran con dos decimales. El formato visual no interviene en selección, iteración ni comparación: 46,861… m se ve como46,86 m y consulta48 m; un valor interno apenas superior a48 m consulta50 m, aunque visualmente se vea48,00. Los valores impresos originales del catálogo y la precisión interna permanecen intactos.
+
+El ejercicio58m conserva cantidades y candidatos; sigue incompleto por accesorios/uniones reales no identificados. No se inventó una versión completamente identificada del croquis. Se conserva un circuito de ensayo independiente, con productos documentados y datos explícitos, para verificar el estado comprobado, su trazabilidad y su impresión sin atribuir esas variantes al ejercicio del propietario.

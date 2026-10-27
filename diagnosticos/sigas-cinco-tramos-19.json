@@ -335,7 +335,9 @@
         "terminal-medidor: Salida roscada del medidor: identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero.",
         "terminal-Termo: Conexión fusión–rosca de Termo: identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero."
       ],
-      "estado": "Preselección condicionada; no diámetro de ejecución"
+      "estado": "Preselección condicionada; no diámetro de ejecución",
+      "comprobadoPorTabla": false,
+      "diametroCalculadoMm": null
     },
     {
       "id": "ref-A-B",
@@ -607,7 +609,9 @@
         "terminal-medidor: Salida roscada del medidor: identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero.",
         "terminal-Cocina: Conexión fusión–rosca de Cocina: identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero."
       ],
-      "estado": "Preselección condicionada; no diámetro de ejecución"
+      "estado": "Preselección condicionada; no diámetro de ejecución",
+      "comprobadoPorTabla": false,
+      "diametroCalculadoMm": null
     },
     {
       "id": "ref-A-Termo",
@@ -870,7 +874,9 @@
         "terminal-medidor: Salida roscada del medidor: identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero.",
         "terminal-Termo: Conexión fusión–rosca de Termo: identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero."
       ],
-      "estado": "Preselección condicionada; no diámetro de ejecución"
+      "estado": "Preselección condicionada; no diámetro de ejecución",
+      "comprobadoPorTabla": false,
+      "diametroCalculadoMm": null
     },
     {
       "id": "ref-B-Calefactor",
@@ -1154,7 +1160,9 @@
         "terminal-medidor: Salida roscada del medidor: identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero.",
         "terminal-Calefactor: Conexión fusión–rosca de Calefactor: identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero."
       ],
-      "estado": "Preselección condicionada; no diámetro de ejecución"
+      "estado": "Preselección condicionada; no diámetro de ejecución",
+      "comprobadoPorTabla": false,
+      "diametroCalculadoMm": null
     },
     {
       "id": "ref-B-Cocina",
@@ -1449,7 +1457,9 @@
         "terminal-medidor: Salida roscada del medidor: identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero.",
         "terminal-Cocina: Conexión fusión–rosca de Cocina: identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero."
       ],
-      "estado": "Preselección condicionada; no diámetro de ejecución"
+      "estado": "Preselección condicionada; no diámetro de ejecución",
+      "comprobadoPorTabla": false,
+      "diametroCalculadoMm": null
     }
   ],
   "historia": [
