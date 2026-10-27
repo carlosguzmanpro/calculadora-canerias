@@ -77,6 +77,33 @@
   }
   return {estado:'resuelta',fila:fs[0],via,salida,entrada,fuenteVia:dib?.estado==='identificada'?'croquis-vectorial':'seleccion-manual'};
  }
+ // Conjuntos documentados: catálogo pp.41–42, montaje MH p.28 y LE originales pp.24–25.
+ function proponerConjuntosTee(d,pieza,recorridos,vector,seleccion={}){
+  if(d?.id!=='sigas')return [];
+  const ids=pieza.conexionesDiametro||[],rutas=recorridos.map(r=>r.tramos.filter(t=>ids.includes(t))).filter(r=>r.length===2),entradas=[...new Set(rutas.map(r=>r[0]))];
+  if(ids.length!==3||new Set(ids).size!==3||entradas.length!==1||ids.some(id=>!positivo(vector[id])))return [];
+  const entrada=entradas[0],salidas=ids.filter(id=>id!==entrada),vias=seleccion.viasPorTramo||{};
+  if(salidas.some(id=>!['directo','giro'].includes(vias[id]))||salidas.every(id=>vias[id]==='directo'))return [];
+  const firma=JSON.stringify({conexiones:ids.map(id=>[id,vector[id]]),entrada,vias:salidas.map(id=>[id,vias[id]])}),opciones=[];
+  const codigos={20:'60-130020000',25:'60-130025000',32:'60-130032000',40:'60-130040000',50:'60-130050000',63:'60-130063000',75:'60-130075000',90:'60-130090000',110:'60-130110000'};
+  const bujes={'25-20':'60-241025020','32-25':'60-241032025','32-20':'60-241032020','40-25':'60-241040025','40-32':'60-241040032','50-32':'60-241050032','50-40':'60-241050040','63-40':'60-241063040','63-50':'60-241063050','75-50':'60-241075050','75-63':'60-241075063','90-63':'60-241090063','90-75':'60-241090075','110-75':'60-241110075','110-90':'60-241110090'};
+  const D=vector[entrada],reducciones=[],filas={};let valido=!!codigos[D];
+  for(const id of salidas){
+   const f=d.tablas[3].filas.find(f=>f.nombreOriginal==='Te Normal '+D+' mm, flujo '+(vias[id]==='giro'?'a 90º':'a través'));if(!f)valido=false;else filas[id]=f.id;
+   const menor=vector[id];if(menor===D)continue;
+   const clave=D+'-'+menor,fila=d.tablas[3].filas.find(f=>f.nombreOriginal==='Buje Reducción '+clave);
+   if(menor>D||!fila||!bujes[clave]){valido=false;continue;}
+   reducciones.push({id:pieza.id+'::buje:'+id,tramoId:id,productoId:fila.id,codigo:bujes[clave],nombre:fila.nombreOriginal,medidas:[D,menor],equivalenteM:fila.longitudEquivalenteM});
+  }
+  if(valido)opciones.push({id:'normal-bujes',firma,entrada,diametroTee:D,codigoTee:codigos[D],nombre:'Tee normal '+D+' mm'+(reducciones.length?' + '+reducciones.length+' buje(s)':' sin reducciones'),filasPorSalida:filas,reducciones});
+  // Pieza integrada solo si todas sus vías y puertos están documentados y son compatibles.
+  const codigoCentral={'25-20':'60-133025020','32-20':'60-133032020','32-25':'60-133032025'};
+  for(const tipo of ['central']){
+   const res=salidas.map(id=>resolverTee(d,pieza,{tramos:[entrada,id]},vector,{...seleccion,tipo}));
+   if(res.every(r=>r.estado==='resuelta')){const m=medidasTee(res[0].fila),codigo=codigoCentral[m[0]+'-'+m[2]];if(codigo)opciones.push({id:tipo,firma,entrada,diametroTee:m[0],codigoTee:codigo,nombre:'Tee reductora central '+m[0]+' × '+m[2]+' mm, sin bujes adicionales',filasPorSalida:Object.fromEntries(salidas.map((id,i)=>[id,res[i].fila.id])),reducciones:[]});}
+  }
+  return opciones;
+ }
  // Extremos verificados: catálogo pp.40–43; equivalentes originales Tabla3 pp.24–25.
  function puertosProducto(f){
   const n=f.nombreOriginal,a=atributosTerminal(f),D=f.diametroExteriorM*1000;
@@ -175,11 +202,27 @@
      // Una identidad física aporta una sola vez a cada recorrido; nunca suma referencias duplicadas.
      const vinculo=config.vinculos?.[p.id],ubicaciones=p.tramos.length?p.tramos:vinculo?.tramoAplicacion&&base.has(vinculo.tramoAplicacion)?[vinculo.tramoAplicacion]:[],enRuta=ubicaciones.some(id=>r.tramos.includes(id))||(Array.isArray(vinculo?.recorridos)&&vinculo.recorridos.includes(r.artefacto));
      if(!enRuta){if(!ubicaciones.length&&!vinculo?.recorridos)pendiente({...p,tramos:ubicaciones},'ubicación respecto del recorrido/medidor pendiente.');continue;}
+     if(p.tipo==='reduccion'&&Object.values(config.tees||{}).some(t=>t.conjunto?.confirmado&&Object.values(t.conjunto.reutilizadas||{}).includes(p.id)))continue;
      if(aplicadas.has(p.id))continue;aplicadas.add(p.id);
      if(p.conflicto||p.confirmada!==true){pendiente({...p,tramos:ubicaciones},'identidad/cantidad por verificar.');continue;}
      let a=vinculo?.porRecorrido?.[r.artefacto]||vinculo?.producto;
      if(p.tipo==='tee'&&config.tees?.[p.id]){
       if(iteracion===0){pendiente(p,'semilla sin equivalentes, no es pérdida cero.');continue;}
+      const seleccion=config.tees[p.id],confirmacion=seleccion.conjunto;
+      if(confirmacion){
+       const propuesta=proponerConjuntosTee(d,p,rutas,vector,seleccion).find(o=>o.id===confirmacion.opcionId&&o.firma===confirmacion.firma);
+       if(!propuesta||confirmacion.confirmado!==true){pendiente(p,'Conjunto de tee incompatible con diámetros o vías actuales: confirmar nuevamente la propuesta; sus pérdidas no se aplican.');continue;}
+       const salida=r.tramos.filter(id=>p.conexionesDiametro.includes(id))[1],fila=d.tablas[3].filas.find(f=>f.id===propuesta.filasPorSalida[salida]);
+       try{
+        const x=tecnico().accesorio(d,fila.id,p.cantidad);aportes.push({piezaId:p.id,tipo:'tee',tramoId:null,diametroExteriorMm:fila.diametroExteriorM*1000,codigoCatalogo:propuesta.codigoTee,...x});
+        for(const red of propuesta.reducciones.filter(x=>x.tramoId===salida)){
+         const existente=confirmacion.reutilizadas?.[red.id];
+         if(existente){const q=piezas.get(existente),v=config.vinculos?.[existente]?.producto;const vs=v?.productos?Object.values(v.productos):[];if(!q||q.tipo!=='reduccion'||q.cantidad!==1||!q.confirmada||!q.tramos.includes(salida)||!vs.includes(red.productoId)){pendiente(p,'Reducción vinculada cambió: revisar coincidencia antes de aplicar el conjunto.');continue;}if(!aplicadas.has(q.id)){aplicadas.add(q.id);aportes.push({piezaId:q.id,tipo:'reduccion',tramoId:salida,diametroExteriorMm:red.medidas[0],...tecnico().accesorio(d,red.productoId,1)});}continue;}
+         if([...piezas.values()].some(q=>q.tipo==='reduccion'&&q.tramos.includes(salida))){pendiente(p,'Reducción ya registrada en esta salida: vincularla antes de añadir otra.');continue;}
+         const x=tecnico().accesorio(d,red.productoId,1);aportes.push({piezaId:red.id,tipo:'reduccion',tramoId:salida,diametroExteriorMm:red.medidas[0],conjuntoTee:p.id,codigoCatalogo:red.codigo,medidas:red.medidas,...x});
+        }
+       }catch(e){pendiente(p,e.message);}continue;
+      }
       const t=resolverTee(d,p,r,vector,config.tees[p.id]);if(t.estado!=='resuelta'){pendiente(p,t.motivo);continue;}
       const medidas=p.conexionesDiametro;a={confirmado:true,tramosDiametro:medidas,productos:{[medidas.map(id=>vector[id]).join('/')]:t.fila.id}};
      }
@@ -331,5 +374,5 @@
   v.nota='La cota de 10 mmca (98,0665 Pa) corresponde al recorrido completo verificado; no se suma 10 mmca por tramo. No es la pérdida exacta ni una certificación. No se escala caudal al cuadrado ni se interpolan tablas. La aplicación normativa y el suministro necesitan revisión profesional.';
   return v;
  }
- const api={memoriaCalculo,consultar,resolver,familiaProducto,atributosTerminal,opcionesTerminal,puertosProducto,fusionCompatible,resolverConexion,presionPa,verificar,medidasTee,deducirTerminal,tipoTee,viaTee,opcionesTee,interpretarTeeVectorial,resolverTee};if(typeof module==='object'&&module.exports)module.exports=api;else root.DimensionamientoSigas=api;
+ const api={proponerConjuntosTee,memoriaCalculo,consultar,resolver,familiaProducto,atributosTerminal,opcionesTerminal,puertosProducto,fusionCompatible,resolverConexion,presionPa,verificar,medidasTee,deducirTerminal,tipoTee,viaTee,opcionesTee,interpretarTeeVectorial,resolverTee};if(typeof module==='object'&&module.exports)module.exports=api;else root.DimensionamientoSigas=api;
 })(globalThis);
