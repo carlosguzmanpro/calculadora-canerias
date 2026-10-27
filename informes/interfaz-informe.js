@@ -5,7 +5,13 @@ function modeloInformeActual(){
   d.resumen.push(modoManualGasActivo()?'Cálculo manual: cantidades ingresadas una sola vez, sin segunda confirmación; revisión técnica pendiente.':avisoConciliacionRapidaGas());
   const avisoDeteccion=avisoDeteccionGas();if(avisoDeteccion)d.resumen.push(avisoDeteccion);
   const perfilInforme=perfilTecnicoActualGas(),instInforme={...instalacionGas,perfil:perfilInforme};
-  if(CatalogosSistemasGas.identificar(instalacionGas.perfil)==='sigas'&&perfilInforme.gas==='GN'){const v=registroAccesoriosSigasGas()?.verificacion;if(v)d.resumen.push(v.estado==='comprobacion-tabular-satisfecha'?'SIGAS GN: comprobación tabular satisfecha a 10 mmca (98,0665 Pa); presión final al menos '+fmt(v.presionFinalMinimaPa)+' Pa, bajo las condiciones declaradas. No es pérdida exacta ni aprobación normativa.':'SIGAS GN: comprobación tabular pendiente; pérdida exacta no calculada. '+v.pendientes.join(' '));}
+  if(CatalogosSistemasGas.identificar(instalacionGas.perfil)==='sigas'&&perfilInforme.gas==='GN'){
+   const v=registroAccesoriosSigasGas()?.verificacion;if(v){
+    d.resumen.push('SIGAS GN · capacidad tabular a 10 mmca, densidad de referencia 0,65: '+(v.estado==='comprobacion-tabular-satisfecha'?'comprobada.':'pendiente. '+v.pendientes.join(' ')));
+    d.resumen.push('Compatibilidad del suministro: '+(v.suministro.estado==='compatible-con-referencia-tabular'?'comprobada según datos documentados declarados; presión final conservadora al menos '+fmt(v.suministro.presionFinalMinimaPa)+' Pa.':v.suministro.pendientes.join(' ')));
+    d.resumen.push('Aprobación normativa final: pendiente de revisión profesional. No se calculó una pérdida exacta.');
+   }
+  }
   d.resumen.push('Sistema: '+(CatalogosSistemasGas.identificar(instalacionGas.perfil)||'Pendiente')+' · combustible: '+(perfilInforme.gas||'Pendiente')+'.',...combustibleTecnicoGas().pendientes);
   const resultado=motorClaseAceroGas(tramos,artefactos,instInforme,catalogoParaGas(instInforme));
   const red=analizarRedGas();

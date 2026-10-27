@@ -16,8 +16,8 @@ No se encontró una fórmula documentada aplicable que permita obtener la pérdi
 2. Itera candidatos, equivalentes por diámetro local y vía de tee; suma por recorrido sin duplicar identidades físicas.
 3. Una llave/tee no queda incompleta por un aviso genérico si su producto real ya fue resuelto. Un producto desconocido sigue pendiente.
 4. Reconoce `Unión Normal` como cupla SIGAS con su equivalente impreso. No usa estimaciones de cuplas como piezas reales.
-5. Con inventario real completo revisado y vigente, verifica capacidad de todos los tramos y recorridos a la referencia de 10 mmca. Cada tramo se consulta con el recorrido completo de control y su propio consumo/diámetro, no con su longitud física aislada.
-6. Si condiciones y alcance declarados son suficientes, informa `comprobacion-tabular-satisfecha`, cota de referencia 98,0665 Pa y presión final inferior conservadora disponible menos esa cota. **Es una comprobación tabular condicionada, no una pérdida exacta ni diámetro definitivo.** No suma 10 mmca por tramo. Presupuesto menor que 10 mmca queda pendiente, sin escalar la tabla.
+5. Con inventario real completo revisado y vigente, verifica capacidad de todos los tramos y recorridos a la referencia de 10 mmca, independientemente de las presiones de suministro. Cada tramo se consulta con el recorrido completo de control y su propio consumo/diámetro, no con su longitud física aislada.
+6. Con recorridos, caudales y equivalentes completos informa `comprobacion-tabular-satisfecha` y cota de referencia 98,0665 Pa, para GN de densidad tabulada 0,65. El suministro se evalúa aparte y solo informa presión final inferior conservadora si sus datos documentados declarados son compatibles con esa referencia. **Es una comprobación tabular condicionada, no una pérdida exacta ni diámetro definitivo.** No suma 10 mmca por tramo. Presupuesto menor que 10 mmca impide comprobar la compatibilidad del suministro con esta tabla, sin invalidar la capacidad tabular de referencia ni escalar valores.
 7. Si falta una equivalencia, devuelve total desconocido y conserva equivalentes parciales/candidatos. Presiones en Pa, mbar o mmca se convierten explícitamente (1 mmca convencional = 9,80665 Pa).
 
 ## Datos ingresados una sola vez
@@ -27,9 +27,9 @@ En GAS → CALCULAR CAÑERÍA → VER DETALLES TÉCNICOS → Verificar capacidad
 - Presión disponible, mínima más exigente, pérdida admisible, unidad y fuente.
 - Densidad, poder calorífico y fuente, reutilizados si ya existen.
 - Demanda de placa sin simultaneidad y referencia/requisitos aplicables.
-- Revisión del alcance del método tabular e inventario real completo, con fuente. Esa declaración no resuelve un accesorio desconocido ni equivale a aprobación normativa.
+- Revisión del inventario real completo, con fuente. Esa declaración no resuelve un accesorio desconocido ni equivale a aprobación normativa. Se retiró la casilla redundante de confirmación del método: la regla aplicada por el motor queda identificada sin solicitar otra declaración.
 
-La revisión conserva una firma de red, cantidades, productos y perfil. Si cambian, sigue guardada como respaldo pero deja de habilitar el cierre. No se exigen posiciones dentro de tramos uniformes. Para confirmar el inventario deben conocerse las cuplas reales (incluido cero comprobado); el estimado de compra no prueba sus cantidades. Una cota mínima geométrica detecta declaraciones físicamente insuficientes respecto del largo comercial; no convierte estimaciones en piezas reales.
+La revisión conserva una firma de red, cantidades, productos, sistema y combustible. Si cambian, sigue guardada como respaldo pero deja de habilitar el cierre. Presiones, densidad declarada del suministro y referencias normativas no invalidan la revisión física. Las firmas legadas se reconocen sin reescribirlas. No se exigen posiciones dentro de tramos uniformes. Para confirmar el inventario deben conocerse las cuplas reales (incluido cero comprobado); el estimado de compra no prueba sus cantidades. Una cota mínima geométrica detecta declaraciones físicamente insuficientes respecto del largo comercial; no convierte estimaciones en piezas reales.
 
 Las excepciones de producto siguen en la identificación existente de SIGAS: sexo/variante terminal, configuración y vía de cada tee, tipo de llave, variante del codo adicional. Las propuestas de adaptación no incorporan pérdidas automáticamente.
 
@@ -60,3 +60,12 @@ Ejercicio conservado:
 | B–Cocina |13|10200|25 mm|
 
 Rutas reales: Termo24 m, Calefactor36 m, Cocina33 m. Total físico58 m;19 codos;2 tees;3 llaves. Los candidatos siguen condicionados; no se suman los tramos compartidos varias veces a materiales. Sin cambios en fórmulas, valores originales de las tablas, estimaciones comerciales, guardado o PDF.
+
+
+## Separación de verificaciones (base 761f455)
+
+- **Capacidad tabular:** recorridos, consumos de placa, conversión con poder calorífico y fuente, productos/equivalentes por diámetro, iteración y capacidades Tabla4 a 10 mmca y densidad tabulada0,65. No requiere presión disponible, mínima, pérdida admisible, referencia normativa, densidad real ni confirmar de nuevo el método. Una densidad real diferente NO autoriza aplicar el resultado a ese suministro.
+- **Suministro:** sus propios pendientes y estado; verifica presión/unidad/fuente, margen disponible y densidad frente a la referencia. Nunca informa presión final si falta capacidad completa o sus condiciones son incompatibles/desconocidas. Un presupuesto menor que 10 mmca no queda probado por esta tabla, aunque el caudal sí quede cubierto en su referencia.
+- **Aprobación normativa:** siempre pendiente de revisión profesional, independientemente de los dos estados anteriores. Completar el campo de referencia no certifica la instalación.
+
+No cambian tablas, caudales, candidatos, cantidades, equivalentes impresos ni estimaciones de cuplas. No se exige ninguna posición dentro de tramos uniformes. PDF y pantalla presentan los tres estados separados. El resultado legado `estado` representa ahora exclusivamente la capacidad tabular; no debe interpretarse como compatibilidad de suministro ni aprobación.

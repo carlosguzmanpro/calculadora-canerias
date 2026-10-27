@@ -670,7 +670,13 @@ function modeloInformeActual(){
   d.resumen.push(modoManualGasActivo()?'Cálculo manual: cantidades ingresadas una sola vez, sin segunda confirmación; revisión técnica pendiente.':avisoConciliacionRapidaGas());
   const avisoDeteccion=avisoDeteccionGas();if(avisoDeteccion)d.resumen.push(avisoDeteccion);
   const perfilInforme=perfilTecnicoActualGas(),instInforme={...instalacionGas,perfil:perfilInforme};
-  if(CatalogosSistemasGas.identificar(instalacionGas.perfil)==='sigas'&&perfilInforme.gas==='GN'){const v=registroAccesoriosSigasGas()?.verificacion;if(v)d.resumen.push(v.estado==='comprobacion-tabular-satisfecha'?'SIGAS GN: comprobación tabular satisfecha a 10 mmca (98,0665 Pa); presión final al menos '+fmt(v.presionFinalMinimaPa)+' Pa, bajo las condiciones declaradas. No es pérdida exacta ni aprobación normativa.':'SIGAS GN: comprobación tabular pendiente; pérdida exacta no calculada. '+v.pendientes.join(' '));}
+  if(CatalogosSistemasGas.identificar(instalacionGas.perfil)==='sigas'&&perfilInforme.gas==='GN'){
+   const v=registroAccesoriosSigasGas()?.verificacion;if(v){
+    d.resumen.push('SIGAS GN · capacidad tabular a 10 mmca, densidad de referencia 0,65: '+(v.estado==='comprobacion-tabular-satisfecha'?'comprobada.':'pendiente. '+v.pendientes.join(' ')));
+    d.resumen.push('Compatibilidad del suministro: '+(v.suministro.estado==='compatible-con-referencia-tabular'?'comprobada según datos documentados declarados; presión final conservadora al menos '+fmt(v.suministro.presionFinalMinimaPa)+' Pa.':v.suministro.pendientes.join(' ')));
+    d.resumen.push('Aprobación normativa final: pendiente de revisión profesional. No se calculó una pérdida exacta.');
+   }
+  }
   d.resumen.push('Sistema: '+(CatalogosSistemasGas.identificar(instalacionGas.perfil)||'Pendiente')+' · combustible: '+(perfilInforme.gas||'Pendiente')+'.',...combustibleTecnicoGas().pendientes);
   const resultado=motorClaseAceroGas(tramos,artefactos,instInforme,catalogoParaGas(instInforme));
   const red=analizarRedGas();
@@ -9121,7 +9127,7 @@ function avisoDeteccionGas(){
   const salida={estado:'pendiente',convergente:false,definitivo:false,diametrosDefinitivos:null,filas:[],historia:[],recorridos:[],pendientes,errores,fuente:d?.fuente||null,metodo:'Consulta SIGAS por recorrido completo más desfavorable, con fila superior; aplicación normativa pendiente',semillaAdicionalM:0};
   if(perfil?.catalogoTecnicoGas!=='sigas'||perfil?.gas!=='GN')errores.push('Elegir SIGAS y gas natural; no se utilizarán tablas de otra marca o combustible.');
   if(perfil?.material!=='Acero-polietileno SIGAS Thermofusión'||perfil?.sistema!=='Thermofusión')errores.push('Material/unión guardados no corresponden a SIGAS Thermofusión. Se conservaron sin reinterpretarlos.');
-  if(perfil?.densidadRelativa&&Number(perfil.densidadRelativa)!==.65)errores.push('Densidad informada incompatible con SIGAS GN Tabla 4 (0,65).');
+  if(perfil?.densidadRelativa&&Number(perfil.densidadRelativa)!==.65)pendientes.push('Densidad declarada distinta de 0,65: comprobar suministro por separado; candidatos referidos exclusivamente a la tabla GN 0,65.');
   if(!preparacion?.recorridos?.length||!preparacion?.porTramo?.length)errores.push('Recorridos completos desde el medidor pendientes.');
   if(errores.length)return salida;
   pendientes.push(...revision.alertas);
@@ -9129,7 +9135,7 @@ function avisoDeteccionGas(){
   const pcs=Number(perfil.poderCalorifico),fuentePCS=typeof perfil.fuenteGas==='string'&&perfil.fuenteGas.trim();
   if(!positivo(pcs)||!fuentePCS)pendientes.push('Poder calorífico y su fuente pendientes; no se aplica 9300 por defecto.');
   const presion=Number(perfil.presionDisponible),minima=Number(perfil.presionMinima),perdida=Number(perfil.perdidaMaxima);
-  salida.condiciones={gas:perfil.gas,densidadTabla:.65,caidaImpresa:d.tablas[4].caidaPresionImpresa,poderCalorifico:positivo(pcs)&&fuentePCS?pcs:null,fuentePCS:fuentePCS||null,simultaneidad:perfil.criterioDemanda==='placa-total'?'Consumos de placa sumados sin reducción; criterio declarado en el proyecto':'Consumos sumados sin reducción; criterio técnico por verificar',presupuestoDisponiblePa:perfil.unidadPresion==='Pa'&&positivo(presion)&&positivo(minima)?presion-minima:null};
+  salida.condiciones={gas:perfil.gas,densidadTabla:.65,caidaImpresa:d.tablas[4].caidaPresionImpresa,poderCalorifico:positivo(pcs)&&fuentePCS?pcs:null,fuentePCS:fuentePCS||null,simultaneidad:'Suma de consumos de placa sin reducción (cálculo aplicado)',presupuestoDisponiblePa:perfil.unidadPresion==='Pa'&&positivo(presion)&&positivo(minima)?presion-minima:null};
   if(perfil.unidadPresion==='Pa'&&positivo(presion)&&positivo(minima)&&positivo(perdida)&&(presion<=minima||perdida>presion-minima))pendientes.push('Presupuesto de presión incompatible con los valores ingresados; preselección no verifica suministro.');
   const piezas=new Map();let inventarioInvalido=false;
   for(const p of inventario.fisicas||[]){
@@ -9143,7 +9149,6 @@ function avisoDeteccionGas(){
    for(const id of p.identidadesFisicas){const previo=identidades.get(id);if(previo&&previo.id!==p.id){previo.conflicto=true;p.conflicto=true;inventarioInvalido=true;pendientes.push('Identidad física compartida por grupos: '+id+'; no se suman ambos.');}else identidades.set(id,p);}
   }
   if(errores.length)return salida;
-  if(config.metodoTabularSigas!=='nag200-recorrido-completo'||perfil.criterioDemanda!=='placa-total')pendientes.push('Criterio de recorrido/fila superior y simultaneidad: validar con método aplicable. No se añadieron 15 m EPOXI.');
   if(!['presionDisponible','presionMinima','perdidaMaxima','fuentePresiones'].every(k=>perfil[k]))pendientes.push('Presión disponible, mínima de artefactos y pérdida admisible: confirmar alcance de la tabla; caída impresa 10 mm no es suministro.');
   if(config.inventarioPerdidasCompleto!==true||!config.fuenteInventario)pendientes.push('Cuplas y otras pérdidas no identificadas permanecen pendientes; no se suponen nulas ni bloquean esta preselección parcial.');
   if(!perfil.densidadRelativa)pendientes.push('Densidad del suministro pendiente de confirmar frente a 0,65 tabulado.');
@@ -9242,34 +9247,42 @@ function avisoDeteccionGas(){
  }
  function verificar(d,entrada,resultado){
   const r=resultado||resolver(d,entrada),p=entrada.perfil||{},pendientes=[];
-  const v={estado:'pendiente',metodo:'capacidad-tabular-recorrido-completo',fuente:'NAG-200 (1982), 5.2.8, 5.3 y 5.10; SIGAS ed15/2025 Tabla4 p.22 y Tabla3 pp.24–25',perdidaCalculadaPa:null,cotaTabularPa:null,presionFinalMinimaPa:null,definitivo:false,filas:[],recorridos:[],pendientes};
+  const v={capacidadTabular:{estado:'pendiente',densidadReferencia:.65,caidaReferenciaMmca:10,pendientes},suministro:{estado:'pendiente',pendientes:[],presionFinalMinimaPa:null},aprobacionNormativa:{estado:'pendiente',aprobada:false,pendientes:['Revisión normativa y de aplicabilidad profesional independiente de la capacidad tabular y del suministro.']},estado:'pendiente',metodo:'capacidad-tabular-recorrido-completo',fuente:'NAG-200 (1982), 5.2.8, 5.3 y 5.10; SIGAS ed15/2025 Tabla4 p.22 y Tabla3 pp.24–25',perdidaCalculadaPa:null,cotaTabularPa:null,presionFinalMinimaPa:null,definitivo:false,filas:[],recorridos:[],pendientes};
   const revision=tecnico().validar(d);
   if(revision.errores.length||p.catalogoTecnicoGas!=='sigas'||p.gas!=='GN'||d.tablas[4].caidaPresionImpresa?.valor!==10||d.tablas[4].caidaPresionImpresa?.unidad!=='mm'){
-   pendientes.push(...revision.errores,'Verificación disponible solo para SIGAS GN Tabla4 original a 10 mm de columna de agua.');return v;
+   pendientes.push(...revision.errores,'Verificación disponible solo para SIGAS GN Tabla4 original a 10 mm de columna de agua.');v.suministro.pendientes.push('No hay una tabla aplicable para comprobar compatibilidad del suministro.');return v;
   }
   const limite=10*9.80665,disponible=presionPa(p.presionDisponible,p.unidadPresion),minima=presionPa(p.presionMinima,p.unidadPresion),admisible=presionPa(p.perdidaMaxima,p.unidadPresion);
-  if(Number(p.densidadRelativa)!==.65)pendientes.push('Confirmar densidad del suministro compatible con 0,65 tabulado; no se corrige por otra densidad.');
-  if(!disponible||!minima||!admisible||!(typeof p.fuentePresiones==='string'&&p.fuentePresiones.trim()))pendientes.push('Completar presiones disponible, mínima, pérdida admisible, unidad y fuente.');
-  if(disponible&&minima&&admisible&&(disponible<=minima||admisible>disponible-minima+1e-8))pendientes.push('Presupuesto de presión incompatible con los datos ingresados.');
-  if(admisible&&admisible+1e-8<limite)pendientes.push('La tabla a 10 mmca no prueba una pérdida menor que ese límite; hace falta un método documentado para el presupuesto indicado.');
-  if(disponible&&minima&&disponible-minima+1e-8<limite)pendientes.push('El margen disponible no cubre el límite tabulado de 10 mmca.');
-  if(p.criterioDemanda!=='placa-total')pendientes.push('Confirmar suma de consumos de placa sin reducción por simultaneidad.');
-  if(!(typeof p.referenciaNormativa==='string'&&p.referenciaNormativa.trim()))pendientes.push('Registrar referencia normativa y requisitos aplicables de la distribuidora; esto no equivale a su aprobación.');
-  if(entrada.config?.metodoTabularSigas!=='nag200-recorrido-completo')pendientes.push('Revisar alcance del método por recorrido completo NAG-200 5.10 con Tabla4 SIGAS, para este proyecto de baja presión.');
+  const suministro=v.suministro.pendientes;
+  if(Number(p.densidadRelativa)!==.65)suministro.push('Confirmar densidad del suministro compatible con 0,65 tabulado; no se corrige por otra densidad.');
+  if(!disponible||!minima||!admisible||!(typeof p.fuentePresiones==='string'&&p.fuentePresiones.trim()))suministro.push('Completar presiones disponible, mínima, pérdida admisible, unidad y fuente.');
+  if(disponible&&minima&&admisible&&(disponible<=minima||admisible>disponible-minima+1e-8))suministro.push('Presupuesto de presión incompatible con los datos ingresados.');
+  if(admisible&&admisible+1e-8<limite)suministro.push('La tabla a 10 mmca no prueba una pérdida menor que ese límite; hace falta un método documentado para el presupuesto indicado.');
+  if(disponible&&minima&&disponible-minima+1e-8<limite)suministro.push('El margen disponible no cubre el límite tabulado de 10 mmca.');
+  if(!(typeof p.referenciaNormativa==='string'&&p.referenciaNormativa.trim()))v.aprobacionNormativa.pendientes.push('Registrar requisitos normativos y de distribuidora aplicables; una referencia escrita no equivale a aprobación.');
+  // La suma de consumos de placa y el método tabular ya se ejecutan en el motor.
+  // Ninguna declaración de suministro/normativa habilita o bloquea esa aritmética.
   if(!r.convergente||r.errores.length||!r.filas.length)pendientes.push(...r.errores,'Cálculo sin vector convergente y completo de candidatos.');
   for(const ruta of r.recorridos){
    const filas=r.filas.filter(f=>ruta.tramos.includes(f.id));
    const completa=ruta.equivalenteCompleto===true&&ruta.longitudDefinitivaM!==null&&filas.length===ruta.tramos.length;
    const cumple=completa&&r.convergente&&filas.every(f=>f.candidato?.cubre&&f.verificacionConsulta?.cubreConsulta);
-   v.recorridos.push({artefacto:ruta.artefacto,tramos:ruta.tramos.slice(),equivalenteConocidoM:ruta.equivalenteConocidoM,longitudCalculoM:ruta.longitudDefinitivaM,completa,cumpleCapacidad:!!cumple,cotaTabularPa:cumple?limite:null,perdidaCalculadaPa:null,presionFinalMinimaPa:cumple&&disponible?disponible-limite:null});
+   v.recorridos.push({artefacto:ruta.artefacto,tramos:ruta.tramos.slice(),equivalenteConocidoM:ruta.equivalenteConocidoM,longitudCalculoM:ruta.longitudDefinitivaM,completa,cumpleCapacidad:!!cumple,cotaTabularPa:cumple?limite:null,perdidaCalculadaPa:null,presionFinalMinimaPa:null});
    if(!completa)pendientes.push(ruta.artefacto+': completar productos, vías y registro de todas las pérdidas reales; las desconocidas no son cero.');
    else if(!cumple)pendientes.push(ruta.artefacto+': no supera la comprobación de capacidades tabuladas.');
   }
   v.filas=r.filas.map(f=>({tramo:f.tramo,candidatoMm:f.candidato?.exteriorMm||null,longitudConsultaM:f.longitudConsultaM,filaM:f.candidato?.longitudFilaM||null,capacidadM3h:f.candidato?.capacidadM3h||null,caudalM3h:f.caudalM3h,equivalenteCompleto:f.verificacionConsulta?.parcial===false,cumpleCapacidad:!!f.verificacionConsulta?.cubreConsulta}));
   v.pendientes=[...new Set(pendientes)];
   if(v.recorridos.length&&v.pendientes.length===0&&v.recorridos.every(x=>x.cumpleCapacidad)){
-   v.estado='comprobacion-tabular-satisfecha';v.cotaTabularPa=limite;v.presionFinalMinimaPa=disponible-limite;
+   v.estado='comprobacion-tabular-satisfecha';v.cotaTabularPa=limite;
   }
+  v.capacidadTabular.estado=v.estado;v.capacidadTabular.pendientes=v.pendientes;
+  if(suministro.length===0){
+   if(v.estado==='comprobacion-tabular-satisfecha'){
+    v.suministro.estado='compatible-con-referencia-tabular';v.presionFinalMinimaPa=disponible-limite;v.suministro.presionFinalMinimaPa=v.presionFinalMinimaPa;
+    for(const ruta of v.recorridos)ruta.presionFinalMinimaPa=v.presionFinalMinimaPa;
+   }else suministro.push('Completar la capacidad tabular antes de comprobar el suministro de este recorrido.');
+  }else if(Number(p.densidadRelativa)>0&&Number(p.densidadRelativa)!==.65||disponible&&minima&&admisible&&(disponible<=minima||admisible>disponible-minima+1e-8||admisible+1e-8<limite||disponible-minima+1e-8<limite))v.suministro.estado='no-comprobado-con-esta-tabla';
   v.nota='La cota de 10 mmca (98,0665 Pa) corresponde al recorrido completo verificado; no se suma 10 mmca por tramo. No es la pérdida exacta ni una certificación. No se escala caudal al cuadrado ni se interpolan tablas. La aplicación normativa y el suministro necesitan revisión profesional.';
   return v;
  }
@@ -9384,8 +9397,10 @@ function entradaPreseleccionSigasGas(){
   return {artefacto:ruta.artefacto,tramo,llaveId,estado:llaveId?'Llave registrada asociada; tipo exacto pendiente':cantidad===0?'Llave no identificada en este tramo; no se añadió una':'Asociación de llaves ambigua; revisar ubicación sin cambiar cantidades',conexionRequerida:'Transición fusión–rosca',geometria:inventario.fisicas.find(p=>p.necesidadTerminal==='terminal-'+ruta.artefacto)?.geometria||null,medidaRosca:config.terminales?.['terminal-'+ruta.artefacto]?.rosca||null};
  });
  // Una revisión del inventario se conserva solo mientras no cambien red, cantidades o productos.
- const firma=JSON.stringify({tramos:tramos.map(t=>({id:t.id,desde:t.desde,hasta:t.hasta,metros:t.metros,detalle:t.detalle})),piezas:inventario.fisicas,ceros:inventario.ceros,vinculos:config.vinculos,terminales:config.terminales,perfil});
- const revisada=config.revisionInventario?.firma===firma&&typeof config.revisionInventario.fuente==='string'&&config.revisionInventario.fuente.trim();
+ const normalizarFirma=f=>{const x=JSON.parse(f);x.perfil=Object.fromEntries(['catalogoTecnicoGas','material','sistema','gas'].map(k=>[k,x.perfil?.[k]]));return JSON.stringify(x);};
+ const firma=normalizarFirma(JSON.stringify({tramos:tramos.map(t=>({id:t.id,desde:t.desde,hasta:t.hasta,metros:t.metros,detalle:t.detalle})),piezas:inventario.fisicas,ceros:inventario.ceros,vinculos:config.vinculos,terminales:config.terminales,perfil}));
+ let firmaAnterior=null;try{if(config.revisionInventario?.firma)firmaAnterior=normalizarFirma(config.revisionInventario.firma);}catch(e){/* Un formato desconocido se conserva sin habilitar la revisión. */}
+ const revisada=firmaAnterior===firma&&typeof config.revisionInventario?.fuente==='string'&&config.revisionInventario.fuente.trim();
  config.inventarioPerdidasCompleto=!!revisada;config.fuenteInventario=revisada?config.revisionInventario.fuente:null;
  config.firmaInventarioActual=firma;
  if(revisada){
@@ -9647,7 +9662,7 @@ function guardarVerificacionSigasGas(form){
  for(const [id,k]of Object.entries(campos))p[k]=campo(id).value.trim();
  if(p.poderCalorifico&&p.fuenteGas&&p.densidadRelativa)p.condicionesCombustiblePendientes=false;
  const c=proyectoGasActual().calculoSigas||={version:1,vinculos:{}};
- c.metodoTabularSigas=campo('sigasMetodo').checked?'nag200-recorrido-completo':null;
+ // Se conserva la declaración legada; el método aplicado no depende de esta casilla.
  const entrada=entradaPreseleccionSigasGas(),fuente=campo('sigasFuenteInventario').value.trim();
  if(campo('sigasInventario').checked&&fuente)c.revisionInventario={firma:entrada.config.firmaInventarioActual,fuente};
  else if(!campo('sigasInventario').checked)c.revisionInventario=null;
@@ -9659,15 +9674,18 @@ function renderVerificacionTabularSigasGas(out){
  const v=registro.verificacion,entrada=registro.entradaTecnica,p=entrada.perfil;
  const d=document.createElement('details'),sum=document.createElement('summary');sum.textContent='Verificar capacidad y límite de caída · SIGAS GN';d.append(sum);
  const texto=s=>{const n=document.createElement('p');n.textContent=s;d.append(n);};
- texto(v.estado==='comprobacion-tabular-satisfecha'?'Comprobación tabular satisfecha a 10 mmca (98,0665 Pa); presión final al menos '+fmt(v.presionFinalMinimaPa)+' Pa. No es una pérdida exacta ni aprobación de instalación.':'Comprobación tabular pendiente. Las equivalencias conocidas y candidatos parciales se conservan.');
+ texto('Capacidad tabular a 10 mmca · GN, densidad de referencia 0,65: '+(v.estado==='comprobacion-tabular-satisfecha'?'comprobada. No es aprobación normativa.':'pendiente de completar recorridos o equivalencias.'));
+ texto('Compatibilidad del suministro: '+(v.suministro.estado==='compatible-con-referencia-tabular'?'comprobada con los datos documentados declarados; presión final conservadora al menos '+fmt(v.suministro.presionFinalMinimaPa)+' Pa.':v.suministro.estado==='no-comprobado-con-esta-tabla'?'no comprobada con esta tabla.':'pendiente de datos o de capacidad tabular completa.'));
+ texto('Aprobación normativa final: pendiente de revisión profesional independiente.');
  for(const r of v.recorridos)texto(r.artefacto+': '+(r.completa?fmt(r.longitudCalculoM)+' m de cálculo · '+(r.cumpleCapacidad?'capacidades cubiertas a la referencia de tabla':'capacidad insuficiente'):'equivalencias reales incompletas; pérdida total pendiente')+'.');
  texto(v.nota);for(const aviso of v.pendientes)texto(aviso);
+ const suministro=document.createElement('details'),ss=document.createElement('summary');ss.textContent='Suministro · datos que faltan';suministro.append(ss);for(const aviso of v.suministro.pendientes){const n=document.createElement('p');n.textContent=aviso;suministro.append(n);}d.append(suministro);
  const form=document.createElement('details'),st=document.createElement('summary');st.textContent='Completar datos una sola vez para este proyecto';form.append(st);
  const campos=[['sigasUnidad','Unidad común de presión','unidadPresion','select',['','Pa','mbar','mmca']],['sigasPresion','Presión disponible a la salida del medidor','presionDisponible','number'],['sigasMinima','Presión mínima más exigente de los artefactos','presionMinima','number'],['sigasPerdida','Pérdida máxima admisible','perdidaMaxima','number'],['sigasFuente','Fuente de presiones y pérdida admisible','fuentePresiones','text'],['sigasDensidad','Densidad relativa del suministro (tabla GN: 0,65)','densidadRelativa','number'],['sigasPCS','Poder calorífico (kcal/m³)','poderCalorifico','number'],['sigasFuenteGas','Fuente de propiedades del gas','fuenteGas','text'],['sigasNorma','Referencia normativa y requisitos de distribuidora','referenciaNormativa','text'],['sigasDemanda','Demanda','criterioDemanda','select',['','placa-total']]];
  for(const [id,nombre,k,tipo,opciones] of campos){const l=document.createElement('label'),i=document.createElement(tipo==='select'?'select':'input');l.textContent=nombre;i.name=id;i.ariaLabel=nombre;if(tipo==='select')for(const val of opciones){const o=document.createElement('option');o.value=val;o.textContent=val==='placa-total'?'Sumar consumos de placa sin simultaneidad':val||'Pendiente';i.append(o);}else{i.type=tipo;i.step='any';if(tipo==='number')i.min='0';else i.maxLength=300;}i.value=p[k]??'';l.append(i);form.append(l);}
- for(const [id,nombre,checked] of [['sigasMetodo','Revisé que el método por recorrido completo NAG-200 5.10 y Tabla 4 SIGAS corresponde al alcance de este proyecto de baja presión (no certifica normativa).',entrada.config.metodoTabularSigas==='nag200-recorrido-completo'],['sigasInventario','Verifiqué que todos los accesorios y cuplas reales del circuito están registrados, incluidas cantidades cero comprobadas. No usar las cuplas estimadas de compra como inventario real.',entrada.config.inventarioPerdidasCompleto]]){const l=document.createElement('label'),i=document.createElement('input');i.type='checkbox';i.style.width='auto';i.name=id;i.checked=checked;l.append(i,document.createTextNode(nombre));form.append(l);}
+ for(const [id,nombre,checked] of [['sigasInventario','Verifiqué que todos los accesorios y cuplas reales del circuito están registrados, incluidas cantidades cero comprobadas. No usar las cuplas estimadas de compra como inventario real.',entrada.config.inventarioPerdidasCompleto]]){const l=document.createElement('label'),i=document.createElement('input');i.type='checkbox';i.style.width='auto';i.name=id;i.checked=checked;l.append(i,document.createTextNode(nombre));form.append(l);}
  const l=document.createElement('label'),f=document.createElement('input');l.textContent='Fuente de revisión del inventario (croquis/listado real revisado)';f.name='sigasFuenteInventario';f.maxLength=300;f.value=entrada.config.revisionInventario?.fuente||'';l.append(f);form.append(l);
- const nota=document.createElement('p');nota.textContent='No hacen falta posiciones dentro de un tramo uniforme. Sí deben conocerse las cantidades reales y el producto de sus uniones. Si faltan cuplas reales, registralas en accesorios; esta revisión no agrega piezas ni cambia estimaciones. Un cambio de red, productos o condiciones deja la revisión anterior pendiente.';form.append(nota);
+ const nota=document.createElement('p');nota.textContent='No hacen falta posiciones dentro de un tramo uniforme. Sí deben conocerse las cantidades reales y el producto de sus uniones. Si faltan cuplas reales, registralas en accesorios; esta revisión no agrega piezas ni cambia estimaciones. Un cambio de red, cantidades o productos deja la revisión anterior pendiente. Completar presiones no obliga a repetir la revisión del inventario.';form.append(nota);
  const b=document.createElement('button');b.type='button';b.textContent='Guardar datos y verificar';b.onclick=()=>guardarVerificacionSigasGas(form);form.append(b);const msg=document.createElement('p');msg.setAttribute?.('name','sigasVerificacionMensaje');msg.setAttribute?.('role','status');form.append(msg);d.append(form);out.append(d);
 }
 
@@ -14617,7 +14635,7 @@ function estadoCierreGas(){
 }
 // Diagnóstico de presentación: no cambia el motor, el inventario ni resultados guardados.
 function diagnosticoVisibleGas(plan=null){
- const estado=estadoCierreGas(),grupos={calculo:[],compra:[],informacion:[]},claves=new Set();
+ const estado=estadoCierreGas(),grupos={calculo:[],suministro:[],compra:[],informacion:[]},claves=new Set();
  const agregar=(grupo,clave,texto)=>{if(!claves.has(grupo+clave)){claves.add(grupo+clave);grupos[grupo].push({clave,texto});}};
  if(!estado)return {...grupos,candidatos:[],estado:null};
  const perfil=perfilTecnicoActualGas();
@@ -14629,11 +14647,8 @@ function diagnosticoVisibleGas(plan=null){
   const registro=registroAccesoriosSigasGas(),r=registro.calculo;
   const red=redFisicaManualGas();
   for(const texto of [...red.errores,...red.faltantes,...r.errores])agregar('calculo',texto,texto);
-  const campos=[['densidadRelativa','densidad del suministro (tabla: 0,65)'],['unidadPresion','unidad de presión'],['presionDisponible','presión disponible'],['presionMinima','presión mínima requerida'],['perdidaMaxima','pérdida admisible'],['fuentePresiones','fuente de las presiones']];
-  const faltan=campos.filter(([k])=>!perfil[k]).map(([,n])=>n);
-  if(faltan.length)agregar('calculo','suministro','Suministro: falta '+faltan.join(', ')+'.');
+  for(const texto of registro.verificacion.suministro.pendientes)agregar('suministro',texto,texto);
   if(!r.condiciones?.poderCalorifico)agregar('calculo','pcs','Completar poder calorífico y su fuente.');
-  if(registro.entradaTecnica.config.metodoTabularSigas!=='nag200-recorrido-completo'||perfil.criterioDemanda!=='placa-total')agregar('calculo','metodo','Validar el criterio de recorrido completo, fila superior y demanda/simultaneidad para el suministro y método aplicables.');
   for(const p of registro.piezas){
    if(!p.pendientes.length)continue;
    const donde=p.tramos.map(id=>r.filas.find(f=>f.id===id)?.tramo||id).join(', ');
@@ -14677,7 +14692,7 @@ function renderEstadoCierreGas(out,pendientes,plan=null){
  if(plan?.casilleroMedidorGas?.adicional===1)texto(pendientes,'Incluye un codo de 90° dentro del casillero M por entrada lateral/posterior confirmada y declarado no incluido en los tramos.');
  texto(pendientes,d.candidatos.length?'Candidatos SIGAS disponibles: '+d.candidatos.map(f=>f.tramo+' '+f.exteriorMm+' mm').join(' · ')+'. Pendientes de verificación; cantidades manuales y estimaciones disponibles.':'Las cantidades válidas siguen disponibles aunque falte completar el cálculo técnico.');
  const detalle=document.createElement('details'),titulo=document.createElement('summary');detalle.className='gas-detalles';titulo.textContent='Ver comprobaciones técnicas pendientes ('+d.calculo.length+')';detalle.append(titulo);
- for(const [clave,nombre] of [['calculo','Diámetros y pérdidas'],['compra','Compra exacta · opcional para estimaciones'],['informacion','Información y verificación normativa']]){
+ for(const [clave,nombre] of [['calculo','Capacidad tabular y equivalencias'],['suministro','Compatibilidad del suministro'],['compra','Compra exacta · opcional para estimaciones'],['informacion','Información y verificación normativa']]){
   const seccion=document.createElement('details'),sum=document.createElement('summary');sum.textContent=nombre+' · '+d[clave].length;seccion.append(sum);for(const aviso of d[clave])texto(seccion,aviso.texto);detalle.append(seccion);
  }
  pendientes.append(detalle);

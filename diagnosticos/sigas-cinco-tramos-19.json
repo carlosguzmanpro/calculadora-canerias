@@ -32,7 +32,7 @@
     },
     "poderCalorifico": 9300,
     "fuentePCS": "Poder calorífico aportado para el ejercicio por el propietario; suministro real sin verificar",
-    "simultaneidad": "Consumos sumados sin reducción; criterio técnico por verificar",
+    "simultaneidad": "Suma de consumos de placa sin reducción (cálculo aplicado)",
     "presupuestoDisponiblePa": null
   },
   "filas": [
@@ -1482,7 +1482,6 @@
     "Tabla 5, 75 m / 75, 90 y 110 mm: descenso distinto del patrón de las otras columnas; cotejado con el PDF, pendiente aclaración del fabricante.",
     "Ejemplos pp.26–27 remiten Tabla 6 a pp.24–25, pero está en p.21. Conservar la referencia literal como discrepancia editorial.",
     "Edición identificada no equivale a condiciones de suministro ni validación normativa vigente.",
-    "Criterio de recorrido/fila superior y simultaneidad: validar con método aplicable. No se añadieron 15 m EPOXI.",
     "Presión disponible, mínima de artefactos y pérdida admisible: confirmar alcance de la tabla; caída impresa 10 mm no es suministro.",
     "Cuplas y otras pérdidas no identificadas permanecen pendientes; no se suponen nulas ni bloquean esta preselección parcial.",
     "Densidad del suministro pendiente de confirmar frente a 0,65 tabulado.",

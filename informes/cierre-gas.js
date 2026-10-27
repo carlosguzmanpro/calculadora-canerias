@@ -21,7 +21,7 @@ function estadoCierreGas(){
 }
 // Diagnóstico de presentación: no cambia el motor, el inventario ni resultados guardados.
 function diagnosticoVisibleGas(plan=null){
- const estado=estadoCierreGas(),grupos={calculo:[],compra:[],informacion:[]},claves=new Set();
+ const estado=estadoCierreGas(),grupos={calculo:[],suministro:[],compra:[],informacion:[]},claves=new Set();
  const agregar=(grupo,clave,texto)=>{if(!claves.has(grupo+clave)){claves.add(grupo+clave);grupos[grupo].push({clave,texto});}};
  if(!estado)return {...grupos,candidatos:[],estado:null};
  const perfil=perfilTecnicoActualGas();
@@ -33,11 +33,8 @@ function diagnosticoVisibleGas(plan=null){
   const registro=registroAccesoriosSigasGas(),r=registro.calculo;
   const red=redFisicaManualGas();
   for(const texto of [...red.errores,...red.faltantes,...r.errores])agregar('calculo',texto,texto);
-  const campos=[['densidadRelativa','densidad del suministro (tabla: 0,65)'],['unidadPresion','unidad de presión'],['presionDisponible','presión disponible'],['presionMinima','presión mínima requerida'],['perdidaMaxima','pérdida admisible'],['fuentePresiones','fuente de las presiones']];
-  const faltan=campos.filter(([k])=>!perfil[k]).map(([,n])=>n);
-  if(faltan.length)agregar('calculo','suministro','Suministro: falta '+faltan.join(', ')+'.');
+  for(const texto of registro.verificacion.suministro.pendientes)agregar('suministro',texto,texto);
   if(!r.condiciones?.poderCalorifico)agregar('calculo','pcs','Completar poder calorífico y su fuente.');
-  if(registro.entradaTecnica.config.metodoTabularSigas!=='nag200-recorrido-completo'||perfil.criterioDemanda!=='placa-total')agregar('calculo','metodo','Validar el criterio de recorrido completo, fila superior y demanda/simultaneidad para el suministro y método aplicables.');
   for(const p of registro.piezas){
    if(!p.pendientes.length)continue;
    const donde=p.tramos.map(id=>r.filas.find(f=>f.id===id)?.tramo||id).join(', ');
@@ -81,7 +78,7 @@ function renderEstadoCierreGas(out,pendientes,plan=null){
  if(plan?.casilleroMedidorGas?.adicional===1)texto(pendientes,'Incluye un codo de 90° dentro del casillero M por entrada lateral/posterior confirmada y declarado no incluido en los tramos.');
  texto(pendientes,d.candidatos.length?'Candidatos SIGAS disponibles: '+d.candidatos.map(f=>f.tramo+' '+f.exteriorMm+' mm').join(' · ')+'. Pendientes de verificación; cantidades manuales y estimaciones disponibles.':'Las cantidades válidas siguen disponibles aunque falte completar el cálculo técnico.');
  const detalle=document.createElement('details'),titulo=document.createElement('summary');detalle.className='gas-detalles';titulo.textContent='Ver comprobaciones técnicas pendientes ('+d.calculo.length+')';detalle.append(titulo);
- for(const [clave,nombre] of [['calculo','Diámetros y pérdidas'],['compra','Compra exacta · opcional para estimaciones'],['informacion','Información y verificación normativa']]){
+ for(const [clave,nombre] of [['calculo','Capacidad tabular y equivalencias'],['suministro','Compatibilidad del suministro'],['compra','Compra exacta · opcional para estimaciones'],['informacion','Información y verificación normativa']]){
   const seccion=document.createElement('details'),sum=document.createElement('summary');sum.textContent=nombre+' · '+d[clave].length;seccion.append(sum);for(const aviso of d[clave])texto(seccion,aviso.texto);detalle.append(seccion);
  }
  pendientes.append(detalle);
