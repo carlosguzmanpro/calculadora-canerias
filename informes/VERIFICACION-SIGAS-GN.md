@@ -79,3 +79,25 @@ Pantalla y PDF distinguen «Diámetro calculado y comprobado por tabla SIGAS» d
 Las longitudes calculadas se muestran con dos decimales. El formato visual no interviene en selección, iteración ni comparación: 46,861… m se ve como46,86 m y consulta48 m; un valor interno apenas superior a48 m consulta50 m, aunque visualmente se vea48,00. Los valores impresos originales del catálogo y la precisión interna permanecen intactos.
 
 El ejercicio58m conserva cantidades y candidatos; sigue incompleto por accesorios/uniones reales no identificados. No se inventó una versión completamente identificada del croquis. Se conserva un circuito de ensayo independiente, con productos documentados y datos explícitos, para verificar el estado comprobado, su trazabilidad y su impresión sin atribuir esas variantes al ejercicio del propietario.
+
+## Codo del medidor y tees visuales (base 469246e)
+
+Tabla3 SIGAS p.24: «Codo90º con rosca hembra32 x3/4» =0,543m (ID `sigas-p24-izquierdo-39`). Se respeta la columna impresa, no17×0,032. 32mm es el diámetro exterior del extremo de fusión;¾″ es otra medida, de rosca. En la referencia ya existe una identidad dentro de los siete codos M–A reservada a la conexión del medidor; no se añade otra.
+
+El catálogo determina automáticamente solo atributos comunes de las opciones que cumplen geometría, rosca y diámetro de fusión ya conocidos. Una opción única identifica el producto; varias variantes quedan pendientes. No se presupone la geometría ni la rosca de otros medidores. Las excepciones manuales continúan disponibles. En Termo/Calefactor/Cocina se conservan las roscas½″; donde hay varias variantes solo se solicita esa variante, no repetir diámetros o cantidades.
+
+Con el codo existente identificado, la longitud parcial de control M–A pasa de46,861 a47,404m por añadir su equivalente0,543m. Sigue fila48 y candidato32mm. El inventario conserva58m/19codos/2tees/3llaves y las estimaciones comerciales. Se actualiza el diagnóstico numérico por esta pérdida real antes omitida, sin alterar la tabla.
+
+Las tees ofrecen esquemas de paso directo, derivación y ambas vías. La vía se guarda por **salida de tramo**, reutilizándose para todos los artefactos que esa salida alimenta. El orden en la lista o el mayor consumo no establecen la vía. Una selección de producto/vía avanzada se conserva como alternativa; al reemplazar una selección visual se conserva su configuración en el historial del proyecto.
+
+Las tres medidas candidatas se comparan con las originales del producto. Si queda una única familia compatible, se puede resolver con la vía declarada; si son posibles central y extremo, se solicita esa distinción. Se verifica el puerto reducido de una tee central. Una fila que no diferencia vías no se extiende automáticamente a ambas. Dos salidas declaradas directas producen un pendiente, sin cambiar las cantidades. No se agregan reducciones por diferencias de diámetro: deben identificarse el montaje real y sus equivalencias.
+
+En A las medidas provisionales32/25/25 no tienen una tee con equivalencia documentada que coincida con esa combinación en el catálogo incorporado. Esto no prueba que corresponda comprar reducciones: falta identificar el montaje real o conseguir la documentación específica. En B25/25/20 existen distintas configuraciones; el usuario puede identificar familia y circulación con los esquemas.
+
+### Contrato para futuro dibujo dentro de la aplicación
+
+`calculoSigas.tees[id].dibujo` admite `{version:1,nodo:{id,x,y},conexiones:[{tramoId,x,y},...]}` con tres extremos únicos vinculados a los tramos y al nodo correctos. El sentido desde el medidor se obtiene de los recorridos ya reconstruidos. Solo direcciones inequívocas opuestas/perpendiculares dan paso directo/giro; datos incompletos, otro nodo o geometría ambigua quedan pendientes. Las coordenadas representan el dibujo, no nuevas medidas físicas de cañería.
+
+La función pura y su integración al motor están preparadas y probadas; no se incorpora un editor de dibujo nuevo ni se afirma que los dibujos actuales ya producen ese contrato. **No se analizan fotografías ni se conecta IA.** Una imagen de referencia no se convierte en una red vectorial.
+
+Los pendientes de conexión terminal sin cantidad muestran «Cantidad no determinada», como necesidad, sin `null×`, cero implícito ni incorporación de piezas ficticias. Los tres estados de verificación se conservan separados.

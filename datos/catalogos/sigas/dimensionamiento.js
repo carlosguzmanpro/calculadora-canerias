@@ -24,6 +24,59 @@
  function opcionesTerminal(d,atributos={},diametro){
   return d.tablas[3].filas.filter(f=>{const a=atributosTerminal(f);return a&&(!diametro||f.diametroExteriorM*1000===diametro)&&['geometria','sexo','rosca','variante'].every(k=>!atributos[k]||atributos[k]===a[k]);});
  }
+ // Atributos del producto, no medidas supuestas del medidor. Solo se deducen
+ // características comunes a todas las opciones que cumplen geometría/rosca/fusión conocidas.
+ function deducirTerminal(d,atributos,diametro){
+  const a={...atributos};if(d?.id!=='sigas'||!Array.isArray(d.tablas?.[3]?.filas)||!positivo(diametro)||!a.geometria||!a.rosca)return a;
+  const opciones=opcionesTerminal(d,a,diametro);
+  for(const k of ['sexo','variante'])if(!a[k]&&opciones.length&&opciones.every(f=>atributosTerminal(f)[k]===atributosTerminal(opciones[0])[k]))a[k]=atributosTerminal(opciones[0])[k];
+  return a;
+ }
+ function tipoTee(f){return /^Te Normal /.test(f.nombreOriginal)?'normal':/^Te Reduc\. Central /.test(f.nombreOriginal)?'central':/^Te Reduc\./.test(f.nombreOriginal)?'extremo':null;}
+ function viaTee(f){return /flujo a trav[eé]s/.test(f.nombreOriginal)?'directo':/flujo a 90/.test(f.nombreOriginal)?'giro':null;}
+ function opcionesTee(d,diametros,tipo){
+  if(d?.id!=='sigas'||diametros.length!==3||diametros.some(x=>!positivo(x)))return [];
+  const clave=[...diametros].sort((a,b)=>a-b).join('/');
+  return d.tablas[3].filas.filter(f=>tipoTee(f)&&(!tipo||tipoTee(f)===tipo)&&medidasTee(f)?.sort((a,b)=>a-b).join('/')===clave);
+ }
+ // Contrato para un futuro dibujo VECTORIAL: coordenadas reales del dibujo,
+ // tres extremos vinculados a IDs de tramos y tramo de entrada orientado desde el medidor.
+ function interpretarTeeVectorial(dibujo,entrada,conexiones){
+  const pendiente={estado:'pendiente',viasPorTramo:{},motivo:'Dibujo vectorial incompleto o ambiguo; indicar vía manualmente.'};
+  const n=dibujo?.nodo,ps=dibujo?.conexiones;
+  if(dibujo?.version!==1||!n||typeof n.id!=='string'||!n.id||![n.x,n.y].every(Number.isFinite)||!Array.isArray(ps)||ps.length!==3||new Set(ps.map(p=>p.tramoId)).size!==3||ps.some(p=>!conexiones.includes(p.tramoId)||![p.x,p.y].every(Number.isFinite)))return pendiente;
+  const v=ps.map(p=>({...p,dx:p.x-n.x,dy:p.y-n.y}));if(v.some(p=>p.dx===0&&p.dy===0))return pendiente;
+  const e=v.find(p=>p.tramoId===entrada);if(!e)return pendiente;
+  const paralelos=v.filter(p=>p!==e&&Math.abs(e.dx*p.dy-e.dy*p.dx)<1e-9&&e.dx*p.dx+e.dy*p.dy<0),salidas=v.filter(p=>p!==e),vias={};
+  for(const p of salidas){const dot=e.dx*p.dx+e.dy*p.dy;if(paralelos.includes(p))vias[p.tramoId]='directo';else if(Math.abs(dot)<1e-9)vias[p.tramoId]='giro';else return pendiente;}
+  // Si entra por el ramal, las dos salidas deben ser opuestas entre sí.
+  if(!paralelos.length&&(Math.abs(salidas[0].dx*salidas[1].dy-salidas[0].dy*salidas[1].dx)>1e-9||salidas[0].dx*salidas[1].dx+salidas[0].dy*salidas[1].dy>=0))return pendiente;
+  if(paralelos.length>1)return pendiente;
+  return {estado:'identificada',viasPorTramo:vias,fuente:'croquis-vectorial'};
+ }
+ function resolverTee(d,pieza,recorrido,vector,seleccion={}){
+  const ids=pieza.conexionesDiametro||[],enRuta=recorrido.tramos.filter(id=>ids.includes(id));
+  const fallo=motivo=>({estado:'pendiente',motivo});
+  if(ids.length!==3||new Set(ids).size!==3||enRuta.length!==2)return fallo('Vincular las tres conexiones de la tee al recorrido desde el medidor.');
+  const [entrada,salida]=enRuta,diametros=ids.map(id=>vector[id]),opciones=opcionesTee(d,diametros,seleccion.tipo),tipos=[...new Set(opciones.map(tipoTee))];
+  if(tipos.length!==1)return fallo(tipos.length?'Identificar solamente la familia real de tee (central o extremo); hay varias configuraciones compatibles.':'No hay tee documentada con estas tres medidas: '+diametros.join('/')+' mm. Verificar la pieza real y posibles reducciones; no se añaden piezas ni equivalentes por suposición.');
+  if(seleccion.dibujo&&pieza.nodo&&String(seleccion.dibujo.nodo?.id).replace(/^nombre:/,'').toLowerCase()!==String(pieza.nodo).replace(/^nombre:/,'').toLowerCase())return fallo('El nodo del dibujo no corresponde a esta tee; revisar el vínculo sin asumir la circulación.');
+  const dib=seleccion.dibujo?interpretarTeeVectorial(seleccion.dibujo,entrada,ids):null;
+  const vias=dib?.estado==='identificada'?dib.viasPorTramo:seleccion.viasPorTramo||{};
+  const salidas=ids.filter(id=>id!==entrada),v=via=>vias[via];
+  if(salidas.every(id=>v(id)==='directo'))return fallo('Dos salidas directas son incompatibles con una tee; revisar las vías sin cambiar cantidades.');
+  const via=v(salida);if(!['directo','giro'].includes(via))return fallo('Indicar únicamente si '+salida+' sigue directo o sale por derivación. No se deduce del caudal.');
+  const fs=opciones.filter(f=>viaTee(f)===via);
+  if(fs.length!==1)return fallo('La Tabla3 no identifica un equivalente único para esta configuración y vía; aclarar producto real.');
+  // En la tee central, el puerto reducido es el ramal; verificar su asignación, no solo la lista de medidas.
+  if(tipos[0]==='central'){
+   const m=medidasTee(fs[0]),D=m[0],R=m[2],ramales=ids.filter(id=>vector[id]===R);
+   if(ramales.length!==1)return fallo('Identificar el puerto reducido de la tee central.');
+   const esperado=entrada===ramales[0]||salida===ramales[0]?'giro':'directo';
+   if(via!==esperado)return fallo('La vía elegida no corresponde al puerto reducido de esta tee central; comprobar conexiones.');
+  }
+  return {estado:'resuelta',fila:fs[0],via,salida,entrada,fuenteVia:dib?.estado==='identificada'?'croquis-vectorial':'seleccion-manual'};
+ }
  // Extremos verificados: catálogo pp.40–43; equivalentes originales Tabla3 pp.24–25.
  function puertosProducto(f){
   const n=f.nombreOriginal,a=atributosTerminal(f),D=f.diametroExteriorM*1000;
@@ -38,6 +91,7 @@
  }
  function fusionCompatible(a,b){return a?.union==='fusion'&&b?.union==='fusion'&&a.diametro===b.diametro&&a.sexo!==b.sexo;}
  function resolverConexion(d,atributos={},diametro){
+  atributos=deducirTerminal(d,atributos,diametro);
   const resultado={estado:'pendiente',componentes:[],propuestas:[],pendientes:[],fuentes:[24,25,28,40,41,42,43]};
   if(d?.id!=='sigas'||d.fuente?.sha256!=='a7dc5dd90adec7d9db335100407d4748f306281b3917e2e52a8f2b707d35e2b1'){resultado.pendientes.push('Fuente SIGAS verificada pendiente; no se usan otras marcas.');return resultado;}
   if(!Array.isArray(d.tablas?.[3]?.filas)||d.tablas[3].filas.some(f=>!positivo(f.longitudEquivalenteM)||!positivo(f.diametroExteriorM)||f.longitudEquivalenteM!==Number(String(f.originales?.longitudEquivalente).replace(',','.'))||f.diametroExteriorM!==Number(String(f.originales?.diametroExterior).replace(',','.')))){resultado.pendientes.push('Equivalencias o unidades de accesorios sin verificar; no se completan con cero.');return resultado;}
@@ -123,7 +177,13 @@
      if(!enRuta){if(!ubicaciones.length&&!vinculo?.recorridos)pendiente({...p,tramos:ubicaciones},'ubicación respecto del recorrido/medidor pendiente.');continue;}
      if(aplicadas.has(p.id))continue;aplicadas.add(p.id);
      if(p.conflicto||p.confirmada!==true){pendiente({...p,tramos:ubicaciones},'identidad/cantidad por verificar.');continue;}
-     const a=vinculo?.porRecorrido?.[r.artefacto]||vinculo?.producto;
+     let a=vinculo?.porRecorrido?.[r.artefacto]||vinculo?.producto;
+     if(p.tipo==='tee'&&config.tees?.[p.id]){
+      if(iteracion===0){pendiente(p,'semilla sin equivalentes, no es pérdida cero.');continue;}
+      const t=resolverTee(d,p,r,vector,config.tees[p.id]);if(t.estado!=='resuelta'){pendiente(p,t.motivo);continue;}
+      const medidas=p.conexionesDiametro;a={confirmado:true,tramosDiametro:medidas,productos:{[medidas.map(id=>vector[id]).join('/')]:t.fila.id}};
+     }
+     if(p.necesidadTerminal&&a?.atributos&&p.tramos.length===1)a={...a,atributos:deducirTerminal(d,a.atributos,vector[p.tramos[0]])};
      if(!a||a.confirmado!==true||(!a.familia&&!a.atributos&&(!Array.isArray(a.tramosDiametro)||!a.tramosDiametro.length||a.tramosDiametro.some(id=>!base.has(id))))){pendiente({...p,tramos:ubicaciones},p.tipo==='tee'?'producto SIGAS, medidas de tres conexiones y vía directa/giro pendientes.':p.tipo==='llave'?'tipo y producto de llave SIGAS pendientes.':'producto SIGAS exacto y vía pendientes.'+(p.tipo==='codo90'?' Confirmar normal, MH o roscado y sus medidas; no se elige una variante por defecto.':''));continue;}
      if(iteracion===0){pendiente({...p,tramos:ubicaciones},'semilla sin equivalentes, no es pérdida cero.');continue;}
      const clave=(a.tramosDiametro||[]).map(id=>vector[id]).join('/'),id=a.productos?.[clave];
@@ -145,6 +205,7 @@
      const tipoCorrecto=fila&&(p.necesidadTerminal?atributosTerminal(fila)?.geometria===(p.geometria||p.tipo):({codo90:/^Codo(?: Normal a 90º | MH a 90° | 90º)/,codo45:/^Codo.*45/,tee:/^Te /,llave:/^Llave /,reduccion:/Reduct|Reduc/,cupla:/^(Cupla|Unión Normal) /,niple:/^Niple corto con tope /,transicion:/^Transición /}[p.tipo]?.test(fila.nombreOriginal)));
      if(!tipoCorrecto||!(p.tipo==='tee'?ubicaciones.some(id=>vector[id]===fila.diametroExteriorM*1000):ubicaciones.every(id=>vector[id]===fila.diametroExteriorM*1000))){pendiente({...p,tramos:ubicaciones},'combinación '+clave+' sin producto/diámetro/vía SIGAS compatible documentado.');continue;}
 
+     if(p.tipo==='tee'&&!viaTee(fila)){pendiente(p,'La fila original de esta tee no distingue vía directa/giro; verificar su alcance con el fabricante antes de aplicar la equivalencia.');continue;}
      if(p.tipo==='tee'&&/^Te Normal /.test(fila.nombreOriginal)&&Array.isArray(p.conexionesDiametro)&&p.conexionesDiametro.some(id=>vector[id]!==fila.diametroExteriorM*1000)){
       pendiente({...p,tramos:ubicaciones},'tee normal incompatible con los diámetros candidatos de sus tres conexiones; identificar configuración y reducciones sin inventarlas.');continue;
      }
@@ -250,5 +311,5 @@
   v.nota='La cota de 10 mmca (98,0665 Pa) corresponde al recorrido completo verificado; no se suma 10 mmca por tramo. No es la pérdida exacta ni una certificación. No se escala caudal al cuadrado ni se interpolan tablas. La aplicación normativa y el suministro necesitan revisión profesional.';
   return v;
  }
- const api={consultar,resolver,familiaProducto,atributosTerminal,opcionesTerminal,puertosProducto,fusionCompatible,resolverConexion,presionPa,verificar,medidasTee};if(typeof module==='object'&&module.exports)module.exports=api;else root.DimensionamientoSigas=api;
+ const api={consultar,resolver,familiaProducto,atributosTerminal,opcionesTerminal,puertosProducto,fusionCompatible,resolverConexion,presionPa,verificar,medidasTee,deducirTerminal,tipoTee,viaTee,opcionesTee,interpretarTeeVectorial,resolverTee};if(typeof module==='object'&&module.exports)module.exports=api;else root.DimensionamientoSigas=api;
 })(globalThis);
