@@ -94,7 +94,7 @@
           "tramos": [
             "ref-M-A"
           ],
-          "motivo": "producto SIGAS, medidas de tres conexiones y vía directa/giro pendientes."
+          "motivo": "No hay tee documentada con estas tres medidas: 32/25/25 mm. Verificar la pieza real y posibles reducciones; no se añaden piezas ni equivalentes por suposición."
         }
       ],
       "perdidasSinUbicacion": [],
@@ -312,18 +312,18 @@
       ],
       "diametroDefinitivo": null,
       "pendientes": [
-        "tee:nombre:a: producto SIGAS, medidas de tres conexiones y vía directa/giro pendientes.",
-        "tee:nombre:b: producto SIGAS, medidas de tres conexiones y vía directa/giro pendientes.",
+        "tee:nombre:a: No hay tee documentada con estas tres medidas: 32/25/25 mm. Verificar la pieza real y posibles reducciones; no se añaden piezas ni equivalentes por suposición.",
+        "tee:nombre:b: Identificar solamente la familia real de tee (central o extremo); hay varias configuraciones compatibles.",
         "manual-total:[\"ref-B-Calefactor\",\"codo90\"]::terminal: Variante de la pieza directa pendiente; no se elige un conjunto para evitar esa pregunta.",
         "manual-total:[\"ref-B-Calefactor\",\"llave\"]: tipo y producto de llave SIGAS pendientes.",
         "terminal-Calefactor: Conexión fusión–rosca de Calefactor: identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero.",
         "referencia-codo19: producto SIGAS exacto y vía pendientes. Confirmar normal, MH o roscado y sus medidas; no se elige una variante por defecto.",
-        "tee:nombre:a: producto SIGAS, medidas de tres conexiones y vía directa/giro pendientes.",
-        "tee:nombre:b: producto SIGAS, medidas de tres conexiones y vía directa/giro pendientes.",
+        "tee:nombre:a: No hay tee documentada con estas tres medidas: 32/25/25 mm. Verificar la pieza real y posibles reducciones; no se añaden piezas ni equivalentes por suposición.",
+        "tee:nombre:b: Identificar solamente la familia real de tee (central o extremo); hay varias configuraciones compatibles.",
         "manual-total:[\"ref-B-Cocina\",\"codo90\"]::terminal: Variante de la pieza directa pendiente; no se elige un conjunto para evitar esa pregunta.",
         "manual-total:[\"ref-B-Cocina\",\"llave\"]: tipo y producto de llave SIGAS pendientes.",
         "terminal-Cocina: Conexión fusión–rosca de Cocina: identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero.",
-        "tee:nombre:a: producto SIGAS, medidas de tres conexiones y vía directa/giro pendientes.",
+        "tee:nombre:a: No hay tee documentada con estas tres medidas: 32/25/25 mm. Verificar la pieza real y posibles reducciones; no se añaden piezas ni equivalentes por suposición.",
         "manual-total:[\"ref-A-Termo\",\"codo90\"]: Variante de la pieza directa pendiente; no se elige un conjunto para evitar esa pregunta.",
         "manual-total:[\"ref-A-Termo\",\"llave\"]: tipo y producto de llave SIGAS pendientes.",
         "terminal-Termo: Conexión fusión–rosca de Termo: identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero."
@@ -368,7 +368,7 @@
           "tramos": [
             "ref-A-B"
           ],
-          "motivo": "producto SIGAS, medidas de tres conexiones y vía directa/giro pendientes."
+          "motivo": "Identificar solamente la familia real de tee (central o extremo); hay varias configuraciones compatibles."
         }
       ],
       "perdidasSinUbicacion": [],
@@ -586,14 +586,14 @@
       ],
       "diametroDefinitivo": null,
       "pendientes": [
-        "tee:nombre:a: producto SIGAS, medidas de tres conexiones y vía directa/giro pendientes.",
-        "tee:nombre:b: producto SIGAS, medidas de tres conexiones y vía directa/giro pendientes.",
+        "tee:nombre:a: No hay tee documentada con estas tres medidas: 32/25/25 mm. Verificar la pieza real y posibles reducciones; no se añaden piezas ni equivalentes por suposición.",
+        "tee:nombre:b: Identificar solamente la familia real de tee (central o extremo); hay varias configuraciones compatibles.",
         "manual-total:[\"ref-B-Calefactor\",\"codo90\"]::terminal: Variante de la pieza directa pendiente; no se elige un conjunto para evitar esa pregunta.",
         "manual-total:[\"ref-B-Calefactor\",\"llave\"]: tipo y producto de llave SIGAS pendientes.",
         "terminal-Calefactor: Conexión fusión–rosca de Calefactor: identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero.",
         "referencia-codo19: producto SIGAS exacto y vía pendientes. Confirmar normal, MH o roscado y sus medidas; no se elige una variante por defecto.",
-        "tee:nombre:a: producto SIGAS, medidas de tres conexiones y vía directa/giro pendientes.",
-        "tee:nombre:b: producto SIGAS, medidas de tres conexiones y vía directa/giro pendientes.",
+        "tee:nombre:a: No hay tee documentada con estas tres medidas: 32/25/25 mm. Verificar la pieza real y posibles reducciones; no se añaden piezas ni equivalentes por suposición.",
+        "tee:nombre:b: Identificar solamente la familia real de tee (central o extremo); hay varias configuraciones compatibles.",
         "manual-total:[\"ref-B-Cocina\",\"codo90\"]::terminal: Variante de la pieza directa pendiente; no se elige un conjunto para evitar esa pregunta.",
         "manual-total:[\"ref-B-Cocina\",\"llave\"]: tipo y producto de llave SIGAS pendientes.",
         "terminal-Cocina: Conexión fusión–rosca de Cocina: identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero."
@@ -856,7 +856,7 @@
       ],
       "diametroDefinitivo": null,
       "pendientes": [
-        "tee:nombre:a: producto SIGAS, medidas de tres conexiones y vía directa/giro pendientes.",
+        "tee:nombre:a: No hay tee documentada con estas tres medidas: 32/25/25 mm. Verificar la pieza real y posibles reducciones; no se añaden piezas ni equivalentes por suposición.",
         "manual-total:[\"ref-A-Termo\",\"codo90\"]: Variante de la pieza directa pendiente; no se elige un conjunto para evitar esa pregunta.",
         "manual-total:[\"ref-A-Termo\",\"llave\"]: tipo y producto de llave SIGAS pendientes.",
         "terminal-Termo: Conexión fusión–rosca de Termo: identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero."
@@ -1139,8 +1139,8 @@
       ],
       "diametroDefinitivo": null,
       "pendientes": [
-        "tee:nombre:a: producto SIGAS, medidas de tres conexiones y vía directa/giro pendientes.",
-        "tee:nombre:b: producto SIGAS, medidas de tres conexiones y vía directa/giro pendientes.",
+        "tee:nombre:a: No hay tee documentada con estas tres medidas: 32/25/25 mm. Verificar la pieza real y posibles reducciones; no se añaden piezas ni equivalentes por suposición.",
+        "tee:nombre:b: Identificar solamente la familia real de tee (central o extremo); hay varias configuraciones compatibles.",
         "manual-total:[\"ref-B-Calefactor\",\"codo90\"]::terminal: Variante de la pieza directa pendiente; no se elige un conjunto para evitar esa pregunta.",
         "manual-total:[\"ref-B-Calefactor\",\"llave\"]: tipo y producto de llave SIGAS pendientes.",
         "terminal-Calefactor: Conexión fusión–rosca de Calefactor: identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero."
@@ -1434,8 +1434,8 @@
       "diametroDefinitivo": null,
       "pendientes": [
         "referencia-codo19: producto SIGAS exacto y vía pendientes. Confirmar normal, MH o roscado y sus medidas; no se elige una variante por defecto.",
-        "tee:nombre:a: producto SIGAS, medidas de tres conexiones y vía directa/giro pendientes.",
-        "tee:nombre:b: producto SIGAS, medidas de tres conexiones y vía directa/giro pendientes.",
+        "tee:nombre:a: No hay tee documentada con estas tres medidas: 32/25/25 mm. Verificar la pieza real y posibles reducciones; no se añaden piezas ni equivalentes por suposición.",
+        "tee:nombre:b: Identificar solamente la familia real de tee (central o extremo); hay varias configuraciones compatibles.",
         "manual-total:[\"ref-B-Cocina\",\"codo90\"]::terminal: Variante de la pieza directa pendiente; no se elige un conjunto para evitar esa pregunta.",
         "manual-total:[\"ref-B-Cocina\",\"llave\"]: tipo y producto de llave SIGAS pendientes.",
         "terminal-Cocina: Conexión fusión–rosca de Cocina: identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero."
@@ -1487,8 +1487,8 @@
     "Cuplas de A–Termo: segmentos continuos pendientes; largo comercial ya configurado 4 m. No se suponen cero uniones.",
     "Cuplas de B–Calefactor: segmentos continuos pendientes; largo comercial ya configurado 4 m. No se suponen cero uniones.",
     "Cuplas de B–Cocina: segmentos continuos pendientes; largo comercial ya configurado 4 m. No se suponen cero uniones.",
-    "tee:nombre:a: producto SIGAS, medidas de tres conexiones y vía directa/giro pendientes.",
-    "tee:nombre:b: producto SIGAS, medidas de tres conexiones y vía directa/giro pendientes.",
+    "tee:nombre:a: No hay tee documentada con estas tres medidas: 32/25/25 mm. Verificar la pieza real y posibles reducciones; no se añaden piezas ni equivalentes por suposición.",
+    "tee:nombre:b: Identificar solamente la familia real de tee (central o extremo); hay varias configuraciones compatibles.",
     "manual-total:[\"ref-B-Calefactor\",\"codo90\"]::terminal: Variante de la pieza directa pendiente; no se elige un conjunto para evitar esa pregunta.",
     "manual-total:[\"ref-B-Calefactor\",\"llave\"]: tipo y producto de llave SIGAS pendientes.",
     "terminal-Calefactor: Conexión fusión–rosca de Calefactor: identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero.",
