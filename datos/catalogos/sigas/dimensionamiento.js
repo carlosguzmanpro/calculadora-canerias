@@ -265,7 +265,7 @@
     for(const terminal of inventario.necesidadesTerminales||[])if(terminal.recorridos?.includes(r.artefacto)){
      const vinculadas=[...piezas.values()].filter(p=>p.necesidadTerminal===terminal.id&&p.cantidad===1);
      if(vinculadas.length===1&&aportes.some(a=>a.piezaId===vinculadas[0].id)&&!perdidasPendientes.some(p=>p.piezaId===vinculadas[0].id))continue;
-     pendiente({id:terminal.id,tipo:'conexion-terminal',cantidad:null,tramos:terminal.tramos},terminal.nombre+': identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero.');
+     pendiente({id:terminal.id,tipo:'conexion-terminal',cantidad:null,tramos:terminal.tramos},vinculadas.length===1&&config.terminales?.[terminal.id]?.rosca?terminal.nombre+': producto o variante pendiente del accesorio ya contabilizado; rosca '+config.terminales[terminal.id].rosca+'″ registrada. No se añade otra pieza ni se supone pérdida cero.':terminal.nombre+': identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero.');
     }
     const equivalenteConocidoM=aportes.reduce((n,a)=>n+a.equivalenteTotalM,0),completo=!inventarioInvalido&&!faltantes.length&&!faltantesInventario.length&&config.inventarioPerdidasCompleto===true&&config.fuenteInventario;
     return {...r,indice:ri,aportes,faltantes,perdidasPendientes,solucionesTerminales,equivalenteConocidoM:aportes.length||completo?equivalenteConocidoM:null,equivalenteCompleto:!!completo,longitudConsultaM:r.longitudReal+equivalenteConocidoM,longitudDefinitivaM:completo?r.longitudReal+equivalenteConocidoM:null};

@@ -316,17 +316,17 @@
         "tee:nombre:b: Identificar solamente la familia real de tee (central o extremo); hay varias configuraciones compatibles.",
         "manual-total:[\"ref-B-Calefactor\",\"codo90\"]::terminal: Variante de la pieza directa pendiente; no se elige un conjunto para evitar esa pregunta.",
         "manual-total:[\"ref-B-Calefactor\",\"llave\"]: tipo y producto de llave SIGAS pendientes.",
-        "terminal-Calefactor: Conexión fusión–rosca de Calefactor: identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero.",
+        "terminal-Calefactor: Conexión fusión–rosca de Calefactor: producto o variante pendiente del accesorio ya contabilizado; rosca 1/2″ registrada. No se añade otra pieza ni se supone pérdida cero.",
         "referencia-codo19: producto SIGAS exacto y vía pendientes. Confirmar normal, MH o roscado y sus medidas; no se elige una variante por defecto.",
         "tee:nombre:a: No hay tee documentada con estas tres medidas: 32/25/25 mm. Verificar la pieza real y posibles reducciones; no se añaden piezas ni equivalentes por suposición.",
         "tee:nombre:b: Identificar solamente la familia real de tee (central o extremo); hay varias configuraciones compatibles.",
         "manual-total:[\"ref-B-Cocina\",\"codo90\"]::terminal: Variante de la pieza directa pendiente; no se elige un conjunto para evitar esa pregunta.",
         "manual-total:[\"ref-B-Cocina\",\"llave\"]: tipo y producto de llave SIGAS pendientes.",
-        "terminal-Cocina: Conexión fusión–rosca de Cocina: identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero.",
+        "terminal-Cocina: Conexión fusión–rosca de Cocina: producto o variante pendiente del accesorio ya contabilizado; rosca 1/2″ registrada. No se añade otra pieza ni se supone pérdida cero.",
         "tee:nombre:a: No hay tee documentada con estas tres medidas: 32/25/25 mm. Verificar la pieza real y posibles reducciones; no se añaden piezas ni equivalentes por suposición.",
         "manual-total:[\"ref-A-Termo\",\"codo90\"]: Variante de la pieza directa pendiente; no se elige un conjunto para evitar esa pregunta.",
         "manual-total:[\"ref-A-Termo\",\"llave\"]: tipo y producto de llave SIGAS pendientes.",
-        "terminal-Termo: Conexión fusión–rosca de Termo: identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero."
+        "terminal-Termo: Conexión fusión–rosca de Termo: producto o variante pendiente del accesorio ya contabilizado; rosca 1/2″ registrada. No se añade otra pieza ni se supone pérdida cero."
       ],
       "estado": "Preselección condicionada; no diámetro de ejecución",
       "comprobadoPorTabla": false,
@@ -590,13 +590,13 @@
         "tee:nombre:b: Identificar solamente la familia real de tee (central o extremo); hay varias configuraciones compatibles.",
         "manual-total:[\"ref-B-Calefactor\",\"codo90\"]::terminal: Variante de la pieza directa pendiente; no se elige un conjunto para evitar esa pregunta.",
         "manual-total:[\"ref-B-Calefactor\",\"llave\"]: tipo y producto de llave SIGAS pendientes.",
-        "terminal-Calefactor: Conexión fusión–rosca de Calefactor: identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero.",
+        "terminal-Calefactor: Conexión fusión–rosca de Calefactor: producto o variante pendiente del accesorio ya contabilizado; rosca 1/2″ registrada. No se añade otra pieza ni se supone pérdida cero.",
         "referencia-codo19: producto SIGAS exacto y vía pendientes. Confirmar normal, MH o roscado y sus medidas; no se elige una variante por defecto.",
         "tee:nombre:a: No hay tee documentada con estas tres medidas: 32/25/25 mm. Verificar la pieza real y posibles reducciones; no se añaden piezas ni equivalentes por suposición.",
         "tee:nombre:b: Identificar solamente la familia real de tee (central o extremo); hay varias configuraciones compatibles.",
         "manual-total:[\"ref-B-Cocina\",\"codo90\"]::terminal: Variante de la pieza directa pendiente; no se elige un conjunto para evitar esa pregunta.",
         "manual-total:[\"ref-B-Cocina\",\"llave\"]: tipo y producto de llave SIGAS pendientes.",
-        "terminal-Cocina: Conexión fusión–rosca de Cocina: identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero."
+        "terminal-Cocina: Conexión fusión–rosca de Cocina: producto o variante pendiente del accesorio ya contabilizado; rosca 1/2″ registrada. No se añade otra pieza ni se supone pérdida cero."
       ],
       "estado": "Preselección condicionada; no diámetro de ejecución",
       "comprobadoPorTabla": false,
@@ -638,7 +638,7 @@
           "tramos": [
             "ref-A-Termo"
           ],
-          "motivo": "Conexión fusión–rosca de Termo: identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero."
+          "motivo": "Conexión fusión–rosca de Termo: producto o variante pendiente del accesorio ya contabilizado; rosca 1/2″ registrada. No se añade otra pieza ni se supone pérdida cero."
         }
       ],
       "perdidasSinUbicacion": [],
@@ -859,7 +859,7 @@
         "tee:nombre:a: No hay tee documentada con estas tres medidas: 32/25/25 mm. Verificar la pieza real y posibles reducciones; no se añaden piezas ni equivalentes por suposición.",
         "manual-total:[\"ref-A-Termo\",\"codo90\"]: Variante de la pieza directa pendiente; no se elige un conjunto para evitar esa pregunta.",
         "manual-total:[\"ref-A-Termo\",\"llave\"]: tipo y producto de llave SIGAS pendientes.",
-        "terminal-Termo: Conexión fusión–rosca de Termo: identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero."
+        "terminal-Termo: Conexión fusión–rosca de Termo: producto o variante pendiente del accesorio ya contabilizado; rosca 1/2″ registrada. No se añade otra pieza ni se supone pérdida cero."
       ],
       "estado": "Preselección condicionada; no diámetro de ejecución",
       "comprobadoPorTabla": false,
@@ -921,7 +921,7 @@
           "tramos": [
             "ref-B-Calefactor"
           ],
-          "motivo": "Conexión fusión–rosca de Calefactor: identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero."
+          "motivo": "Conexión fusión–rosca de Calefactor: producto o variante pendiente del accesorio ya contabilizado; rosca 1/2″ registrada. No se añade otra pieza ni se supone pérdida cero."
         }
       ],
       "perdidasSinUbicacion": [],
@@ -1143,7 +1143,7 @@
         "tee:nombre:b: Identificar solamente la familia real de tee (central o extremo); hay varias configuraciones compatibles.",
         "manual-total:[\"ref-B-Calefactor\",\"codo90\"]::terminal: Variante de la pieza directa pendiente; no se elige un conjunto para evitar esa pregunta.",
         "manual-total:[\"ref-B-Calefactor\",\"llave\"]: tipo y producto de llave SIGAS pendientes.",
-        "terminal-Calefactor: Conexión fusión–rosca de Calefactor: identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero."
+        "terminal-Calefactor: Conexión fusión–rosca de Calefactor: producto o variante pendiente del accesorio ya contabilizado; rosca 1/2″ registrada. No se añade otra pieza ni se supone pérdida cero."
       ],
       "estado": "Preselección condicionada; no diámetro de ejecución",
       "comprobadoPorTabla": false,
@@ -1215,7 +1215,7 @@
           "tramos": [
             "ref-B-Cocina"
           ],
-          "motivo": "Conexión fusión–rosca de Cocina: identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero."
+          "motivo": "Conexión fusión–rosca de Cocina: producto o variante pendiente del accesorio ya contabilizado; rosca 1/2″ registrada. No se añade otra pieza ni se supone pérdida cero."
         }
       ],
       "perdidasSinUbicacion": [],
@@ -1438,7 +1438,7 @@
         "tee:nombre:b: Identificar solamente la familia real de tee (central o extremo); hay varias configuraciones compatibles.",
         "manual-total:[\"ref-B-Cocina\",\"codo90\"]::terminal: Variante de la pieza directa pendiente; no se elige un conjunto para evitar esa pregunta.",
         "manual-total:[\"ref-B-Cocina\",\"llave\"]: tipo y producto de llave SIGAS pendientes.",
-        "terminal-Cocina: Conexión fusión–rosca de Cocina: identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero."
+        "terminal-Cocina: Conexión fusión–rosca de Cocina: producto o variante pendiente del accesorio ya contabilizado; rosca 1/2″ registrada. No se añade otra pieza ni se supone pérdida cero."
       ],
       "estado": "Preselección condicionada; no diámetro de ejecución",
       "comprobadoPorTabla": false,
@@ -1491,13 +1491,13 @@
     "tee:nombre:b: Identificar solamente la familia real de tee (central o extremo); hay varias configuraciones compatibles.",
     "manual-total:[\"ref-B-Calefactor\",\"codo90\"]::terminal: Variante de la pieza directa pendiente; no se elige un conjunto para evitar esa pregunta.",
     "manual-total:[\"ref-B-Calefactor\",\"llave\"]: tipo y producto de llave SIGAS pendientes.",
-    "terminal-Calefactor: Conexión fusión–rosca de Calefactor: identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero.",
+    "terminal-Calefactor: Conexión fusión–rosca de Calefactor: producto o variante pendiente del accesorio ya contabilizado; rosca 1/2″ registrada. No se añade otra pieza ni se supone pérdida cero.",
     "referencia-codo19: producto SIGAS exacto y vía pendientes. Confirmar normal, MH o roscado y sus medidas; no se elige una variante por defecto.",
     "manual-total:[\"ref-B-Cocina\",\"codo90\"]::terminal: Variante de la pieza directa pendiente; no se elige un conjunto para evitar esa pregunta.",
     "manual-total:[\"ref-B-Cocina\",\"llave\"]: tipo y producto de llave SIGAS pendientes.",
-    "terminal-Cocina: Conexión fusión–rosca de Cocina: identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero.",
+    "terminal-Cocina: Conexión fusión–rosca de Cocina: producto o variante pendiente del accesorio ya contabilizado; rosca 1/2″ registrada. No se añade otra pieza ni se supone pérdida cero.",
     "manual-total:[\"ref-A-Termo\",\"codo90\"]: Variante de la pieza directa pendiente; no se elige un conjunto para evitar esa pregunta.",
     "manual-total:[\"ref-A-Termo\",\"llave\"]: tipo y producto de llave SIGAS pendientes.",
-    "terminal-Termo: Conexión fusión–rosca de Termo: identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero."
+    "terminal-Termo: Conexión fusión–rosca de Termo: producto o variante pendiente del accesorio ya contabilizado; rosca 1/2″ registrada. No se añade otra pieza ni se supone pérdida cero."
   ]
 }
