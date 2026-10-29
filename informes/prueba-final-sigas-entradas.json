@@ -1,0 +1,697 @@
+{
+  "formato": "canerias-respaldo-v1",
+  "proyectos": {
+    "gas": {
+      "planCompra": {
+        "opciones": {},
+        "extras": [],
+        "revisiones": {}
+      },
+      "proyectosGuardados": [
+        {
+          "id": "proyecto-mvu371dd-1",
+          "nombre": "Taller y vivienda",
+          "datos": {
+            "tramos": [
+              {
+                "id": "raiz",
+                "desde": "M",
+                "hasta": "J",
+                "metros": 14,
+                "consumo": null,
+                "diametro": null
+              },
+              {
+                "id": "horno",
+                "desde": "J",
+                "hasta": "Horno",
+                "metros": 6,
+                "consumo": 18600,
+                "diametro": null
+              },
+              {
+                "id": "caldera",
+                "desde": "J",
+                "hasta": "Caldera",
+                "metros": 8,
+                "consumo": 9300,
+                "diametro": null
+              }
+            ],
+            "artefactos": [
+              {
+                "nombre": "Horno",
+                "consumo": 18600,
+                "id": "artefacto-mvu371e0-2"
+              },
+              {
+                "nombre": "Caldera",
+                "consumo": 9300,
+                "id": "artefacto-mvu371e0-3"
+              }
+            ],
+            "instalacion": {
+              "version": 1,
+              "perfil": {
+                "pais": "AR",
+                "uso": "domiciliario",
+                "gas": "GN",
+                "largosDocumentados2026": true,
+                "catalogoTecnicoGas": "sigas",
+                "material": "Acero-polietileno SIGAS Thermofusión",
+                "sistema": "Thermofusión",
+                "poderCalorifico": 9300,
+                "fuenteGas": "Referencia declarada para ensayo; no suministro real"
+              },
+              "nodos": []
+            },
+            "planCompra": {
+              "opciones": {
+                "cargaManualDirecta": true
+              },
+              "extras": [],
+              "revisiones": {
+                "proyecto": {
+                  "firma": "{\"fuente\":\"proyecto\",\"entrada\":{\"casilleroMedidorGas\":{},\"origen\":\"Proyecto manual actual\",\"material\":\"Acero-polietileno SIGAS Thermofusión\",\"sistema\":\"Thermofusión\",\"nodos\":[{\"id\":\"nombre:j\",\"nombre\":\"J\"},{\"id\":\"nombre:caldera\",\"nombre\":\"Caldera\"},{\"id\":\"nombre:horno\",\"nombre\":\"Horno\"},{\"id\":\"nombre:m\",\"nombre\":\"M\"}],\"tramos\":[{\"id\":\"raiz\",\"metros\":14,\"diametro\":null,\"diametroFinal\":null,\"red\":{\"desde\":\"nombre:m\",\"hasta\":\"nombre:j\"},\"segmentos\":null,\"accesorios\":[],\"continuidadCuplas\":{\"segmentos\":[],\"completa\":false,\"metrosPendientes\":14,\"pendientes\":[\"El total de codo90 no coincide con los accesorios posicionados.\"],\"bloqueada\":true}},{\"id\":\"horno\",\"metros\":6,\"diametro\":null,\"diametroFinal\":null,\"red\":{\"desde\":\"nombre:j\",\"hasta\":\"nombre:horno\"},\"segmentos\":null,\"accesorios\":[],\"continuidadCuplas\":{\"segmentos\":[],\"completa\":false,\"metrosPendientes\":6,\"pendientes\":[\"El total de codo90 no coincide con los accesorios posicionados.\"],\"bloqueada\":true}},{\"id\":\"caldera\",\"metros\":8,\"diametro\":null,\"diametroFinal\":null,\"red\":{\"desde\":\"nombre:j\",\"hasta\":\"nombre:caldera\"},\"segmentos\":null,\"accesorios\":[],\"continuidadCuplas\":{\"segmentos\":[],\"completa\":false,\"metrosPendientes\":8,\"pendientes\":[\"El total de codo90 no coincide con los accesorios posicionados.\"],\"bloqueada\":true}}],\"extras\":[{\"idFisico\":\"manual-total:[\\\"raiz\\\",\\\"codo90\\\"]\",\"tipo\":\"codo90\",\"cantidad\":2,\"medidas\":[\"32 mm candidato\"],\"confirmado\":true,\"tramo\":\"raiz\",\"ubicacion\":\"raiz · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":\"Codo Normal a 90º 32 mm\",\"registroSigas\":{\"id\":\"manual-total:[\\\"raiz\\\",\\\"codo90\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"raiz\\\",\\\"codo90\\\"]::pieza:0\",\"manual-total:[\\\"raiz\\\",\\\"codo90\\\"]::pieza:1\"],\"funcion\":\"recorrido\",\"geometria\":\"codo90\",\"productoIdentificado\":true,\"productos\":[\"sigas-p24-izquierdo-21\"],\"candidatoMm\":32,\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"raiz\\\",\\\"tee\\\"]\",\"tipo\":\"tee\",\"cantidad\":1,\"medidas\":[\"32 mm candidato\"],\"confirmado\":true,\"tramo\":\"raiz\",\"ubicacion\":\"raiz · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"raiz\\\",\\\"tee\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"raiz\\\",\\\"tee\\\"]::pieza:0\"],\"funcion\":\"derivacion\",\"geometria\":null,\"productoIdentificado\":false,\"productos\":[],\"candidatoMm\":32,\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"horno\\\",\\\"codo90\\\"]\",\"tipo\":\"codo90\",\"cantidad\":2,\"medidas\":[\"25 mm candidato\"],\"confirmado\":true,\"tramo\":\"horno\",\"ubicacion\":\"horno · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":\"Codo Normal a 90º 25 mm\",\"registroSigas\":{\"id\":\"manual-total:[\\\"horno\\\",\\\"codo90\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"horno\\\",\\\"codo90\\\"]::pieza:0\",\"manual-total:[\\\"horno\\\",\\\"codo90\\\"]::pieza:1\"],\"funcion\":\"recorrido\",\"geometria\":\"codo90\",\"productoIdentificado\":true,\"productos\":[\"sigas-p24-izquierdo-20\"],\"candidatoMm\":25,\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"horno\\\",\\\"llave\\\"]\",\"tipo\":\"llave\",\"cantidad\":1,\"medidas\":[\"25 mm candidato\"],\"confirmado\":true,\"tramo\":\"horno\",\"ubicacion\":\"horno · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"horno\\\",\\\"llave\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"horno\\\",\\\"llave\\\"]::pieza:0\"],\"funcion\":\"corte\",\"geometria\":null,\"productoIdentificado\":false,\"productos\":[],\"candidatoMm\":25,\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"caldera\\\",\\\"codo90\\\"]\",\"tipo\":\"codo90\",\"cantidad\":3,\"medidas\":[\"20 mm candidato\"],\"confirmado\":true,\"tramo\":\"caldera\",\"ubicacion\":\"caldera · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":\"Codo Normal a 90º 20 mm\",\"registroSigas\":{\"id\":\"manual-total:[\\\"caldera\\\",\\\"codo90\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"caldera\\\",\\\"codo90\\\"]::pieza:0\",\"manual-total:[\\\"caldera\\\",\\\"codo90\\\"]::pieza:1\",\"manual-total:[\\\"caldera\\\",\\\"codo90\\\"]::pieza:2\"],\"funcion\":\"recorrido\",\"geometria\":\"codo90\",\"productoIdentificado\":true,\"productos\":[\"sigas-p24-izquierdo-19\"],\"candidatoMm\":20,\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"caldera\\\",\\\"llave\\\"]\",\"tipo\":\"llave\",\"cantidad\":1,\"medidas\":[\"20 mm candidato\"],\"confirmado\":true,\"tramo\":\"caldera\",\"ubicacion\":\"caldera · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"caldera\\\",\\\"llave\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"caldera\\\",\\\"llave\\\"]::pieza:0\"],\"funcion\":\"corte\",\"geometria\":null,\"productoIdentificado\":false,\"productos\":[],\"candidatoMm\":20,\"rosca\":null},\"medidasEstimadas\":true}],\"manualDirecto\":{\"avisos\":[],\"ceros\":[{\"tipo\":\"codo45\",\"material\":\"Codo 45°\",\"diametro\":\"Pendiente\",\"cantidad\":0,\"unidad\":\"unidad\",\"ubicacion\":\"raiz\",\"estado\":\"estimado\",\"cantidadConfirmada\":true,\"origen\":\"manual-cero\",\"evidencia\":\"Cero ingresado explícitamente; no es un campo vacío.\"},{\"tipo\":\"reduccion\",\"material\":\"Reducción independiente\",\"diametro\":\"Pendiente\",\"cantidad\":0,\"unidad\":\"unidad\",\"ubicacion\":\"raiz\",\"estado\":\"estimado\",\"cantidadConfirmada\":true,\"origen\":\"manual-cero\",\"evidencia\":\"Cero ingresado explícitamente; no es un campo vacío.\"},{\"tipo\":\"llave\",\"material\":\"Llave de paso\",\"diametro\":\"Pendiente\",\"cantidad\":0,\"unidad\":\"unidad\",\"ubicacion\":\"raiz\",\"estado\":\"estimado\",\"cantidadConfirmada\":true,\"origen\":\"manual-cero\",\"evidencia\":\"Cero ingresado explícitamente; no es un campo vacío.\"},{\"tipo\":\"codo45\",\"material\":\"Codo 45°\",\"diametro\":\"Pendiente\",\"cantidad\":0,\"unidad\":\"unidad\",\"ubicacion\":\"horno\",\"estado\":\"estimado\",\"cantidadConfirmada\":true,\"origen\":\"manual-cero\",\"evidencia\":\"Cero ingresado explícitamente; no es un campo vacío.\"},{\"tipo\":\"tee\",\"material\":\"Tee\",\"diametro\":\"Pendiente\",\"cantidad\":0,\"unidad\":\"unidad\",\"ubicacion\":\"horno\",\"estado\":\"estimado\",\"cantidadConfirmada\":true,\"origen\":\"manual-cero\",\"evidencia\":\"Cero ingresado explícitamente; no es un campo vacío.\"},{\"tipo\":\"reduccion\",\"material\":\"Reducción independiente\",\"diametro\":\"Pendiente\",\"cantidad\":0,\"unidad\":\"unidad\",\"ubicacion\":\"horno\",\"estado\":\"estimado\",\"cantidadConfirmada\":true,\"origen\":\"manual-cero\",\"evidencia\":\"Cero ingresado explícitamente; no es un campo vacío.\"},{\"tipo\":\"codo45\",\"material\":\"Codo 45°\",\"diametro\":\"Pendiente\",\"cantidad\":0,\"unidad\":\"unidad\",\"ubicacion\":\"caldera\",\"estado\":\"estimado\",\"cantidadConfirmada\":true,\"origen\":\"manual-cero\",\"evidencia\":\"Cero ingresado explícitamente; no es un campo vacío.\"},{\"tipo\":\"tee\",\"material\":\"Tee\",\"diametro\":\"Pendiente\",\"cantidad\":0,\"unidad\":\"unidad\",\"ubicacion\":\"caldera\",\"estado\":\"estimado\",\"cantidadConfirmada\":true,\"origen\":\"manual-cero\",\"evidencia\":\"Cero ingresado explícitamente; no es un campo vacío.\"},{\"tipo\":\"reduccion\",\"material\":\"Reducción independiente\",\"diametro\":\"Pendiente\",\"cantidad\":0,\"unidad\":\"unidad\",\"ubicacion\":\"caldera\",\"estado\":\"estimado\",\"cantidadConfirmada\":true,\"origen\":\"manual-cero\",\"evidencia\":\"Cero ingresado explícitamente; no es un campo vacío.\"}],\"pendientes\":[],\"red\":{\"errores\":[],\"avisos\":[],\"faltantes\":[],\"porTramo\":{\"caldera\":9300,\"horno\":18600,\"raiz\":27900},\"parciales\":{\"caldera\":9300,\"horno\":18600,\"raiz\":27900},\"total\":27900,\"orientacion\":{\"raiz\":{\"desde\":\"nombre:m\",\"hasta\":\"nombre:j\",\"invertido\":false},\"caldera\":{\"desde\":\"nombre:j\",\"hasta\":\"nombre:caldera\",\"invertido\":false},\"horno\":{\"desde\":\"nombre:j\",\"hasta\":\"nombre:horno\",\"invertido\":false}},\"puntos\":[{\"id\":\"nombre:j\",\"nombre\":\"J\",\"tipo\":null,\"artefactoId\":null},{\"id\":\"nombre:caldera\",\"nombre\":\"Caldera\",\"tipo\":null,\"artefactoId\":null},{\"id\":\"nombre:horno\",\"nombre\":\"Horno\",\"tipo\":null,\"artefactoId\":null},{\"id\":\"nombre:m\",\"nombre\":\"M\",\"tipo\":null,\"artefactoId\":null}],\"grupos\":[{\"id\":\"caldera\",\"desde\":\"nombre:j\",\"hasta\":\"nombre:caldera\"},{\"id\":\"horno\",\"desde\":\"nombre:j\",\"hasta\":\"nombre:horno\"},{\"id\":\"raiz\",\"desde\":\"nombre:m\",\"hasta\":\"nombre:j\"}],\"excluidos\":[],\"ambiguos\":[],\"listoParaDimensionar\":false}},\"propuestasCompraSigas\":[]},\"opciones\":{\"largoComercial\":4,\"reutilizar\":false,\"minimoSobrante\":0.5,\"hipotesisSinPosiciones\":false,\"uniones\":{}}}",
+                  "filas": [
+                    {
+                      "id": "material-0",
+                      "unidad": "unidad",
+                      "estado": "estimado",
+                      "revisado": false,
+                      "material": "Codo Normal a 90º 32 mm",
+                      "registroSigas": {
+                        "id": "manual-total:[\"raiz\",\"codo90\"]",
+                        "identidadesFisicas": [
+                          "manual-total:[\"raiz\",\"codo90\"]::pieza:0",
+                          "manual-total:[\"raiz\",\"codo90\"]::pieza:1"
+                        ],
+                        "funcion": "recorrido",
+                        "geometria": "codo90",
+                        "productoIdentificado": true,
+                        "productos": [
+                          "sigas-p24-izquierdo-21"
+                        ],
+                        "candidatoMm": 32,
+                        "rosca": null
+                      },
+                      "tipo": "codo90",
+                      "medidas": [
+                        "32 mm candidato"
+                      ],
+                      "diametro": "32 mm candidato",
+                      "cantidad": 2,
+                      "ubicacion": "raiz · cantidad manual; posición pendiente",
+                      "cantidadConfirmada": true,
+                      "evidencia": "Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.",
+                      "nodo": null,
+                      "origen": "identificado",
+                      "equivalentes": "No se calculan en este plan físico",
+                      "ubicacionNombre": "M–J · cantidad manual; posición pendiente",
+                      "claveRevision": "[\"codo90\",\"Codo Normal a 90º 32 mm\",\"32 mm candidato\",\"unidad\",\"raiz · cantidad manual; posición pendiente\",[{\"idFisico\":\"manual-total:[\\\"raiz\\\",\\\"codo90\\\"]\",\"tipo\":\"codo90\",\"cantidad\":2,\"medidas\":[\"32 mm candidato\"],\"confirmado\":true,\"tramo\":\"raiz\",\"ubicacion\":\"raiz · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":\"Codo Normal a 90º 32 mm\",\"registroSigas\":{\"id\":\"manual-total:[\\\"raiz\\\",\\\"codo90\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"raiz\\\",\\\"codo90\\\"]::pieza:0\",\"manual-total:[\\\"raiz\\\",\\\"codo90\\\"]::pieza:1\"],\"funcion\":\"recorrido\",\"geometria\":\"codo90\",\"productoIdentificado\":true,\"productos\":[\"sigas-p24-izquierdo-21\"],\"candidatoMm\":32,\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"raiz\\\",\\\"tee\\\"]\",\"tipo\":\"tee\",\"cantidad\":1,\"medidas\":[\"32 mm candidato\"],\"confirmado\":true,\"tramo\":\"raiz\",\"ubicacion\":\"raiz · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"raiz\\\",\\\"tee\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"raiz\\\",\\\"tee\\\"]::pieza:0\"],\"funcion\":\"derivacion\",\"geometria\":null,\"productoIdentificado\":false,\"productos\":[],\"candidatoMm\":32,\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"horno\\\",\\\"codo90\\\"]\",\"tipo\":\"codo90\",\"cantidad\":2,\"medidas\":[\"25 mm candidato\"],\"confirmado\":true,\"tramo\":\"horno\",\"ubicacion\":\"horno · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":\"Codo Normal a 90º 25 mm\",\"registroSigas\":{\"id\":\"manual-total:[\\\"horno\\\",\\\"codo90\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"horno\\\",\\\"codo90\\\"]::pieza:0\",\"manual-total:[\\\"horno\\\",\\\"codo90\\\"]::pieza:1\"],\"funcion\":\"recorrido\",\"geometria\":\"codo90\",\"productoIdentificado\":true,\"productos\":[\"sigas-p24-izquierdo-20\"],\"candidatoMm\":25,\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"horno\\\",\\\"llave\\\"]\",\"tipo\":\"llave\",\"cantidad\":1,\"medidas\":[\"25 mm candidato\"],\"confirmado\":true,\"tramo\":\"horno\",\"ubicacion\":\"horno · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"horno\\\",\\\"llave\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"horno\\\",\\\"llave\\\"]::pieza:0\"],\"funcion\":\"corte\",\"geometria\":null,\"productoIdentificado\":false,\"productos\":[],\"candidatoMm\":25,\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"caldera\\\",\\\"codo90\\\"]\",\"tipo\":\"codo90\",\"cantidad\":3,\"medidas\":[\"20 mm candidato\"],\"confirmado\":true,\"tramo\":\"caldera\",\"ubicacion\":\"caldera · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":\"Codo Normal a 90º 20 mm\",\"registroSigas\":{\"id\":\"manual-total:[\\\"caldera\\\",\\\"codo90\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"caldera\\\",\\\"codo90\\\"]::pieza:0\",\"manual-total:[\\\"caldera\\\",\\\"codo90\\\"]::pieza:1\",\"manual-total:[\\\"caldera\\\",\\\"codo90\\\"]::pieza:2\"],\"funcion\":\"recorrido\",\"geometria\":\"codo90\",\"productoIdentificado\":true,\"productos\":[\"sigas-p24-izquierdo-19\"],\"candidatoMm\":20,\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"caldera\\\",\\\"llave\\\"]\",\"tipo\":\"llave\",\"cantidad\":1,\"medidas\":[\"20 mm candidato\"],\"confirmado\":true,\"tramo\":\"caldera\",\"ubicacion\":\"caldera · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"caldera\\\",\\\"llave\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"caldera\\\",\\\"llave\\\"]::pieza:0\"],\"funcion\":\"corte\",\"geometria\":null,\"productoIdentificado\":false,\"productos\":[],\"candidatoMm\":20,\"rosca\":null},\"medidasEstimadas\":true}]]"
+                    },
+                    {
+                      "id": "material-1",
+                      "unidad": "unidad",
+                      "estado": "estimado",
+                      "revisado": false,
+                      "material": "Tee",
+                      "registroSigas": {
+                        "id": "manual-total:[\"raiz\",\"tee\"]",
+                        "identidadesFisicas": [
+                          "manual-total:[\"raiz\",\"tee\"]::pieza:0"
+                        ],
+                        "funcion": "derivacion",
+                        "geometria": null,
+                        "productoIdentificado": false,
+                        "productos": [],
+                        "candidatoMm": 32,
+                        "rosca": null
+                      },
+                      "tipo": "tee",
+                      "medidas": [
+                        "32 mm candidato"
+                      ],
+                      "diametro": "32 mm candidato",
+                      "cantidad": 1,
+                      "ubicacion": "raiz · cantidad manual; posición pendiente",
+                      "cantidadConfirmada": true,
+                      "evidencia": "Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo. Medidas/conexiones pendientes.",
+                      "nodo": null,
+                      "origen": "identificado",
+                      "equivalentes": "No se calculan en este plan físico",
+                      "ubicacionNombre": "M–J · cantidad manual; posición pendiente",
+                      "claveRevision": "[\"tee\",\"Tee\",\"32 mm candidato\",\"unidad\",\"raiz · cantidad manual; posición pendiente\",[{\"idFisico\":\"manual-total:[\\\"raiz\\\",\\\"codo90\\\"]\",\"tipo\":\"codo90\",\"cantidad\":2,\"medidas\":[\"32 mm candidato\"],\"confirmado\":true,\"tramo\":\"raiz\",\"ubicacion\":\"raiz · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":\"Codo Normal a 90º 32 mm\",\"registroSigas\":{\"id\":\"manual-total:[\\\"raiz\\\",\\\"codo90\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"raiz\\\",\\\"codo90\\\"]::pieza:0\",\"manual-total:[\\\"raiz\\\",\\\"codo90\\\"]::pieza:1\"],\"funcion\":\"recorrido\",\"geometria\":\"codo90\",\"productoIdentificado\":true,\"productos\":[\"sigas-p24-izquierdo-21\"],\"candidatoMm\":32,\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"raiz\\\",\\\"tee\\\"]\",\"tipo\":\"tee\",\"cantidad\":1,\"medidas\":[\"32 mm candidato\"],\"confirmado\":true,\"tramo\":\"raiz\",\"ubicacion\":\"raiz · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"raiz\\\",\\\"tee\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"raiz\\\",\\\"tee\\\"]::pieza:0\"],\"funcion\":\"derivacion\",\"geometria\":null,\"productoIdentificado\":false,\"productos\":[],\"candidatoMm\":32,\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"horno\\\",\\\"codo90\\\"]\",\"tipo\":\"codo90\",\"cantidad\":2,\"medidas\":[\"25 mm candidato\"],\"confirmado\":true,\"tramo\":\"horno\",\"ubicacion\":\"horno · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":\"Codo Normal a 90º 25 mm\",\"registroSigas\":{\"id\":\"manual-total:[\\\"horno\\\",\\\"codo90\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"horno\\\",\\\"codo90\\\"]::pieza:0\",\"manual-total:[\\\"horno\\\",\\\"codo90\\\"]::pieza:1\"],\"funcion\":\"recorrido\",\"geometria\":\"codo90\",\"productoIdentificado\":true,\"productos\":[\"sigas-p24-izquierdo-20\"],\"candidatoMm\":25,\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"horno\\\",\\\"llave\\\"]\",\"tipo\":\"llave\",\"cantidad\":1,\"medidas\":[\"25 mm candidato\"],\"confirmado\":true,\"tramo\":\"horno\",\"ubicacion\":\"horno · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"horno\\\",\\\"llave\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"horno\\\",\\\"llave\\\"]::pieza:0\"],\"funcion\":\"corte\",\"geometria\":null,\"productoIdentificado\":false,\"productos\":[],\"candidatoMm\":25,\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"caldera\\\",\\\"codo90\\\"]\",\"tipo\":\"codo90\",\"cantidad\":3,\"medidas\":[\"20 mm candidato\"],\"confirmado\":true,\"tramo\":\"caldera\",\"ubicacion\":\"caldera · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":\"Codo Normal a 90º 20 mm\",\"registroSigas\":{\"id\":\"manual-total:[\\\"caldera\\\",\\\"codo90\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"caldera\\\",\\\"codo90\\\"]::pieza:0\",\"manual-total:[\\\"caldera\\\",\\\"codo90\\\"]::pieza:1\",\"manual-total:[\\\"caldera\\\",\\\"codo90\\\"]::pieza:2\"],\"funcion\":\"recorrido\",\"geometria\":\"codo90\",\"productoIdentificado\":true,\"productos\":[\"sigas-p24-izquierdo-19\"],\"candidatoMm\":20,\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"caldera\\\",\\\"llave\\\"]\",\"tipo\":\"llave\",\"cantidad\":1,\"medidas\":[\"20 mm candidato\"],\"confirmado\":true,\"tramo\":\"caldera\",\"ubicacion\":\"caldera · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"caldera\\\",\\\"llave\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"caldera\\\",\\\"llave\\\"]::pieza:0\"],\"funcion\":\"corte\",\"geometria\":null,\"productoIdentificado\":false,\"productos\":[],\"candidatoMm\":20,\"rosca\":null},\"medidasEstimadas\":true}]]"
+                    },
+                    {
+                      "id": "material-2",
+                      "unidad": "unidad",
+                      "estado": "estimado",
+                      "revisado": false,
+                      "material": "Codo Normal a 90º 25 mm",
+                      "registroSigas": {
+                        "id": "manual-total:[\"horno\",\"codo90\"]",
+                        "identidadesFisicas": [
+                          "manual-total:[\"horno\",\"codo90\"]::pieza:0",
+                          "manual-total:[\"horno\",\"codo90\"]::pieza:1"
+                        ],
+                        "funcion": "recorrido",
+                        "geometria": "codo90",
+                        "productoIdentificado": true,
+                        "productos": [
+                          "sigas-p24-izquierdo-20"
+                        ],
+                        "candidatoMm": 25,
+                        "rosca": null
+                      },
+                      "tipo": "codo90",
+                      "medidas": [
+                        "25 mm candidato"
+                      ],
+                      "diametro": "25 mm candidato",
+                      "cantidad": 2,
+                      "ubicacion": "horno · cantidad manual; posición pendiente",
+                      "cantidadConfirmada": true,
+                      "evidencia": "Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.",
+                      "nodo": null,
+                      "origen": "identificado",
+                      "equivalentes": "No se calculan en este plan físico",
+                      "ubicacionNombre": "J–Horno · cantidad manual; posición pendiente",
+                      "claveRevision": "[\"codo90\",\"Codo Normal a 90º 25 mm\",\"25 mm candidato\",\"unidad\",\"horno · cantidad manual; posición pendiente\",[{\"idFisico\":\"manual-total:[\\\"raiz\\\",\\\"codo90\\\"]\",\"tipo\":\"codo90\",\"cantidad\":2,\"medidas\":[\"32 mm candidato\"],\"confirmado\":true,\"tramo\":\"raiz\",\"ubicacion\":\"raiz · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":\"Codo Normal a 90º 32 mm\",\"registroSigas\":{\"id\":\"manual-total:[\\\"raiz\\\",\\\"codo90\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"raiz\\\",\\\"codo90\\\"]::pieza:0\",\"manual-total:[\\\"raiz\\\",\\\"codo90\\\"]::pieza:1\"],\"funcion\":\"recorrido\",\"geometria\":\"codo90\",\"productoIdentificado\":true,\"productos\":[\"sigas-p24-izquierdo-21\"],\"candidatoMm\":32,\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"raiz\\\",\\\"tee\\\"]\",\"tipo\":\"tee\",\"cantidad\":1,\"medidas\":[\"32 mm candidato\"],\"confirmado\":true,\"tramo\":\"raiz\",\"ubicacion\":\"raiz · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"raiz\\\",\\\"tee\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"raiz\\\",\\\"tee\\\"]::pieza:0\"],\"funcion\":\"derivacion\",\"geometria\":null,\"productoIdentificado\":false,\"productos\":[],\"candidatoMm\":32,\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"horno\\\",\\\"codo90\\\"]\",\"tipo\":\"codo90\",\"cantidad\":2,\"medidas\":[\"25 mm candidato\"],\"confirmado\":true,\"tramo\":\"horno\",\"ubicacion\":\"horno · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":\"Codo Normal a 90º 25 mm\",\"registroSigas\":{\"id\":\"manual-total:[\\\"horno\\\",\\\"codo90\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"horno\\\",\\\"codo90\\\"]::pieza:0\",\"manual-total:[\\\"horno\\\",\\\"codo90\\\"]::pieza:1\"],\"funcion\":\"recorrido\",\"geometria\":\"codo90\",\"productoIdentificado\":true,\"productos\":[\"sigas-p24-izquierdo-20\"],\"candidatoMm\":25,\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"horno\\\",\\\"llave\\\"]\",\"tipo\":\"llave\",\"cantidad\":1,\"medidas\":[\"25 mm candidato\"],\"confirmado\":true,\"tramo\":\"horno\",\"ubicacion\":\"horno · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"horno\\\",\\\"llave\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"horno\\\",\\\"llave\\\"]::pieza:0\"],\"funcion\":\"corte\",\"geometria\":null,\"productoIdentificado\":false,\"productos\":[],\"candidatoMm\":25,\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"caldera\\\",\\\"codo90\\\"]\",\"tipo\":\"codo90\",\"cantidad\":3,\"medidas\":[\"20 mm candidato\"],\"confirmado\":true,\"tramo\":\"caldera\",\"ubicacion\":\"caldera · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":\"Codo Normal a 90º 20 mm\",\"registroSigas\":{\"id\":\"manual-total:[\\\"caldera\\\",\\\"codo90\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"caldera\\\",\\\"codo90\\\"]::pieza:0\",\"manual-total:[\\\"caldera\\\",\\\"codo90\\\"]::pieza:1\",\"manual-total:[\\\"caldera\\\",\\\"codo90\\\"]::pieza:2\"],\"funcion\":\"recorrido\",\"geometria\":\"codo90\",\"productoIdentificado\":true,\"productos\":[\"sigas-p24-izquierdo-19\"],\"candidatoMm\":20,\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"caldera\\\",\\\"llave\\\"]\",\"tipo\":\"llave\",\"cantidad\":1,\"medidas\":[\"20 mm candidato\"],\"confirmado\":true,\"tramo\":\"caldera\",\"ubicacion\":\"caldera · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"caldera\\\",\\\"llave\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"caldera\\\",\\\"llave\\\"]::pieza:0\"],\"funcion\":\"corte\",\"geometria\":null,\"productoIdentificado\":false,\"productos\":[],\"candidatoMm\":20,\"rosca\":null},\"medidasEstimadas\":true}]]"
+                    },
+                    {
+                      "id": "material-3",
+                      "unidad": "unidad",
+                      "estado": "estimado",
+                      "revisado": false,
+                      "material": "Llave de paso",
+                      "registroSigas": {
+                        "id": "manual-total:[\"horno\",\"llave\"]",
+                        "identidadesFisicas": [
+                          "manual-total:[\"horno\",\"llave\"]::pieza:0"
+                        ],
+                        "funcion": "corte",
+                        "geometria": null,
+                        "productoIdentificado": false,
+                        "productos": [],
+                        "candidatoMm": 25,
+                        "rosca": null
+                      },
+                      "tipo": "llave",
+                      "medidas": [
+                        "25 mm candidato"
+                      ],
+                      "diametro": "25 mm candidato",
+                      "cantidad": 1,
+                      "ubicacion": "horno · cantidad manual; posición pendiente",
+                      "cantidadConfirmada": true,
+                      "evidencia": "Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.",
+                      "nodo": null,
+                      "origen": "identificado",
+                      "equivalentes": "No se calculan en este plan físico",
+                      "ubicacionNombre": "J–Horno · cantidad manual; posición pendiente",
+                      "claveRevision": "[\"llave\",\"Llave de paso\",\"25 mm candidato\",\"unidad\",\"horno · cantidad manual; posición pendiente\",[{\"idFisico\":\"manual-total:[\\\"raiz\\\",\\\"codo90\\\"]\",\"tipo\":\"codo90\",\"cantidad\":2,\"medidas\":[\"32 mm candidato\"],\"confirmado\":true,\"tramo\":\"raiz\",\"ubicacion\":\"raiz · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":\"Codo Normal a 90º 32 mm\",\"registroSigas\":{\"id\":\"manual-total:[\\\"raiz\\\",\\\"codo90\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"raiz\\\",\\\"codo90\\\"]::pieza:0\",\"manual-total:[\\\"raiz\\\",\\\"codo90\\\"]::pieza:1\"],\"funcion\":\"recorrido\",\"geometria\":\"codo90\",\"productoIdentificado\":true,\"productos\":[\"sigas-p24-izquierdo-21\"],\"candidatoMm\":32,\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"raiz\\\",\\\"tee\\\"]\",\"tipo\":\"tee\",\"cantidad\":1,\"medidas\":[\"32 mm candidato\"],\"confirmado\":true,\"tramo\":\"raiz\",\"ubicacion\":\"raiz · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"raiz\\\",\\\"tee\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"raiz\\\",\\\"tee\\\"]::pieza:0\"],\"funcion\":\"derivacion\",\"geometria\":null,\"productoIdentificado\":false,\"productos\":[],\"candidatoMm\":32,\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"horno\\\",\\\"codo90\\\"]\",\"tipo\":\"codo90\",\"cantidad\":2,\"medidas\":[\"25 mm candidato\"],\"confirmado\":true,\"tramo\":\"horno\",\"ubicacion\":\"horno · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":\"Codo Normal a 90º 25 mm\",\"registroSigas\":{\"id\":\"manual-total:[\\\"horno\\\",\\\"codo90\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"horno\\\",\\\"codo90\\\"]::pieza:0\",\"manual-total:[\\\"horno\\\",\\\"codo90\\\"]::pieza:1\"],\"funcion\":\"recorrido\",\"geometria\":\"codo90\",\"productoIdentificado\":true,\"productos\":[\"sigas-p24-izquierdo-20\"],\"candidatoMm\":25,\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"horno\\\",\\\"llave\\\"]\",\"tipo\":\"llave\",\"cantidad\":1,\"medidas\":[\"25 mm candidato\"],\"confirmado\":true,\"tramo\":\"horno\",\"ubicacion\":\"horno · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"horno\\\",\\\"llave\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"horno\\\",\\\"llave\\\"]::pieza:0\"],\"funcion\":\"corte\",\"geometria\":null,\"productoIdentificado\":false,\"productos\":[],\"candidatoMm\":25,\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"caldera\\\",\\\"codo90\\\"]\",\"tipo\":\"codo90\",\"cantidad\":3,\"medidas\":[\"20 mm candidato\"],\"confirmado\":true,\"tramo\":\"caldera\",\"ubicacion\":\"caldera · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":\"Codo Normal a 90º 20 mm\",\"registroSigas\":{\"id\":\"manual-total:[\\\"caldera\\\",\\\"codo90\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"caldera\\\",\\\"codo90\\\"]::pieza:0\",\"manual-total:[\\\"caldera\\\",\\\"codo90\\\"]::pieza:1\",\"manual-total:[\\\"caldera\\\",\\\"codo90\\\"]::pieza:2\"],\"funcion\":\"recorrido\",\"geometria\":\"codo90\",\"productoIdentificado\":true,\"productos\":[\"sigas-p24-izquierdo-19\"],\"candidatoMm\":20,\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"caldera\\\",\\\"llave\\\"]\",\"tipo\":\"llave\",\"cantidad\":1,\"medidas\":[\"20 mm candidato\"],\"confirmado\":true,\"tramo\":\"caldera\",\"ubicacion\":\"caldera · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"caldera\\\",\\\"llave\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"caldera\\\",\\\"llave\\\"]::pieza:0\"],\"funcion\":\"corte\",\"geometria\":null,\"productoIdentificado\":false,\"productos\":[],\"candidatoMm\":20,\"rosca\":null},\"medidasEstimadas\":true}]]"
+                    },
+                    {
+                      "id": "material-4",
+                      "unidad": "unidad",
+                      "estado": "estimado",
+                      "revisado": false,
+                      "material": "Codo Normal a 90º 20 mm",
+                      "registroSigas": {
+                        "id": "manual-total:[\"caldera\",\"codo90\"]",
+                        "identidadesFisicas": [
+                          "manual-total:[\"caldera\",\"codo90\"]::pieza:0",
+                          "manual-total:[\"caldera\",\"codo90\"]::pieza:1",
+                          "manual-total:[\"caldera\",\"codo90\"]::pieza:2"
+                        ],
+                        "funcion": "recorrido",
+                        "geometria": "codo90",
+                        "productoIdentificado": true,
+                        "productos": [
+                          "sigas-p24-izquierdo-19"
+                        ],
+                        "candidatoMm": 20,
+                        "rosca": null
+                      },
+                      "tipo": "codo90",
+                      "medidas": [
+                        "20 mm candidato"
+                      ],
+                      "diametro": "20 mm candidato",
+                      "cantidad": 3,
+                      "ubicacion": "caldera · cantidad manual; posición pendiente",
+                      "cantidadConfirmada": true,
+                      "evidencia": "Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.",
+                      "nodo": null,
+                      "origen": "identificado",
+                      "equivalentes": "No se calculan en este plan físico",
+                      "ubicacionNombre": "J–Caldera · cantidad manual; posición pendiente",
+                      "claveRevision": "[\"codo90\",\"Codo Normal a 90º 20 mm\",\"20 mm candidato\",\"unidad\",\"caldera · cantidad manual; posición pendiente\",[{\"idFisico\":\"manual-total:[\\\"raiz\\\",\\\"codo90\\\"]\",\"tipo\":\"codo90\",\"cantidad\":2,\"medidas\":[\"32 mm candidato\"],\"confirmado\":true,\"tramo\":\"raiz\",\"ubicacion\":\"raiz · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":\"Codo Normal a 90º 32 mm\",\"registroSigas\":{\"id\":\"manual-total:[\\\"raiz\\\",\\\"codo90\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"raiz\\\",\\\"codo90\\\"]::pieza:0\",\"manual-total:[\\\"raiz\\\",\\\"codo90\\\"]::pieza:1\"],\"funcion\":\"recorrido\",\"geometria\":\"codo90\",\"productoIdentificado\":true,\"productos\":[\"sigas-p24-izquierdo-21\"],\"candidatoMm\":32,\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"raiz\\\",\\\"tee\\\"]\",\"tipo\":\"tee\",\"cantidad\":1,\"medidas\":[\"32 mm candidato\"],\"confirmado\":true,\"tramo\":\"raiz\",\"ubicacion\":\"raiz · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"raiz\\\",\\\"tee\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"raiz\\\",\\\"tee\\\"]::pieza:0\"],\"funcion\":\"derivacion\",\"geometria\":null,\"productoIdentificado\":false,\"productos\":[],\"candidatoMm\":32,\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"horno\\\",\\\"codo90\\\"]\",\"tipo\":\"codo90\",\"cantidad\":2,\"medidas\":[\"25 mm candidato\"],\"confirmado\":true,\"tramo\":\"horno\",\"ubicacion\":\"horno · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":\"Codo Normal a 90º 25 mm\",\"registroSigas\":{\"id\":\"manual-total:[\\\"horno\\\",\\\"codo90\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"horno\\\",\\\"codo90\\\"]::pieza:0\",\"manual-total:[\\\"horno\\\",\\\"codo90\\\"]::pieza:1\"],\"funcion\":\"recorrido\",\"geometria\":\"codo90\",\"productoIdentificado\":true,\"productos\":[\"sigas-p24-izquierdo-20\"],\"candidatoMm\":25,\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"horno\\\",\\\"llave\\\"]\",\"tipo\":\"llave\",\"cantidad\":1,\"medidas\":[\"25 mm candidato\"],\"confirmado\":true,\"tramo\":\"horno\",\"ubicacion\":\"horno · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"horno\\\",\\\"llave\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"horno\\\",\\\"llave\\\"]::pieza:0\"],\"funcion\":\"corte\",\"geometria\":null,\"productoIdentificado\":false,\"productos\":[],\"candidatoMm\":25,\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"caldera\\\",\\\"codo90\\\"]\",\"tipo\":\"codo90\",\"cantidad\":3,\"medidas\":[\"20 mm candidato\"],\"confirmado\":true,\"tramo\":\"caldera\",\"ubicacion\":\"caldera · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":\"Codo Normal a 90º 20 mm\",\"registroSigas\":{\"id\":\"manual-total:[\\\"caldera\\\",\\\"codo90\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"caldera\\\",\\\"codo90\\\"]::pieza:0\",\"manual-total:[\\\"caldera\\\",\\\"codo90\\\"]::pieza:1\",\"manual-total:[\\\"caldera\\\",\\\"codo90\\\"]::pieza:2\"],\"funcion\":\"recorrido\",\"geometria\":\"codo90\",\"productoIdentificado\":true,\"productos\":[\"sigas-p24-izquierdo-19\"],\"candidatoMm\":20,\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"caldera\\\",\\\"llave\\\"]\",\"tipo\":\"llave\",\"cantidad\":1,\"medidas\":[\"20 mm candidato\"],\"confirmado\":true,\"tramo\":\"caldera\",\"ubicacion\":\"caldera · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"caldera\\\",\\\"llave\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"caldera\\\",\\\"llave\\\"]::pieza:0\"],\"funcion\":\"corte\",\"geometria\":null,\"productoIdentificado\":false,\"productos\":[],\"candidatoMm\":20,\"rosca\":null},\"medidasEstimadas\":true}]]"
+                    },
+                    {
+                      "id": "material-5",
+                      "unidad": "unidad",
+                      "estado": "estimado",
+                      "revisado": false,
+                      "material": "Llave de paso",
+                      "registroSigas": {
+                        "id": "manual-total:[\"caldera\",\"llave\"]",
+                        "identidadesFisicas": [
+                          "manual-total:[\"caldera\",\"llave\"]::pieza:0"
+                        ],
+                        "funcion": "corte",
+                        "geometria": null,
+                        "productoIdentificado": false,
+                        "productos": [],
+                        "candidatoMm": 20,
+                        "rosca": null
+                      },
+                      "tipo": "llave",
+                      "medidas": [
+                        "20 mm candidato"
+                      ],
+                      "diametro": "20 mm candidato",
+                      "cantidad": 1,
+                      "ubicacion": "caldera · cantidad manual; posición pendiente",
+                      "cantidadConfirmada": true,
+                      "evidencia": "Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.",
+                      "nodo": null,
+                      "origen": "identificado",
+                      "equivalentes": "No se calculan en este plan físico",
+                      "ubicacionNombre": "J–Caldera · cantidad manual; posición pendiente",
+                      "claveRevision": "[\"llave\",\"Llave de paso\",\"20 mm candidato\",\"unidad\",\"caldera · cantidad manual; posición pendiente\",[{\"idFisico\":\"manual-total:[\\\"raiz\\\",\\\"codo90\\\"]\",\"tipo\":\"codo90\",\"cantidad\":2,\"medidas\":[\"32 mm candidato\"],\"confirmado\":true,\"tramo\":\"raiz\",\"ubicacion\":\"raiz · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":\"Codo Normal a 90º 32 mm\",\"registroSigas\":{\"id\":\"manual-total:[\\\"raiz\\\",\\\"codo90\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"raiz\\\",\\\"codo90\\\"]::pieza:0\",\"manual-total:[\\\"raiz\\\",\\\"codo90\\\"]::pieza:1\"],\"funcion\":\"recorrido\",\"geometria\":\"codo90\",\"productoIdentificado\":true,\"productos\":[\"sigas-p24-izquierdo-21\"],\"candidatoMm\":32,\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"raiz\\\",\\\"tee\\\"]\",\"tipo\":\"tee\",\"cantidad\":1,\"medidas\":[\"32 mm candidato\"],\"confirmado\":true,\"tramo\":\"raiz\",\"ubicacion\":\"raiz · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"raiz\\\",\\\"tee\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"raiz\\\",\\\"tee\\\"]::pieza:0\"],\"funcion\":\"derivacion\",\"geometria\":null,\"productoIdentificado\":false,\"productos\":[],\"candidatoMm\":32,\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"horno\\\",\\\"codo90\\\"]\",\"tipo\":\"codo90\",\"cantidad\":2,\"medidas\":[\"25 mm candidato\"],\"confirmado\":true,\"tramo\":\"horno\",\"ubicacion\":\"horno · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":\"Codo Normal a 90º 25 mm\",\"registroSigas\":{\"id\":\"manual-total:[\\\"horno\\\",\\\"codo90\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"horno\\\",\\\"codo90\\\"]::pieza:0\",\"manual-total:[\\\"horno\\\",\\\"codo90\\\"]::pieza:1\"],\"funcion\":\"recorrido\",\"geometria\":\"codo90\",\"productoIdentificado\":true,\"productos\":[\"sigas-p24-izquierdo-20\"],\"candidatoMm\":25,\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"horno\\\",\\\"llave\\\"]\",\"tipo\":\"llave\",\"cantidad\":1,\"medidas\":[\"25 mm candidato\"],\"confirmado\":true,\"tramo\":\"horno\",\"ubicacion\":\"horno · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"horno\\\",\\\"llave\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"horno\\\",\\\"llave\\\"]::pieza:0\"],\"funcion\":\"corte\",\"geometria\":null,\"productoIdentificado\":false,\"productos\":[],\"candidatoMm\":25,\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"caldera\\\",\\\"codo90\\\"]\",\"tipo\":\"codo90\",\"cantidad\":3,\"medidas\":[\"20 mm candidato\"],\"confirmado\":true,\"tramo\":\"caldera\",\"ubicacion\":\"caldera · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":\"Codo Normal a 90º 20 mm\",\"registroSigas\":{\"id\":\"manual-total:[\\\"caldera\\\",\\\"codo90\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"caldera\\\",\\\"codo90\\\"]::pieza:0\",\"manual-total:[\\\"caldera\\\",\\\"codo90\\\"]::pieza:1\",\"manual-total:[\\\"caldera\\\",\\\"codo90\\\"]::pieza:2\"],\"funcion\":\"recorrido\",\"geometria\":\"codo90\",\"productoIdentificado\":true,\"productos\":[\"sigas-p24-izquierdo-19\"],\"candidatoMm\":20,\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"caldera\\\",\\\"llave\\\"]\",\"tipo\":\"llave\",\"cantidad\":1,\"medidas\":[\"20 mm candidato\"],\"confirmado\":true,\"tramo\":\"caldera\",\"ubicacion\":\"caldera · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"caldera\\\",\\\"llave\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"caldera\\\",\\\"llave\\\"]::pieza:0\"],\"funcion\":\"corte\",\"geometria\":null,\"productoIdentificado\":false,\"productos\":[],\"candidatoMm\":20,\"rosca\":null},\"medidasEstimadas\":true}]]"
+                    },
+                    {
+                      "id": "material-6",
+                      "unidad": "unidad",
+                      "estado": "estimado",
+                      "revisado": false,
+                      "tipo": "cano",
+                      "material": "Caño Acero-polietileno SIGAS Thermofusión / Thermofusión · comercial de 4 m",
+                      "diametro": "Pendiente (raiz)",
+                      "cantidad": null,
+                      "ubicacion": "raiz",
+                      "origen": "plan-cortes",
+                      "minimoTeorico": 4,
+                      "evidencia": "Compra pendiente: faltan posiciones. Mínimo por longitud, no lista definitiva.",
+                      "ubicacionNombre": "M–J",
+                      "claveRevision": "[\"cano\",\"Caño Acero-polietileno SIGAS Thermofusión / Thermofusión · comercial de 4 m\",\"Pendiente (raiz)\",\"unidad\",\"raiz\"]"
+                    },
+                    {
+                      "id": "material-7",
+                      "unidad": "unidad",
+                      "estado": "estimado",
+                      "revisado": false,
+                      "tipo": "cupla-plan",
+                      "material": "Cuplas dentro de segmentos continuos",
+                      "diametro": "Pendiente (raiz)",
+                      "cantidad": null,
+                      "ubicacion": "raiz",
+                      "origen": "plan-cortes",
+                      "evidencia": "Cuplas pendientes, no cero.",
+                      "ubicacionNombre": "M–J",
+                      "claveRevision": "[\"cupla-plan\",\"Cuplas dentro de segmentos continuos\",\"Pendiente (raiz)\",\"unidad\",\"raiz\"]"
+                    },
+                    {
+                      "id": "material-8",
+                      "unidad": "unidad",
+                      "estado": "estimado",
+                      "revisado": false,
+                      "tipo": "cano",
+                      "material": "Caño Acero-polietileno SIGAS Thermofusión / Thermofusión · comercial de 4 m",
+                      "diametro": "Pendiente (horno)",
+                      "cantidad": null,
+                      "ubicacion": "horno",
+                      "origen": "plan-cortes",
+                      "minimoTeorico": 2,
+                      "evidencia": "Compra pendiente: faltan posiciones. Mínimo por longitud, no lista definitiva.",
+                      "ubicacionNombre": "J–Horno",
+                      "claveRevision": "[\"cano\",\"Caño Acero-polietileno SIGAS Thermofusión / Thermofusión · comercial de 4 m\",\"Pendiente (horno)\",\"unidad\",\"horno\"]"
+                    },
+                    {
+                      "id": "material-9",
+                      "unidad": "unidad",
+                      "estado": "estimado",
+                      "revisado": false,
+                      "tipo": "cupla-plan",
+                      "material": "Cuplas dentro de segmentos continuos",
+                      "diametro": "Pendiente (horno)",
+                      "cantidad": null,
+                      "ubicacion": "horno",
+                      "origen": "plan-cortes",
+                      "evidencia": "Cuplas pendientes, no cero.",
+                      "ubicacionNombre": "J–Horno",
+                      "claveRevision": "[\"cupla-plan\",\"Cuplas dentro de segmentos continuos\",\"Pendiente (horno)\",\"unidad\",\"horno\"]"
+                    },
+                    {
+                      "id": "material-10",
+                      "unidad": "unidad",
+                      "estado": "estimado",
+                      "revisado": false,
+                      "tipo": "cano",
+                      "material": "Caño Acero-polietileno SIGAS Thermofusión / Thermofusión · comercial de 4 m",
+                      "diametro": "Pendiente (caldera)",
+                      "cantidad": null,
+                      "ubicacion": "caldera",
+                      "origen": "plan-cortes",
+                      "minimoTeorico": 2,
+                      "evidencia": "Compra pendiente: faltan posiciones. Mínimo por longitud, no lista definitiva.",
+                      "ubicacionNombre": "J–Caldera",
+                      "claveRevision": "[\"cano\",\"Caño Acero-polietileno SIGAS Thermofusión / Thermofusión · comercial de 4 m\",\"Pendiente (caldera)\",\"unidad\",\"caldera\"]"
+                    },
+                    {
+                      "id": "material-11",
+                      "unidad": "unidad",
+                      "estado": "estimado",
+                      "revisado": false,
+                      "tipo": "cupla-plan",
+                      "material": "Cuplas dentro de segmentos continuos",
+                      "diametro": "Pendiente (caldera)",
+                      "cantidad": null,
+                      "ubicacion": "caldera",
+                      "origen": "plan-cortes",
+                      "evidencia": "Cuplas pendientes, no cero.",
+                      "ubicacionNombre": "J–Caldera",
+                      "claveRevision": "[\"cupla-plan\",\"Cuplas dentro de segmentos continuos\",\"Pendiente (caldera)\",\"unidad\",\"caldera\"]"
+                    },
+                    {
+                      "id": "manual-cero:raiz:codo45",
+                      "revisado": false,
+                      "tipo": "codo45",
+                      "material": "Codo 45°",
+                      "diametro": "Pendiente",
+                      "cantidad": 0,
+                      "unidad": "unidad",
+                      "ubicacion": "raiz",
+                      "estado": "estimado",
+                      "cantidadConfirmada": true,
+                      "origen": "manual-cero",
+                      "evidencia": "Cero ingresado explícitamente; no es un campo vacío.",
+                      "ubicacionNombre": "M–J",
+                      "claveRevision": "[\"codo45\",\"Codo 45°\",\"Pendiente\",\"unidad\",\"raiz\"]"
+                    },
+                    {
+                      "id": "manual-cero:raiz:reduccion",
+                      "revisado": false,
+                      "tipo": "reduccion",
+                      "material": "Reducción independiente",
+                      "diametro": "Pendiente",
+                      "cantidad": 0,
+                      "unidad": "unidad",
+                      "ubicacion": "raiz",
+                      "estado": "estimado",
+                      "cantidadConfirmada": true,
+                      "origen": "manual-cero",
+                      "evidencia": "Cero ingresado explícitamente; no es un campo vacío.",
+                      "ubicacionNombre": "M–J",
+                      "claveRevision": "[\"reduccion\",\"Reducción independiente\",\"Pendiente\",\"unidad\",\"raiz\"]"
+                    },
+                    {
+                      "id": "manual-cero:raiz:llave",
+                      "revisado": false,
+                      "tipo": "llave",
+                      "material": "Llave de paso",
+                      "diametro": "Pendiente",
+                      "cantidad": 0,
+                      "unidad": "unidad",
+                      "ubicacion": "raiz",
+                      "estado": "estimado",
+                      "cantidadConfirmada": true,
+                      "origen": "manual-cero",
+                      "evidencia": "Cero ingresado explícitamente; no es un campo vacío.",
+                      "ubicacionNombre": "M–J",
+                      "claveRevision": "[\"llave\",\"Llave de paso\",\"Pendiente\",\"unidad\",\"raiz\"]"
+                    },
+                    {
+                      "id": "manual-cero:horno:codo45",
+                      "revisado": false,
+                      "tipo": "codo45",
+                      "material": "Codo 45°",
+                      "diametro": "Pendiente",
+                      "cantidad": 0,
+                      "unidad": "unidad",
+                      "ubicacion": "horno",
+                      "estado": "estimado",
+                      "cantidadConfirmada": true,
+                      "origen": "manual-cero",
+                      "evidencia": "Cero ingresado explícitamente; no es un campo vacío.",
+                      "ubicacionNombre": "J–Horno",
+                      "claveRevision": "[\"codo45\",\"Codo 45°\",\"Pendiente\",\"unidad\",\"horno\"]"
+                    },
+                    {
+                      "id": "manual-cero:horno:tee",
+                      "revisado": false,
+                      "tipo": "tee",
+                      "material": "Tee",
+                      "diametro": "Pendiente",
+                      "cantidad": 0,
+                      "unidad": "unidad",
+                      "ubicacion": "horno",
+                      "estado": "estimado",
+                      "cantidadConfirmada": true,
+                      "origen": "manual-cero",
+                      "evidencia": "Cero ingresado explícitamente; no es un campo vacío.",
+                      "ubicacionNombre": "J–Horno",
+                      "claveRevision": "[\"tee\",\"Tee\",\"Pendiente\",\"unidad\",\"horno\"]"
+                    },
+                    {
+                      "id": "manual-cero:horno:reduccion",
+                      "revisado": false,
+                      "tipo": "reduccion",
+                      "material": "Reducción independiente",
+                      "diametro": "Pendiente",
+                      "cantidad": 0,
+                      "unidad": "unidad",
+                      "ubicacion": "horno",
+                      "estado": "estimado",
+                      "cantidadConfirmada": true,
+                      "origen": "manual-cero",
+                      "evidencia": "Cero ingresado explícitamente; no es un campo vacío.",
+                      "ubicacionNombre": "J–Horno",
+                      "claveRevision": "[\"reduccion\",\"Reducción independiente\",\"Pendiente\",\"unidad\",\"horno\"]"
+                    },
+                    {
+                      "id": "manual-cero:caldera:codo45",
+                      "revisado": false,
+                      "tipo": "codo45",
+                      "material": "Codo 45°",
+                      "diametro": "Pendiente",
+                      "cantidad": 0,
+                      "unidad": "unidad",
+                      "ubicacion": "caldera",
+                      "estado": "estimado",
+                      "cantidadConfirmada": true,
+                      "origen": "manual-cero",
+                      "evidencia": "Cero ingresado explícitamente; no es un campo vacío.",
+                      "ubicacionNombre": "J–Caldera",
+                      "claveRevision": "[\"codo45\",\"Codo 45°\",\"Pendiente\",\"unidad\",\"caldera\"]"
+                    },
+                    {
+                      "id": "manual-cero:caldera:tee",
+                      "revisado": false,
+                      "tipo": "tee",
+                      "material": "Tee",
+                      "diametro": "Pendiente",
+                      "cantidad": 0,
+                      "unidad": "unidad",
+                      "ubicacion": "caldera",
+                      "estado": "estimado",
+                      "cantidadConfirmada": true,
+                      "origen": "manual-cero",
+                      "evidencia": "Cero ingresado explícitamente; no es un campo vacío.",
+                      "ubicacionNombre": "J–Caldera",
+                      "claveRevision": "[\"tee\",\"Tee\",\"Pendiente\",\"unidad\",\"caldera\"]"
+                    },
+                    {
+                      "id": "manual-cero:caldera:reduccion",
+                      "revisado": false,
+                      "tipo": "reduccion",
+                      "material": "Reducción independiente",
+                      "diametro": "Pendiente",
+                      "cantidad": 0,
+                      "unidad": "unidad",
+                      "ubicacion": "caldera",
+                      "estado": "estimado",
+                      "cantidadConfirmada": true,
+                      "origen": "manual-cero",
+                      "evidencia": "Cero ingresado explícitamente; no es un campo vacío.",
+                      "ubicacionNombre": "J–Caldera",
+                      "claveRevision": "[\"reduccion\",\"Reducción independiente\",\"Pendiente\",\"unidad\",\"caldera\"]"
+                    }
+                  ]
+                }
+              }
+            },
+            "aclaracion": "",
+            "revision": "Todavía no hay una revisión registrada.",
+            "borradorCroquis": null,
+            "tipoGas": "9300",
+            "conteosRapidosGas": {
+              "raiz": {
+                "codo90": 2,
+                "codo45": 0,
+                "tee": 1,
+                "llave": 0,
+                "reduccion": 0
+              },
+              "horno": {
+                "codo90": 2,
+                "codo45": 0,
+                "tee": 0,
+                "llave": 1,
+                "reduccion": 0
+              },
+              "caldera": {
+                "codo90": 3,
+                "codo45": 0,
+                "tee": 0,
+                "llave": 1,
+                "reduccion": 0
+              }
+            },
+            "calculoSigas": {
+              "terminales": {
+                "terminal-medidor": {
+                  "rosca": "3/4"
+                },
+                "terminal-Horno": {
+                  "rosca": "1/2"
+                },
+                "terminal-Caldera": {
+                  "rosca": "1/2"
+                }
+              }
+            },
+            "derivadosGas": {
+              "firma": "{\"tramos\":[{\"id\":\"raiz\",\"desde\":\"M\",\"hasta\":\"J\",\"metros\":14,\"consumo\":null,\"diametro\":null},{\"id\":\"horno\",\"desde\":\"J\",\"hasta\":\"Horno\",\"metros\":6,\"consumo\":18600,\"diametro\":null},{\"id\":\"caldera\",\"desde\":\"J\",\"hasta\":\"Caldera\",\"metros\":8,\"consumo\":9300,\"diametro\":null}],\"artefactos\":[{\"nombre\":\"Horno\",\"consumo\":18600,\"id\":\"artefacto-mvu371e0-2\"},{\"nombre\":\"Caldera\",\"consumo\":9300,\"id\":\"artefacto-mvu371e0-3\"}],\"instalacion\":{\"version\":1,\"perfil\":{\"pais\":\"AR\",\"uso\":\"domiciliario\",\"gas\":\"GN\",\"largosDocumentados2026\":true,\"catalogoTecnicoGas\":\"sigas\",\"material\":\"Acero-polietileno SIGAS Thermofusión\",\"sistema\":\"Thermofusión\",\"poderCalorifico\":9300,\"fuenteGas\":\"Referencia declarada para ensayo; no suministro real\"},\"nodos\":[]},\"tipoGas\":\"9300\"}",
+              "resultado": {
+                "metodo": "clase-tablas-3-18",
+                "aptoInstalacion": false,
+                "aviso": "Método de clase, NO aptitud para ejecutar una instalación real. Las reducciones se incluyen en el inventario como piezas pero se excluyen de equivalentes por este procedimiento; la verificación normativa puede exigir sus pérdidas y otras adicionales.",
+                "prueba": false,
+                "semillaAdicionalMetros": 15,
+                "recorridos": [],
+                "porTramo": {
+                  "raiz": {
+                    "longitudReal": 14,
+                    "consumoKcal": null,
+                    "caudal": null,
+                    "accesoriosIdentificados": null,
+                    "longitudEquivalenteAccesorios": null,
+                    "longitudDefinitiva": null,
+                    "longitudDeCalculo": null,
+                    "diametroCalculado": null,
+                    "capacidad": null,
+                    "comprobacion": "PENDIENTE"
+                  },
+                  "horno": {
+                    "longitudReal": 6,
+                    "consumoKcal": null,
+                    "caudal": null,
+                    "accesoriosIdentificados": null,
+                    "longitudEquivalenteAccesorios": null,
+                    "longitudDefinitiva": null,
+                    "longitudDeCalculo": null,
+                    "diametroCalculado": null,
+                    "capacidad": null,
+                    "comprobacion": "PENDIENTE"
+                  },
+                  "caldera": {
+                    "longitudReal": 8,
+                    "consumoKcal": null,
+                    "caudal": null,
+                    "accesoriosIdentificados": null,
+                    "longitudEquivalenteAccesorios": null,
+                    "longitudDefinitiva": null,
+                    "longitudDeCalculo": null,
+                    "diametroCalculado": null,
+                    "capacidad": null,
+                    "comprobacion": "PENDIENTE"
+                  }
+                },
+                "historia": [],
+                "estado": "bloqueado",
+                "faltantes": [
+                  "La red necesita exactamente un medidor.",
+                  "Conectar origen y destino válidos del tramo M–J.",
+                  "Conectar origen y destino válidos del tramo J–Horno.",
+                  "Conectar origen y destino válidos del tramo J–Caldera.",
+                  "El artefacto Horno todavía no está conectado.",
+                  "El artefacto Caldera todavía no está conectado.",
+                  "Tabla de capacidad/pérdida por diámetro y caudal, específica del material y sistema (Tabla N.º 3 del ejercicio pendiente de verificar).",
+                  "Longitudes equivalentes de accesorios por medida y recorrido de tee (Tabla N.º 18 del ejercicio pendiente de verificar).",
+                  "Catálogo de piezas compatibles: tees, codos, llaves, cuplas y reducciones.",
+                  "Método y condiciones de aplicación verificados, con fuente y edición.",
+                  "Las fotografías de Tablas 3 y 18 ya están transcritas, pero falta verificación técnica: divergencia 7,67/7,65, redondeos, interiores/aplicabilidad al producto, fuente/edición, cuplas y comparación con ejercicios. No hay catálogo habilitado.",
+                  "Elegí explícitamente GN / acero con revestimiento epoxi / roscado para usar este procedimiento de clase.",
+                  "Este ejercicio utiliza 9300 kcal/m³ y densidad 0,65; no se trasladan a otra instalación sin comprobarlos.",
+                  "Identificá accesorios y posiciones de M–J; pendiente no significa cero.",
+                  "Identificá accesorios y posiciones de J–Horno; pendiente no significa cero.",
+                  "Identificá accesorios y posiciones de J–Caldera; pendiente no significa cero."
+                ],
+                "diametros": null,
+                "accesorios": []
+              },
+              "dimensionamiento": {
+                "estado": "bloqueado",
+                "faltantes": [
+                  "La red necesita exactamente un medidor.",
+                  "Conectar origen y destino válidos del tramo M–J.",
+                  "Conectar origen y destino válidos del tramo J–Horno.",
+                  "Conectar origen y destino válidos del tramo J–Caldera.",
+                  "El artefacto Horno todavía no está conectado.",
+                  "El artefacto Caldera todavía no está conectado.",
+                  "Completar Provincia.",
+                  "Completar Localidad.",
+                  "Completar Distribuidora.",
+                  "Completar Unidad.",
+                  "Completar Presion.",
+                  "Completar Minima.",
+                  "Completar Perdida.",
+                  "Completar Fuente.",
+                  "Completar Norma.",
+                  "Completar Demanda.",
+                  "Poder calorífico del gas en kcal/m³ y su fuente (no se usa automáticamente el valor orientativo de la consulta).",
+                  "Densidad relativa del gas, comprobada para las tablas.",
+                  "Presiones en Pa para este motor tabular; no se reinterpretan mbar o mmca como Pa.",
+                  "Tabla de capacidad/pérdida por diámetro y caudal, específica del material y sistema (Tabla N.º 3 del ejercicio pendiente de verificar).",
+                  "Longitudes equivalentes de accesorios por medida y recorrido de tee (Tabla N.º 18 del ejercicio pendiente de verificar).",
+                  "Catálogo de piezas compatibles: tees, codos, llaves, cuplas y reducciones.",
+                  "Método y condiciones de aplicación verificados, con fuente y edición.",
+                  "Revisar cantidad, tipo y posición de accesorios de M–J.",
+                  "Revisar cantidad, tipo y posición de accesorios de J–Horno.",
+                  "Revisar cantidad, tipo y posición de accesorios de J–Caldera."
+                ],
+                "diametros": null,
+                "accesorios": [],
+                "recorridos": [],
+                "prueba": false
+              },
+              "anterior": null,
+              "ultimoValido": null
+            }
+          }
+        }
+      ],
+      "aclaracion": "",
+      "revision": "Todavía no hay una revisión registrada.",
+      "instalacion": {
+        "version": 1,
+        "perfil": {
+          "pais": "AR",
+          "uso": "domiciliario",
+          "gas": "GN"
+        },
+        "nodos": []
+      },
+      "borradorCroquis": null,
+      "tramos": [],
+      "artefactos": [],
+      "tipoGas": "9300",
+      "proyectoActivoGas": "proyecto:proyecto-mvu371dd-1"
+    },
+    "agua": {},
+    "cloacas": {}
+  }
+}
