@@ -48,7 +48,7 @@ function modeloInformeActual(){
   const largo=estadoLargoComercialGas();if(largo.pendiente)d.resumen.push('Largo comercial conservado '+largo.configurado+' m; manual del sistema '+largo.documentado+' m. Revisar antes de compra.');
   }catch(e){d.resumen.push('Materiales: Pendiente de corregir los datos actuales. '+e.message+'. El respaldo anterior no es una lista de compra vigente.');}
  }
- if(gas)d.ejercicioSigas=resultadoEjercicioSigasGas();
+ if(gas)d.ejercicioSigas=resultadoPreliminarSigasGas();
  return d;
 }
 function prepararInformeActual(){

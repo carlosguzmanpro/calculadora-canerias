@@ -767,7 +767,7 @@ function guardarPosicionesCuplasGas(id,valores){
 function renderPosicionesPendientesCuplasGas(out,compra){
  const filas=compra.tramos.filter(t=>t.cuplas===null);if(!filas.length)return;
  const d=document.createElement('details'),s=document.createElement('summary');d.className='gas-detalles';s.textContent='Cuplas pendientes: ver qué posiciones faltan';d.append(s);
- const texto=(padre,s)=>{const p=document.createElement('p');p.textContent=s;padre.append(p);};texto(d,'Las longitudes y cantidades están cargadas. Para calcular uniones faltan las distancias entre accesorios. Una fotografía de referencia no se interpreta automáticamente.');
+ const texto=(padre,s)=>{const p=document.createElement('p');p.textContent=s;padre.append(p);};texto(d,'Compra exacta opcional: las distancias entre accesorios permiten precisar cortes y cuplas reales. No son necesarias para sumar pérdidas por cantidad y diámetro en un tramo uniforme ni para obtener estimaciones. Una fotografía de referencia no se interpreta automáticamente.');
  for(const f of filas){const t=tramos.find(t=>t.id===f.id);if(!t)continue;const datos=datosPosicionesCuplasGas(t),guardado=datosPlanGas().posicionesCuplas?.[t.id],card=document.createElement('details'),sc=document.createElement('summary');card.className='gas-detalles';sc.textContent=t.desde+'–'+t.hasta;card.append(sc);
   if(guardado&&guardado.firma!==datos.firma)texto(card,'Las posiciones anteriores se conservaron, pero cambió el tramo o sus accesorios. Revisalas antes de aplicarlas.');
   const faltantes=datos.filas.filter(a=>a.conocidas.length<a.cantidad);for(const a of faltantes)texto(card,a.nombre+': '+a.cantidad+' registradas; faltan '+(a.cantidad-a.conocidas.length)+' posiciones.');
@@ -850,11 +850,11 @@ function renderPreparacionCompraGas(out,plan,preparada=null){
 }
 
 function renderListaManualSimpleGas(out,plan,modelo){
- const ejercicio=resultadoEjercicioSigasGas();
+ const ejercicio=resultadoPreliminarSigasGas();
  renderResultadoEjercicioSigasGas(out);
  if(ejercicio){
   const preliminar=document.createElement('details'),titulo=document.createElement('summary'),nota=document.createElement('p');
-  preliminar.className='gas-calculo-preliminar';preliminar.ambitoPreliminar=ambitoGas;preliminar.open=out.preliminarGas?.ambito===ambitoGas&&out.preliminarGas.abierto===true;titulo.textContent='Cálculo preliminar';nota.textContent='Utiliza los datos registrados e identificaciones confirmadas del proyecto. No incorpora automáticamente las hipótesis hidráulicas del ejercicio; por eso puede mostrar diámetros o pérdidas pendientes. Podés consultar y editar todas las funciones anteriores aquí.';
+  preliminar.className='gas-calculo-preliminar';preliminar.ambitoPreliminar=ambitoGas;preliminar.open=out.preliminarGas?.ambito===ambitoGas&&out.preliminarGas.abierto===true;titulo.textContent=ejercicio.esEjercicio===false?'Datos registrados y verificación técnica':'Cálculo preliminar';nota.textContent='Utiliza los datos registrados e identificaciones confirmadas del proyecto. No incorpora automáticamente las hipótesis hidráulicas del escenario; por eso puede mostrar diámetros o pérdidas pendientes. Podés consultar y editar todas las funciones anteriores aquí.';
   preliminar.append(titulo,nota);out.append(preliminar);out=preliminar;
  }
  const texto=(padre,s)=>{const p=document.createElement('p');p.textContent=textoMaterialPantallaGas(s);padre.append(p);};
