@@ -456,7 +456,9 @@ function renderTeeVisualSigasGas(caja,p,entrada,r){
  const salidas=ids.filter(id=>id!==entradas[0]),vector=r.historia.at(-1)?.diametrosExteriorMm||{},medidas=ids.map(id=>vector[id]),opciones=DimensionamientoSigas.opcionesTee(SIGAS_ED15_2025,medidas),tipos=[...new Set(opciones.map(DimensionamientoSigas.tipoTee))];
  texto('Entrada: '+nombre(entradas[0])+'. Elegí la circulación por cada salida. Esquemas de función, no posiciones del croquis. La misma tee se cuenta una sola vez.');
  const lab=document.createElement('label'),sel=document.createElement('select');lab.textContent='Familia de tee real';sel.ariaLabel='Familia de tee real';for(const [v,t]of [['','Automática si hay una sola opción compatible'],['normal','Tee igual'],['central','Tee con reducción central'],['extremo','Tee con reducción en extremo']]){const o=document.createElement('option');o.value=v;o.textContent=t;sel.append(o);}sel.value=conf.tipo||'';sel.onchange=()=>guardarConfiguracionTeeSigasGas(p.id,{tipo:sel.value});lab.append(sel);caja.append(lab);
- if(!tipos.length)texto('No hay equivalencia de tee documentada para '+medidas.join('/')+' mm. Identificá la pieza real o sus reducciones independientes; no se agrega ninguna por suposición.');
+ const viasRegistradas=salidas.every(id=>['directo','giro'].includes(conf.viasPorTramo?.[id])),estadoTee=estadoConfirmacionConjuntoTeeGas(p.id),conjuntos=propuestasConjuntoTeeGas(p.id);
+ if(viasRegistradas)texto(estadoTee.estado==='propuesta'?'Vías registradas; falta confirmar el conjunto físico':estadoTee.mensaje);
+ if(!tipos.length){texto('Tee única sin equivalencia documentada para '+medidas.join('/')+' mm. Esto no descarta un conjunto de piezas documentadas.');if(conjuntos.length)texto(estadoTee.estado==='vigente'?'La solución confirmada utiliza una tee normal más bujes; no una tee única con esas tres medidas.':'Conjunto compatible de tee normal más bujes disponible: revisá la propuesta.');}
  else texto('Opciones compatibles con las medidas del cálculo: '+tipos.map(t=>({normal:'igual',central:'reducción central',extremo:'reducción en extremo'}[t])).join(', ')+'. Se recalculan al cambiar el diámetro.');
  const botones=document.createElement('div'),controles=document.createElement('div');botones.className='sigas-vias-visuales';caja.append(botones,controles);
  let modo=conf.modo||'ambas';
@@ -481,6 +483,7 @@ function renderTeeVisualSigasGas(caja,p,entrada,r){
   const b=document.createElement('button'),pre=document.createElement('pre'),t=document.createElement('span');b.type='button';b.className='alt';b.modoTee=valor;b.ariaLabel=titulo;pre.textContent=esquema;pre.setAttribute?.('aria-hidden','true');t.textContent=titulo;b.append(pre,t);b.onclick=()=>{modo=valor;mostrar();};botones.append(b);
  }
  mostrar();
+ renderPropuestaConjuntoTeeGas(caja,p.id);
 }
 function guardarVinculoSigasGas(piezaId,recorrido,productoId,tramoAplicacion=null){
  const entrada=entradaPreseleccionSigasGas();if(!entrada||!entrada.inventario.fisicas.some(p=>p.id===piezaId))return false;
@@ -515,7 +518,7 @@ function renderVinculosSigasGas(out,r){
  let cantidadResuelta=0,cantidadPendiente=0;
  for(const p of entrada.inventario.fisicas){
   const caja=document.createElement('details');caja.className='sigas-vinculo';if(p.tipo==='tee')caja.claveTeeSigas=p.id;const titulo=document.createElement('summary');titulo.textContent=p.cantidad+' × '+p.tipo+' · '+(p.tramos.map(id=>entrada.preparacion.porTramo.find(t=>t.id===id)?.nombre||id).join(', ')||'ubicación técnica pendiente');caja.append(titulo);
-  if(p.clasificacionAutomatica&&!p.automatico){const n=document.createElement('p');n.textContent=['tee','llave'].includes(p.tipo)&&registro.piezas.find(x=>x.id===p.id)?.productoIdentificado?'Producto y vías identificados para los recorridos registrados; cantidad conservada.':p.clasificacionAutomatica;caja.append(n);}
+  if(p.clasificacionAutomatica&&!p.automatico){const n=document.createElement('p');n.textContent=['tee','llave'].includes(p.tipo)&&registro.piezas.find(x=>x.id===p.id)?.productoIdentificado?'Producto y vías identificados para los recorridos registrados; cantidad conservada.':p.tipo==='tee'&&Object.values(entrada.config.tees?.[p.id]?.viasPorTramo||{}).length===2&&Object.values(entrada.config.tees[p.id].viasPorTramo).every(v=>['directo','giro'].includes(v))?(estadoConfirmacionConjuntoTeeGas(p.id).estado==='propuesta'?'Vías registradas; falta confirmar el conjunto físico':estadoConfirmacionConjuntoTeeGas(p.id).mensaje):p.clasificacionAutomatica;caja.append(n);}
   if(p.automatico){const n=document.createElement('p');n.textContent=p.automatico+'; corregible si el croquis indica otra variante.';caja.append(n);}
   if(p.grupoOriginal)titulo.textContent+=' · pieza '+p.numeroUnidad+' (cantidad ya registrada)';
 
