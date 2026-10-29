@@ -160,6 +160,10 @@ section{box-shadow:none}
 .gas-calculo-sencillo{padding:12px;margin:12px 0;background:#f4f8f8;box-shadow:none}.gas-calculo-sencillo h3{font-size:16px;margin:0 0 8px}.gas-calculo-tramo{padding:10px 0;border-top:1px solid #c5dbd8;min-width:0;overflow-wrap:anywhere}.gas-calculo-tramo p{font-size:14px;line-height:1.4;margin:4px 0}.gas-calculo-tramo p:last-child{color:#526675;font-size:13px}
 .sigas-vias-visuales{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}.sigas-vias-visuales button{font-size:12px;padding:8px 3px;overflow-wrap:anywhere}.sigas-vias-visuales button.sigas-via-activa{background:#087e6a;color:white}.sigas-vias-visuales pre{font-size:13px;line-height:1.15;margin:0 0 4px;text-align:center;white-space:pre}
 @media(max-width:700px){.sigas-memoria,.sigas-memoria tbody,.sigas-memoria tr,.sigas-memoria td{display:block;width:auto}.sigas-memoria thead{display:none}.sigas-memoria tr{border:1px solid #9ba7b4;border-radius:8px;margin:8px 0;padding:6px}.sigas-memoria td{padding:4px 6px;overflow-wrap:anywhere}.sigas-memoria td:before{content:attr(data-label) ": ";font-weight:600}}
+
+.ejercicio-sigas{background:#f0f7ff;border:1px solid #9cbbd3;border-radius:12px;padding:12px;margin-bottom:16px;min-width:0}.ejercicio-estado{font-weight:700}.ejercicio-tabla{width:100%;border-collapse:collapse;table-layout:fixed}.ejercicio-tabla th,.ejercicio-tabla td{padding:6px;border:1px solid #aab9c5;font-size:12px;overflow-wrap:anywhere}.ejercicio-sigas details{margin:8px 0}.ejercicio-sigas summary{padding:10px 0;min-height:44px}
+@media screen and (max-width:700px){.ejercicio-tabla,.ejercicio-tabla tbody,.ejercicio-tabla tr,.ejercicio-tabla td{display:block;width:auto}.ejercicio-tabla thead{display:none}.ejercicio-tabla tr{border:1px solid #aab9c5;margin:8px 0;padding:6px;border-radius:8px}.ejercicio-tabla td{border:0;padding:3px;font-size:14px}.ejercicio-tabla td:before{content:attr(data-label) ": ";font-weight:600}}
+@media print{#informeImpresion details>summary{font-weight:700;break-after:avoid}#informeImpresion .ejercicio-tabla{font-size:9px;table-layout:fixed}#informeImpresion .ejercicio-tabla th,#informeImpresion .ejercicio-tabla td{font-size:9px;padding:4px}#informeImpresion .ejercicio-tabla tr{break-inside:avoid}}
 </style>
 </head>
 <body>
@@ -632,6 +636,25 @@ function validarBorradorProyectoGas(p){
     diametro:t.diametro?String(t.diametro)+' (manual; no validado)':'Pendiente'};
   });
  }
+ function ejercicioSigas(e,imprimir=false){
+  if(!e)return '';
+  if(e.error)return '<h2>RESULTADO DEL EJERCICIO SIGAS</h2><p>Simulación no disponible.</p>'+e.bloqueos.map(s=>'<p>'+esc(s)+'</p>').join('');
+  const r=e.resultado,nombres=new Map(r.filas.map(f=>[f.id,f.tramo])),tabla=(cab,filas)=>'<table class="ejercicio-tabla"><thead><tr>'+cab.map(c=>'<th>'+esc(c)+'</th>').join('')+'</tr></thead><tbody>'+filas.map(f=>'<tr>'+f.map((v,i)=>'<td data-label="'+esc(cab[i])+'">'+esc(v)+'</td>').join('')+'</tr>').join('')+'</tbody></table>';
+  const detalle=(titulo,contenido)=>'<details'+(imprimir?' open':'')+'><summary>'+esc(titulo)+'</summary>'+contenido+'</details>',lista=xs=>xs.map(x=>'<p>'+esc(x)+'</p>').join('');
+  const total=(tipo)=>e.cantidadesDeclaradas[tipo],metrosTotal=r.filas.reduce((n,f)=>n+f.longitudRealM,0),consumoTotal=r.recorridos.reduce((n,t)=>n+t.consumoKcal,0);
+  let html='<h2>RESULTADO DEL EJERCICIO SIGAS</h2><p class="ejercicio-estado">RESULTADO CALCULADO BAJO HIPÓTESIS · NO CONFIRMADO</p><p>'+metros(metrosTotal)+' m · '+numero(total('codo90'))+' codos de 90° · '+numero(total('tee'))+' tees · '+numero(total('llave'))+' llaves · '+numero(consumoTotal)+' kcal/h.</p>';
+  html+=tabla(['Tramo','Caudal (m³/h)','Diámetro del escenario','Longitud de consulta (m)','Fila SIGAS (m)','Capacidad (m³/h)'],r.filas.map(f=>[f.tramo,numero(f.caudalM3h),f.candidato?f.candidato.exteriorMm+' mm · '+(f.comprobadoPorTabla?'capacidad comprobada bajo hipótesis':'parcial, por verificar'):'Pendiente',metros(f.longitudConsultaM),metros(f.candidato?.longitudFilaM),numero(f.candidato?.capacidadM3h)]));
+  html+='<p>'+esc(e.completo?'Escenario tabular estable para el inventario supuesto; pendiente de verificación real.':'Escenario parcial: consultar los bloqueos concretos.')+' No verifica el suministro ni sustituye la revisión profesional.</p>';
+  const rutas=r.recorridos.map(t=>[t.artefacto,t.tramos.map(id=>nombres.get(id)||'Tramo pendiente').join(' → '),metros(t.longitudReal),metros(t.equivalenteConocidoM),metros(t.longitudConsultaM)]);
+  const memoria=tabla(['Tramo','Real (m)','Recorrido real (m)','Consumo (m³/h)','Diámetro inicial (mm)','Equivalente del recorrido (m)','Total de cálculo (m)','Diámetro del escenario (mm)'],e.memoria.map(f=>[f.tramo,metros(f.longitudRealM),metros(f.longitudCalculoRealM),numero(f.caudalM3h),f.diametroProvisorioMm,metros(f.equivalenteRecorridoConocidoM),metros(f.longitudTotalConsultaM),f.diametroVerificadoMm??'Pendiente']));
+  const aportes=r.recorridos.map(t=>'<h3>'+esc(t.artefacto)+'</h3>'+tabla(['Accesorio','Cantidad','Diámetro (mm)','LE unitaria (m)','LE total (m)','Fuente'],t.aportes.map(a=>[a.nombre,a.cantidad,a.diametroExteriorMm,numero(a.equivalenteUnitarioM),numero(a.equivalenteTotalM),'Tabla 3 · p.'+a.pagina]))).join('');
+  html+=detalle('Recorridos y memoria de cálculo imprimible',tabla(['Artefacto','Recorrido','Real (m)','Equivalente (m)','Total (m)'],rutas)+memoria+'<p>Los equivalentes de la memoria corresponden al recorrido completo de control; no deben sumarse entre filas compartidas.</p>'+detalle('Desglose de accesorios por recorrido',aportes));
+  const compra=e.compra;
+  html+=detalle('Materiales y compra del escenario','<h3>Preparación de compra · ESTIMACIÓN PROVISIONAL</h3>'+tabla(['Caño por diámetro','Metros reales','Tiras estimadas','Metros comerciales','Sobrante estimado'],compra.canos.map(c=>[c.diametro,metros(c.metros),c.tiras,metros(c.metrosComerciales),metros(c.sobrante)]))+tabla(['Material del escenario','Cantidad','Unidad','Estado'],e.materiales.map(m=>[m.material,m.cantidad,m.unidad,m.estado]))+'<p>No sumar estos accesorios a los registrados: son las mismas piezas con las variantes del escenario. Los bujes son componentes del conjunto supuesto; las cuplas son estimaciones.</p>'+detalle('Cortes orientativos por tramo',tabla(['Tramo','Longitud (m)','Tiras','Cuplas estimadas · orientativas','Cortes / distribución'],compra.tramos.map(t=>[nombres.get(t.id)||'Tramo pendiente',metros(t.metros),t.tiras,e.cuplas.find(c=>c.tramoId===t.id)?.cantidad??'Pendiente',t.distribucionVigente?'Distribución registrada conservada':'Esquema de metraje: '+e.cortesOrientativos.find(c=>c.tramoId===t.id)?.piezas.map(m=>metros(m)+' m').join(' + ')+'; cortes físicos y posiciones sin verificar.'])))+'<p>Cortes orientativos sin margen supuesto de merma o unión; no representan un plano ni posiciones de accesorios.</p><p>'+esc(compra.estimacionCuplas.criterio)+'</p>');
+  html+=detalle('Condiciones y verificaciones · tres categorías','<h3>1. Resueltos automáticamente para la simulación</h3>'+lista(e.resoluciones)+'<h3>2. Datos necesarios para verificar una instalación real</h3>'+lista(e.validacion)+'<h3>3. Datos que impiden completar la simulación</h3>'+lista(e.bloqueos.length?e.bloqueos:['Ninguno para el inventario supuesto. Las condiciones reales permanecen sin verificar.']));
+  return html+'<p>'+esc(e.fuente)+'</p>';
+ }
+
  function documento(d){
   // Sólo etiquetas del documento. No se modifican modelo, grupos ni cantidades.
   const gas=d.titulo==='GAS',nombres=new Map();
@@ -654,14 +677,14 @@ function validarBorradorProyectoGas(p){
   const materiales=d.materialesAgrupados?tabla('Materiales para revisión',['Material / accesorio','Diámetro','Cantidad','Unidad','Estado','Ubicación'],d.materialesAgrupados.map(f=>[f.material,f.diametro,f.cantidad,f.unidad,(f.estado==='estimado'?'PROVISIONAL (ESTIMADO)':f.estado.toUpperCase())+' · '+(f.revisado?'Revisado':'Sin revisar'),f.ubicaciones.join('; ')]),gas?'materiales-entrega':''):
    tabla('Materiales para revisión',['Material / accesorio','Diámetro','Cantidad','Unidad','Ubicación','Estado / observaciones'],d.filas.map(f=>[f.material,f.diametro,f.cantidad,f.unidad,f.ubicacion,(f.cantidad==null||/pendiente/i.test(f.diametro)?'PENDIENTE':String(f.estado).toUpperCase())+' · '+(f.revisado?'Revisado':'Sin revisar')+' · '+(f.evidencia||'')+(f.editado?' · Ajuste manual':'')]),gas?'materiales-entrega':'');
   const compra=gas&&d.preparacionCompra,preparacion=compra?tabla('Preparación de compra · ESTIMACIÓN PROVISIONAL',['Tramo / diámetro','Real (m)','Tiras / metros comerciales','Sobrante (m)','Cuplas estimadas'],compra.tramos.map(t=>[t.id+' · '+t.diametros.map(d=>d.valor+' ('+d.estado+')').join(' / '),numero(t.metros),t.tiras+' × '+compra.largoComercial+' m = '+numero(t.metrosComerciales)+' m',numero(t.sobrante),t.cuplas===null&&compra.estimacionCuplas?compra.estimacionCuplas.tramos.find(e=>e.id===t.id).cantidad+' estimadas · orientativas':t.cuplas===null?(t.cuplasConocidas?t.cuplasConocidas+' calculadas; resto pendiente':'Pendiente'):t.cuplas]))+'<p>Distribución estimada: no sumar estas tiras o cuplas a las filas anteriores como si fueran piezas adicionales. Diámetros y conexiones pendientes; no constituye compra definitiva.</p>'+compra.supuestos.concat(compra.estimacionCuplas?[compra.estimacionCuplas.criterio]:[],compra.tramos.filter(t=>t.cuplas===null&&t.cuplasConocidas>0).map(t=>t.id+': '+t.cuplasConocidas+' calculadas; resto pendiente para cantidad exacta.'),compra.pendientes).map(s=>'<p>'+celda(s)+'</p>').join('')+tabla('Conexiones propuestas · SIN CONFIRMAR',['Ubicación','Propuesta','Medidas'],compra.propuestas.map(p=>[p.ubicacion,p.material,p.diametro])):'';
-  return '<h1>CAÑERÍAS · '+esc(d.titulo)+'</h1><p>'+esc(d.ambito)+'</p>'+imagen+dimensiones+
+  return '<h1>CAÑERÍAS · '+esc(d.titulo)+'</h1><p>'+esc(d.ambito)+'</p>'+imagen+ejercicioSigas(d.ejercicioSigas,true)+(d.ejercicioSigas?'<h2>Datos registrados del proyecto · hipótesis sin confirmar</h2>':'')+dimensiones+
    (d.planilla?.length?'<p>REAL: longitud física del tramo. EQUIVALENTE: accesorios del tramo. DEFINITIVO: longitud total del recorrido de cálculo más desfavorable que lo contiene; no es REAL + EQUIVALENTE de esa fila. Consumo acumulado transportado por el tramo.</p>':'')+
-   tabla('Artefactos',['Artefacto','Consumo (kcal/h)'],d.artefactos.map(a=>[a.nombre,a.consumo]))+materiales+preparacion+
-   (d.resumen||[]).map(t=>'<p>'+celda(t)+'</p>').join('')+
+   tabla('Artefactos',['Artefacto','Consumo (kcal/h)'],d.artefactos.map(a=>[a.nombre,a.consumo]))+materiales+(d.ejercicioSigas?'':preparacion)+
+   (d.ejercicioSigas?[]:d.resumen||[]).map(t=>'<p>'+celda(t)+'</p>').join('')+
    (d.observaciones?'<h2>Observaciones</h2><p>'+celda(d.observaciones)+'</p>':'')+
    '<p>'+celda(d.advertencia)+'</p>';
  }
- root.InformeProyecto={documento,agruparMateriales,planilla};if(typeof module!=='undefined')module.exports=root.InformeProyecto;
+ root.InformeProyecto={documento,agruparMateriales,planilla,ejercicioSigas};if(typeof module!=='undefined')module.exports=root.InformeProyecto;
 })(typeof globalThis!=='undefined'?globalThis:this);
 
 </script>
@@ -716,6 +739,7 @@ function modeloInformeActual(){
   const largo=estadoLargoComercialGas();if(largo.pendiente)d.resumen.push('Largo comercial conservado '+largo.configurado+' m; manual del sistema '+largo.documentado+' m. Revisar antes de compra.');
   }catch(e){d.resumen.push('Materiales: Pendiente de corregir los datos actuales. '+e.message+'. El respaldo anterior no es una lista de compra vigente.');}
  }
+ if(gas)d.ejercicioSigas=resultadoEjercicioSigasGas();
  return d;
 }
 function prepararInformeActual(){
@@ -1892,6 +1916,7 @@ function renderPreparacionCompraGas(out,plan,preparada=null){
 }
 
 function renderListaManualSimpleGas(out,plan,modelo){
+ renderResultadoEjercicioSigasGas(out);
  const texto=(padre,s)=>{const p=document.createElement('p');p.textContent=textoMaterialPantallaGas(s);padre.append(p);};
  let compra=null;try{compra=prepararCompraActualGas(plan);}catch(e){/* El detalle de compra muestra el error; el inventario se conserva. */}
  const filasResumen=resumenMaterialesInstalacionGas(plan,compra);
@@ -10143,6 +10168,66 @@ function renderVerificacionTabularSigasGas(out){
  const l=document.createElement('label'),f=document.createElement('input');l.textContent='Fuente de revisión del inventario (croquis/listado real revisado)';f.name='sigasFuenteInventario';f.maxLength=300;f.value=entrada.config.revisionInventario?.fuente||'';l.append(f);form.append(l);
  const nota=document.createElement('p');nota.textContent='No hacen falta posiciones dentro de un tramo uniforme. Sí deben conocerse las cantidades reales y el producto de sus uniones. Si faltan cuplas reales, registralas en accesorios; esta revisión no agrega piezas ni cambia estimaciones. Un cambio de red, cantidades o productos deja la revisión anterior pendiente. Completar presiones no obliga a repetir la revisión del inventario.';form.append(nota);
  const b=document.createElement('button');b.type='button';b.textContent='Guardar datos y verificar';b.onclick=()=>guardarVerificacionSigasGas(form);form.append(b);const msg=document.createElement('p');msg.setAttribute?.('name','sigasVerificacionMensaje');msg.setAttribute?.('role','status');form.append(msg);d.append(form);out.append(d);
+}
+
+// Resultado educativo completo y efímero. Las hipótesis nunca se guardan como instalación real.
+let cacheResultadoEjercicioSigasGas=null;
+function resultadoEjercicioSigasGas(){
+ try{return construirResultadoEjercicioSigasGas();}catch(e){return modulo==='gas'&&proyectoGasActual().referenciaSigas19?{error:true,bloqueos:['No se pudo ejecutar el cálculo SIGAS. Revisar la disponibilidad del catálogo y los datos técnicos; las cantidades registradas permanecen disponibles.']}:null;}
+}
+function construirResultadoEjercicioSigasGas(){
+ const reg=registroAccesoriosSigasGas();if(!reg||!proyectoGasActual().referenciaSigas19||reg.entradaTecnica.perfil.gas!=='GN'||!revisionMaterialesGas)return null;
+ if(cacheResultadoEjercicioSigasGas?.registro===reg)return cacheResultadoEjercicioSigasGas.modelo;
+ const entrada=JSON.parse(JSON.stringify(reg.entradaTecnica)),compraBase=prepararCompraActualGas(revisionMaterialesGas.plan),estimacion=compraBase.estimacionCuplas;
+ const bloqueos=[],hipotesis=[],cuplas=[];entrada.config.vinculos||={};entrada.config.tees||={};
+ entrada.config.inventarioPerdidasCompleto=true;entrada.config.fuenteInventario='Hipótesis explícita del ejercicio: piezas declaradas, conjuntos de tees y uniones estimadas; no certifica el inventario real.';
+ hipotesis.push('Inventario cerrado solo para este escenario: no se presuponen otras piezas. Cualquier accesorio real adicional requiere incorporar su equivalencia; no se ha declarado completo el inventario real.');
+ for(const t of estimacion.tramos){
+  const existentes=entrada.inventario.fisicas.filter(p=>p.tipo==='cupla'&&p.tramos.length===1&&p.tramos[0]===t.id),registradas=existentes.reduce((n,p)=>n+p.cantidad,0),adicional=Math.max(0,t.cantidad-registradas);
+  for(const p of existentes)if(!reg.piezas.find(x=>x.id===p.id)?.productoIdentificado)entrada.config.vinculos[p.id]={producto:{confirmado:true,familia:'Unión Normal'}};
+  if(adicional){const id='escenario-uniones:'+t.id;entrada.inventario.fisicas.push({id,tipo:'cupla',cantidad:adicional,tramos:[t.id],confirmada:true,identidadesFisicas:Array.from({length:adicional},(_,i)=>id+':'+i)});entrada.config.vinculos[id]={producto:{confirmado:true,familia:'Unión Normal'}};}
+  cuplas.push({tramoId:t.id,cantidad:t.cantidad,registradas,estimada:t.orientativo});
+ }
+ const avisosCuplasSupuestas=new Set(estimacion.tramos.map(t=>'Cuplas de '+(reg.calculo.filas.find(f=>f.id===t.id)?.tramo||t.id)+': segmentos continuos pendientes; largo comercial ya configurado '+compraBase.largoComercial+' m. No se suponen cero uniones.'));
+ entrada.inventario.pendientes=entrada.inventario.pendientes.filter(s=>!avisosCuplasSupuestas.has(s));
+ hipotesis.push('Cuplas: '+estimacion.total+' uniones normales SIGAS en el escenario, según la estimación comercial por tramo. Su cantidad, tipo y distribución real requieren verificación; no se suponen pérdidas nulas.');
+ let vector=reg.calculo.historia.at(-1)?.diametrosExteriorMm||{},escenario=null,estable=false;
+ for(let i=0;i<12;i++){
+  const temporales=[];
+  for(const p of entrada.inventario.fisicas.filter(p=>p.tipo==='tee')){
+   const seleccion=entrada.config.tees[p.id]||{},opciones=DimensionamientoSigas.proponerConjuntosTee(SIGAS_ED15_2025,p,entrada.preparacion.recorridos,vector,seleccion),op=opciones.find(o=>o.id===seleccion.conjunto?.opcionId&&o.firma===seleccion.conjunto?.firma)||opciones.find(o=>o.id==='normal-bujes');
+   if(!op){temporales.push('No hay conjunto de tee documentado compatible con las vías y medidas actuales en '+(p.nodo?.split(':').at(-1)||'la derivación')+'.');continue;}
+   const reutilizadas={};let compatible=true;
+   for(const red of op.reducciones){const existentes=entrada.inventario.fisicas.filter(x=>x.tipo==='reduccion'&&x.tramos.includes(red.tramoId));if(existentes.length){const exactas=existentes.filter(x=>x.cantidad===1&&Object.values(entrada.config.vinculos[x.id]?.producto?.productos||{}).includes(red.productoId));if(existentes.length!==1||exactas.length!==1){compatible=false;temporales.push('Reducción ya registrada en una salida: identificar su compatibilidad antes de resolver el conjunto, sin duplicarla.');}else reutilizadas[red.id]=exactas[0].id;}}
+   if(compatible)entrada.config.tees[p.id]={...seleccion,conjunto:{version:1,confirmado:true,opcionId:op.id,firma:op.firma,reutilizadas}};
+  }
+  escenario=simularAccesoriosSigasGas({}, {...reg,entradaTecnica:entrada});const siguiente=escenario.resultado.historia.at(-1)?.diametrosExteriorMm||{};
+  if(JSON.stringify(siguiente)===JSON.stringify(vector)){estable=escenario.resultado.convergente;bloqueos.push(...temporales);break;}vector=siguiente;
+ }
+ if(!estable)bloqueos.push('El escenario no estabilizó todos los diámetros; no se presenta una selección cerrada.');
+ const r=escenario.resultado,porTramo=new Map(r.filas.map(f=>[f.id,f.tramo]));
+ const nombrePieza=id=>{const p=reg.piezas.find(p=>p.id===id);return p?(p.tipo==='tee'?'Tee '+p.nodo?.split(':').at(-1):p.tipo+' · '+p.tramos.map(id=>porTramo.get(id)||'tramo pendiente').join(', ')):'Accesorio del escenario';};
+ for(const ruta of r.recorridos)for(const p of ruta.perdidasPendientes)bloqueos.push(nombrePieza(p.piezaId)+': '+p.motivo);
+ bloqueos.push(...entrada.inventario.pendientes.filter(t=>!/^Tee en .*: identificar vía directa\/giro y configuración reductora\.$|^Tipo real de llave pendiente;/.test(t)),...r.errores,...escenario.sinOpcion.map(p=>nombrePieza(p.id)+': '+p.motivo));
+ for(const f of r.filas)if(!f.candidato||!f.verificacionConsulta?.cubreConsulta)bloqueos.push(f.tramo+': capacidad tabulada insuficiente o no disponible.');
+ if(r.recorridos.some(t=>!t.equivalenteCompleto)&&!bloqueos.length)bloqueos.push('Inventario del escenario incompleto o inconsistente: revisar cantidades e identidades de accesorios antes de cerrar las pérdidas.');
+ const limpiar=s=>{let t=String(s);for(const p of reg.piezas)t=t.split(p.id).join(nombrePieza(p.id));for(const [id,n]of porTramo)t=t.split(id).join(n);return t.replace(/presionDisponible/g,'presión disponible').replace(/presionMinima/g,'presión mínima').replace(/perdidaMaxima/g,'pérdida admisible').replace(/tee:nombre:/g,'tee ');};
+ const materiales=new Map(),fisicas=new Map();
+ for(const ruta of r.recorridos)for(const a of ruta.aportes)if(!fisicas.has(a.piezaId))fisicas.set(a.piezaId,a);
+ for(const a of fisicas.values()){const clave=a.tipo+'|'+a.nombre,previa=materiales.get(clave)||{tipo:a.tipo,material:a.nombre,cantidad:0,unidad:'unidad',estado:a.tipo==='cupla'?'Estimación de uniones del escenario':'Pieza del escenario; medidas por verificar'};previa.cantidad+=a.cantidad;materiales.set(clave,previa);}
+ for(const p of reg.piezas)if(!fisicas.has(p.id)&&!p.funcion?.startsWith('reduccion-confirmada'))materiales.set('pendiente:'+p.id,{tipo:p.tipo,material:nombrePieza(p.id)+' · producto pendiente',cantidad:p.cantidad,unidad:'unidad',estado:'Cantidad registrada; equivalencia sin resolver'});
+ const entradaCompra=entradaManualMaterialesGas(false,true);completarContinuidadCompraGas(entradaCompra);
+ const compra=MaterialesGas.prepararCompra(entradaCompra,revisionMaterialesGas.plan,{...opcionesMaterialesGas('proyecto'),cortesCompra:datosPlanGas().cortesCompra||{}},r);compra.estimacionCuplas=MaterialesGas.estimarCuplasCompra(compra);
+ const resoluciones=['Recorridos, consumos acumulados y filas de capacidad SIGAS calculados desde los datos del ejercicio.','Tees y bujes compatibles resueltos por escenario, sin confirmar ni duplicar piezas reales.','Variantes terminales normales, válvulas esféricas y codo adicional común: referencias orientativas documentadas.',...hipotesis];
+ const validacion=['Confirmar los productos y variantes realmente instalados, incluidas las tees, bujes y uniones.','Verificar cortes, reutilización de sobrantes, continuidad y cantidad exacta de cuplas.','Documentar suministro real: combustible, poder calorífico, densidad, presiones disponible y mínima, y caída admisible.','Verificar aplicabilidad normativa y revisión profesional. No se calculó una pérdida exacta en Pa.'];
+ const cortesOrientativos=compra.tramos.map(t=>({tramoId:t.id,piezas:t.segmentos.flatMap(s=>{const n=Math.floor(s.metros/compra.largoComercial),resto=s.metros-n*compra.largoComercial;return [...Array(n).fill(compra.largoComercial),...(resto>1e-9?[resto]:[])];})}));
+ const cantidadesDeclaradas=Object.fromEntries(['codo90','tee','llave'].map(tipo=>[tipo,reg.piezas.filter(p=>p.tipo===tipo).reduce((n,p)=>n+p.cantidad,0)]));
+ const modelo={simulacion:true,confirmada:false,cantidadesDeclaradas,cortesOrientativos,completo:estable&&bloqueos.length===0&&r.filas.every(f=>f.comprobadoPorTabla),resultado:r,selecciones:escenario.selecciones,cuplas,materiales:[...materiales.values()],compra,memoria:DimensionamientoSigas.memoriaCalculo(r),resoluciones,validacion,bloqueos:[...new Set(bloqueos.map(limpiar))],fuente:'Manual SIGAS ed.15/2025: Tabla 3 pp.24–25; Tabla 4 GN p.22, densidad relativa 0,65 y caída de referencia 10 mmca. PCS 9300 kcal/m³: dato del ejercicio, no valor universal.'};
+ cacheResultadoEjercicioSigasGas={registro:reg,modelo};return modelo;
+}
+function renderResultadoEjercicioSigasGas(out){
+ const modelo=resultadoEjercicioSigasGas();if(!modelo)return;
+ const caja=document.createElement('section');caja.className='ejercicio-sigas';caja.innerHTML=InformeProyecto.ejercicioSigas(modelo);out.append(caja);
 }
 
 </script>

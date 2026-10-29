@@ -850,6 +850,7 @@ function renderPreparacionCompraGas(out,plan,preparada=null){
 }
 
 function renderListaManualSimpleGas(out,plan,modelo){
+ renderResultadoEjercicioSigasGas(out);
  const texto=(padre,s)=>{const p=document.createElement('p');p.textContent=textoMaterialPantallaGas(s);padre.append(p);};
  let compra=null;try{compra=prepararCompraActualGas(plan);}catch(e){/* El detalle de compra muestra el error; el inventario se conserva. */}
  const filasResumen=resumenMaterialesInstalacionGas(plan,compra);
