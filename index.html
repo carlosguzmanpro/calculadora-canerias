@@ -9668,6 +9668,7 @@ function renderPreseleccionSigasGas(out,plan=null){
  const aviso=document.createElement('p');aviso.textContent=r.filas.length?(completo?'Equivalentes completos y capacidades consultadas; la aprobación normativa sigue pendiente.':'Preselección parcial, sin validación de instalación. Pérdidas pendientes no equivalen a cero.'):'No hay preselección: '+r.errores.join(' ');out.append(aviso);
  const tabla=document.createElement('table');tabla.className='tabla sigas-diametros';const head=document.createElement('thead'),hr=document.createElement('tr');for(const s of ['Tramo','Inicial → recalculado · estado tabular']){const th=document.createElement('th');th.textContent=s;hr.append(th);}head.append(hr);tabla.append(head);const body=document.createElement('tbody');
  for(const f of r.filas){const tr=document.createElement('tr');for(const s of [f.tramo,f.candidato?(r.historia[0]?.diametrosExteriorMm[f.id]??'Pendiente')+' → '+f.candidato.exteriorMm+' mm · '+(f.comprobadoPorTabla?'comprobado por tabla':'provisional'):'Sin candidato: '+(f.pendientes[0]||'Revisar conexiones, combustible y poder calorífico')]){const td=document.createElement('td');td.textContent=s;tr.append(td);}body.append(tr);}tabla.append(body);if(r.filas.length)out.append(tabla);
+ renderAccesoriosPendientesCompactosSigasGas(out);
  renderMemoriaCalculoSigasGas(out,r);
  const resumen=document.createElement('details'),sr=document.createElement('summary');sr.textContent='Ver caudales, capacidades y recorridos por tramo';resumen.append(sr);
  const lista=document.createElement('div');lista.className='sigas-candidatos';
@@ -9753,6 +9754,40 @@ function confirmarVarianteSigasGas(piezaId,productoId){
  else{const ruta=reg.entradaTecnica.preparacion.recorridos.find(r=>r.tramos.includes(p.tramos[0]));if(!ruta)return false;const familia=DimensionamientoSigas.familiaProducto(op.fila);if(!guardarVinculoSigasGas(p.id,ruta.artefacto,familia?'familia:'+familia:op.fila.id))return false;calcularMaterialesManualGas();}
  for(const d of document.querySelectorAll?.('#resumenPrincipalMaterialesGas details')||[])if(abiertos.includes(d.claveTerminalSigas||d.querySelector?.('summary')?.textContent))d.open=true;
  if(Number.isFinite(scroll))window.scrollTo({top:scroll,behavior:'instant'});return true;
+}
+// Estado de interfaz derivado de los mismos registros; no crea otro inventario.
+function decisionesAccesoriosPendientesSigasGas(reg=registroAccesoriosSigasGas()){
+ if(!reg)return [];
+ let persistido=null;
+ try{persistido=buscarProyectoGas(ambitoGas,JSON.parse(localStorage.getItem(CLAVE)))?.calculoSigas;}catch(e){}
+ const actual=reg.entradaTecnica.config;
+ return reg.piezas.filter(p=>p.tipo==='tee'||p.tipo==='llave'||p.necesidadTerminal&&p.necesidadTerminal!=='terminal-medidor'||p.id==='referencia-codo19').map(p=>{
+  if(p.tipo==='tee')return {pieza:p,...estadoConfirmacionConjuntoTeeGas(p.id,reg)};
+  const dato=c=>p.necesidadTerminal?c?.terminales?.[p.necesidadTerminal]:c?.vinculos?.[p.id];
+  const a=dato(actual),b=dato(persistido),guardada=!!a&&JSON.stringify(a)===JSON.stringify(b);
+  const seleccion=p.necesidadTerminal?!!a?.variante:!!a?.producto;
+  const vigente=p.productoIdentificado===true;
+  const estado=vigente?(guardada?'vigente':'solo-sesion'):seleccion?'requiere-confirmacion':'pendiente';
+  return {pieza:p,estado,guardada,vigente,mensaje:estado==='vigente'?'Identificada y guardada':estado==='solo-sesion'?'Confirmada solo en esta sesión; no pudo guardarse':estado==='requiere-confirmacion'?'Requiere reconfirmación: revisar compatibilidad con el diámetro o la conexión actual.':'Pendiente: confirmar solamente el producto o variante real.'};
+ }).filter(d=>d.estado!=='vigente');
+}
+function renderAccesoriosPendientesCompactosSigasGas(out){
+ const reg=registroAccesoriosSigasGas();if(!reg)return;
+ const decisiones=decisionesAccesoriosPendientesSigasGas(reg),seccion=document.createElement('details'),titulo=document.createElement('summary');
+ seccion.className='sigas-pendientes-compactos';titulo.textContent='Completar accesorios pendientes · '+decisiones.length+' decisiones';seccion.append(titulo);
+ const aviso=document.createElement('p');aviso.textContent=decisiones.length?'Solo se identifican piezas ya registradas. Diámetros provisionales; pérdidas desconocidas pendientes, nunca cero.':'Identificaciones guardadas y vigentes. La compatibilidad del suministro y la aprobación normativa se verifican por separado.';seccion.append(aviso);
+ for(const d of decisiones){
+  const p=d.pieza,caja=document.createElement('details'),sum=document.createElement('summary');
+  const tramo=p.tramos.map(id=>reg.calculo.filas.find(f=>f.id===id)?.tramo||'Tramo pendiente').join(', ');
+  caja.className='sigas-decision-pendiente';caja.claveTerminalSigas='pendiente:'+p.id;
+  sum.textContent=(p.tipo==='tee'?'Tee '+(p.nodo?.split(':').at(-1)||''):p.tipo==='llave'?'Llave de paso':p.id==='referencia-codo19'?'Codo adicional de Cocina':'Codo terminal')+' · '+tramo+' · '+(d.estado==='solo-sesion'?'Solo en sesión':d.estado==='requiere-confirmacion'?'Requiere reconfirmación':'Pendiente');caja.append(sum);
+  const estado=document.createElement('p');estado.setAttribute?.('role','status');estado.textContent=d.mensaje;caja.append(estado);
+  if(p.tipo==='tee')renderPropuestaConjuntoTeeGas(caja,p.id);
+  else if(!renderVarianteCompactaSigasGas(caja,p)){const n=document.createElement('p');n.textContent=p.pendientes.map(x=>x.motivo).filter((x,i,a)=>a.indexOf(x)===i).join(' ')||'No hay variante documentada compatible con los datos actuales. Revisar la conexión en los detalles existentes.';caja.append(n);}
+  if(d.estado==='solo-sesion'){const guardar=document.createElement('button');guardar.type='button';guardar.textContent='Reintentar guardar identificación';guardar.onclick=()=>{guardarDatos();calcularMaterialesManualGas();};caja.append(guardar);}
+  seccion.append(caja);
+ }
+ out.append(seccion);
 }
 function renderVarianteCompactaSigasGas(caja,p){
  const reg=registroAccesoriosSigasGas(),opciones=opcionesVariantesSigasGas(p.id,reg);if(!opciones.length)return false;
