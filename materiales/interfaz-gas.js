@@ -450,7 +450,7 @@ function modeloResumenMaterialesGas(plan,ts=tramos){
  return {totales,porTramo:ts.map(t=>({tramo:t.desde+'–'+t.hasta,filas:asignaciones.filter(a=>a.ids.includes(t.id))})),sinUbicacion:asignaciones.filter(a=>!a.ids.length)};
 }
 function renderResumenPrincipalGas(){
- const out=$('resumenPrincipalMaterialesGas');if(!out)return;out.replaceChildren();
+ const out=$('resumenPrincipalMaterialesGas');if(!out)return;const previo=out.querySelector?.(':scope > .gas-calculo-preliminar');out.preliminarGas=previo?{ambito:previo.ambitoPreliminar,abierto:previo.open}:null;out.replaceChildren();
  const texto=(padre,t)=>{const p=document.createElement('p');p.textContent=textoMaterialPantallaGas(t);padre.append(p);};
  if(!revisionMaterialesGas){texto(out,'Cargá los tramos y generá la lista. Los datos faltantes se mostrarán como pendientes.');return;}
  if(revisionMaterialesGas.firma!==firmaMaterialesGas()){texto(out,'Resumen desactualizado: generá la lista con los datos actuales. Se conserva el respaldo anterior.');return;}
@@ -850,7 +850,13 @@ function renderPreparacionCompraGas(out,plan,preparada=null){
 }
 
 function renderListaManualSimpleGas(out,plan,modelo){
+ const ejercicio=resultadoEjercicioSigasGas();
  renderResultadoEjercicioSigasGas(out);
+ if(ejercicio){
+  const preliminar=document.createElement('details'),titulo=document.createElement('summary'),nota=document.createElement('p');
+  preliminar.className='gas-calculo-preliminar';preliminar.ambitoPreliminar=ambitoGas;preliminar.open=out.preliminarGas?.ambito===ambitoGas&&out.preliminarGas.abierto===true;titulo.textContent='Cálculo preliminar';nota.textContent='Utiliza los datos registrados e identificaciones confirmadas del proyecto. No incorpora automáticamente las hipótesis hidráulicas del ejercicio; por eso puede mostrar diámetros o pérdidas pendientes. Podés consultar y editar todas las funciones anteriores aquí.';
+  preliminar.append(titulo,nota);out.append(preliminar);out=preliminar;
+ }
  const texto=(padre,s)=>{const p=document.createElement('p');p.textContent=textoMaterialPantallaGas(s);padre.append(p);};
  let compra=null;try{compra=prepararCompraActualGas(plan);}catch(e){/* El detalle de compra muestra el error; el inventario se conserva. */}
  const filasResumen=resumenMaterialesInstalacionGas(plan,compra);

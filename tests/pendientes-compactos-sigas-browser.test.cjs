@@ -1,9 +1,10 @@
+const abrirPreliminarGas=require('./abrir-preliminar-browser.cjs');
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),{chromium}=require('playwright');
 test('Android: pendientes compactos, confirmación táctil, recálculo, sesión, recuperación e invalidación',async()=>{
  const b=await chromium.launch({executablePath:'/usr/bin/chromium',args:['--no-sandbox']});try{
  const p=await b.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true}),errores=[];p.on('pageerror',e=>errores.push(e.message));p.on('dialog',d=>d.accept());await p.route('https://pendientes.invalid/**',r=>r.fulfill({contentType:'text/html',body:fs.readFileSync('index.html','utf8')}));await p.goto('https://pendientes.invalid/');await p.getByRole('button',{name:'🔥 Gas',exact:true}).tap();await p.evaluate(()=>abrirEjercicioSigas19Gas());
- const panel=p.locator('#resumenPrincipalMaterialesGas'),sec=panel.locator('.sigas-pendientes-compactos');
- async function abrir(){const tech=panel.getByText('VER DETALLES TÉCNICOS',{exact:true});if(!await tech.locator('..').evaluate(e=>e.open))await tech.tap();if(!await sec.evaluate(e=>e.open))await sec.locator(':scope > summary').tap();}
+ await abrirPreliminarGas(p);const panel=p.locator('#resumenPrincipalMaterialesGas'),sec=panel.locator('.sigas-pendientes-compactos');
+ async function abrir(){await abrirPreliminarGas(p);const tech=panel.getByText('VER DETALLES TÉCNICOS',{exact:true});if(!await tech.locator('..').evaluate(e=>e.open))await tech.tap();if(!await sec.evaluate(e=>e.open))await sec.locator(':scope > summary').tap();}
  await abrir();assert.equal(await sec.locator('.sigas-decision-pendiente').count(),9);
  for(let i=0;i<2;i++){const card=sec.locator('.sigas-decision-pendiente').filter({has:p.getByRole('button',{name:'Confirmar este conjunto',exact:true,includeHidden:true})}).first();if(!await card.evaluate(e=>e.open))await card.locator(':scope > summary').tap();const prop=card.getByText('Propuesta de tee y reducciones · revisar',{exact:true});if(!await prop.locator('..').evaluate(e=>e.open))await prop.tap();await card.getByRole('button',{name:'Confirmar este conjunto',exact:true}).tap();await abrir();}
  assert.equal(await sec.locator('.sigas-decision-pendiente').count(),7);assert.equal(await sec.locator('select').count(),7);assert.ok(await sec.locator('select').evaluateAll(es=>es.every(e=>e.value==='')));
