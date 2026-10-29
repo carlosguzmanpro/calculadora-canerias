@@ -363,6 +363,21 @@ function propuestasConjuntoTeeGas(id,registro=registroAccesoriosSigasGas()){
  const vector=Object.fromEntries(registro.calculo.filas.map(f=>[f.id,f.candidato?.exteriorMm]));
  return DimensionamientoSigas.proponerConjuntosTee(SIGAS_ED15_2025,p,registro.entradaTecnica.preparacion.recorridos,vector,registro.entradaTecnica.config.tees?.[id]);
 }
+// Estado de persistencia comprobado contra el almacenamiento real, no contra el último intento.
+// No forma parte del motor ni agrega campos al respaldo.
+function estadoConfirmacionConjuntoTeeGas(id,registro=registroAccesoriosSigasGas()){
+ const t=registro?.entradaTecnica.config.tees?.[id],c=t?.conjunto;
+ if(!c)return {estado:'propuesta',guardada:false,vigente:false,mensaje:'Propuesta sin confirmar: no añade materiales ni pérdidas.'};
+ const vigente=c.confirmado===true&&propuestasConjuntoTeeGas(id,registro).some(o=>o.id===c.opcionId&&o.firma===c.firma);
+ let guardada=false;
+ try{
+  const raiz=JSON.parse(localStorage.getItem(CLAVE)),persistida=buscarProyectoGas(ambitoGas,raiz)?.calculoSigas?.tees?.[id];
+  guardada=!!persistida?.conjunto&&JSON.stringify(persistida.conjunto)===JSON.stringify(c)&&JSON.stringify(persistida.viasPorTramo||{})===JSON.stringify(t.viasPorTramo||{});
+ }catch(e){/* El dato en memoria permanece utilizable, pero no se afirma que sobrevivirá al cierre. */}
+ if(!vigente)return {estado:'requiere-confirmacion',guardada,vigente:false,mensaje:'Requiere nueva confirmación: cambiaron diámetros, vías o compatibilidad. No se aplican las pérdidas del conjunto anterior.'+(guardada?'':' Los cambios solo están en esta sesión.')};
+ if(!guardada)return {estado:'solo-sesion',guardada:false,vigente:true,mensaje:'Confirmada solo en esta sesión; no pudo guardarse'};
+ return {estado:'vigente',guardada:true,vigente:true,mensaje:'Conjunto confirmado y vigente; guardado en este navegador. Los diámetros siguen sujetos a las pérdidas pendientes.'};
+}
 function confirmarConjuntoTeeGas(id,opcionId){
  const borrador=editandoAccesorios>=0?Object.fromEntries(tiposRapidosGas.map(([k])=>[k,$('rapidoGas_'+k)?.value])):null;
  const reg=registroAccesoriosSigasGas(),op=propuestasConjuntoTeeGas(id,reg).find(o=>o.id===opcionId);if(!op)return {ok:false,mensaje:'No hay un conjunto documentado compatible con estas vías y diámetros.'};
@@ -374,18 +389,18 @@ function confirmarConjuntoTeeGas(id,opcionId){
   if(candidatas.length!==1||compatibles.length!==1)return {ok:false,mensaje:'Ya hay una reducción registrada en esta salida. Identificar su producto y vínculo antes de confirmar; no se añade otra.'};
   reutilizadas[red.id]=compatibles[0].id;
  }
- guardarConfiguracionTeeSigasGas(id,{conjunto:{version:1,confirmado:true,opcionId:op.id,firma:op.firma,reutilizadas}});
- renderTramos();if(editandoAccesorios>=0){mostrarConteoRapidoGas();for(const [k,v]of Object.entries(borrador||{}))if(v!==undefined&&$('rapidoGas_'+k))$('rapidoGas_'+k).value=v;}return {ok:true,mensaje:'Conjunto confirmado para los diámetros y vías actuales. Si cambian, se revisará su compatibilidad.'};
+ if(!guardarConfiguracionTeeSigasGas(id,{conjunto:{version:1,confirmado:true,opcionId:op.id,firma:op.firma,reutilizadas}}))return {ok:false,guardada:false,mensaje:'No se pudo aplicar la confirmación; revisar la tee registrada.'};
+ renderTramos();if(editandoAccesorios>=0){mostrarConteoRapidoGas();for(const [k,v]of Object.entries(borrador||{}))if(v!==undefined&&$('rapidoGas_'+k))$('rapidoGas_'+k).value=v;}const estado=estadoConfirmacionConjuntoTeeGas(id);return {ok:estado.guardada&&estado.vigente,aplicada:true,...estado};
 }
 function renderPropuestaConjuntoTeeGas(caja,id){
- const reg=registroAccesoriosSigasGas(),opciones=propuestasConjuntoTeeGas(id,reg);if(!opciones.length)return;
+ const reg=registroAccesoriosSigasGas(),opciones=propuestasConjuntoTeeGas(id,reg),estado=estadoConfirmacionConjuntoTeeGas(id,reg);if(!opciones.length){if(estado.estado==='requiere-confirmacion'){const n=document.createElement('p');n.setAttribute?.('role','status');n.textContent=estado.mensaje;caja.append(n);}return;}
  const conf=reg.entradaTecnica.config.tees?.[id]?.conjunto,activa=opciones.find(o=>o.id===conf?.opcionId&&o.firma===conf?.firma&&conf.confirmado);
- const d=document.createElement('details'),sum=document.createElement('summary');sum.textContent=activa?'Conjunto de tee confirmado · ver o cambiar':'Propuesta de tee y reducciones · revisar';d.append(sum);
+ const d=document.createElement('details'),sum=document.createElement('summary');sum.textContent=estado.estado==='solo-sesion'?'Confirmada solo en esta sesión; no pudo guardarse':estado.estado==='requiere-confirmacion'?'Requiere nueva confirmación':activa?'Conjunto de tee confirmado y vigente · ver o cambiar':'Propuesta de tee y reducciones · revisar';d.append(sum);
  const sel=document.createElement('select');sel.ariaLabel='Solución documentada de '+id;for(const op of opciones){const o=document.createElement('option');o.value=op.id;o.textContent=op.nombre;sel.append(o);}sel.value=activa?.id||opciones[0].id;d.append(sel);
  const contenido=document.createElement('div'),mensaje=document.createElement('p');mensaje.setAttribute?.('role','status');
  const mostrar=()=>{contenido.replaceChildren();const op=opciones.find(o=>o.id===sel.value);const p=document.createElement('p');p.textContent=op.nombre+' · código '+op.codigoTee+'. La tee existente se reutiliza.';contenido.append(p);for(const r of op.reducciones){const n=document.createElement('p');n.textContent='1 × '+r.nombre+' · '+r.codigo+' · salida '+(reg.calculo.filas.find(f=>f.id===r.tramoId)?.tramo||r.tramoId)+' · '+r.equivalenteM+' m equivalentes.';contenido.append(n);}};sel.onchange=mostrar;mostrar();
  const b=document.createElement('button');b.type='button';b.textContent='Confirmar este conjunto';b.onclick=()=>{const enCarga=$('croquis').classList.contains?.('oculto')===false,r=confirmarConjuntoTeeGas(id,sel.value);mensaje.textContent=r.mensaje;if(enCarga){mostrarVista('croquis');$('tramosRegistradosGas').open=true;}if(!r.ok)window.alert?.(r.mensaje);};
- const aviso=document.createElement('p');aviso.textContent=activa?'Piezas confirmadas; diámetros aún sujetos a las pérdidas pendientes.':conf?'Cambió la compatibilidad: confirmar nuevamente. Las piezas anteriores se conservan en el registro, sin aplicar pérdidas obsoletas.':'Propuesta sin confirmar: no añade materiales ni pérdidas.';d.append(contenido,aviso,b,mensaje);caja.append(d);
+ const aviso=document.createElement('p');aviso.setAttribute?.('role','status');aviso.textContent=estado.mensaje;d.append(contenido,aviso,b,mensaje);caja.append(d);
 }
 // Orientación independiente del producto físico; el registro técnico existente es la única fuente.
 function renderViasManualesTeeGas(cont,tramoId){
@@ -430,7 +445,7 @@ function guardarConfiguracionTeeSigasGas(id,cambios){
  if(nuevo.modo&&!['ambas','directo','giro'].includes(nuevo.modo)||nuevo.tipo&&!['normal','central','extremo'].includes(nuevo.tipo)||Object.values(nuevo.viasPorTramo||{}).some(v=>!['','directo','giro'].includes(v))||Object.keys(nuevo.viasPorTramo||{}).some(t=>!pieza.conexionesDiametro?.includes(t)))return false;
  const clave=d=>d.claveTerminalSigas||d.claveTeeSigas||d.querySelector?.('summary')?.textContent;
  const abiertos=Array.from(document.querySelectorAll?.('#resumenPrincipalMaterialesGas details[open]')||[]).map(clave),scrollAnterior=window.scrollY;
- actual.tees[id]=nuevo;guardarDatos();calcularMaterialesManualGas();
+ actual.tees[id]=nuevo;guardarDatos();calcularMaterialesManualGas();renderTramos();
  for(const d of document.querySelectorAll?.('#resumenPrincipalMaterialesGas details')||[])if(abiertos.includes(clave(d))){d.open=true;if(d.claveTeeSigas===id)for(let padre=d.parentElement;padre&&padre.id!=='resumenPrincipalMaterialesGas';padre=padre.parentElement)if(padre.tagName==='DETAILS')padre.open=true;}
  if(Number.isFinite(scrollAnterior))window.scrollTo({top:scrollAnterior,behavior:'instant'});return true;
 }
