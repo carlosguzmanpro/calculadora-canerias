@@ -9494,6 +9494,8 @@ function entradaPreseleccionSigasGas(){
  if(modulo!=='gas'||CatalogosSistemasGas.identificar(instalacionGas.perfil)!=='sigas')return null;
  const perfil=perfilTecnicoActualGas(),red=redFisicaManualGas(),preparacion=PreparacionDiametrosGas.prepararRed(red,tramos,perfil);
  const inventario=inventarioAccesoriosParaMotorGas(red);
+ // Vincular solo tees registradas a un nodo inequívoco; no añadir piezas ni elegir su vía.
+ deducirTeesPreliminaresSigasGas({inventario},red,[],false);
  // Necesidad terminal independiente: no se transforma en un codo ni se suma a materiales.
  const entradas=new Set(Object.values(red.orientacion).map(o=>o.hasta));
  const raices=[...new Set(Object.values(red.orientacion).map(o=>o.desde))].filter(id=>!entradas.has(id));
@@ -10196,14 +10198,14 @@ function resultadoEjercicioSigasGas(){
  try{return construirResultadoEjercicioSigasGas();}catch(e){return modulo==='gas'&&proyectoGasActual().referenciaSigas19?{error:true,bloqueos:['No se pudo ejecutar el cálculo SIGAS. Revisar la disponibilidad del catálogo y los datos técnicos; las cantidades registradas permanecen disponibles.']}:null;}
 }
 // Deducción por incidencia de extremos, independiente del orden o longitud entre accesorios.
-function deducirTeesPreliminaresSigasGas(entrada,red,hipotesis){
+function deducirTeesPreliminaresSigasGas(entrada,red,hipotesis,proponerFaltantes=true){
  const incidentes=new Map();for(const [id,o]of Object.entries(red.orientacion))for(const nodo of [o.desde,o.hasta]){if(!incidentes.has(nodo))incidentes.set(nodo,new Set());incidentes.get(nodo).add(id);}
  const tees=entrada.inventario.fisicas.filter(p=>p.tipo==='tee'),ocupados=new Set(tees.filter(p=>p.nodo).map(p=>p.nodo)),pendientes=tees.filter(p=>!p.nodo),propuestas=[];
  let avance=true;while(avance){avance=false;for(const p of pendientes.filter(p=>!p.nodo&&p.cantidad===1)){
   const opciones=[...incidentes].filter(([n,ids])=>ids.size===3&&!ocupados.has(n)&&p.tramos.length&&p.tramos.every(id=>ids.has(id)));
   if(opciones.length!==1)continue;const [n,ids]=opciones[0];p.nodo=n;p.conexionesDiametro=[...ids];ocupados.add(n);avance=true;hipotesis.push('Tee '+(red.puntos.find(p=>p.id===n)?.nombre||'de derivación')+': punto deducido de las conexiones registradas, sin posiciones de codos.');
  }}
- for(const [n,ids]of incidentes)if(ids.size===3&&!ocupados.has(n)&&!pendientes.some(p=>!p.nodo&&p.tramos.some(id=>ids.has(id)))){
+ for(const [n,ids]of incidentes)if(proponerFaltantes&&ids.size===3&&!ocupados.has(n)&&!pendientes.some(p=>!p.nodo&&p.tramos.some(id=>ids.has(id)))){
   const entradas=[...ids].filter(id=>red.orientacion[id].hasta===n);if(entradas.length!==1)continue;
   const p={id:'propuesta-topologia-tee:'+n,tipo:'tee',cantidad:1,confirmada:true,nodo:n,tramos:entradas,conexionesDiametro:[...ids],identidadesFisicas:['propuesta-topologia-tee:'+n]};entrada.inventario.fisicas.push(p);propuestas.push(p);ocupados.add(n);
   hipotesis.push('Tee '+(red.puntos.find(p=>p.id===n)?.nombre||'de derivación')+': propuesta por tres conexiones; no se añade al inventario real ni cambia una cantidad cero registrada.');

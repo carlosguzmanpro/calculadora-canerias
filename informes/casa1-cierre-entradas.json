@@ -1,0 +1,1490 @@
+{
+  "formato": "canerias-respaldo-v1",
+  "proyectos": {
+    "gas": {
+      "planCompra": {
+        "opciones": {},
+        "extras": [],
+        "revisiones": {}
+      },
+      "proyectosGuardados": [
+        {
+          "id": "proyecto-mvua75y4-1",
+          "nombre": "Casa 1",
+          "datos": {
+            "tramos": [
+              {
+                "desde": "M",
+                "hasta": "A",
+                "metros": 12,
+                "consumo": null,
+                "diametro": null,
+                "artefacto": "",
+                "llave": false,
+                "id": "tramo-mvua75yo-2"
+              },
+              {
+                "desde": "A",
+                "hasta": "Cocina",
+                "metros": 8,
+                "consumo": 10000,
+                "diametro": null,
+                "artefacto": "Cocina",
+                "llave": false,
+                "id": "tramo-mvua75zn-3"
+              },
+              {
+                "desde": "A",
+                "hasta": "Calefón",
+                "metros": 6,
+                "consumo": 20000,
+                "diametro": null,
+                "artefacto": "Calefón",
+                "llave": false,
+                "id": "tramo-mvua7606-4"
+              }
+            ],
+            "artefactos": [],
+            "instalacion": {
+              "version": 1,
+              "perfil": {
+                "pais": "AR",
+                "uso": "domiciliario",
+                "gas": "GN",
+                "largosDocumentados2026": true,
+                "catalogoTecnicoGas": "sigas",
+                "material": "Acero-polietileno SIGAS Thermofusión",
+                "sistema": "Thermofusión",
+                "poderCalorifico": 9300,
+                "fuenteGas": "PCS definido por el propietario para el ensayo Casa 1"
+              },
+              "nodos": []
+            },
+            "planCompra": {
+              "opciones": {
+                "cargaManualDirecta": true
+              },
+              "extras": [],
+              "revisiones": {
+                "proyecto": {
+                  "firma": "{\"fuente\":\"proyecto\",\"entrada\":{\"casilleroMedidorGas\":{},\"origen\":\"Proyecto manual actual\",\"material\":\"Acero-polietileno SIGAS Thermofusión\",\"sistema\":\"Thermofusión\",\"nodos\":[{\"id\":\"nombre:m\",\"nombre\":\"M\"},{\"id\":\"nombre:a\",\"nombre\":\"A\"},{\"id\":\"nombre:cocina\",\"nombre\":\"Cocina\"},{\"id\":\"nombre:calefón\",\"nombre\":\"Calefón\"}],\"tramos\":[{\"id\":\"tramo-mvua75yo-2\",\"metros\":12,\"diametro\":null,\"diametroFinal\":null,\"red\":{\"desde\":\"nombre:m\",\"hasta\":\"nombre:a\"},\"segmentos\":null,\"accesorios\":[],\"continuidadCuplas\":{\"segmentos\":[],\"completa\":false,\"metrosPendientes\":12,\"pendientes\":[\"El total de codo90 no coincide con los accesorios posicionados.\"],\"bloqueada\":true}},{\"id\":\"tramo-mvua75zn-3\",\"metros\":8,\"diametro\":null,\"diametroFinal\":null,\"red\":{\"desde\":\"nombre:a\",\"hasta\":\"nombre:cocina\"},\"segmentos\":null,\"accesorios\":[],\"continuidadCuplas\":{\"segmentos\":[],\"completa\":false,\"metrosPendientes\":8,\"pendientes\":[\"El total de codo90 no coincide con los accesorios posicionados.\"],\"bloqueada\":true}},{\"id\":\"tramo-mvua7606-4\",\"metros\":6,\"diametro\":null,\"diametroFinal\":null,\"red\":{\"desde\":\"nombre:a\",\"hasta\":\"nombre:calefón\"},\"segmentos\":null,\"accesorios\":[],\"continuidadCuplas\":{\"segmentos\":[],\"completa\":false,\"metrosPendientes\":6,\"pendientes\":[\"El total de codo90 no coincide con los accesorios posicionados.\"],\"bloqueada\":true}}],\"extras\":[{\"idFisico\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]\",\"tipo\":\"codo90\",\"cantidad\":3,\"medidas\":[\"32 mm candidato\"],\"confirmado\":true,\"tramo\":\"tramo-mvua75yo-2\",\"ubicacion\":\"tramo-mvua75yo-2 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":\"Codo Normal a 90º 32 mm\",\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]::pieza:0\",\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]::pieza:1\",\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]::pieza:2\"],\"funcion\":\"recorrido\",\"geometria\":\"codo90\",\"productoIdentificado\":true,\"productos\":[\"sigas-p24-izquierdo-21\"],\"candidatoMm\":32,\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"tee\\\"]\",\"tipo\":\"tee\",\"cantidad\":1,\"medidas\":[\"32 mm candidato\"],\"confirmado\":true,\"tramo\":\"tramo-mvua75yo-2\",\"ubicacion\":\"tramo-mvua75yo-2 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"tee\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"tee\\\"]::pieza:0\"],\"funcion\":\"derivacion\",\"geometria\":null,\"productoIdentificado\":false,\"productos\":[],\"candidatoMm\":32,\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"codo90\\\"]\",\"tipo\":\"codo90\",\"cantidad\":2,\"medidas\":[\"20 mm candidato\"],\"confirmado\":true,\"tramo\":\"tramo-mvua75zn-3\",\"ubicacion\":\"tramo-mvua75zn-3 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":\"Codo Normal a 90º 20 mm\",\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"codo90\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"codo90\\\"]::pieza:0\",\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"codo90\\\"]::pieza:1\"],\"funcion\":\"recorrido\",\"geometria\":\"codo90\",\"productoIdentificado\":true,\"productos\":[\"sigas-p24-izquierdo-19\"],\"candidatoMm\":20,\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"llave\\\"]\",\"tipo\":\"llave\",\"cantidad\":1,\"medidas\":[\"20 mm candidato\"],\"confirmado\":true,\"tramo\":\"tramo-mvua75zn-3\",\"ubicacion\":\"tramo-mvua75zn-3 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"llave\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"llave\\\"]::pieza:0\"],\"funcion\":\"corte\",\"geometria\":null,\"productoIdentificado\":false,\"productos\":[],\"candidatoMm\":20,\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"codo90\\\"]\",\"tipo\":\"codo90\",\"cantidad\":2,\"medidas\":[\"25 mm candidato\"],\"confirmado\":true,\"tramo\":\"tramo-mvua7606-4\",\"ubicacion\":\"tramo-mvua7606-4 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":\"Codo Normal a 90º 25 mm\",\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"codo90\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"codo90\\\"]::pieza:0\",\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"codo90\\\"]::pieza:1\"],\"funcion\":\"recorrido\",\"geometria\":\"codo90\",\"productoIdentificado\":true,\"productos\":[\"sigas-p24-izquierdo-20\"],\"candidatoMm\":25,\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"llave\\\"]\",\"tipo\":\"llave\",\"cantidad\":1,\"medidas\":[\"25 mm candidato\"],\"confirmado\":true,\"tramo\":\"tramo-mvua7606-4\",\"ubicacion\":\"tramo-mvua7606-4 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"llave\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"llave\\\"]::pieza:0\"],\"funcion\":\"corte\",\"geometria\":null,\"productoIdentificado\":false,\"productos\":[],\"candidatoMm\":25,\"rosca\":null},\"medidasEstimadas\":true}],\"manualDirecto\":{\"avisos\":[],\"ceros\":[{\"tipo\":\"codo45\",\"material\":\"Codo 45°\",\"diametro\":\"Pendiente\",\"cantidad\":0,\"unidad\":\"unidad\",\"ubicacion\":\"tramo-mvua75yo-2\",\"estado\":\"estimado\",\"cantidadConfirmada\":true,\"origen\":\"manual-cero\",\"evidencia\":\"Cero ingresado explícitamente; no es un campo vacío.\"},{\"tipo\":\"llave\",\"material\":\"Llave de paso\",\"diametro\":\"Pendiente\",\"cantidad\":0,\"unidad\":\"unidad\",\"ubicacion\":\"tramo-mvua75yo-2\",\"estado\":\"estimado\",\"cantidadConfirmada\":true,\"origen\":\"manual-cero\",\"evidencia\":\"Cero ingresado explícitamente; no es un campo vacío.\"},{\"tipo\":\"codo45\",\"material\":\"Codo 45°\",\"diametro\":\"Pendiente\",\"cantidad\":0,\"unidad\":\"unidad\",\"ubicacion\":\"tramo-mvua75zn-3\",\"estado\":\"estimado\",\"cantidadConfirmada\":true,\"origen\":\"manual-cero\",\"evidencia\":\"Cero ingresado explícitamente; no es un campo vacío.\"},{\"tipo\":\"tee\",\"material\":\"Tee\",\"diametro\":\"Pendiente\",\"cantidad\":0,\"unidad\":\"unidad\",\"ubicacion\":\"tramo-mvua75zn-3\",\"estado\":\"estimado\",\"cantidadConfirmada\":true,\"origen\":\"manual-cero\",\"evidencia\":\"Cero ingresado explícitamente; no es un campo vacío.\"},{\"tipo\":\"codo45\",\"material\":\"Codo 45°\",\"diametro\":\"Pendiente\",\"cantidad\":0,\"unidad\":\"unidad\",\"ubicacion\":\"tramo-mvua7606-4\",\"estado\":\"estimado\",\"cantidadConfirmada\":true,\"origen\":\"manual-cero\",\"evidencia\":\"Cero ingresado explícitamente; no es un campo vacío.\"},{\"tipo\":\"tee\",\"material\":\"Tee\",\"diametro\":\"Pendiente\",\"cantidad\":0,\"unidad\":\"unidad\",\"ubicacion\":\"tramo-mvua7606-4\",\"estado\":\"estimado\",\"cantidadConfirmada\":true,\"origen\":\"manual-cero\",\"evidencia\":\"Cero ingresado explícitamente; no es un campo vacío.\"}],\"pendientes\":[\"M–A: Reducciones\",\"A–Cocina: Reducciones\",\"A–Calefón: Reducciones\"],\"red\":{\"errores\":[],\"avisos\":[],\"faltantes\":[],\"porTramo\":{\"tramo-mvua75zn-3\":10000,\"tramo-mvua7606-4\":20000,\"tramo-mvua75yo-2\":30000},\"parciales\":{\"tramo-mvua75zn-3\":10000,\"tramo-mvua7606-4\":20000,\"tramo-mvua75yo-2\":30000},\"total\":30000,\"orientacion\":{\"tramo-mvua75yo-2\":{\"desde\":\"nombre:m\",\"hasta\":\"nombre:a\",\"invertido\":false},\"tramo-mvua75zn-3\":{\"desde\":\"nombre:a\",\"hasta\":\"nombre:cocina\",\"invertido\":false},\"tramo-mvua7606-4\":{\"desde\":\"nombre:a\",\"hasta\":\"nombre:calefón\",\"invertido\":false}},\"puntos\":[{\"id\":\"nombre:m\",\"nombre\":\"M\",\"tipo\":null,\"artefactoId\":null},{\"id\":\"nombre:a\",\"nombre\":\"A\",\"tipo\":null,\"artefactoId\":null},{\"id\":\"nombre:cocina\",\"nombre\":\"Cocina\",\"tipo\":null,\"artefactoId\":null},{\"id\":\"nombre:calefón\",\"nombre\":\"Calefón\",\"tipo\":null,\"artefactoId\":null}],\"grupos\":[{\"id\":\"tramo-mvua75yo-2\",\"desde\":\"nombre:m\",\"hasta\":\"nombre:a\"},{\"id\":\"tramo-mvua75zn-3\",\"desde\":\"nombre:a\",\"hasta\":\"nombre:cocina\"},{\"id\":\"tramo-mvua7606-4\",\"desde\":\"nombre:a\",\"hasta\":\"nombre:calefón\"}],\"excluidos\":[],\"ambiguos\":[],\"listoParaDimensionar\":false}},\"propuestasCompraSigas\":[]},\"opciones\":{\"largoComercial\":4,\"reutilizar\":false,\"minimoSobrante\":0.5,\"hipotesisSinPosiciones\":false,\"uniones\":{}}}",
+                  "filas": [
+                    {
+                      "id": "material-0",
+                      "unidad": "unidad",
+                      "estado": "estimado",
+                      "revisado": false,
+                      "material": "Codo Normal a 90º 32 mm",
+                      "registroSigas": {
+                        "id": "manual-total:[\"tramo-mvua75yo-2\",\"codo90\"]",
+                        "identidadesFisicas": [
+                          "manual-total:[\"tramo-mvua75yo-2\",\"codo90\"]::pieza:0",
+                          "manual-total:[\"tramo-mvua75yo-2\",\"codo90\"]::pieza:1",
+                          "manual-total:[\"tramo-mvua75yo-2\",\"codo90\"]::pieza:2"
+                        ],
+                        "funcion": "recorrido",
+                        "geometria": "codo90",
+                        "productoIdentificado": true,
+                        "productos": [
+                          "sigas-p24-izquierdo-21"
+                        ],
+                        "candidatoMm": 32,
+                        "rosca": null
+                      },
+                      "tipo": "codo90",
+                      "medidas": [
+                        "32 mm candidato"
+                      ],
+                      "diametro": "32 mm candidato",
+                      "cantidad": 3,
+                      "ubicacion": "tramo-mvua75yo-2 · cantidad manual; posición pendiente",
+                      "cantidadConfirmada": true,
+                      "evidencia": "Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.",
+                      "nodo": null,
+                      "origen": "identificado",
+                      "equivalentes": "No se calculan en este plan físico",
+                      "ubicacionNombre": "M–A · cantidad manual; posición pendiente",
+                      "claveRevision": "[\"codo90\",\"Codo Normal a 90º 32 mm\",\"32 mm candidato\",\"unidad\",\"tramo-mvua75yo-2 · cantidad manual; posición pendiente\",[{\"idFisico\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]\",\"tipo\":\"codo90\",\"cantidad\":3,\"medidas\":[\"32 mm candidato\"],\"confirmado\":true,\"tramo\":\"tramo-mvua75yo-2\",\"ubicacion\":\"tramo-mvua75yo-2 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":\"Codo Normal a 90º 32 mm\",\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]::pieza:0\",\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]::pieza:1\",\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]::pieza:2\"],\"funcion\":\"recorrido\",\"geometria\":\"codo90\",\"productoIdentificado\":true,\"productos\":[\"sigas-p24-izquierdo-21\"],\"candidatoMm\":32,\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"tee\\\"]\",\"tipo\":\"tee\",\"cantidad\":1,\"medidas\":[\"32 mm candidato\"],\"confirmado\":true,\"tramo\":\"tramo-mvua75yo-2\",\"ubicacion\":\"tramo-mvua75yo-2 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"tee\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"tee\\\"]::pieza:0\"],\"funcion\":\"derivacion\",\"geometria\":null,\"productoIdentificado\":false,\"productos\":[],\"candidatoMm\":32,\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"codo90\\\"]\",\"tipo\":\"codo90\",\"cantidad\":2,\"medidas\":[\"20 mm candidato\"],\"confirmado\":true,\"tramo\":\"tramo-mvua75zn-3\",\"ubicacion\":\"tramo-mvua75zn-3 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":\"Codo Normal a 90º 20 mm\",\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"codo90\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"codo90\\\"]::pieza:0\",\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"codo90\\\"]::pieza:1\"],\"funcion\":\"recorrido\",\"geometria\":\"codo90\",\"productoIdentificado\":true,\"productos\":[\"sigas-p24-izquierdo-19\"],\"candidatoMm\":20,\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"llave\\\"]\",\"tipo\":\"llave\",\"cantidad\":1,\"medidas\":[\"20 mm candidato\"],\"confirmado\":true,\"tramo\":\"tramo-mvua75zn-3\",\"ubicacion\":\"tramo-mvua75zn-3 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"llave\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"llave\\\"]::pieza:0\"],\"funcion\":\"corte\",\"geometria\":null,\"productoIdentificado\":false,\"productos\":[],\"candidatoMm\":20,\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"codo90\\\"]\",\"tipo\":\"codo90\",\"cantidad\":2,\"medidas\":[\"25 mm candidato\"],\"confirmado\":true,\"tramo\":\"tramo-mvua7606-4\",\"ubicacion\":\"tramo-mvua7606-4 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":\"Codo Normal a 90º 25 mm\",\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"codo90\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"codo90\\\"]::pieza:0\",\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"codo90\\\"]::pieza:1\"],\"funcion\":\"recorrido\",\"geometria\":\"codo90\",\"productoIdentificado\":true,\"productos\":[\"sigas-p24-izquierdo-20\"],\"candidatoMm\":25,\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"llave\\\"]\",\"tipo\":\"llave\",\"cantidad\":1,\"medidas\":[\"25 mm candidato\"],\"confirmado\":true,\"tramo\":\"tramo-mvua7606-4\",\"ubicacion\":\"tramo-mvua7606-4 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"llave\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"llave\\\"]::pieza:0\"],\"funcion\":\"corte\",\"geometria\":null,\"productoIdentificado\":false,\"productos\":[],\"candidatoMm\":25,\"rosca\":null},\"medidasEstimadas\":true}]]"
+                    },
+                    {
+                      "id": "material-1",
+                      "unidad": "unidad",
+                      "estado": "estimado",
+                      "revisado": false,
+                      "material": "Tee",
+                      "registroSigas": {
+                        "id": "manual-total:[\"tramo-mvua75yo-2\",\"tee\"]",
+                        "identidadesFisicas": [
+                          "manual-total:[\"tramo-mvua75yo-2\",\"tee\"]::pieza:0"
+                        ],
+                        "funcion": "derivacion",
+                        "geometria": null,
+                        "productoIdentificado": false,
+                        "productos": [],
+                        "candidatoMm": 32,
+                        "rosca": null
+                      },
+                      "tipo": "tee",
+                      "medidas": [
+                        "32 mm candidato"
+                      ],
+                      "diametro": "32 mm candidato",
+                      "cantidad": 1,
+                      "ubicacion": "tramo-mvua75yo-2 · cantidad manual; posición pendiente",
+                      "cantidadConfirmada": true,
+                      "evidencia": "Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo. Medidas/conexiones pendientes.",
+                      "nodo": null,
+                      "origen": "identificado",
+                      "equivalentes": "No se calculan en este plan físico",
+                      "ubicacionNombre": "M–A · cantidad manual; posición pendiente",
+                      "claveRevision": "[\"tee\",\"Tee\",\"32 mm candidato\",\"unidad\",\"tramo-mvua75yo-2 · cantidad manual; posición pendiente\",[{\"idFisico\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]\",\"tipo\":\"codo90\",\"cantidad\":3,\"medidas\":[\"32 mm candidato\"],\"confirmado\":true,\"tramo\":\"tramo-mvua75yo-2\",\"ubicacion\":\"tramo-mvua75yo-2 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":\"Codo Normal a 90º 32 mm\",\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]::pieza:0\",\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]::pieza:1\",\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]::pieza:2\"],\"funcion\":\"recorrido\",\"geometria\":\"codo90\",\"productoIdentificado\":true,\"productos\":[\"sigas-p24-izquierdo-21\"],\"candidatoMm\":32,\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"tee\\\"]\",\"tipo\":\"tee\",\"cantidad\":1,\"medidas\":[\"32 mm candidato\"],\"confirmado\":true,\"tramo\":\"tramo-mvua75yo-2\",\"ubicacion\":\"tramo-mvua75yo-2 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"tee\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"tee\\\"]::pieza:0\"],\"funcion\":\"derivacion\",\"geometria\":null,\"productoIdentificado\":false,\"productos\":[],\"candidatoMm\":32,\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"codo90\\\"]\",\"tipo\":\"codo90\",\"cantidad\":2,\"medidas\":[\"20 mm candidato\"],\"confirmado\":true,\"tramo\":\"tramo-mvua75zn-3\",\"ubicacion\":\"tramo-mvua75zn-3 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":\"Codo Normal a 90º 20 mm\",\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"codo90\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"codo90\\\"]::pieza:0\",\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"codo90\\\"]::pieza:1\"],\"funcion\":\"recorrido\",\"geometria\":\"codo90\",\"productoIdentificado\":true,\"productos\":[\"sigas-p24-izquierdo-19\"],\"candidatoMm\":20,\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"llave\\\"]\",\"tipo\":\"llave\",\"cantidad\":1,\"medidas\":[\"20 mm candidato\"],\"confirmado\":true,\"tramo\":\"tramo-mvua75zn-3\",\"ubicacion\":\"tramo-mvua75zn-3 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"llave\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"llave\\\"]::pieza:0\"],\"funcion\":\"corte\",\"geometria\":null,\"productoIdentificado\":false,\"productos\":[],\"candidatoMm\":20,\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"codo90\\\"]\",\"tipo\":\"codo90\",\"cantidad\":2,\"medidas\":[\"25 mm candidato\"],\"confirmado\":true,\"tramo\":\"tramo-mvua7606-4\",\"ubicacion\":\"tramo-mvua7606-4 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":\"Codo Normal a 90º 25 mm\",\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"codo90\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"codo90\\\"]::pieza:0\",\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"codo90\\\"]::pieza:1\"],\"funcion\":\"recorrido\",\"geometria\":\"codo90\",\"productoIdentificado\":true,\"productos\":[\"sigas-p24-izquierdo-20\"],\"candidatoMm\":25,\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"llave\\\"]\",\"tipo\":\"llave\",\"cantidad\":1,\"medidas\":[\"25 mm candidato\"],\"confirmado\":true,\"tramo\":\"tramo-mvua7606-4\",\"ubicacion\":\"tramo-mvua7606-4 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"llave\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"llave\\\"]::pieza:0\"],\"funcion\":\"corte\",\"geometria\":null,\"productoIdentificado\":false,\"productos\":[],\"candidatoMm\":25,\"rosca\":null},\"medidasEstimadas\":true}]]"
+                    },
+                    {
+                      "id": "material-2",
+                      "unidad": "unidad",
+                      "estado": "estimado",
+                      "revisado": false,
+                      "material": "Codo Normal a 90º 20 mm",
+                      "registroSigas": {
+                        "id": "manual-total:[\"tramo-mvua75zn-3\",\"codo90\"]",
+                        "identidadesFisicas": [
+                          "manual-total:[\"tramo-mvua75zn-3\",\"codo90\"]::pieza:0",
+                          "manual-total:[\"tramo-mvua75zn-3\",\"codo90\"]::pieza:1"
+                        ],
+                        "funcion": "recorrido",
+                        "geometria": "codo90",
+                        "productoIdentificado": true,
+                        "productos": [
+                          "sigas-p24-izquierdo-19"
+                        ],
+                        "candidatoMm": 20,
+                        "rosca": null
+                      },
+                      "tipo": "codo90",
+                      "medidas": [
+                        "20 mm candidato"
+                      ],
+                      "diametro": "20 mm candidato",
+                      "cantidad": 2,
+                      "ubicacion": "tramo-mvua75zn-3 · cantidad manual; posición pendiente",
+                      "cantidadConfirmada": true,
+                      "evidencia": "Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.",
+                      "nodo": null,
+                      "origen": "identificado",
+                      "equivalentes": "No se calculan en este plan físico",
+                      "ubicacionNombre": "A–Cocina · cantidad manual; posición pendiente",
+                      "claveRevision": "[\"codo90\",\"Codo Normal a 90º 20 mm\",\"20 mm candidato\",\"unidad\",\"tramo-mvua75zn-3 · cantidad manual; posición pendiente\",[{\"idFisico\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]\",\"tipo\":\"codo90\",\"cantidad\":3,\"medidas\":[\"32 mm candidato\"],\"confirmado\":true,\"tramo\":\"tramo-mvua75yo-2\",\"ubicacion\":\"tramo-mvua75yo-2 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":\"Codo Normal a 90º 32 mm\",\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]::pieza:0\",\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]::pieza:1\",\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]::pieza:2\"],\"funcion\":\"recorrido\",\"geometria\":\"codo90\",\"productoIdentificado\":true,\"productos\":[\"sigas-p24-izquierdo-21\"],\"candidatoMm\":32,\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"tee\\\"]\",\"tipo\":\"tee\",\"cantidad\":1,\"medidas\":[\"32 mm candidato\"],\"confirmado\":true,\"tramo\":\"tramo-mvua75yo-2\",\"ubicacion\":\"tramo-mvua75yo-2 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"tee\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"tee\\\"]::pieza:0\"],\"funcion\":\"derivacion\",\"geometria\":null,\"productoIdentificado\":false,\"productos\":[],\"candidatoMm\":32,\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"codo90\\\"]\",\"tipo\":\"codo90\",\"cantidad\":2,\"medidas\":[\"20 mm candidato\"],\"confirmado\":true,\"tramo\":\"tramo-mvua75zn-3\",\"ubicacion\":\"tramo-mvua75zn-3 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":\"Codo Normal a 90º 20 mm\",\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"codo90\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"codo90\\\"]::pieza:0\",\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"codo90\\\"]::pieza:1\"],\"funcion\":\"recorrido\",\"geometria\":\"codo90\",\"productoIdentificado\":true,\"productos\":[\"sigas-p24-izquierdo-19\"],\"candidatoMm\":20,\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"llave\\\"]\",\"tipo\":\"llave\",\"cantidad\":1,\"medidas\":[\"20 mm candidato\"],\"confirmado\":true,\"tramo\":\"tramo-mvua75zn-3\",\"ubicacion\":\"tramo-mvua75zn-3 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"llave\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"llave\\\"]::pieza:0\"],\"funcion\":\"corte\",\"geometria\":null,\"productoIdentificado\":false,\"productos\":[],\"candidatoMm\":20,\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"codo90\\\"]\",\"tipo\":\"codo90\",\"cantidad\":2,\"medidas\":[\"25 mm candidato\"],\"confirmado\":true,\"tramo\":\"tramo-mvua7606-4\",\"ubicacion\":\"tramo-mvua7606-4 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":\"Codo Normal a 90º 25 mm\",\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"codo90\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"codo90\\\"]::pieza:0\",\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"codo90\\\"]::pieza:1\"],\"funcion\":\"recorrido\",\"geometria\":\"codo90\",\"productoIdentificado\":true,\"productos\":[\"sigas-p24-izquierdo-20\"],\"candidatoMm\":25,\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"llave\\\"]\",\"tipo\":\"llave\",\"cantidad\":1,\"medidas\":[\"25 mm candidato\"],\"confirmado\":true,\"tramo\":\"tramo-mvua7606-4\",\"ubicacion\":\"tramo-mvua7606-4 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"llave\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"llave\\\"]::pieza:0\"],\"funcion\":\"corte\",\"geometria\":null,\"productoIdentificado\":false,\"productos\":[],\"candidatoMm\":25,\"rosca\":null},\"medidasEstimadas\":true}]]"
+                    },
+                    {
+                      "id": "material-3",
+                      "unidad": "unidad",
+                      "estado": "estimado",
+                      "revisado": false,
+                      "material": "Llave de paso",
+                      "registroSigas": {
+                        "id": "manual-total:[\"tramo-mvua75zn-3\",\"llave\"]",
+                        "identidadesFisicas": [
+                          "manual-total:[\"tramo-mvua75zn-3\",\"llave\"]::pieza:0"
+                        ],
+                        "funcion": "corte",
+                        "geometria": null,
+                        "productoIdentificado": false,
+                        "productos": [],
+                        "candidatoMm": 20,
+                        "rosca": null
+                      },
+                      "tipo": "llave",
+                      "medidas": [
+                        "20 mm candidato"
+                      ],
+                      "diametro": "20 mm candidato",
+                      "cantidad": 1,
+                      "ubicacion": "tramo-mvua75zn-3 · cantidad manual; posición pendiente",
+                      "cantidadConfirmada": true,
+                      "evidencia": "Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.",
+                      "nodo": null,
+                      "origen": "identificado",
+                      "equivalentes": "No se calculan en este plan físico",
+                      "ubicacionNombre": "A–Cocina · cantidad manual; posición pendiente",
+                      "claveRevision": "[\"llave\",\"Llave de paso\",\"20 mm candidato\",\"unidad\",\"tramo-mvua75zn-3 · cantidad manual; posición pendiente\",[{\"idFisico\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]\",\"tipo\":\"codo90\",\"cantidad\":3,\"medidas\":[\"32 mm candidato\"],\"confirmado\":true,\"tramo\":\"tramo-mvua75yo-2\",\"ubicacion\":\"tramo-mvua75yo-2 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":\"Codo Normal a 90º 32 mm\",\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]::pieza:0\",\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]::pieza:1\",\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]::pieza:2\"],\"funcion\":\"recorrido\",\"geometria\":\"codo90\",\"productoIdentificado\":true,\"productos\":[\"sigas-p24-izquierdo-21\"],\"candidatoMm\":32,\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"tee\\\"]\",\"tipo\":\"tee\",\"cantidad\":1,\"medidas\":[\"32 mm candidato\"],\"confirmado\":true,\"tramo\":\"tramo-mvua75yo-2\",\"ubicacion\":\"tramo-mvua75yo-2 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"tee\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"tee\\\"]::pieza:0\"],\"funcion\":\"derivacion\",\"geometria\":null,\"productoIdentificado\":false,\"productos\":[],\"candidatoMm\":32,\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"codo90\\\"]\",\"tipo\":\"codo90\",\"cantidad\":2,\"medidas\":[\"20 mm candidato\"],\"confirmado\":true,\"tramo\":\"tramo-mvua75zn-3\",\"ubicacion\":\"tramo-mvua75zn-3 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":\"Codo Normal a 90º 20 mm\",\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"codo90\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"codo90\\\"]::pieza:0\",\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"codo90\\\"]::pieza:1\"],\"funcion\":\"recorrido\",\"geometria\":\"codo90\",\"productoIdentificado\":true,\"productos\":[\"sigas-p24-izquierdo-19\"],\"candidatoMm\":20,\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"llave\\\"]\",\"tipo\":\"llave\",\"cantidad\":1,\"medidas\":[\"20 mm candidato\"],\"confirmado\":true,\"tramo\":\"tramo-mvua75zn-3\",\"ubicacion\":\"tramo-mvua75zn-3 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"llave\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"llave\\\"]::pieza:0\"],\"funcion\":\"corte\",\"geometria\":null,\"productoIdentificado\":false,\"productos\":[],\"candidatoMm\":20,\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"codo90\\\"]\",\"tipo\":\"codo90\",\"cantidad\":2,\"medidas\":[\"25 mm candidato\"],\"confirmado\":true,\"tramo\":\"tramo-mvua7606-4\",\"ubicacion\":\"tramo-mvua7606-4 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":\"Codo Normal a 90º 25 mm\",\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"codo90\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"codo90\\\"]::pieza:0\",\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"codo90\\\"]::pieza:1\"],\"funcion\":\"recorrido\",\"geometria\":\"codo90\",\"productoIdentificado\":true,\"productos\":[\"sigas-p24-izquierdo-20\"],\"candidatoMm\":25,\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"llave\\\"]\",\"tipo\":\"llave\",\"cantidad\":1,\"medidas\":[\"25 mm candidato\"],\"confirmado\":true,\"tramo\":\"tramo-mvua7606-4\",\"ubicacion\":\"tramo-mvua7606-4 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"llave\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"llave\\\"]::pieza:0\"],\"funcion\":\"corte\",\"geometria\":null,\"productoIdentificado\":false,\"productos\":[],\"candidatoMm\":25,\"rosca\":null},\"medidasEstimadas\":true}]]"
+                    },
+                    {
+                      "id": "material-4",
+                      "unidad": "unidad",
+                      "estado": "estimado",
+                      "revisado": false,
+                      "material": "Codo Normal a 90º 25 mm",
+                      "registroSigas": {
+                        "id": "manual-total:[\"tramo-mvua7606-4\",\"codo90\"]",
+                        "identidadesFisicas": [
+                          "manual-total:[\"tramo-mvua7606-4\",\"codo90\"]::pieza:0",
+                          "manual-total:[\"tramo-mvua7606-4\",\"codo90\"]::pieza:1"
+                        ],
+                        "funcion": "recorrido",
+                        "geometria": "codo90",
+                        "productoIdentificado": true,
+                        "productos": [
+                          "sigas-p24-izquierdo-20"
+                        ],
+                        "candidatoMm": 25,
+                        "rosca": null
+                      },
+                      "tipo": "codo90",
+                      "medidas": [
+                        "25 mm candidato"
+                      ],
+                      "diametro": "25 mm candidato",
+                      "cantidad": 2,
+                      "ubicacion": "tramo-mvua7606-4 · cantidad manual; posición pendiente",
+                      "cantidadConfirmada": true,
+                      "evidencia": "Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.",
+                      "nodo": null,
+                      "origen": "identificado",
+                      "equivalentes": "No se calculan en este plan físico",
+                      "ubicacionNombre": "A–Calefón · cantidad manual; posición pendiente",
+                      "claveRevision": "[\"codo90\",\"Codo Normal a 90º 25 mm\",\"25 mm candidato\",\"unidad\",\"tramo-mvua7606-4 · cantidad manual; posición pendiente\",[{\"idFisico\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]\",\"tipo\":\"codo90\",\"cantidad\":3,\"medidas\":[\"32 mm candidato\"],\"confirmado\":true,\"tramo\":\"tramo-mvua75yo-2\",\"ubicacion\":\"tramo-mvua75yo-2 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":\"Codo Normal a 90º 32 mm\",\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]::pieza:0\",\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]::pieza:1\",\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]::pieza:2\"],\"funcion\":\"recorrido\",\"geometria\":\"codo90\",\"productoIdentificado\":true,\"productos\":[\"sigas-p24-izquierdo-21\"],\"candidatoMm\":32,\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"tee\\\"]\",\"tipo\":\"tee\",\"cantidad\":1,\"medidas\":[\"32 mm candidato\"],\"confirmado\":true,\"tramo\":\"tramo-mvua75yo-2\",\"ubicacion\":\"tramo-mvua75yo-2 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"tee\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"tee\\\"]::pieza:0\"],\"funcion\":\"derivacion\",\"geometria\":null,\"productoIdentificado\":false,\"productos\":[],\"candidatoMm\":32,\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"codo90\\\"]\",\"tipo\":\"codo90\",\"cantidad\":2,\"medidas\":[\"20 mm candidato\"],\"confirmado\":true,\"tramo\":\"tramo-mvua75zn-3\",\"ubicacion\":\"tramo-mvua75zn-3 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":\"Codo Normal a 90º 20 mm\",\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"codo90\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"codo90\\\"]::pieza:0\",\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"codo90\\\"]::pieza:1\"],\"funcion\":\"recorrido\",\"geometria\":\"codo90\",\"productoIdentificado\":true,\"productos\":[\"sigas-p24-izquierdo-19\"],\"candidatoMm\":20,\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"llave\\\"]\",\"tipo\":\"llave\",\"cantidad\":1,\"medidas\":[\"20 mm candidato\"],\"confirmado\":true,\"tramo\":\"tramo-mvua75zn-3\",\"ubicacion\":\"tramo-mvua75zn-3 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"llave\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"llave\\\"]::pieza:0\"],\"funcion\":\"corte\",\"geometria\":null,\"productoIdentificado\":false,\"productos\":[],\"candidatoMm\":20,\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"codo90\\\"]\",\"tipo\":\"codo90\",\"cantidad\":2,\"medidas\":[\"25 mm candidato\"],\"confirmado\":true,\"tramo\":\"tramo-mvua7606-4\",\"ubicacion\":\"tramo-mvua7606-4 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":\"Codo Normal a 90º 25 mm\",\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"codo90\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"codo90\\\"]::pieza:0\",\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"codo90\\\"]::pieza:1\"],\"funcion\":\"recorrido\",\"geometria\":\"codo90\",\"productoIdentificado\":true,\"productos\":[\"sigas-p24-izquierdo-20\"],\"candidatoMm\":25,\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"llave\\\"]\",\"tipo\":\"llave\",\"cantidad\":1,\"medidas\":[\"25 mm candidato\"],\"confirmado\":true,\"tramo\":\"tramo-mvua7606-4\",\"ubicacion\":\"tramo-mvua7606-4 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"llave\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"llave\\\"]::pieza:0\"],\"funcion\":\"corte\",\"geometria\":null,\"productoIdentificado\":false,\"productos\":[],\"candidatoMm\":25,\"rosca\":null},\"medidasEstimadas\":true}]]"
+                    },
+                    {
+                      "id": "material-5",
+                      "unidad": "unidad",
+                      "estado": "estimado",
+                      "revisado": false,
+                      "material": "Llave de paso",
+                      "registroSigas": {
+                        "id": "manual-total:[\"tramo-mvua7606-4\",\"llave\"]",
+                        "identidadesFisicas": [
+                          "manual-total:[\"tramo-mvua7606-4\",\"llave\"]::pieza:0"
+                        ],
+                        "funcion": "corte",
+                        "geometria": null,
+                        "productoIdentificado": false,
+                        "productos": [],
+                        "candidatoMm": 25,
+                        "rosca": null
+                      },
+                      "tipo": "llave",
+                      "medidas": [
+                        "25 mm candidato"
+                      ],
+                      "diametro": "25 mm candidato",
+                      "cantidad": 1,
+                      "ubicacion": "tramo-mvua7606-4 · cantidad manual; posición pendiente",
+                      "cantidadConfirmada": true,
+                      "evidencia": "Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.",
+                      "nodo": null,
+                      "origen": "identificado",
+                      "equivalentes": "No se calculan en este plan físico",
+                      "ubicacionNombre": "A–Calefón · cantidad manual; posición pendiente",
+                      "claveRevision": "[\"llave\",\"Llave de paso\",\"25 mm candidato\",\"unidad\",\"tramo-mvua7606-4 · cantidad manual; posición pendiente\",[{\"idFisico\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]\",\"tipo\":\"codo90\",\"cantidad\":3,\"medidas\":[\"32 mm candidato\"],\"confirmado\":true,\"tramo\":\"tramo-mvua75yo-2\",\"ubicacion\":\"tramo-mvua75yo-2 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":\"Codo Normal a 90º 32 mm\",\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]::pieza:0\",\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]::pieza:1\",\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]::pieza:2\"],\"funcion\":\"recorrido\",\"geometria\":\"codo90\",\"productoIdentificado\":true,\"productos\":[\"sigas-p24-izquierdo-21\"],\"candidatoMm\":32,\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"tee\\\"]\",\"tipo\":\"tee\",\"cantidad\":1,\"medidas\":[\"32 mm candidato\"],\"confirmado\":true,\"tramo\":\"tramo-mvua75yo-2\",\"ubicacion\":\"tramo-mvua75yo-2 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"tee\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"tee\\\"]::pieza:0\"],\"funcion\":\"derivacion\",\"geometria\":null,\"productoIdentificado\":false,\"productos\":[],\"candidatoMm\":32,\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"codo90\\\"]\",\"tipo\":\"codo90\",\"cantidad\":2,\"medidas\":[\"20 mm candidato\"],\"confirmado\":true,\"tramo\":\"tramo-mvua75zn-3\",\"ubicacion\":\"tramo-mvua75zn-3 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":\"Codo Normal a 90º 20 mm\",\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"codo90\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"codo90\\\"]::pieza:0\",\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"codo90\\\"]::pieza:1\"],\"funcion\":\"recorrido\",\"geometria\":\"codo90\",\"productoIdentificado\":true,\"productos\":[\"sigas-p24-izquierdo-19\"],\"candidatoMm\":20,\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"llave\\\"]\",\"tipo\":\"llave\",\"cantidad\":1,\"medidas\":[\"20 mm candidato\"],\"confirmado\":true,\"tramo\":\"tramo-mvua75zn-3\",\"ubicacion\":\"tramo-mvua75zn-3 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"llave\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"llave\\\"]::pieza:0\"],\"funcion\":\"corte\",\"geometria\":null,\"productoIdentificado\":false,\"productos\":[],\"candidatoMm\":20,\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"codo90\\\"]\",\"tipo\":\"codo90\",\"cantidad\":2,\"medidas\":[\"25 mm candidato\"],\"confirmado\":true,\"tramo\":\"tramo-mvua7606-4\",\"ubicacion\":\"tramo-mvua7606-4 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":\"Codo Normal a 90º 25 mm\",\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"codo90\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"codo90\\\"]::pieza:0\",\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"codo90\\\"]::pieza:1\"],\"funcion\":\"recorrido\",\"geometria\":\"codo90\",\"productoIdentificado\":true,\"productos\":[\"sigas-p24-izquierdo-20\"],\"candidatoMm\":25,\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"llave\\\"]\",\"tipo\":\"llave\",\"cantidad\":1,\"medidas\":[\"25 mm candidato\"],\"confirmado\":true,\"tramo\":\"tramo-mvua7606-4\",\"ubicacion\":\"tramo-mvua7606-4 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"llave\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"llave\\\"]::pieza:0\"],\"funcion\":\"corte\",\"geometria\":null,\"productoIdentificado\":false,\"productos\":[],\"candidatoMm\":25,\"rosca\":null},\"medidasEstimadas\":true}]]"
+                    },
+                    {
+                      "id": "material-6",
+                      "unidad": "unidad",
+                      "estado": "estimado",
+                      "revisado": false,
+                      "tipo": "cano",
+                      "material": "Caño Acero-polietileno SIGAS Thermofusión / Thermofusión · comercial de 4 m",
+                      "diametro": "Pendiente (tramo-mvua75yo-2)",
+                      "cantidad": null,
+                      "ubicacion": "tramo-mvua75yo-2",
+                      "origen": "plan-cortes",
+                      "minimoTeorico": 3,
+                      "evidencia": "Compra pendiente: faltan posiciones. Mínimo por longitud, no lista definitiva.",
+                      "ubicacionNombre": "M–A",
+                      "claveRevision": "[\"cano\",\"Caño Acero-polietileno SIGAS Thermofusión / Thermofusión · comercial de 4 m\",\"Pendiente (tramo-mvua75yo-2)\",\"unidad\",\"tramo-mvua75yo-2\"]"
+                    },
+                    {
+                      "id": "material-7",
+                      "unidad": "unidad",
+                      "estado": "estimado",
+                      "revisado": false,
+                      "tipo": "cupla-plan",
+                      "material": "Cuplas dentro de segmentos continuos",
+                      "diametro": "Pendiente (tramo-mvua75yo-2)",
+                      "cantidad": null,
+                      "ubicacion": "tramo-mvua75yo-2",
+                      "origen": "plan-cortes",
+                      "evidencia": "Cuplas pendientes, no cero.",
+                      "ubicacionNombre": "M–A",
+                      "claveRevision": "[\"cupla-plan\",\"Cuplas dentro de segmentos continuos\",\"Pendiente (tramo-mvua75yo-2)\",\"unidad\",\"tramo-mvua75yo-2\"]"
+                    },
+                    {
+                      "id": "material-8",
+                      "unidad": "unidad",
+                      "estado": "estimado",
+                      "revisado": false,
+                      "tipo": "cano",
+                      "material": "Caño Acero-polietileno SIGAS Thermofusión / Thermofusión · comercial de 4 m",
+                      "diametro": "Pendiente (tramo-mvua75zn-3)",
+                      "cantidad": null,
+                      "ubicacion": "tramo-mvua75zn-3",
+                      "origen": "plan-cortes",
+                      "minimoTeorico": 2,
+                      "evidencia": "Compra pendiente: faltan posiciones. Mínimo por longitud, no lista definitiva.",
+                      "ubicacionNombre": "A–Cocina",
+                      "claveRevision": "[\"cano\",\"Caño Acero-polietileno SIGAS Thermofusión / Thermofusión · comercial de 4 m\",\"Pendiente (tramo-mvua75zn-3)\",\"unidad\",\"tramo-mvua75zn-3\"]"
+                    },
+                    {
+                      "id": "material-9",
+                      "unidad": "unidad",
+                      "estado": "estimado",
+                      "revisado": false,
+                      "tipo": "cupla-plan",
+                      "material": "Cuplas dentro de segmentos continuos",
+                      "diametro": "Pendiente (tramo-mvua75zn-3)",
+                      "cantidad": null,
+                      "ubicacion": "tramo-mvua75zn-3",
+                      "origen": "plan-cortes",
+                      "evidencia": "Cuplas pendientes, no cero.",
+                      "ubicacionNombre": "A–Cocina",
+                      "claveRevision": "[\"cupla-plan\",\"Cuplas dentro de segmentos continuos\",\"Pendiente (tramo-mvua75zn-3)\",\"unidad\",\"tramo-mvua75zn-3\"]"
+                    },
+                    {
+                      "id": "material-10",
+                      "unidad": "unidad",
+                      "estado": "estimado",
+                      "revisado": false,
+                      "tipo": "cano",
+                      "material": "Caño Acero-polietileno SIGAS Thermofusión / Thermofusión · comercial de 4 m",
+                      "diametro": "Pendiente (tramo-mvua7606-4)",
+                      "cantidad": null,
+                      "ubicacion": "tramo-mvua7606-4",
+                      "origen": "plan-cortes",
+                      "minimoTeorico": 2,
+                      "evidencia": "Compra pendiente: faltan posiciones. Mínimo por longitud, no lista definitiva.",
+                      "ubicacionNombre": "A–Calefón",
+                      "claveRevision": "[\"cano\",\"Caño Acero-polietileno SIGAS Thermofusión / Thermofusión · comercial de 4 m\",\"Pendiente (tramo-mvua7606-4)\",\"unidad\",\"tramo-mvua7606-4\"]"
+                    },
+                    {
+                      "id": "material-11",
+                      "unidad": "unidad",
+                      "estado": "estimado",
+                      "revisado": false,
+                      "tipo": "cupla-plan",
+                      "material": "Cuplas dentro de segmentos continuos",
+                      "diametro": "Pendiente (tramo-mvua7606-4)",
+                      "cantidad": null,
+                      "ubicacion": "tramo-mvua7606-4",
+                      "origen": "plan-cortes",
+                      "evidencia": "Cuplas pendientes, no cero.",
+                      "ubicacionNombre": "A–Calefón",
+                      "claveRevision": "[\"cupla-plan\",\"Cuplas dentro de segmentos continuos\",\"Pendiente (tramo-mvua7606-4)\",\"unidad\",\"tramo-mvua7606-4\"]"
+                    },
+                    {
+                      "id": "manual-cero:tramo-mvua75yo-2:codo45",
+                      "revisado": false,
+                      "tipo": "codo45",
+                      "material": "Codo 45°",
+                      "diametro": "Pendiente",
+                      "cantidad": 0,
+                      "unidad": "unidad",
+                      "ubicacion": "tramo-mvua75yo-2",
+                      "estado": "estimado",
+                      "cantidadConfirmada": true,
+                      "origen": "manual-cero",
+                      "evidencia": "Cero ingresado explícitamente; no es un campo vacío.",
+                      "ubicacionNombre": "M–A",
+                      "claveRevision": "[\"codo45\",\"Codo 45°\",\"Pendiente\",\"unidad\",\"tramo-mvua75yo-2\"]"
+                    },
+                    {
+                      "id": "manual-cero:tramo-mvua75yo-2:llave",
+                      "revisado": false,
+                      "tipo": "llave",
+                      "material": "Llave de paso",
+                      "diametro": "Pendiente",
+                      "cantidad": 0,
+                      "unidad": "unidad",
+                      "ubicacion": "tramo-mvua75yo-2",
+                      "estado": "estimado",
+                      "cantidadConfirmada": true,
+                      "origen": "manual-cero",
+                      "evidencia": "Cero ingresado explícitamente; no es un campo vacío.",
+                      "ubicacionNombre": "M–A",
+                      "claveRevision": "[\"llave\",\"Llave de paso\",\"Pendiente\",\"unidad\",\"tramo-mvua75yo-2\"]"
+                    },
+                    {
+                      "id": "manual-cero:tramo-mvua75zn-3:codo45",
+                      "revisado": false,
+                      "tipo": "codo45",
+                      "material": "Codo 45°",
+                      "diametro": "Pendiente",
+                      "cantidad": 0,
+                      "unidad": "unidad",
+                      "ubicacion": "tramo-mvua75zn-3",
+                      "estado": "estimado",
+                      "cantidadConfirmada": true,
+                      "origen": "manual-cero",
+                      "evidencia": "Cero ingresado explícitamente; no es un campo vacío.",
+                      "ubicacionNombre": "A–Cocina",
+                      "claveRevision": "[\"codo45\",\"Codo 45°\",\"Pendiente\",\"unidad\",\"tramo-mvua75zn-3\"]"
+                    },
+                    {
+                      "id": "manual-cero:tramo-mvua75zn-3:tee",
+                      "revisado": false,
+                      "tipo": "tee",
+                      "material": "Tee",
+                      "diametro": "Pendiente",
+                      "cantidad": 0,
+                      "unidad": "unidad",
+                      "ubicacion": "tramo-mvua75zn-3",
+                      "estado": "estimado",
+                      "cantidadConfirmada": true,
+                      "origen": "manual-cero",
+                      "evidencia": "Cero ingresado explícitamente; no es un campo vacío.",
+                      "ubicacionNombre": "A–Cocina",
+                      "claveRevision": "[\"tee\",\"Tee\",\"Pendiente\",\"unidad\",\"tramo-mvua75zn-3\"]"
+                    },
+                    {
+                      "id": "manual-cero:tramo-mvua7606-4:codo45",
+                      "revisado": false,
+                      "tipo": "codo45",
+                      "material": "Codo 45°",
+                      "diametro": "Pendiente",
+                      "cantidad": 0,
+                      "unidad": "unidad",
+                      "ubicacion": "tramo-mvua7606-4",
+                      "estado": "estimado",
+                      "cantidadConfirmada": true,
+                      "origen": "manual-cero",
+                      "evidencia": "Cero ingresado explícitamente; no es un campo vacío.",
+                      "ubicacionNombre": "A–Calefón",
+                      "claveRevision": "[\"codo45\",\"Codo 45°\",\"Pendiente\",\"unidad\",\"tramo-mvua7606-4\"]"
+                    },
+                    {
+                      "id": "manual-cero:tramo-mvua7606-4:tee",
+                      "revisado": false,
+                      "tipo": "tee",
+                      "material": "Tee",
+                      "diametro": "Pendiente",
+                      "cantidad": 0,
+                      "unidad": "unidad",
+                      "ubicacion": "tramo-mvua7606-4",
+                      "estado": "estimado",
+                      "cantidadConfirmada": true,
+                      "origen": "manual-cero",
+                      "evidencia": "Cero ingresado explícitamente; no es un campo vacío.",
+                      "ubicacionNombre": "A–Calefón",
+                      "claveRevision": "[\"tee\",\"Tee\",\"Pendiente\",\"unidad\",\"tramo-mvua7606-4\"]"
+                    }
+                  ]
+                }
+              },
+              "respaldos": [
+                {
+                  "firma": "{\"fuente\":\"proyecto\",\"entrada\":{\"casilleroMedidorGas\":{},\"origen\":\"Proyecto manual actual\",\"material\":\"Acero-polietileno SIGAS Thermofusión\",\"sistema\":\"Thermofusión\",\"nodos\":[{\"id\":\"nombre:m\",\"nombre\":\"M\"},{\"id\":\"nombre:a\",\"nombre\":\"A\"}],\"tramos\":[{\"id\":\"tramo-mvua75yo-2\",\"metros\":12,\"diametro\":null,\"diametroFinal\":null,\"red\":{\"desde\":\"nombre:m\",\"hasta\":\"nombre:a\"},\"segmentos\":null,\"accesorios\":[],\"continuidadCuplas\":{\"segmentos\":[],\"completa\":false,\"metrosPendientes\":12,\"pendientes\":[\"El total de codo90 no coincide con los accesorios posicionados.\"],\"bloqueada\":true}}],\"extras\":[{\"idFisico\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]\",\"tipo\":\"codo90\",\"cantidad\":3,\"medidas\":[],\"confirmado\":true,\"tramo\":\"tramo-mvua75yo-2\",\"ubicacion\":\"tramo-mvua75yo-2 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]::pieza:0\",\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]::pieza:1\",\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]::pieza:2\"],\"funcion\":\"recorrido\",\"geometria\":\"codo90\",\"productoIdentificado\":false,\"productos\":[],\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"tee\\\"]\",\"tipo\":\"tee\",\"cantidad\":1,\"medidas\":[],\"confirmado\":true,\"tramo\":\"tramo-mvua75yo-2\",\"ubicacion\":\"tramo-mvua75yo-2 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"tee\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"tee\\\"]::pieza:0\"],\"funcion\":\"derivacion\",\"geometria\":null,\"productoIdentificado\":false,\"productos\":[],\"rosca\":null},\"medidasEstimadas\":true}],\"manualDirecto\":{\"avisos\":[\"Consumo pendiente en A: indicá su artefacto o consumo de placa.\"],\"ceros\":[{\"tipo\":\"codo45\",\"material\":\"Codo 45°\",\"diametro\":\"Pendiente\",\"cantidad\":0,\"unidad\":\"unidad\",\"ubicacion\":\"tramo-mvua75yo-2\",\"estado\":\"estimado\",\"cantidadConfirmada\":true,\"origen\":\"manual-cero\",\"evidencia\":\"Cero ingresado explícitamente; no es un campo vacío.\"},{\"tipo\":\"llave\",\"material\":\"Llave de paso\",\"diametro\":\"Pendiente\",\"cantidad\":0,\"unidad\":\"unidad\",\"ubicacion\":\"tramo-mvua75yo-2\",\"estado\":\"estimado\",\"cantidadConfirmada\":true,\"origen\":\"manual-cero\",\"evidencia\":\"Cero ingresado explícitamente; no es un campo vacío.\"}],\"pendientes\":[\"M–A: Reducciones\"],\"red\":{\"errores\":[],\"avisos\":[],\"faltantes\":[\"Consumo pendiente en A: indicá su artefacto o consumo de placa.\"],\"porTramo\":{\"tramo-mvua75yo-2\":null},\"parciales\":{\"tramo-mvua75yo-2\":0},\"total\":null,\"orientacion\":{\"tramo-mvua75yo-2\":{\"desde\":\"nombre:m\",\"hasta\":\"nombre:a\",\"invertido\":false}},\"puntos\":[{\"id\":\"nombre:m\",\"nombre\":\"M\",\"tipo\":null,\"artefactoId\":null},{\"id\":\"nombre:a\",\"nombre\":\"A\",\"tipo\":null,\"artefactoId\":null}],\"grupos\":[{\"id\":\"tramo-mvua75yo-2\",\"desde\":\"nombre:m\",\"hasta\":\"nombre:a\"}],\"excluidos\":[],\"ambiguos\":[],\"listoParaDimensionar\":false}},\"propuestasCompraSigas\":[]},\"opciones\":{\"largoComercial\":4,\"reutilizar\":false,\"minimoSobrante\":0.5,\"hipotesisSinPosiciones\":false,\"uniones\":{}}}",
+                  "fuente": "proyecto",
+                  "estado": "DESACTUALIZADO · solo respaldo",
+                  "filas": [
+                    {
+                      "id": "material-0",
+                      "unidad": "unidad",
+                      "estado": "estimado",
+                      "revisado": false,
+                      "material": "Codo 90°",
+                      "registroSigas": {
+                        "id": "manual-total:[\"tramo-mvua75yo-2\",\"codo90\"]",
+                        "identidadesFisicas": [
+                          "manual-total:[\"tramo-mvua75yo-2\",\"codo90\"]::pieza:0",
+                          "manual-total:[\"tramo-mvua75yo-2\",\"codo90\"]::pieza:1",
+                          "manual-total:[\"tramo-mvua75yo-2\",\"codo90\"]::pieza:2"
+                        ],
+                        "funcion": "recorrido",
+                        "geometria": "codo90",
+                        "productoIdentificado": false,
+                        "productos": [],
+                        "rosca": null
+                      },
+                      "tipo": "codo90",
+                      "medidas": [],
+                      "diametro": "Pendiente",
+                      "cantidad": 3,
+                      "ubicacion": "tramo-mvua75yo-2 · cantidad manual; posición pendiente",
+                      "cantidadConfirmada": true,
+                      "evidencia": "Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo. Medidas/conexiones pendientes.",
+                      "nodo": null,
+                      "origen": "identificado",
+                      "equivalentes": "No se calculan en este plan físico",
+                      "ubicacionNombre": "M–A · cantidad manual; posición pendiente",
+                      "claveRevision": "[\"codo90\",\"Codo 90°\",\"Pendiente\",\"unidad\",\"tramo-mvua75yo-2 · cantidad manual; posición pendiente\",[{\"idFisico\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]\",\"tipo\":\"codo90\",\"cantidad\":3,\"medidas\":[],\"confirmado\":true,\"tramo\":\"tramo-mvua75yo-2\",\"ubicacion\":\"tramo-mvua75yo-2 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]::pieza:0\",\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]::pieza:1\",\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]::pieza:2\"],\"funcion\":\"recorrido\",\"geometria\":\"codo90\",\"productoIdentificado\":false,\"productos\":[],\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"tee\\\"]\",\"tipo\":\"tee\",\"cantidad\":1,\"medidas\":[],\"confirmado\":true,\"tramo\":\"tramo-mvua75yo-2\",\"ubicacion\":\"tramo-mvua75yo-2 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"tee\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"tee\\\"]::pieza:0\"],\"funcion\":\"derivacion\",\"geometria\":null,\"productoIdentificado\":false,\"productos\":[],\"rosca\":null},\"medidasEstimadas\":true}]]"
+                    },
+                    {
+                      "id": "material-1",
+                      "unidad": "unidad",
+                      "estado": "estimado",
+                      "revisado": false,
+                      "material": "Tee",
+                      "registroSigas": {
+                        "id": "manual-total:[\"tramo-mvua75yo-2\",\"tee\"]",
+                        "identidadesFisicas": [
+                          "manual-total:[\"tramo-mvua75yo-2\",\"tee\"]::pieza:0"
+                        ],
+                        "funcion": "derivacion",
+                        "geometria": null,
+                        "productoIdentificado": false,
+                        "productos": [],
+                        "rosca": null
+                      },
+                      "tipo": "tee",
+                      "medidas": [],
+                      "diametro": "Pendiente",
+                      "cantidad": 1,
+                      "ubicacion": "tramo-mvua75yo-2 · cantidad manual; posición pendiente",
+                      "cantidadConfirmada": true,
+                      "evidencia": "Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo. Medidas/conexiones pendientes.",
+                      "nodo": null,
+                      "origen": "identificado",
+                      "equivalentes": "No se calculan en este plan físico",
+                      "ubicacionNombre": "M–A · cantidad manual; posición pendiente",
+                      "claveRevision": "[\"tee\",\"Tee\",\"Pendiente\",\"unidad\",\"tramo-mvua75yo-2 · cantidad manual; posición pendiente\",[{\"idFisico\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]\",\"tipo\":\"codo90\",\"cantidad\":3,\"medidas\":[],\"confirmado\":true,\"tramo\":\"tramo-mvua75yo-2\",\"ubicacion\":\"tramo-mvua75yo-2 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]::pieza:0\",\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]::pieza:1\",\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]::pieza:2\"],\"funcion\":\"recorrido\",\"geometria\":\"codo90\",\"productoIdentificado\":false,\"productos\":[],\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"tee\\\"]\",\"tipo\":\"tee\",\"cantidad\":1,\"medidas\":[],\"confirmado\":true,\"tramo\":\"tramo-mvua75yo-2\",\"ubicacion\":\"tramo-mvua75yo-2 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"tee\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"tee\\\"]::pieza:0\"],\"funcion\":\"derivacion\",\"geometria\":null,\"productoIdentificado\":false,\"productos\":[],\"rosca\":null},\"medidasEstimadas\":true}]]"
+                    },
+                    {
+                      "id": "material-2",
+                      "unidad": "unidad",
+                      "estado": "estimado",
+                      "revisado": false,
+                      "tipo": "cano",
+                      "material": "Caño Acero-polietileno SIGAS Thermofusión / Thermofusión · comercial de 4 m",
+                      "diametro": "Pendiente (tramo-mvua75yo-2)",
+                      "cantidad": null,
+                      "ubicacion": "tramo-mvua75yo-2",
+                      "origen": "plan-cortes",
+                      "minimoTeorico": 3,
+                      "evidencia": "Compra pendiente: faltan posiciones. Mínimo por longitud, no lista definitiva.",
+                      "ubicacionNombre": "M–A",
+                      "claveRevision": "[\"cano\",\"Caño Acero-polietileno SIGAS Thermofusión / Thermofusión · comercial de 4 m\",\"Pendiente (tramo-mvua75yo-2)\",\"unidad\",\"tramo-mvua75yo-2\"]"
+                    },
+                    {
+                      "id": "material-3",
+                      "unidad": "unidad",
+                      "estado": "estimado",
+                      "revisado": false,
+                      "tipo": "cupla-plan",
+                      "material": "Cuplas dentro de segmentos continuos",
+                      "diametro": "Pendiente (tramo-mvua75yo-2)",
+                      "cantidad": null,
+                      "ubicacion": "tramo-mvua75yo-2",
+                      "origen": "plan-cortes",
+                      "evidencia": "Cuplas pendientes, no cero.",
+                      "ubicacionNombre": "M–A",
+                      "claveRevision": "[\"cupla-plan\",\"Cuplas dentro de segmentos continuos\",\"Pendiente (tramo-mvua75yo-2)\",\"unidad\",\"tramo-mvua75yo-2\"]"
+                    },
+                    {
+                      "id": "manual-cero:tramo-mvua75yo-2:codo45",
+                      "revisado": false,
+                      "tipo": "codo45",
+                      "material": "Codo 45°",
+                      "diametro": "Pendiente",
+                      "cantidad": 0,
+                      "unidad": "unidad",
+                      "ubicacion": "tramo-mvua75yo-2",
+                      "estado": "estimado",
+                      "cantidadConfirmada": true,
+                      "origen": "manual-cero",
+                      "evidencia": "Cero ingresado explícitamente; no es un campo vacío.",
+                      "ubicacionNombre": "M–A",
+                      "claveRevision": "[\"codo45\",\"Codo 45°\",\"Pendiente\",\"unidad\",\"tramo-mvua75yo-2\"]"
+                    },
+                    {
+                      "id": "manual-cero:tramo-mvua75yo-2:llave",
+                      "revisado": false,
+                      "tipo": "llave",
+                      "material": "Llave de paso",
+                      "diametro": "Pendiente",
+                      "cantidad": 0,
+                      "unidad": "unidad",
+                      "ubicacion": "tramo-mvua75yo-2",
+                      "estado": "estimado",
+                      "cantidadConfirmada": true,
+                      "origen": "manual-cero",
+                      "evidencia": "Cero ingresado explícitamente; no es un campo vacío.",
+                      "ubicacionNombre": "M–A",
+                      "claveRevision": "[\"llave\",\"Llave de paso\",\"Pendiente\",\"unidad\",\"tramo-mvua75yo-2\"]"
+                    }
+                  ]
+                },
+                {
+                  "firma": "{\"fuente\":\"proyecto\",\"entrada\":{\"casilleroMedidorGas\":{},\"origen\":\"Proyecto manual actual\",\"material\":\"Acero-polietileno SIGAS Thermofusión\",\"sistema\":\"Thermofusión\",\"nodos\":[{\"id\":\"nombre:m\",\"nombre\":\"M\"},{\"id\":\"nombre:a\",\"nombre\":\"A\"},{\"id\":\"nombre:cocina\",\"nombre\":\"Cocina\"}],\"tramos\":[{\"id\":\"tramo-mvua75yo-2\",\"metros\":12,\"diametro\":null,\"diametroFinal\":null,\"red\":{\"desde\":\"nombre:m\",\"hasta\":\"nombre:a\"},\"segmentos\":null,\"accesorios\":[],\"continuidadCuplas\":{\"segmentos\":[],\"completa\":false,\"metrosPendientes\":12,\"pendientes\":[\"El total de codo90 no coincide con los accesorios posicionados.\"],\"bloqueada\":true}},{\"id\":\"tramo-mvua75zn-3\",\"metros\":8,\"diametro\":null,\"diametroFinal\":null,\"red\":{\"desde\":\"nombre:a\",\"hasta\":\"nombre:cocina\"},\"segmentos\":null,\"accesorios\":[],\"continuidadCuplas\":{\"segmentos\":[],\"completa\":false,\"metrosPendientes\":8,\"pendientes\":[\"El total de codo90 no coincide con los accesorios posicionados.\"],\"bloqueada\":true}}],\"extras\":[{\"idFisico\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]\",\"tipo\":\"codo90\",\"cantidad\":3,\"medidas\":[],\"confirmado\":true,\"tramo\":\"tramo-mvua75yo-2\",\"ubicacion\":\"tramo-mvua75yo-2 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]::pieza:0\",\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]::pieza:1\",\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]::pieza:2\"],\"funcion\":\"recorrido\",\"geometria\":\"codo90\",\"productoIdentificado\":false,\"productos\":[],\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"tee\\\"]\",\"tipo\":\"tee\",\"cantidad\":1,\"medidas\":[],\"confirmado\":true,\"tramo\":\"tramo-mvua75yo-2\",\"ubicacion\":\"tramo-mvua75yo-2 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"tee\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"tee\\\"]::pieza:0\"],\"funcion\":\"derivacion\",\"geometria\":null,\"productoIdentificado\":false,\"productos\":[],\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"codo90\\\"]\",\"tipo\":\"codo90\",\"cantidad\":2,\"medidas\":[],\"confirmado\":true,\"tramo\":\"tramo-mvua75zn-3\",\"ubicacion\":\"tramo-mvua75zn-3 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"codo90\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"codo90\\\"]::pieza:0\",\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"codo90\\\"]::pieza:1\"],\"funcion\":\"recorrido\",\"geometria\":\"codo90\",\"productoIdentificado\":false,\"productos\":[],\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"llave\\\"]\",\"tipo\":\"llave\",\"cantidad\":1,\"medidas\":[],\"confirmado\":true,\"tramo\":\"tramo-mvua75zn-3\",\"ubicacion\":\"tramo-mvua75zn-3 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"llave\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"llave\\\"]::pieza:0\"],\"funcion\":\"corte\",\"geometria\":null,\"productoIdentificado\":false,\"productos\":[],\"rosca\":null},\"medidasEstimadas\":true}],\"manualDirecto\":{\"avisos\":[],\"ceros\":[{\"tipo\":\"codo45\",\"material\":\"Codo 45°\",\"diametro\":\"Pendiente\",\"cantidad\":0,\"unidad\":\"unidad\",\"ubicacion\":\"tramo-mvua75yo-2\",\"estado\":\"estimado\",\"cantidadConfirmada\":true,\"origen\":\"manual-cero\",\"evidencia\":\"Cero ingresado explícitamente; no es un campo vacío.\"},{\"tipo\":\"llave\",\"material\":\"Llave de paso\",\"diametro\":\"Pendiente\",\"cantidad\":0,\"unidad\":\"unidad\",\"ubicacion\":\"tramo-mvua75yo-2\",\"estado\":\"estimado\",\"cantidadConfirmada\":true,\"origen\":\"manual-cero\",\"evidencia\":\"Cero ingresado explícitamente; no es un campo vacío.\"},{\"tipo\":\"codo45\",\"material\":\"Codo 45°\",\"diametro\":\"Pendiente\",\"cantidad\":0,\"unidad\":\"unidad\",\"ubicacion\":\"tramo-mvua75zn-3\",\"estado\":\"estimado\",\"cantidadConfirmada\":true,\"origen\":\"manual-cero\",\"evidencia\":\"Cero ingresado explícitamente; no es un campo vacío.\"},{\"tipo\":\"tee\",\"material\":\"Tee\",\"diametro\":\"Pendiente\",\"cantidad\":0,\"unidad\":\"unidad\",\"ubicacion\":\"tramo-mvua75zn-3\",\"estado\":\"estimado\",\"cantidadConfirmada\":true,\"origen\":\"manual-cero\",\"evidencia\":\"Cero ingresado explícitamente; no es un campo vacío.\"}],\"pendientes\":[\"M–A: Reducciones\",\"A–Cocina: Reducciones\"],\"red\":{\"errores\":[],\"avisos\":[],\"faltantes\":[],\"porTramo\":{\"tramo-mvua75zn-3\":10000,\"tramo-mvua75yo-2\":10000},\"parciales\":{\"tramo-mvua75zn-3\":10000,\"tramo-mvua75yo-2\":10000},\"total\":10000,\"orientacion\":{\"tramo-mvua75yo-2\":{\"desde\":\"nombre:m\",\"hasta\":\"nombre:a\",\"invertido\":false},\"tramo-mvua75zn-3\":{\"desde\":\"nombre:a\",\"hasta\":\"nombre:cocina\",\"invertido\":false}},\"puntos\":[{\"id\":\"nombre:m\",\"nombre\":\"M\",\"tipo\":null,\"artefactoId\":null},{\"id\":\"nombre:a\",\"nombre\":\"A\",\"tipo\":null,\"artefactoId\":null},{\"id\":\"nombre:cocina\",\"nombre\":\"Cocina\",\"tipo\":null,\"artefactoId\":null}],\"grupos\":[{\"id\":\"tramo-mvua75yo-2\",\"desde\":\"nombre:m\",\"hasta\":\"nombre:a\"},{\"id\":\"tramo-mvua75zn-3\",\"desde\":\"nombre:a\",\"hasta\":\"nombre:cocina\"}],\"excluidos\":[],\"ambiguos\":[],\"listoParaDimensionar\":false}},\"propuestasCompraSigas\":[]},\"opciones\":{\"largoComercial\":4,\"reutilizar\":false,\"minimoSobrante\":0.5,\"hipotesisSinPosiciones\":false,\"uniones\":{}}}",
+                  "fuente": "proyecto",
+                  "estado": "DESACTUALIZADO · solo respaldo",
+                  "filas": [
+                    {
+                      "id": "material-0",
+                      "unidad": "unidad",
+                      "estado": "estimado",
+                      "revisado": false,
+                      "material": "Codo 90°",
+                      "registroSigas": {
+                        "id": "manual-total:[\"tramo-mvua75yo-2\",\"codo90\"]",
+                        "identidadesFisicas": [
+                          "manual-total:[\"tramo-mvua75yo-2\",\"codo90\"]::pieza:0",
+                          "manual-total:[\"tramo-mvua75yo-2\",\"codo90\"]::pieza:1",
+                          "manual-total:[\"tramo-mvua75yo-2\",\"codo90\"]::pieza:2"
+                        ],
+                        "funcion": "recorrido",
+                        "geometria": "codo90",
+                        "productoIdentificado": false,
+                        "productos": [],
+                        "rosca": null
+                      },
+                      "tipo": "codo90",
+                      "medidas": [],
+                      "diametro": "Pendiente",
+                      "cantidad": 3,
+                      "ubicacion": "tramo-mvua75yo-2 · cantidad manual; posición pendiente",
+                      "cantidadConfirmada": true,
+                      "evidencia": "Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo. Medidas/conexiones pendientes.",
+                      "nodo": null,
+                      "origen": "identificado",
+                      "equivalentes": "No se calculan en este plan físico",
+                      "ubicacionNombre": "M–A · cantidad manual; posición pendiente",
+                      "claveRevision": "[\"codo90\",\"Codo 90°\",\"Pendiente\",\"unidad\",\"tramo-mvua75yo-2 · cantidad manual; posición pendiente\",[{\"idFisico\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]\",\"tipo\":\"codo90\",\"cantidad\":3,\"medidas\":[],\"confirmado\":true,\"tramo\":\"tramo-mvua75yo-2\",\"ubicacion\":\"tramo-mvua75yo-2 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]::pieza:0\",\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]::pieza:1\",\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]::pieza:2\"],\"funcion\":\"recorrido\",\"geometria\":\"codo90\",\"productoIdentificado\":false,\"productos\":[],\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"tee\\\"]\",\"tipo\":\"tee\",\"cantidad\":1,\"medidas\":[],\"confirmado\":true,\"tramo\":\"tramo-mvua75yo-2\",\"ubicacion\":\"tramo-mvua75yo-2 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"tee\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"tee\\\"]::pieza:0\"],\"funcion\":\"derivacion\",\"geometria\":null,\"productoIdentificado\":false,\"productos\":[],\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"codo90\\\"]\",\"tipo\":\"codo90\",\"cantidad\":2,\"medidas\":[],\"confirmado\":true,\"tramo\":\"tramo-mvua75zn-3\",\"ubicacion\":\"tramo-mvua75zn-3 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"codo90\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"codo90\\\"]::pieza:0\",\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"codo90\\\"]::pieza:1\"],\"funcion\":\"recorrido\",\"geometria\":\"codo90\",\"productoIdentificado\":false,\"productos\":[],\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"llave\\\"]\",\"tipo\":\"llave\",\"cantidad\":1,\"medidas\":[],\"confirmado\":true,\"tramo\":\"tramo-mvua75zn-3\",\"ubicacion\":\"tramo-mvua75zn-3 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"llave\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"llave\\\"]::pieza:0\"],\"funcion\":\"corte\",\"geometria\":null,\"productoIdentificado\":false,\"productos\":[],\"rosca\":null},\"medidasEstimadas\":true}]]"
+                    },
+                    {
+                      "id": "material-1",
+                      "unidad": "unidad",
+                      "estado": "estimado",
+                      "revisado": false,
+                      "material": "Tee",
+                      "registroSigas": {
+                        "id": "manual-total:[\"tramo-mvua75yo-2\",\"tee\"]",
+                        "identidadesFisicas": [
+                          "manual-total:[\"tramo-mvua75yo-2\",\"tee\"]::pieza:0"
+                        ],
+                        "funcion": "derivacion",
+                        "geometria": null,
+                        "productoIdentificado": false,
+                        "productos": [],
+                        "rosca": null
+                      },
+                      "tipo": "tee",
+                      "medidas": [],
+                      "diametro": "Pendiente",
+                      "cantidad": 1,
+                      "ubicacion": "tramo-mvua75yo-2 · cantidad manual; posición pendiente",
+                      "cantidadConfirmada": true,
+                      "evidencia": "Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo. Medidas/conexiones pendientes.",
+                      "nodo": null,
+                      "origen": "identificado",
+                      "equivalentes": "No se calculan en este plan físico",
+                      "ubicacionNombre": "M–A · cantidad manual; posición pendiente",
+                      "claveRevision": "[\"tee\",\"Tee\",\"Pendiente\",\"unidad\",\"tramo-mvua75yo-2 · cantidad manual; posición pendiente\",[{\"idFisico\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]\",\"tipo\":\"codo90\",\"cantidad\":3,\"medidas\":[],\"confirmado\":true,\"tramo\":\"tramo-mvua75yo-2\",\"ubicacion\":\"tramo-mvua75yo-2 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]::pieza:0\",\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]::pieza:1\",\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]::pieza:2\"],\"funcion\":\"recorrido\",\"geometria\":\"codo90\",\"productoIdentificado\":false,\"productos\":[],\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"tee\\\"]\",\"tipo\":\"tee\",\"cantidad\":1,\"medidas\":[],\"confirmado\":true,\"tramo\":\"tramo-mvua75yo-2\",\"ubicacion\":\"tramo-mvua75yo-2 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"tee\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"tee\\\"]::pieza:0\"],\"funcion\":\"derivacion\",\"geometria\":null,\"productoIdentificado\":false,\"productos\":[],\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"codo90\\\"]\",\"tipo\":\"codo90\",\"cantidad\":2,\"medidas\":[],\"confirmado\":true,\"tramo\":\"tramo-mvua75zn-3\",\"ubicacion\":\"tramo-mvua75zn-3 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"codo90\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"codo90\\\"]::pieza:0\",\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"codo90\\\"]::pieza:1\"],\"funcion\":\"recorrido\",\"geometria\":\"codo90\",\"productoIdentificado\":false,\"productos\":[],\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"llave\\\"]\",\"tipo\":\"llave\",\"cantidad\":1,\"medidas\":[],\"confirmado\":true,\"tramo\":\"tramo-mvua75zn-3\",\"ubicacion\":\"tramo-mvua75zn-3 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"llave\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"llave\\\"]::pieza:0\"],\"funcion\":\"corte\",\"geometria\":null,\"productoIdentificado\":false,\"productos\":[],\"rosca\":null},\"medidasEstimadas\":true}]]"
+                    },
+                    {
+                      "id": "material-2",
+                      "unidad": "unidad",
+                      "estado": "estimado",
+                      "revisado": false,
+                      "material": "Codo 90°",
+                      "registroSigas": {
+                        "id": "manual-total:[\"tramo-mvua75zn-3\",\"codo90\"]",
+                        "identidadesFisicas": [
+                          "manual-total:[\"tramo-mvua75zn-3\",\"codo90\"]::pieza:0",
+                          "manual-total:[\"tramo-mvua75zn-3\",\"codo90\"]::pieza:1"
+                        ],
+                        "funcion": "recorrido",
+                        "geometria": "codo90",
+                        "productoIdentificado": false,
+                        "productos": [],
+                        "rosca": null
+                      },
+                      "tipo": "codo90",
+                      "medidas": [],
+                      "diametro": "Pendiente",
+                      "cantidad": 2,
+                      "ubicacion": "tramo-mvua75zn-3 · cantidad manual; posición pendiente",
+                      "cantidadConfirmada": true,
+                      "evidencia": "Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo. Medidas/conexiones pendientes.",
+                      "nodo": null,
+                      "origen": "identificado",
+                      "equivalentes": "No se calculan en este plan físico",
+                      "ubicacionNombre": "A–Cocina · cantidad manual; posición pendiente",
+                      "claveRevision": "[\"codo90\",\"Codo 90°\",\"Pendiente\",\"unidad\",\"tramo-mvua75zn-3 · cantidad manual; posición pendiente\",[{\"idFisico\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]\",\"tipo\":\"codo90\",\"cantidad\":3,\"medidas\":[],\"confirmado\":true,\"tramo\":\"tramo-mvua75yo-2\",\"ubicacion\":\"tramo-mvua75yo-2 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]::pieza:0\",\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]::pieza:1\",\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]::pieza:2\"],\"funcion\":\"recorrido\",\"geometria\":\"codo90\",\"productoIdentificado\":false,\"productos\":[],\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"tee\\\"]\",\"tipo\":\"tee\",\"cantidad\":1,\"medidas\":[],\"confirmado\":true,\"tramo\":\"tramo-mvua75yo-2\",\"ubicacion\":\"tramo-mvua75yo-2 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"tee\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"tee\\\"]::pieza:0\"],\"funcion\":\"derivacion\",\"geometria\":null,\"productoIdentificado\":false,\"productos\":[],\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"codo90\\\"]\",\"tipo\":\"codo90\",\"cantidad\":2,\"medidas\":[],\"confirmado\":true,\"tramo\":\"tramo-mvua75zn-3\",\"ubicacion\":\"tramo-mvua75zn-3 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"codo90\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"codo90\\\"]::pieza:0\",\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"codo90\\\"]::pieza:1\"],\"funcion\":\"recorrido\",\"geometria\":\"codo90\",\"productoIdentificado\":false,\"productos\":[],\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"llave\\\"]\",\"tipo\":\"llave\",\"cantidad\":1,\"medidas\":[],\"confirmado\":true,\"tramo\":\"tramo-mvua75zn-3\",\"ubicacion\":\"tramo-mvua75zn-3 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"llave\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"llave\\\"]::pieza:0\"],\"funcion\":\"corte\",\"geometria\":null,\"productoIdentificado\":false,\"productos\":[],\"rosca\":null},\"medidasEstimadas\":true}]]"
+                    },
+                    {
+                      "id": "material-3",
+                      "unidad": "unidad",
+                      "estado": "estimado",
+                      "revisado": false,
+                      "material": "Llave de paso",
+                      "registroSigas": {
+                        "id": "manual-total:[\"tramo-mvua75zn-3\",\"llave\"]",
+                        "identidadesFisicas": [
+                          "manual-total:[\"tramo-mvua75zn-3\",\"llave\"]::pieza:0"
+                        ],
+                        "funcion": "corte",
+                        "geometria": null,
+                        "productoIdentificado": false,
+                        "productos": [],
+                        "rosca": null
+                      },
+                      "tipo": "llave",
+                      "medidas": [],
+                      "diametro": "Pendiente",
+                      "cantidad": 1,
+                      "ubicacion": "tramo-mvua75zn-3 · cantidad manual; posición pendiente",
+                      "cantidadConfirmada": true,
+                      "evidencia": "Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo. Medidas/conexiones pendientes.",
+                      "nodo": null,
+                      "origen": "identificado",
+                      "equivalentes": "No se calculan en este plan físico",
+                      "ubicacionNombre": "A–Cocina · cantidad manual; posición pendiente",
+                      "claveRevision": "[\"llave\",\"Llave de paso\",\"Pendiente\",\"unidad\",\"tramo-mvua75zn-3 · cantidad manual; posición pendiente\",[{\"idFisico\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]\",\"tipo\":\"codo90\",\"cantidad\":3,\"medidas\":[],\"confirmado\":true,\"tramo\":\"tramo-mvua75yo-2\",\"ubicacion\":\"tramo-mvua75yo-2 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]::pieza:0\",\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]::pieza:1\",\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]::pieza:2\"],\"funcion\":\"recorrido\",\"geometria\":\"codo90\",\"productoIdentificado\":false,\"productos\":[],\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"tee\\\"]\",\"tipo\":\"tee\",\"cantidad\":1,\"medidas\":[],\"confirmado\":true,\"tramo\":\"tramo-mvua75yo-2\",\"ubicacion\":\"tramo-mvua75yo-2 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"tee\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"tee\\\"]::pieza:0\"],\"funcion\":\"derivacion\",\"geometria\":null,\"productoIdentificado\":false,\"productos\":[],\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"codo90\\\"]\",\"tipo\":\"codo90\",\"cantidad\":2,\"medidas\":[],\"confirmado\":true,\"tramo\":\"tramo-mvua75zn-3\",\"ubicacion\":\"tramo-mvua75zn-3 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"codo90\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"codo90\\\"]::pieza:0\",\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"codo90\\\"]::pieza:1\"],\"funcion\":\"recorrido\",\"geometria\":\"codo90\",\"productoIdentificado\":false,\"productos\":[],\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"llave\\\"]\",\"tipo\":\"llave\",\"cantidad\":1,\"medidas\":[],\"confirmado\":true,\"tramo\":\"tramo-mvua75zn-3\",\"ubicacion\":\"tramo-mvua75zn-3 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"llave\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"llave\\\"]::pieza:0\"],\"funcion\":\"corte\",\"geometria\":null,\"productoIdentificado\":false,\"productos\":[],\"rosca\":null},\"medidasEstimadas\":true}]]"
+                    },
+                    {
+                      "id": "material-4",
+                      "unidad": "unidad",
+                      "estado": "estimado",
+                      "revisado": false,
+                      "tipo": "cano",
+                      "material": "Caño Acero-polietileno SIGAS Thermofusión / Thermofusión · comercial de 4 m",
+                      "diametro": "Pendiente (tramo-mvua75yo-2)",
+                      "cantidad": null,
+                      "ubicacion": "tramo-mvua75yo-2",
+                      "origen": "plan-cortes",
+                      "minimoTeorico": 3,
+                      "evidencia": "Compra pendiente: faltan posiciones. Mínimo por longitud, no lista definitiva.",
+                      "ubicacionNombre": "M–A",
+                      "claveRevision": "[\"cano\",\"Caño Acero-polietileno SIGAS Thermofusión / Thermofusión · comercial de 4 m\",\"Pendiente (tramo-mvua75yo-2)\",\"unidad\",\"tramo-mvua75yo-2\"]"
+                    },
+                    {
+                      "id": "material-5",
+                      "unidad": "unidad",
+                      "estado": "estimado",
+                      "revisado": false,
+                      "tipo": "cupla-plan",
+                      "material": "Cuplas dentro de segmentos continuos",
+                      "diametro": "Pendiente (tramo-mvua75yo-2)",
+                      "cantidad": null,
+                      "ubicacion": "tramo-mvua75yo-2",
+                      "origen": "plan-cortes",
+                      "evidencia": "Cuplas pendientes, no cero.",
+                      "ubicacionNombre": "M–A",
+                      "claveRevision": "[\"cupla-plan\",\"Cuplas dentro de segmentos continuos\",\"Pendiente (tramo-mvua75yo-2)\",\"unidad\",\"tramo-mvua75yo-2\"]"
+                    },
+                    {
+                      "id": "material-6",
+                      "unidad": "unidad",
+                      "estado": "estimado",
+                      "revisado": false,
+                      "tipo": "cano",
+                      "material": "Caño Acero-polietileno SIGAS Thermofusión / Thermofusión · comercial de 4 m",
+                      "diametro": "Pendiente (tramo-mvua75zn-3)",
+                      "cantidad": null,
+                      "ubicacion": "tramo-mvua75zn-3",
+                      "origen": "plan-cortes",
+                      "minimoTeorico": 2,
+                      "evidencia": "Compra pendiente: faltan posiciones. Mínimo por longitud, no lista definitiva.",
+                      "ubicacionNombre": "A–Cocina",
+                      "claveRevision": "[\"cano\",\"Caño Acero-polietileno SIGAS Thermofusión / Thermofusión · comercial de 4 m\",\"Pendiente (tramo-mvua75zn-3)\",\"unidad\",\"tramo-mvua75zn-3\"]"
+                    },
+                    {
+                      "id": "material-7",
+                      "unidad": "unidad",
+                      "estado": "estimado",
+                      "revisado": false,
+                      "tipo": "cupla-plan",
+                      "material": "Cuplas dentro de segmentos continuos",
+                      "diametro": "Pendiente (tramo-mvua75zn-3)",
+                      "cantidad": null,
+                      "ubicacion": "tramo-mvua75zn-3",
+                      "origen": "plan-cortes",
+                      "evidencia": "Cuplas pendientes, no cero.",
+                      "ubicacionNombre": "A–Cocina",
+                      "claveRevision": "[\"cupla-plan\",\"Cuplas dentro de segmentos continuos\",\"Pendiente (tramo-mvua75zn-3)\",\"unidad\",\"tramo-mvua75zn-3\"]"
+                    },
+                    {
+                      "id": "manual-cero:tramo-mvua75yo-2:codo45",
+                      "revisado": false,
+                      "tipo": "codo45",
+                      "material": "Codo 45°",
+                      "diametro": "Pendiente",
+                      "cantidad": 0,
+                      "unidad": "unidad",
+                      "ubicacion": "tramo-mvua75yo-2",
+                      "estado": "estimado",
+                      "cantidadConfirmada": true,
+                      "origen": "manual-cero",
+                      "evidencia": "Cero ingresado explícitamente; no es un campo vacío.",
+                      "ubicacionNombre": "M–A",
+                      "claveRevision": "[\"codo45\",\"Codo 45°\",\"Pendiente\",\"unidad\",\"tramo-mvua75yo-2\"]"
+                    },
+                    {
+                      "id": "manual-cero:tramo-mvua75yo-2:llave",
+                      "revisado": false,
+                      "tipo": "llave",
+                      "material": "Llave de paso",
+                      "diametro": "Pendiente",
+                      "cantidad": 0,
+                      "unidad": "unidad",
+                      "ubicacion": "tramo-mvua75yo-2",
+                      "estado": "estimado",
+                      "cantidadConfirmada": true,
+                      "origen": "manual-cero",
+                      "evidencia": "Cero ingresado explícitamente; no es un campo vacío.",
+                      "ubicacionNombre": "M–A",
+                      "claveRevision": "[\"llave\",\"Llave de paso\",\"Pendiente\",\"unidad\",\"tramo-mvua75yo-2\"]"
+                    },
+                    {
+                      "id": "manual-cero:tramo-mvua75zn-3:codo45",
+                      "revisado": false,
+                      "tipo": "codo45",
+                      "material": "Codo 45°",
+                      "diametro": "Pendiente",
+                      "cantidad": 0,
+                      "unidad": "unidad",
+                      "ubicacion": "tramo-mvua75zn-3",
+                      "estado": "estimado",
+                      "cantidadConfirmada": true,
+                      "origen": "manual-cero",
+                      "evidencia": "Cero ingresado explícitamente; no es un campo vacío.",
+                      "ubicacionNombre": "A–Cocina",
+                      "claveRevision": "[\"codo45\",\"Codo 45°\",\"Pendiente\",\"unidad\",\"tramo-mvua75zn-3\"]"
+                    },
+                    {
+                      "id": "manual-cero:tramo-mvua75zn-3:tee",
+                      "revisado": false,
+                      "tipo": "tee",
+                      "material": "Tee",
+                      "diametro": "Pendiente",
+                      "cantidad": 0,
+                      "unidad": "unidad",
+                      "ubicacion": "tramo-mvua75zn-3",
+                      "estado": "estimado",
+                      "cantidadConfirmada": true,
+                      "origen": "manual-cero",
+                      "evidencia": "Cero ingresado explícitamente; no es un campo vacío.",
+                      "ubicacionNombre": "A–Cocina",
+                      "claveRevision": "[\"tee\",\"Tee\",\"Pendiente\",\"unidad\",\"tramo-mvua75zn-3\"]"
+                    }
+                  ]
+                },
+                {
+                  "firma": "{\"fuente\":\"proyecto\",\"entrada\":{\"casilleroMedidorGas\":{},\"origen\":\"Proyecto manual actual\",\"material\":\"Acero-polietileno SIGAS Thermofusión\",\"sistema\":\"Thermofusión\",\"nodos\":[{\"id\":\"nombre:m\",\"nombre\":\"M\"},{\"id\":\"nombre:a\",\"nombre\":\"A\"},{\"id\":\"nombre:cocina\",\"nombre\":\"Cocina\"},{\"id\":\"nombre:calefón\",\"nombre\":\"Calefón\"}],\"tramos\":[{\"id\":\"tramo-mvua75yo-2\",\"metros\":12,\"diametro\":null,\"diametroFinal\":null,\"red\":{\"desde\":\"nombre:m\",\"hasta\":\"nombre:a\"},\"segmentos\":null,\"accesorios\":[],\"continuidadCuplas\":{\"segmentos\":[],\"completa\":false,\"metrosPendientes\":12,\"pendientes\":[\"El total de codo90 no coincide con los accesorios posicionados.\"],\"bloqueada\":true}},{\"id\":\"tramo-mvua75zn-3\",\"metros\":8,\"diametro\":null,\"diametroFinal\":null,\"red\":{\"desde\":\"nombre:a\",\"hasta\":\"nombre:cocina\"},\"segmentos\":null,\"accesorios\":[],\"continuidadCuplas\":{\"segmentos\":[],\"completa\":false,\"metrosPendientes\":8,\"pendientes\":[\"El total de codo90 no coincide con los accesorios posicionados.\"],\"bloqueada\":true}},{\"id\":\"tramo-mvua7606-4\",\"metros\":6,\"diametro\":null,\"diametroFinal\":null,\"red\":{\"desde\":\"nombre:a\",\"hasta\":\"nombre:calefón\"},\"segmentos\":null,\"accesorios\":[],\"continuidadCuplas\":{\"segmentos\":[],\"completa\":false,\"metrosPendientes\":6,\"pendientes\":[\"El total de codo90 no coincide con los accesorios posicionados.\"],\"bloqueada\":true}}],\"extras\":[{\"idFisico\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]\",\"tipo\":\"codo90\",\"cantidad\":3,\"medidas\":[],\"confirmado\":true,\"tramo\":\"tramo-mvua75yo-2\",\"ubicacion\":\"tramo-mvua75yo-2 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]::pieza:0\",\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]::pieza:1\",\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]::pieza:2\"],\"funcion\":\"recorrido\",\"geometria\":\"codo90\",\"productoIdentificado\":false,\"productos\":[],\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"tee\\\"]\",\"tipo\":\"tee\",\"cantidad\":1,\"medidas\":[],\"confirmado\":true,\"tramo\":\"tramo-mvua75yo-2\",\"ubicacion\":\"tramo-mvua75yo-2 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"tee\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"tee\\\"]::pieza:0\"],\"funcion\":\"derivacion\",\"geometria\":null,\"productoIdentificado\":false,\"productos\":[],\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"codo90\\\"]\",\"tipo\":\"codo90\",\"cantidad\":2,\"medidas\":[],\"confirmado\":true,\"tramo\":\"tramo-mvua75zn-3\",\"ubicacion\":\"tramo-mvua75zn-3 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"codo90\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"codo90\\\"]::pieza:0\",\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"codo90\\\"]::pieza:1\"],\"funcion\":\"recorrido\",\"geometria\":\"codo90\",\"productoIdentificado\":false,\"productos\":[],\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"llave\\\"]\",\"tipo\":\"llave\",\"cantidad\":1,\"medidas\":[],\"confirmado\":true,\"tramo\":\"tramo-mvua75zn-3\",\"ubicacion\":\"tramo-mvua75zn-3 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"llave\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"llave\\\"]::pieza:0\"],\"funcion\":\"corte\",\"geometria\":null,\"productoIdentificado\":false,\"productos\":[],\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"codo90\\\"]\",\"tipo\":\"codo90\",\"cantidad\":2,\"medidas\":[],\"confirmado\":true,\"tramo\":\"tramo-mvua7606-4\",\"ubicacion\":\"tramo-mvua7606-4 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"codo90\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"codo90\\\"]::pieza:0\",\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"codo90\\\"]::pieza:1\"],\"funcion\":\"recorrido\",\"geometria\":\"codo90\",\"productoIdentificado\":false,\"productos\":[],\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"llave\\\"]\",\"tipo\":\"llave\",\"cantidad\":1,\"medidas\":[],\"confirmado\":true,\"tramo\":\"tramo-mvua7606-4\",\"ubicacion\":\"tramo-mvua7606-4 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"llave\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"llave\\\"]::pieza:0\"],\"funcion\":\"corte\",\"geometria\":null,\"productoIdentificado\":false,\"productos\":[],\"rosca\":null},\"medidasEstimadas\":true}],\"manualDirecto\":{\"avisos\":[],\"ceros\":[{\"tipo\":\"codo45\",\"material\":\"Codo 45°\",\"diametro\":\"Pendiente\",\"cantidad\":0,\"unidad\":\"unidad\",\"ubicacion\":\"tramo-mvua75yo-2\",\"estado\":\"estimado\",\"cantidadConfirmada\":true,\"origen\":\"manual-cero\",\"evidencia\":\"Cero ingresado explícitamente; no es un campo vacío.\"},{\"tipo\":\"llave\",\"material\":\"Llave de paso\",\"diametro\":\"Pendiente\",\"cantidad\":0,\"unidad\":\"unidad\",\"ubicacion\":\"tramo-mvua75yo-2\",\"estado\":\"estimado\",\"cantidadConfirmada\":true,\"origen\":\"manual-cero\",\"evidencia\":\"Cero ingresado explícitamente; no es un campo vacío.\"},{\"tipo\":\"codo45\",\"material\":\"Codo 45°\",\"diametro\":\"Pendiente\",\"cantidad\":0,\"unidad\":\"unidad\",\"ubicacion\":\"tramo-mvua75zn-3\",\"estado\":\"estimado\",\"cantidadConfirmada\":true,\"origen\":\"manual-cero\",\"evidencia\":\"Cero ingresado explícitamente; no es un campo vacío.\"},{\"tipo\":\"tee\",\"material\":\"Tee\",\"diametro\":\"Pendiente\",\"cantidad\":0,\"unidad\":\"unidad\",\"ubicacion\":\"tramo-mvua75zn-3\",\"estado\":\"estimado\",\"cantidadConfirmada\":true,\"origen\":\"manual-cero\",\"evidencia\":\"Cero ingresado explícitamente; no es un campo vacío.\"},{\"tipo\":\"codo45\",\"material\":\"Codo 45°\",\"diametro\":\"Pendiente\",\"cantidad\":0,\"unidad\":\"unidad\",\"ubicacion\":\"tramo-mvua7606-4\",\"estado\":\"estimado\",\"cantidadConfirmada\":true,\"origen\":\"manual-cero\",\"evidencia\":\"Cero ingresado explícitamente; no es un campo vacío.\"},{\"tipo\":\"tee\",\"material\":\"Tee\",\"diametro\":\"Pendiente\",\"cantidad\":0,\"unidad\":\"unidad\",\"ubicacion\":\"tramo-mvua7606-4\",\"estado\":\"estimado\",\"cantidadConfirmada\":true,\"origen\":\"manual-cero\",\"evidencia\":\"Cero ingresado explícitamente; no es un campo vacío.\"}],\"pendientes\":[\"M–A: Reducciones\",\"A–Cocina: Reducciones\",\"A–Calefón: Reducciones\"],\"red\":{\"errores\":[],\"avisos\":[],\"faltantes\":[],\"porTramo\":{\"tramo-mvua75zn-3\":10000,\"tramo-mvua7606-4\":20000,\"tramo-mvua75yo-2\":30000},\"parciales\":{\"tramo-mvua75zn-3\":10000,\"tramo-mvua7606-4\":20000,\"tramo-mvua75yo-2\":30000},\"total\":30000,\"orientacion\":{\"tramo-mvua75yo-2\":{\"desde\":\"nombre:m\",\"hasta\":\"nombre:a\",\"invertido\":false},\"tramo-mvua75zn-3\":{\"desde\":\"nombre:a\",\"hasta\":\"nombre:cocina\",\"invertido\":false},\"tramo-mvua7606-4\":{\"desde\":\"nombre:a\",\"hasta\":\"nombre:calefón\",\"invertido\":false}},\"puntos\":[{\"id\":\"nombre:m\",\"nombre\":\"M\",\"tipo\":null,\"artefactoId\":null},{\"id\":\"nombre:a\",\"nombre\":\"A\",\"tipo\":null,\"artefactoId\":null},{\"id\":\"nombre:cocina\",\"nombre\":\"Cocina\",\"tipo\":null,\"artefactoId\":null},{\"id\":\"nombre:calefón\",\"nombre\":\"Calefón\",\"tipo\":null,\"artefactoId\":null}],\"grupos\":[{\"id\":\"tramo-mvua75yo-2\",\"desde\":\"nombre:m\",\"hasta\":\"nombre:a\"},{\"id\":\"tramo-mvua75zn-3\",\"desde\":\"nombre:a\",\"hasta\":\"nombre:cocina\"},{\"id\":\"tramo-mvua7606-4\",\"desde\":\"nombre:a\",\"hasta\":\"nombre:calefón\"}],\"excluidos\":[],\"ambiguos\":[],\"listoParaDimensionar\":false}},\"propuestasCompraSigas\":[]},\"opciones\":{\"largoComercial\":4,\"reutilizar\":false,\"minimoSobrante\":0.5,\"hipotesisSinPosiciones\":false,\"uniones\":{}}}",
+                  "fuente": "proyecto",
+                  "estado": "DESACTUALIZADO · solo respaldo",
+                  "filas": [
+                    {
+                      "id": "material-0",
+                      "unidad": "unidad",
+                      "estado": "estimado",
+                      "revisado": false,
+                      "material": "Codo 90°",
+                      "registroSigas": {
+                        "id": "manual-total:[\"tramo-mvua75yo-2\",\"codo90\"]",
+                        "identidadesFisicas": [
+                          "manual-total:[\"tramo-mvua75yo-2\",\"codo90\"]::pieza:0",
+                          "manual-total:[\"tramo-mvua75yo-2\",\"codo90\"]::pieza:1",
+                          "manual-total:[\"tramo-mvua75yo-2\",\"codo90\"]::pieza:2"
+                        ],
+                        "funcion": "recorrido",
+                        "geometria": "codo90",
+                        "productoIdentificado": false,
+                        "productos": [],
+                        "rosca": null
+                      },
+                      "tipo": "codo90",
+                      "medidas": [],
+                      "diametro": "Pendiente",
+                      "cantidad": 3,
+                      "ubicacion": "tramo-mvua75yo-2 · cantidad manual; posición pendiente",
+                      "cantidadConfirmada": true,
+                      "evidencia": "Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo. Medidas/conexiones pendientes.",
+                      "nodo": null,
+                      "origen": "identificado",
+                      "equivalentes": "No se calculan en este plan físico",
+                      "ubicacionNombre": "M–A · cantidad manual; posición pendiente",
+                      "claveRevision": "[\"codo90\",\"Codo 90°\",\"Pendiente\",\"unidad\",\"tramo-mvua75yo-2 · cantidad manual; posición pendiente\",[{\"idFisico\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]\",\"tipo\":\"codo90\",\"cantidad\":3,\"medidas\":[],\"confirmado\":true,\"tramo\":\"tramo-mvua75yo-2\",\"ubicacion\":\"tramo-mvua75yo-2 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]::pieza:0\",\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]::pieza:1\",\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]::pieza:2\"],\"funcion\":\"recorrido\",\"geometria\":\"codo90\",\"productoIdentificado\":false,\"productos\":[],\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"tee\\\"]\",\"tipo\":\"tee\",\"cantidad\":1,\"medidas\":[],\"confirmado\":true,\"tramo\":\"tramo-mvua75yo-2\",\"ubicacion\":\"tramo-mvua75yo-2 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"tee\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"tee\\\"]::pieza:0\"],\"funcion\":\"derivacion\",\"geometria\":null,\"productoIdentificado\":false,\"productos\":[],\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"codo90\\\"]\",\"tipo\":\"codo90\",\"cantidad\":2,\"medidas\":[],\"confirmado\":true,\"tramo\":\"tramo-mvua75zn-3\",\"ubicacion\":\"tramo-mvua75zn-3 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"codo90\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"codo90\\\"]::pieza:0\",\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"codo90\\\"]::pieza:1\"],\"funcion\":\"recorrido\",\"geometria\":\"codo90\",\"productoIdentificado\":false,\"productos\":[],\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"llave\\\"]\",\"tipo\":\"llave\",\"cantidad\":1,\"medidas\":[],\"confirmado\":true,\"tramo\":\"tramo-mvua75zn-3\",\"ubicacion\":\"tramo-mvua75zn-3 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"llave\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"llave\\\"]::pieza:0\"],\"funcion\":\"corte\",\"geometria\":null,\"productoIdentificado\":false,\"productos\":[],\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"codo90\\\"]\",\"tipo\":\"codo90\",\"cantidad\":2,\"medidas\":[],\"confirmado\":true,\"tramo\":\"tramo-mvua7606-4\",\"ubicacion\":\"tramo-mvua7606-4 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"codo90\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"codo90\\\"]::pieza:0\",\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"codo90\\\"]::pieza:1\"],\"funcion\":\"recorrido\",\"geometria\":\"codo90\",\"productoIdentificado\":false,\"productos\":[],\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"llave\\\"]\",\"tipo\":\"llave\",\"cantidad\":1,\"medidas\":[],\"confirmado\":true,\"tramo\":\"tramo-mvua7606-4\",\"ubicacion\":\"tramo-mvua7606-4 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"llave\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"llave\\\"]::pieza:0\"],\"funcion\":\"corte\",\"geometria\":null,\"productoIdentificado\":false,\"productos\":[],\"rosca\":null},\"medidasEstimadas\":true}]]"
+                    },
+                    {
+                      "id": "material-1",
+                      "unidad": "unidad",
+                      "estado": "estimado",
+                      "revisado": false,
+                      "material": "Tee",
+                      "registroSigas": {
+                        "id": "manual-total:[\"tramo-mvua75yo-2\",\"tee\"]",
+                        "identidadesFisicas": [
+                          "manual-total:[\"tramo-mvua75yo-2\",\"tee\"]::pieza:0"
+                        ],
+                        "funcion": "derivacion",
+                        "geometria": null,
+                        "productoIdentificado": false,
+                        "productos": [],
+                        "rosca": null
+                      },
+                      "tipo": "tee",
+                      "medidas": [],
+                      "diametro": "Pendiente",
+                      "cantidad": 1,
+                      "ubicacion": "tramo-mvua75yo-2 · cantidad manual; posición pendiente",
+                      "cantidadConfirmada": true,
+                      "evidencia": "Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo. Medidas/conexiones pendientes.",
+                      "nodo": null,
+                      "origen": "identificado",
+                      "equivalentes": "No se calculan en este plan físico",
+                      "ubicacionNombre": "M–A · cantidad manual; posición pendiente",
+                      "claveRevision": "[\"tee\",\"Tee\",\"Pendiente\",\"unidad\",\"tramo-mvua75yo-2 · cantidad manual; posición pendiente\",[{\"idFisico\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]\",\"tipo\":\"codo90\",\"cantidad\":3,\"medidas\":[],\"confirmado\":true,\"tramo\":\"tramo-mvua75yo-2\",\"ubicacion\":\"tramo-mvua75yo-2 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]::pieza:0\",\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]::pieza:1\",\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]::pieza:2\"],\"funcion\":\"recorrido\",\"geometria\":\"codo90\",\"productoIdentificado\":false,\"productos\":[],\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"tee\\\"]\",\"tipo\":\"tee\",\"cantidad\":1,\"medidas\":[],\"confirmado\":true,\"tramo\":\"tramo-mvua75yo-2\",\"ubicacion\":\"tramo-mvua75yo-2 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"tee\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"tee\\\"]::pieza:0\"],\"funcion\":\"derivacion\",\"geometria\":null,\"productoIdentificado\":false,\"productos\":[],\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"codo90\\\"]\",\"tipo\":\"codo90\",\"cantidad\":2,\"medidas\":[],\"confirmado\":true,\"tramo\":\"tramo-mvua75zn-3\",\"ubicacion\":\"tramo-mvua75zn-3 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"codo90\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"codo90\\\"]::pieza:0\",\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"codo90\\\"]::pieza:1\"],\"funcion\":\"recorrido\",\"geometria\":\"codo90\",\"productoIdentificado\":false,\"productos\":[],\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"llave\\\"]\",\"tipo\":\"llave\",\"cantidad\":1,\"medidas\":[],\"confirmado\":true,\"tramo\":\"tramo-mvua75zn-3\",\"ubicacion\":\"tramo-mvua75zn-3 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"llave\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"llave\\\"]::pieza:0\"],\"funcion\":\"corte\",\"geometria\":null,\"productoIdentificado\":false,\"productos\":[],\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"codo90\\\"]\",\"tipo\":\"codo90\",\"cantidad\":2,\"medidas\":[],\"confirmado\":true,\"tramo\":\"tramo-mvua7606-4\",\"ubicacion\":\"tramo-mvua7606-4 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"codo90\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"codo90\\\"]::pieza:0\",\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"codo90\\\"]::pieza:1\"],\"funcion\":\"recorrido\",\"geometria\":\"codo90\",\"productoIdentificado\":false,\"productos\":[],\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"llave\\\"]\",\"tipo\":\"llave\",\"cantidad\":1,\"medidas\":[],\"confirmado\":true,\"tramo\":\"tramo-mvua7606-4\",\"ubicacion\":\"tramo-mvua7606-4 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"llave\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"llave\\\"]::pieza:0\"],\"funcion\":\"corte\",\"geometria\":null,\"productoIdentificado\":false,\"productos\":[],\"rosca\":null},\"medidasEstimadas\":true}]]"
+                    },
+                    {
+                      "id": "material-2",
+                      "unidad": "unidad",
+                      "estado": "estimado",
+                      "revisado": false,
+                      "material": "Codo 90°",
+                      "registroSigas": {
+                        "id": "manual-total:[\"tramo-mvua75zn-3\",\"codo90\"]",
+                        "identidadesFisicas": [
+                          "manual-total:[\"tramo-mvua75zn-3\",\"codo90\"]::pieza:0",
+                          "manual-total:[\"tramo-mvua75zn-3\",\"codo90\"]::pieza:1"
+                        ],
+                        "funcion": "recorrido",
+                        "geometria": "codo90",
+                        "productoIdentificado": false,
+                        "productos": [],
+                        "rosca": null
+                      },
+                      "tipo": "codo90",
+                      "medidas": [],
+                      "diametro": "Pendiente",
+                      "cantidad": 2,
+                      "ubicacion": "tramo-mvua75zn-3 · cantidad manual; posición pendiente",
+                      "cantidadConfirmada": true,
+                      "evidencia": "Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo. Medidas/conexiones pendientes.",
+                      "nodo": null,
+                      "origen": "identificado",
+                      "equivalentes": "No se calculan en este plan físico",
+                      "ubicacionNombre": "A–Cocina · cantidad manual; posición pendiente",
+                      "claveRevision": "[\"codo90\",\"Codo 90°\",\"Pendiente\",\"unidad\",\"tramo-mvua75zn-3 · cantidad manual; posición pendiente\",[{\"idFisico\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]\",\"tipo\":\"codo90\",\"cantidad\":3,\"medidas\":[],\"confirmado\":true,\"tramo\":\"tramo-mvua75yo-2\",\"ubicacion\":\"tramo-mvua75yo-2 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]::pieza:0\",\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]::pieza:1\",\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]::pieza:2\"],\"funcion\":\"recorrido\",\"geometria\":\"codo90\",\"productoIdentificado\":false,\"productos\":[],\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"tee\\\"]\",\"tipo\":\"tee\",\"cantidad\":1,\"medidas\":[],\"confirmado\":true,\"tramo\":\"tramo-mvua75yo-2\",\"ubicacion\":\"tramo-mvua75yo-2 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"tee\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"tee\\\"]::pieza:0\"],\"funcion\":\"derivacion\",\"geometria\":null,\"productoIdentificado\":false,\"productos\":[],\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"codo90\\\"]\",\"tipo\":\"codo90\",\"cantidad\":2,\"medidas\":[],\"confirmado\":true,\"tramo\":\"tramo-mvua75zn-3\",\"ubicacion\":\"tramo-mvua75zn-3 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"codo90\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"codo90\\\"]::pieza:0\",\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"codo90\\\"]::pieza:1\"],\"funcion\":\"recorrido\",\"geometria\":\"codo90\",\"productoIdentificado\":false,\"productos\":[],\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"llave\\\"]\",\"tipo\":\"llave\",\"cantidad\":1,\"medidas\":[],\"confirmado\":true,\"tramo\":\"tramo-mvua75zn-3\",\"ubicacion\":\"tramo-mvua75zn-3 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"llave\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"llave\\\"]::pieza:0\"],\"funcion\":\"corte\",\"geometria\":null,\"productoIdentificado\":false,\"productos\":[],\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"codo90\\\"]\",\"tipo\":\"codo90\",\"cantidad\":2,\"medidas\":[],\"confirmado\":true,\"tramo\":\"tramo-mvua7606-4\",\"ubicacion\":\"tramo-mvua7606-4 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"codo90\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"codo90\\\"]::pieza:0\",\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"codo90\\\"]::pieza:1\"],\"funcion\":\"recorrido\",\"geometria\":\"codo90\",\"productoIdentificado\":false,\"productos\":[],\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"llave\\\"]\",\"tipo\":\"llave\",\"cantidad\":1,\"medidas\":[],\"confirmado\":true,\"tramo\":\"tramo-mvua7606-4\",\"ubicacion\":\"tramo-mvua7606-4 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"llave\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"llave\\\"]::pieza:0\"],\"funcion\":\"corte\",\"geometria\":null,\"productoIdentificado\":false,\"productos\":[],\"rosca\":null},\"medidasEstimadas\":true}]]"
+                    },
+                    {
+                      "id": "material-3",
+                      "unidad": "unidad",
+                      "estado": "estimado",
+                      "revisado": false,
+                      "material": "Llave de paso",
+                      "registroSigas": {
+                        "id": "manual-total:[\"tramo-mvua75zn-3\",\"llave\"]",
+                        "identidadesFisicas": [
+                          "manual-total:[\"tramo-mvua75zn-3\",\"llave\"]::pieza:0"
+                        ],
+                        "funcion": "corte",
+                        "geometria": null,
+                        "productoIdentificado": false,
+                        "productos": [],
+                        "rosca": null
+                      },
+                      "tipo": "llave",
+                      "medidas": [],
+                      "diametro": "Pendiente",
+                      "cantidad": 1,
+                      "ubicacion": "tramo-mvua75zn-3 · cantidad manual; posición pendiente",
+                      "cantidadConfirmada": true,
+                      "evidencia": "Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo. Medidas/conexiones pendientes.",
+                      "nodo": null,
+                      "origen": "identificado",
+                      "equivalentes": "No se calculan en este plan físico",
+                      "ubicacionNombre": "A–Cocina · cantidad manual; posición pendiente",
+                      "claveRevision": "[\"llave\",\"Llave de paso\",\"Pendiente\",\"unidad\",\"tramo-mvua75zn-3 · cantidad manual; posición pendiente\",[{\"idFisico\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]\",\"tipo\":\"codo90\",\"cantidad\":3,\"medidas\":[],\"confirmado\":true,\"tramo\":\"tramo-mvua75yo-2\",\"ubicacion\":\"tramo-mvua75yo-2 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]::pieza:0\",\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]::pieza:1\",\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]::pieza:2\"],\"funcion\":\"recorrido\",\"geometria\":\"codo90\",\"productoIdentificado\":false,\"productos\":[],\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"tee\\\"]\",\"tipo\":\"tee\",\"cantidad\":1,\"medidas\":[],\"confirmado\":true,\"tramo\":\"tramo-mvua75yo-2\",\"ubicacion\":\"tramo-mvua75yo-2 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"tee\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"tee\\\"]::pieza:0\"],\"funcion\":\"derivacion\",\"geometria\":null,\"productoIdentificado\":false,\"productos\":[],\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"codo90\\\"]\",\"tipo\":\"codo90\",\"cantidad\":2,\"medidas\":[],\"confirmado\":true,\"tramo\":\"tramo-mvua75zn-3\",\"ubicacion\":\"tramo-mvua75zn-3 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"codo90\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"codo90\\\"]::pieza:0\",\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"codo90\\\"]::pieza:1\"],\"funcion\":\"recorrido\",\"geometria\":\"codo90\",\"productoIdentificado\":false,\"productos\":[],\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"llave\\\"]\",\"tipo\":\"llave\",\"cantidad\":1,\"medidas\":[],\"confirmado\":true,\"tramo\":\"tramo-mvua75zn-3\",\"ubicacion\":\"tramo-mvua75zn-3 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"llave\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"llave\\\"]::pieza:0\"],\"funcion\":\"corte\",\"geometria\":null,\"productoIdentificado\":false,\"productos\":[],\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"codo90\\\"]\",\"tipo\":\"codo90\",\"cantidad\":2,\"medidas\":[],\"confirmado\":true,\"tramo\":\"tramo-mvua7606-4\",\"ubicacion\":\"tramo-mvua7606-4 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"codo90\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"codo90\\\"]::pieza:0\",\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"codo90\\\"]::pieza:1\"],\"funcion\":\"recorrido\",\"geometria\":\"codo90\",\"productoIdentificado\":false,\"productos\":[],\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"llave\\\"]\",\"tipo\":\"llave\",\"cantidad\":1,\"medidas\":[],\"confirmado\":true,\"tramo\":\"tramo-mvua7606-4\",\"ubicacion\":\"tramo-mvua7606-4 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"llave\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"llave\\\"]::pieza:0\"],\"funcion\":\"corte\",\"geometria\":null,\"productoIdentificado\":false,\"productos\":[],\"rosca\":null},\"medidasEstimadas\":true}]]"
+                    },
+                    {
+                      "id": "material-4",
+                      "unidad": "unidad",
+                      "estado": "estimado",
+                      "revisado": false,
+                      "material": "Codo 90°",
+                      "registroSigas": {
+                        "id": "manual-total:[\"tramo-mvua7606-4\",\"codo90\"]",
+                        "identidadesFisicas": [
+                          "manual-total:[\"tramo-mvua7606-4\",\"codo90\"]::pieza:0",
+                          "manual-total:[\"tramo-mvua7606-4\",\"codo90\"]::pieza:1"
+                        ],
+                        "funcion": "recorrido",
+                        "geometria": "codo90",
+                        "productoIdentificado": false,
+                        "productos": [],
+                        "rosca": null
+                      },
+                      "tipo": "codo90",
+                      "medidas": [],
+                      "diametro": "Pendiente",
+                      "cantidad": 2,
+                      "ubicacion": "tramo-mvua7606-4 · cantidad manual; posición pendiente",
+                      "cantidadConfirmada": true,
+                      "evidencia": "Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo. Medidas/conexiones pendientes.",
+                      "nodo": null,
+                      "origen": "identificado",
+                      "equivalentes": "No se calculan en este plan físico",
+                      "ubicacionNombre": "A–Calefón · cantidad manual; posición pendiente",
+                      "claveRevision": "[\"codo90\",\"Codo 90°\",\"Pendiente\",\"unidad\",\"tramo-mvua7606-4 · cantidad manual; posición pendiente\",[{\"idFisico\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]\",\"tipo\":\"codo90\",\"cantidad\":3,\"medidas\":[],\"confirmado\":true,\"tramo\":\"tramo-mvua75yo-2\",\"ubicacion\":\"tramo-mvua75yo-2 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]::pieza:0\",\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]::pieza:1\",\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]::pieza:2\"],\"funcion\":\"recorrido\",\"geometria\":\"codo90\",\"productoIdentificado\":false,\"productos\":[],\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"tee\\\"]\",\"tipo\":\"tee\",\"cantidad\":1,\"medidas\":[],\"confirmado\":true,\"tramo\":\"tramo-mvua75yo-2\",\"ubicacion\":\"tramo-mvua75yo-2 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"tee\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"tee\\\"]::pieza:0\"],\"funcion\":\"derivacion\",\"geometria\":null,\"productoIdentificado\":false,\"productos\":[],\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"codo90\\\"]\",\"tipo\":\"codo90\",\"cantidad\":2,\"medidas\":[],\"confirmado\":true,\"tramo\":\"tramo-mvua75zn-3\",\"ubicacion\":\"tramo-mvua75zn-3 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"codo90\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"codo90\\\"]::pieza:0\",\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"codo90\\\"]::pieza:1\"],\"funcion\":\"recorrido\",\"geometria\":\"codo90\",\"productoIdentificado\":false,\"productos\":[],\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"llave\\\"]\",\"tipo\":\"llave\",\"cantidad\":1,\"medidas\":[],\"confirmado\":true,\"tramo\":\"tramo-mvua75zn-3\",\"ubicacion\":\"tramo-mvua75zn-3 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"llave\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"llave\\\"]::pieza:0\"],\"funcion\":\"corte\",\"geometria\":null,\"productoIdentificado\":false,\"productos\":[],\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"codo90\\\"]\",\"tipo\":\"codo90\",\"cantidad\":2,\"medidas\":[],\"confirmado\":true,\"tramo\":\"tramo-mvua7606-4\",\"ubicacion\":\"tramo-mvua7606-4 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"codo90\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"codo90\\\"]::pieza:0\",\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"codo90\\\"]::pieza:1\"],\"funcion\":\"recorrido\",\"geometria\":\"codo90\",\"productoIdentificado\":false,\"productos\":[],\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"llave\\\"]\",\"tipo\":\"llave\",\"cantidad\":1,\"medidas\":[],\"confirmado\":true,\"tramo\":\"tramo-mvua7606-4\",\"ubicacion\":\"tramo-mvua7606-4 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"llave\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"llave\\\"]::pieza:0\"],\"funcion\":\"corte\",\"geometria\":null,\"productoIdentificado\":false,\"productos\":[],\"rosca\":null},\"medidasEstimadas\":true}]]"
+                    },
+                    {
+                      "id": "material-5",
+                      "unidad": "unidad",
+                      "estado": "estimado",
+                      "revisado": false,
+                      "material": "Llave de paso",
+                      "registroSigas": {
+                        "id": "manual-total:[\"tramo-mvua7606-4\",\"llave\"]",
+                        "identidadesFisicas": [
+                          "manual-total:[\"tramo-mvua7606-4\",\"llave\"]::pieza:0"
+                        ],
+                        "funcion": "corte",
+                        "geometria": null,
+                        "productoIdentificado": false,
+                        "productos": [],
+                        "rosca": null
+                      },
+                      "tipo": "llave",
+                      "medidas": [],
+                      "diametro": "Pendiente",
+                      "cantidad": 1,
+                      "ubicacion": "tramo-mvua7606-4 · cantidad manual; posición pendiente",
+                      "cantidadConfirmada": true,
+                      "evidencia": "Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo. Medidas/conexiones pendientes.",
+                      "nodo": null,
+                      "origen": "identificado",
+                      "equivalentes": "No se calculan en este plan físico",
+                      "ubicacionNombre": "A–Calefón · cantidad manual; posición pendiente",
+                      "claveRevision": "[\"llave\",\"Llave de paso\",\"Pendiente\",\"unidad\",\"tramo-mvua7606-4 · cantidad manual; posición pendiente\",[{\"idFisico\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]\",\"tipo\":\"codo90\",\"cantidad\":3,\"medidas\":[],\"confirmado\":true,\"tramo\":\"tramo-mvua75yo-2\",\"ubicacion\":\"tramo-mvua75yo-2 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]::pieza:0\",\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]::pieza:1\",\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"codo90\\\"]::pieza:2\"],\"funcion\":\"recorrido\",\"geometria\":\"codo90\",\"productoIdentificado\":false,\"productos\":[],\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"tee\\\"]\",\"tipo\":\"tee\",\"cantidad\":1,\"medidas\":[],\"confirmado\":true,\"tramo\":\"tramo-mvua75yo-2\",\"ubicacion\":\"tramo-mvua75yo-2 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"tee\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75yo-2\\\",\\\"tee\\\"]::pieza:0\"],\"funcion\":\"derivacion\",\"geometria\":null,\"productoIdentificado\":false,\"productos\":[],\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"codo90\\\"]\",\"tipo\":\"codo90\",\"cantidad\":2,\"medidas\":[],\"confirmado\":true,\"tramo\":\"tramo-mvua75zn-3\",\"ubicacion\":\"tramo-mvua75zn-3 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"codo90\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"codo90\\\"]::pieza:0\",\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"codo90\\\"]::pieza:1\"],\"funcion\":\"recorrido\",\"geometria\":\"codo90\",\"productoIdentificado\":false,\"productos\":[],\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"llave\\\"]\",\"tipo\":\"llave\",\"cantidad\":1,\"medidas\":[],\"confirmado\":true,\"tramo\":\"tramo-mvua75zn-3\",\"ubicacion\":\"tramo-mvua75zn-3 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"llave\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua75zn-3\\\",\\\"llave\\\"]::pieza:0\"],\"funcion\":\"corte\",\"geometria\":null,\"productoIdentificado\":false,\"productos\":[],\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"codo90\\\"]\",\"tipo\":\"codo90\",\"cantidad\":2,\"medidas\":[],\"confirmado\":true,\"tramo\":\"tramo-mvua7606-4\",\"ubicacion\":\"tramo-mvua7606-4 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"codo90\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"codo90\\\"]::pieza:0\",\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"codo90\\\"]::pieza:1\"],\"funcion\":\"recorrido\",\"geometria\":\"codo90\",\"productoIdentificado\":false,\"productos\":[],\"rosca\":null},\"medidasEstimadas\":true},{\"idFisico\":\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"llave\\\"]\",\"tipo\":\"llave\",\"cantidad\":1,\"medidas\":[],\"confirmado\":true,\"tramo\":\"tramo-mvua7606-4\",\"ubicacion\":\"tramo-mvua7606-4 · cantidad manual; posición pendiente\",\"evidencia\":\"Cantidad ingresada por el usuario como total del tramo. No se suma al detalle ni alimenta equivalentes. Registro compartido SIGAS: producto y equivalentes según el mismo accesorio; diámetro candidato, no definitivo.\",\"nombreMaterialSigas\":null,\"registroSigas\":{\"id\":\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"llave\\\"]\",\"identidadesFisicas\":[\"manual-total:[\\\"tramo-mvua7606-4\\\",\\\"llave\\\"]::pieza:0\"],\"funcion\":\"corte\",\"geometria\":null,\"productoIdentificado\":false,\"productos\":[],\"rosca\":null},\"medidasEstimadas\":true}]]"
+                    },
+                    {
+                      "id": "material-6",
+                      "unidad": "unidad",
+                      "estado": "estimado",
+                      "revisado": false,
+                      "tipo": "cano",
+                      "material": "Caño Acero-polietileno SIGAS Thermofusión / Thermofusión · comercial de 4 m",
+                      "diametro": "Pendiente (tramo-mvua75yo-2)",
+                      "cantidad": null,
+                      "ubicacion": "tramo-mvua75yo-2",
+                      "origen": "plan-cortes",
+                      "minimoTeorico": 3,
+                      "evidencia": "Compra pendiente: faltan posiciones. Mínimo por longitud, no lista definitiva.",
+                      "ubicacionNombre": "M–A",
+                      "claveRevision": "[\"cano\",\"Caño Acero-polietileno SIGAS Thermofusión / Thermofusión · comercial de 4 m\",\"Pendiente (tramo-mvua75yo-2)\",\"unidad\",\"tramo-mvua75yo-2\"]"
+                    },
+                    {
+                      "id": "material-7",
+                      "unidad": "unidad",
+                      "estado": "estimado",
+                      "revisado": false,
+                      "tipo": "cupla-plan",
+                      "material": "Cuplas dentro de segmentos continuos",
+                      "diametro": "Pendiente (tramo-mvua75yo-2)",
+                      "cantidad": null,
+                      "ubicacion": "tramo-mvua75yo-2",
+                      "origen": "plan-cortes",
+                      "evidencia": "Cuplas pendientes, no cero.",
+                      "ubicacionNombre": "M–A",
+                      "claveRevision": "[\"cupla-plan\",\"Cuplas dentro de segmentos continuos\",\"Pendiente (tramo-mvua75yo-2)\",\"unidad\",\"tramo-mvua75yo-2\"]"
+                    },
+                    {
+                      "id": "material-8",
+                      "unidad": "unidad",
+                      "estado": "estimado",
+                      "revisado": false,
+                      "tipo": "cano",
+                      "material": "Caño Acero-polietileno SIGAS Thermofusión / Thermofusión · comercial de 4 m",
+                      "diametro": "Pendiente (tramo-mvua75zn-3)",
+                      "cantidad": null,
+                      "ubicacion": "tramo-mvua75zn-3",
+                      "origen": "plan-cortes",
+                      "minimoTeorico": 2,
+                      "evidencia": "Compra pendiente: faltan posiciones. Mínimo por longitud, no lista definitiva.",
+                      "ubicacionNombre": "A–Cocina",
+                      "claveRevision": "[\"cano\",\"Caño Acero-polietileno SIGAS Thermofusión / Thermofusión · comercial de 4 m\",\"Pendiente (tramo-mvua75zn-3)\",\"unidad\",\"tramo-mvua75zn-3\"]"
+                    },
+                    {
+                      "id": "material-9",
+                      "unidad": "unidad",
+                      "estado": "estimado",
+                      "revisado": false,
+                      "tipo": "cupla-plan",
+                      "material": "Cuplas dentro de segmentos continuos",
+                      "diametro": "Pendiente (tramo-mvua75zn-3)",
+                      "cantidad": null,
+                      "ubicacion": "tramo-mvua75zn-3",
+                      "origen": "plan-cortes",
+                      "evidencia": "Cuplas pendientes, no cero.",
+                      "ubicacionNombre": "A–Cocina",
+                      "claveRevision": "[\"cupla-plan\",\"Cuplas dentro de segmentos continuos\",\"Pendiente (tramo-mvua75zn-3)\",\"unidad\",\"tramo-mvua75zn-3\"]"
+                    },
+                    {
+                      "id": "material-10",
+                      "unidad": "unidad",
+                      "estado": "estimado",
+                      "revisado": false,
+                      "tipo": "cano",
+                      "material": "Caño Acero-polietileno SIGAS Thermofusión / Thermofusión · comercial de 4 m",
+                      "diametro": "Pendiente (tramo-mvua7606-4)",
+                      "cantidad": null,
+                      "ubicacion": "tramo-mvua7606-4",
+                      "origen": "plan-cortes",
+                      "minimoTeorico": 2,
+                      "evidencia": "Compra pendiente: faltan posiciones. Mínimo por longitud, no lista definitiva.",
+                      "ubicacionNombre": "A–Calefón",
+                      "claveRevision": "[\"cano\",\"Caño Acero-polietileno SIGAS Thermofusión / Thermofusión · comercial de 4 m\",\"Pendiente (tramo-mvua7606-4)\",\"unidad\",\"tramo-mvua7606-4\"]"
+                    },
+                    {
+                      "id": "material-11",
+                      "unidad": "unidad",
+                      "estado": "estimado",
+                      "revisado": false,
+                      "tipo": "cupla-plan",
+                      "material": "Cuplas dentro de segmentos continuos",
+                      "diametro": "Pendiente (tramo-mvua7606-4)",
+                      "cantidad": null,
+                      "ubicacion": "tramo-mvua7606-4",
+                      "origen": "plan-cortes",
+                      "evidencia": "Cuplas pendientes, no cero.",
+                      "ubicacionNombre": "A–Calefón",
+                      "claveRevision": "[\"cupla-plan\",\"Cuplas dentro de segmentos continuos\",\"Pendiente (tramo-mvua7606-4)\",\"unidad\",\"tramo-mvua7606-4\"]"
+                    },
+                    {
+                      "id": "manual-cero:tramo-mvua75yo-2:codo45",
+                      "revisado": false,
+                      "tipo": "codo45",
+                      "material": "Codo 45°",
+                      "diametro": "Pendiente",
+                      "cantidad": 0,
+                      "unidad": "unidad",
+                      "ubicacion": "tramo-mvua75yo-2",
+                      "estado": "estimado",
+                      "cantidadConfirmada": true,
+                      "origen": "manual-cero",
+                      "evidencia": "Cero ingresado explícitamente; no es un campo vacío.",
+                      "ubicacionNombre": "M–A",
+                      "claveRevision": "[\"codo45\",\"Codo 45°\",\"Pendiente\",\"unidad\",\"tramo-mvua75yo-2\"]"
+                    },
+                    {
+                      "id": "manual-cero:tramo-mvua75yo-2:llave",
+                      "revisado": false,
+                      "tipo": "llave",
+                      "material": "Llave de paso",
+                      "diametro": "Pendiente",
+                      "cantidad": 0,
+                      "unidad": "unidad",
+                      "ubicacion": "tramo-mvua75yo-2",
+                      "estado": "estimado",
+                      "cantidadConfirmada": true,
+                      "origen": "manual-cero",
+                      "evidencia": "Cero ingresado explícitamente; no es un campo vacío.",
+                      "ubicacionNombre": "M–A",
+                      "claveRevision": "[\"llave\",\"Llave de paso\",\"Pendiente\",\"unidad\",\"tramo-mvua75yo-2\"]"
+                    },
+                    {
+                      "id": "manual-cero:tramo-mvua75zn-3:codo45",
+                      "revisado": false,
+                      "tipo": "codo45",
+                      "material": "Codo 45°",
+                      "diametro": "Pendiente",
+                      "cantidad": 0,
+                      "unidad": "unidad",
+                      "ubicacion": "tramo-mvua75zn-3",
+                      "estado": "estimado",
+                      "cantidadConfirmada": true,
+                      "origen": "manual-cero",
+                      "evidencia": "Cero ingresado explícitamente; no es un campo vacío.",
+                      "ubicacionNombre": "A–Cocina",
+                      "claveRevision": "[\"codo45\",\"Codo 45°\",\"Pendiente\",\"unidad\",\"tramo-mvua75zn-3\"]"
+                    },
+                    {
+                      "id": "manual-cero:tramo-mvua75zn-3:tee",
+                      "revisado": false,
+                      "tipo": "tee",
+                      "material": "Tee",
+                      "diametro": "Pendiente",
+                      "cantidad": 0,
+                      "unidad": "unidad",
+                      "ubicacion": "tramo-mvua75zn-3",
+                      "estado": "estimado",
+                      "cantidadConfirmada": true,
+                      "origen": "manual-cero",
+                      "evidencia": "Cero ingresado explícitamente; no es un campo vacío.",
+                      "ubicacionNombre": "A–Cocina",
+                      "claveRevision": "[\"tee\",\"Tee\",\"Pendiente\",\"unidad\",\"tramo-mvua75zn-3\"]"
+                    },
+                    {
+                      "id": "manual-cero:tramo-mvua7606-4:codo45",
+                      "revisado": false,
+                      "tipo": "codo45",
+                      "material": "Codo 45°",
+                      "diametro": "Pendiente",
+                      "cantidad": 0,
+                      "unidad": "unidad",
+                      "ubicacion": "tramo-mvua7606-4",
+                      "estado": "estimado",
+                      "cantidadConfirmada": true,
+                      "origen": "manual-cero",
+                      "evidencia": "Cero ingresado explícitamente; no es un campo vacío.",
+                      "ubicacionNombre": "A–Calefón",
+                      "claveRevision": "[\"codo45\",\"Codo 45°\",\"Pendiente\",\"unidad\",\"tramo-mvua7606-4\"]"
+                    },
+                    {
+                      "id": "manual-cero:tramo-mvua7606-4:tee",
+                      "revisado": false,
+                      "tipo": "tee",
+                      "material": "Tee",
+                      "diametro": "Pendiente",
+                      "cantidad": 0,
+                      "unidad": "unidad",
+                      "ubicacion": "tramo-mvua7606-4",
+                      "estado": "estimado",
+                      "cantidadConfirmada": true,
+                      "origen": "manual-cero",
+                      "evidencia": "Cero ingresado explícitamente; no es un campo vacío.",
+                      "ubicacionNombre": "A–Calefón",
+                      "claveRevision": "[\"tee\",\"Tee\",\"Pendiente\",\"unidad\",\"tramo-mvua7606-4\"]"
+                    }
+                  ]
+                }
+              ]
+            },
+            "aclaracion": "",
+            "revision": "Todavía no hay una revisión registrada.",
+            "borradorCroquis": null,
+            "tipoGas": "9300",
+            "conteosRapidosGas": {
+              "tramo-mvua75yo-2": {
+                "codo90": 3,
+                "codo45": 0,
+                "tee": 1,
+                "llave": 0
+              },
+              "tramo-mvua75zn-3": {
+                "codo90": 2,
+                "codo45": 0,
+                "tee": 0,
+                "llave": 1
+              },
+              "tramo-mvua7606-4": {
+                "codo90": 2,
+                "codo45": 0,
+                "tee": 0,
+                "llave": 1
+              }
+            },
+            "derivadosGas": {
+              "firma": "{\"tramos\":[{\"desde\":\"M\",\"hasta\":\"A\",\"metros\":12,\"consumo\":null,\"diametro\":null,\"artefacto\":\"\",\"llave\":false,\"id\":\"tramo-mvua75yo-2\"},{\"desde\":\"A\",\"hasta\":\"Cocina\",\"metros\":8,\"consumo\":10000,\"diametro\":null,\"artefacto\":\"Cocina\",\"llave\":false,\"id\":\"tramo-mvua75zn-3\"},{\"desde\":\"A\",\"hasta\":\"Calefón\",\"metros\":6,\"consumo\":20000,\"diametro\":null,\"artefacto\":\"Calefón\",\"llave\":false,\"id\":\"tramo-mvua7606-4\"}],\"artefactos\":[],\"instalacion\":{\"version\":1,\"perfil\":{\"pais\":\"AR\",\"uso\":\"domiciliario\",\"gas\":\"GN\",\"largosDocumentados2026\":true,\"catalogoTecnicoGas\":\"sigas\",\"material\":\"Acero-polietileno SIGAS Thermofusión\",\"sistema\":\"Thermofusión\",\"poderCalorifico\":9300,\"fuenteGas\":\"PCS definido por el propietario para el ensayo Casa 1\"},\"nodos\":[]},\"tipoGas\":\"9300\"}",
+              "resultado": {
+                "metodo": "clase-tablas-3-18",
+                "aptoInstalacion": false,
+                "aviso": "Método de clase, NO aptitud para ejecutar una instalación real. Las reducciones se incluyen en el inventario como piezas pero se excluyen de equivalentes por este procedimiento; la verificación normativa puede exigir sus pérdidas y otras adicionales.",
+                "prueba": false,
+                "semillaAdicionalMetros": 15,
+                "recorridos": [],
+                "porTramo": {
+                  "tramo-mvua75yo-2": {
+                    "longitudReal": 12,
+                    "consumoKcal": null,
+                    "caudal": null,
+                    "accesoriosIdentificados": null,
+                    "longitudEquivalenteAccesorios": null,
+                    "longitudDefinitiva": null,
+                    "longitudDeCalculo": null,
+                    "diametroCalculado": null,
+                    "capacidad": null,
+                    "comprobacion": "PENDIENTE"
+                  },
+                  "tramo-mvua75zn-3": {
+                    "longitudReal": 8,
+                    "consumoKcal": null,
+                    "caudal": null,
+                    "accesoriosIdentificados": null,
+                    "longitudEquivalenteAccesorios": null,
+                    "longitudDefinitiva": null,
+                    "longitudDeCalculo": null,
+                    "diametroCalculado": null,
+                    "capacidad": null,
+                    "comprobacion": "PENDIENTE"
+                  },
+                  "tramo-mvua7606-4": {
+                    "longitudReal": 6,
+                    "consumoKcal": null,
+                    "caudal": null,
+                    "accesoriosIdentificados": null,
+                    "longitudEquivalenteAccesorios": null,
+                    "longitudDefinitiva": null,
+                    "longitudDeCalculo": null,
+                    "diametroCalculado": null,
+                    "capacidad": null,
+                    "comprobacion": "PENDIENTE"
+                  }
+                },
+                "historia": [],
+                "estado": "bloqueado",
+                "faltantes": [
+                  "La red necesita exactamente un medidor.",
+                  "Agregá artefactos con sus consumos de placa.",
+                  "Conectar origen y destino válidos del tramo M–A.",
+                  "Conectar origen y destino válidos del tramo A–Cocina.",
+                  "Conectar origen y destino válidos del tramo A–Calefón.",
+                  "Tabla de capacidad/pérdida por diámetro y caudal, específica del material y sistema (Tabla N.º 3 del ejercicio pendiente de verificar).",
+                  "Longitudes equivalentes de accesorios por medida y recorrido de tee (Tabla N.º 18 del ejercicio pendiente de verificar).",
+                  "Catálogo de piezas compatibles: tees, codos, llaves, cuplas y reducciones.",
+                  "Método y condiciones de aplicación verificados, con fuente y edición.",
+                  "Las fotografías de Tablas 3 y 18 ya están transcritas, pero falta verificación técnica: divergencia 7,67/7,65, redondeos, interiores/aplicabilidad al producto, fuente/edición, cuplas y comparación con ejercicios. No hay catálogo habilitado.",
+                  "Elegí explícitamente GN / acero con revestimiento epoxi / roscado para usar este procedimiento de clase.",
+                  "Este ejercicio utiliza 9300 kcal/m³ y densidad 0,65; no se trasladan a otra instalación sin comprobarlos.",
+                  "Identificá accesorios y posiciones de M–A; pendiente no significa cero.",
+                  "Identificá accesorios y posiciones de A–Cocina; pendiente no significa cero.",
+                  "Identificá accesorios y posiciones de A–Calefón; pendiente no significa cero."
+                ],
+                "diametros": null,
+                "accesorios": []
+              },
+              "dimensionamiento": {
+                "estado": "bloqueado",
+                "faltantes": [
+                  "La red necesita exactamente un medidor.",
+                  "Agregá artefactos con sus consumos de placa.",
+                  "Conectar origen y destino válidos del tramo M–A.",
+                  "Conectar origen y destino válidos del tramo A–Cocina.",
+                  "Conectar origen y destino válidos del tramo A–Calefón.",
+                  "Completar Provincia.",
+                  "Completar Localidad.",
+                  "Completar Distribuidora.",
+                  "Completar Unidad.",
+                  "Completar Presion.",
+                  "Completar Minima.",
+                  "Completar Perdida.",
+                  "Completar Fuente.",
+                  "Completar Norma.",
+                  "Completar Demanda.",
+                  "Poder calorífico del gas en kcal/m³ y su fuente (no se usa automáticamente el valor orientativo de la consulta).",
+                  "Densidad relativa del gas, comprobada para las tablas.",
+                  "Presiones en Pa para este motor tabular; no se reinterpretan mbar o mmca como Pa.",
+                  "Tabla de capacidad/pérdida por diámetro y caudal, específica del material y sistema (Tabla N.º 3 del ejercicio pendiente de verificar).",
+                  "Longitudes equivalentes de accesorios por medida y recorrido de tee (Tabla N.º 18 del ejercicio pendiente de verificar).",
+                  "Catálogo de piezas compatibles: tees, codos, llaves, cuplas y reducciones.",
+                  "Método y condiciones de aplicación verificados, con fuente y edición.",
+                  "Revisar cantidad, tipo y posición de accesorios de M–A.",
+                  "Revisar cantidad, tipo y posición de accesorios de A–Cocina.",
+                  "Revisar cantidad, tipo y posición de accesorios de A–Calefón."
+                ],
+                "diametros": null,
+                "accesorios": [],
+                "recorridos": [],
+                "prueba": false
+              },
+              "anterior": {
+                "firma": "{\"tramos\":[{\"desde\":\"M\",\"hasta\":\"A\",\"metros\":12,\"consumo\":null,\"diametro\":null,\"artefacto\":\"\",\"llave\":false,\"id\":\"tramo-mvua75yo-2\"},{\"desde\":\"A\",\"hasta\":\"Cocina\",\"metros\":8,\"consumo\":10000,\"diametro\":null,\"artefacto\":\"Cocina\",\"llave\":false,\"id\":\"tramo-mvua75zn-3\"},{\"desde\":\"A\",\"hasta\":\"Calefón\",\"metros\":6,\"consumo\":20000,\"diametro\":null,\"artefacto\":\"Calefón\",\"llave\":false,\"id\":\"tramo-mvua7606-4\"}],\"artefactos\":[],\"instalacion\":{\"version\":1,\"perfil\":{\"pais\":\"AR\",\"uso\":\"domiciliario\",\"gas\":\"GN\",\"largosDocumentados2026\":true,\"catalogoTecnicoGas\":\"sigas\",\"material\":\"Acero-polietileno SIGAS Thermofusión\",\"sistema\":\"Thermofusión\"},\"nodos\":[]},\"tipoGas\":\"9300\"}",
+                "resultado": {
+                  "metodo": "clase-tablas-3-18",
+                  "aptoInstalacion": false,
+                  "aviso": "Método de clase, NO aptitud para ejecutar una instalación real. Las reducciones se incluyen en el inventario como piezas pero se excluyen de equivalentes por este procedimiento; la verificación normativa puede exigir sus pérdidas y otras adicionales.",
+                  "prueba": false,
+                  "semillaAdicionalMetros": 15,
+                  "recorridos": [],
+                  "porTramo": {
+                    "tramo-mvua75yo-2": {
+                      "longitudReal": 12,
+                      "consumoKcal": null,
+                      "caudal": null,
+                      "accesoriosIdentificados": null,
+                      "longitudEquivalenteAccesorios": null,
+                      "longitudDefinitiva": null,
+                      "longitudDeCalculo": null,
+                      "diametroCalculado": null,
+                      "capacidad": null,
+                      "comprobacion": "PENDIENTE"
+                    },
+                    "tramo-mvua75zn-3": {
+                      "longitudReal": 8,
+                      "consumoKcal": null,
+                      "caudal": null,
+                      "accesoriosIdentificados": null,
+                      "longitudEquivalenteAccesorios": null,
+                      "longitudDefinitiva": null,
+                      "longitudDeCalculo": null,
+                      "diametroCalculado": null,
+                      "capacidad": null,
+                      "comprobacion": "PENDIENTE"
+                    },
+                    "tramo-mvua7606-4": {
+                      "longitudReal": 6,
+                      "consumoKcal": null,
+                      "caudal": null,
+                      "accesoriosIdentificados": null,
+                      "longitudEquivalenteAccesorios": null,
+                      "longitudDefinitiva": null,
+                      "longitudDeCalculo": null,
+                      "diametroCalculado": null,
+                      "capacidad": null,
+                      "comprobacion": "PENDIENTE"
+                    }
+                  },
+                  "historia": [],
+                  "estado": "bloqueado",
+                  "faltantes": [
+                    "La red necesita exactamente un medidor.",
+                    "Agregá artefactos con sus consumos de placa.",
+                    "Conectar origen y destino válidos del tramo M–A.",
+                    "Conectar origen y destino válidos del tramo A–Cocina.",
+                    "Conectar origen y destino válidos del tramo A–Calefón.",
+                    "Tabla de capacidad/pérdida por diámetro y caudal, específica del material y sistema (Tabla N.º 3 del ejercicio pendiente de verificar).",
+                    "Longitudes equivalentes de accesorios por medida y recorrido de tee (Tabla N.º 18 del ejercicio pendiente de verificar).",
+                    "Catálogo de piezas compatibles: tees, codos, llaves, cuplas y reducciones.",
+                    "Método y condiciones de aplicación verificados, con fuente y edición.",
+                    "Las fotografías de Tablas 3 y 18 ya están transcritas, pero falta verificación técnica: divergencia 7,67/7,65, redondeos, interiores/aplicabilidad al producto, fuente/edición, cuplas y comparación con ejercicios. No hay catálogo habilitado.",
+                    "Elegí explícitamente GN / acero con revestimiento epoxi / roscado para usar este procedimiento de clase.",
+                    "Este ejercicio utiliza 9300 kcal/m³ y densidad 0,65; no se trasladan a otra instalación sin comprobarlos.",
+                    "Identificá accesorios y posiciones de M–A; pendiente no significa cero.",
+                    "Identificá accesorios y posiciones de A–Cocina; pendiente no significa cero.",
+                    "Identificá accesorios y posiciones de A–Calefón; pendiente no significa cero."
+                  ],
+                  "diametros": null,
+                  "accesorios": []
+                }
+              },
+              "ultimoValido": null
+            },
+            "calculoSigas": {
+              "version": 1,
+              "vinculos": {},
+              "terminales": {
+                "terminal-medidor": {
+                  "rosca": "3/4"
+                },
+                "terminal-Cocina": {
+                  "rosca": "1/2"
+                },
+                "terminal-Calefón": {
+                  "rosca": "1/2"
+                }
+              },
+              "tees": {
+                "manual-total:[\"tramo-mvua75yo-2\",\"tee\"]": {
+                  "modo": "ambas",
+                  "viasPorTramo": {
+                    "tramo-mvua75zn-3": "directo",
+                    "tramo-mvua7606-4": "giro"
+                  },
+                  "fuenteOrientacion": "Datos definidos para el ejercicio Casa 1; no instalación real"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "aclaracion": "",
+      "revision": "Todavía no hay una revisión registrada.",
+      "instalacion": {
+        "version": 1,
+        "perfil": {
+          "pais": "AR",
+          "uso": "domiciliario",
+          "gas": "GN"
+        },
+        "nodos": []
+      },
+      "borradorCroquis": null,
+      "tramos": [],
+      "artefactos": [],
+      "tipoGas": "9300",
+      "proyectoActivoGas": "proyecto:proyecto-mvua75y4-1"
+    },
+    "agua": {},
+    "cloacas": {}
+  }
+}
