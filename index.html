@@ -168,6 +168,7 @@ section{box-shadow:none}
 .gas-calculo-preliminar{margin-top:16px;border:1px solid #b6c3cc;border-radius:10px;padding:10px}.gas-calculo-preliminar>summary{font-weight:700;min-height:44px;padding:10px 0}.ejercicio-estimado{background:#fff5d6;border-left:4px solid #a16b00;padding:10px}.ejercicio-pendiente{background:#f1f3f5;border-left:4px solid #65717c;padding:10px}.ejercicio-estado{border-left:4px solid #2876ac;padding:10px;background:#e4f1ff}
 @media screen and (max-width:700px){.gas-informe-compacto .materiales-diametro table{display:table;width:100%;table-layout:auto}.gas-informe-compacto .materiales-diametro thead{display:table-header-group}.gas-informe-compacto .materiales-diametro tbody{display:table-row-group}.gas-informe-compacto .materiales-diametro tr{display:table-row}.gas-informe-compacto .materiales-diametro td,.gas-informe-compacto .materiales-diametro th{display:table-cell;padding:6px;font-size:14px;width:auto;border:1px solid #aab9c5}.gas-informe-compacto .materiales-diametro td:before{content:none}.gas-informe-compacto .materiales-diametro td:first-child{width:65%}}
 .gas-informe-compacto>section{padding:0;margin:0 0 16px;background:transparent;box-shadow:none;border-radius:0}.gas-informe-compacto h3{margin:12px 0 6px}.gas-informe-compacto .materiales-diametro th:nth-child(n+2),.gas-informe-compacto .materiales-diametro td:nth-child(n+2){white-space:nowrap;overflow-wrap:normal}
+.gas-paso-titulo{font-weight:700;margin:16px 0 6px;color:#215b53}.gas-recorrido{padding:0;display:block}.gas-recorrido button{min-height:48px}.gas-recorrido .nota{font-size:13px;margin:6px 0}#estadoRecorridoGas:empty{display:none}@media(min-width:701px){.gas-recorrido{max-width:720px}}
 </style>
 </head>
 <body>
@@ -191,10 +192,14 @@ section{box-shadow:none}
 <h2 id="titulo"></h2><button id="imprimirGeneral" class="alt" onclick="imprimirInformeActual()">Imprimir informe / guardar PDF</button>
 
 <div id="menuGas" class="oculto">
-<div class="gas-selector-proyectos"><label>Proyecto de GAS <select id="ambitoGas" onchange="seleccionarAmbitoGas(this.value)"><option value="proyecto">Mi proyecto</option><option value="demostracion">Demostración separada</option></select></label><button class="alt" onclick="mostrarEditorProyectoGas('crear')">Nuevo proyecto</button></div>
+<p class="gas-paso-titulo">1 · Proyecto</p><div class="gas-selector-proyectos"><label>Proyecto de GAS <select id="ambitoGas" onchange="seleccionarAmbitoGas(this.value)"><option value="proyecto">Mi proyecto</option><option value="demostracion">Demostración separada</option></select></label><button class="alt" onclick="mostrarEditorProyectoGas('crear')">Nuevo proyecto</button></div>
 <div id="editorProyectosGas" class="detalle oculto"><label for="nombreProyectoGas">Nombre del proyecto</label><input id="nombreProyectoGas" type="text" maxlength="80" placeholder="Ej.: Casa de Ana"><button id="guardarNombreProyectoGas" onclick="guardarNombreProyectoGas()">Crear proyecto vacío</button><button class="alt" onclick="cancelarEditorProyectoGas()">Cancelar</button></div><p id="mensajeProyectosGas" role="status" aria-live="polite"></p><p id="estadoAmbitoGas"></p>
-<label for="catalogoSistemaGas">Sistema de cañería</label><select id="catalogoSistemaGas" onchange="seleccionarCatalogoSistemaGas(this.value)"><option value="">Pendiente de seleccionar</option><option value="acero-epoxi-roscado-gn">Acero epoxi · roscado</option><option value="sigas">SIGAS Thermofusión · manual ed.15 / 2025</option><option value="fusiogas">FUSIOGAS Thermofusión · V.1.2026</option></select>
-<label for="combustibleSistemaGas">Tipo de combustible</label><select id="combustibleSistemaGas" onchange="seleccionarCombustibleGas(this.value)"><option value="">Pendiente / revisar datos guardados</option><option value="GN">Gas natural</option><option value="GLP">GLP (composición por verificar)</option><option value="propano-gaseoso">Propano gaseoso identificado (SIGAS Tabla 5)</option></select><div class="gas-acciones-principales"><button id="editarDatosGas" class="alt" onclick="mostrarVista('croquis');$('editarTramosGas').open=true;desplazarResultadoMaterialesGas('formularioGas')">Cargar o editar tramos</button><button id="calcularCaneriaGas" onclick="calcularMaterialesManualGas()">CALCULAR CAÑERÍA</button></div>
+<p class="gas-paso-titulo">2 · Sistema y combustible</p><label for="catalogoSistemaGas">Sistema de cañería</label><select id="catalogoSistemaGas" onchange="seleccionarCatalogoSistemaGas(this.value)"><option value="">Pendiente de seleccionar</option><option value="acero-epoxi-roscado-gn">Acero epoxi · roscado</option><option value="sigas">SIGAS Thermofusión · manual ed.15 / 2025</option><option value="fusiogas">FUSIOGAS Thermofusión · V.1.2026</option></select>
+<label for="combustibleSistemaGas">Tipo de combustible</label><select id="combustibleSistemaGas" onchange="seleccionarCombustibleGas(this.value)"><option value="">Pendiente / revisar datos guardados</option><option value="GN">Gas natural</option><option value="GLP">GLP (composición por verificar)</option><option value="propano-gaseoso">Propano gaseoso identificado (SIGAS Tabla 5)</option></select><nav class="gas-recorrido solo-pantalla" aria-label="Pasos del proyecto GAS">
+<p class="gas-paso-titulo">3 · Referencia visual (opcional)</p><button id="pasoFotoGas" class="alt" onclick="irPasoProyectoGas('foto')">Cargar croquis o fotografía</button>
+<p class="gas-paso-titulo">4 · Datos de la instalación</p><button id="editarDatosGas" class="alt" onclick="irPasoProyectoGas('cargar')">Cargar o editar tramos</button><button id="pasoRevisarGas" class="alt" onclick="irPasoProyectoGas('revisar')">Revisar tramos cargados</button>
+<p class="gas-paso-titulo">5 · Resultado y presupuesto</p><button id="calcularCaneriaGas" onclick="calcularMaterialesManualGas()">CALCULAR CAÑERÍA</button><p class="nota">El resultado reúne materiales y presupuesto. Desde allí podés generar el PDF completo.</p>
+<p id="estadoRecorridoGas" role="status" aria-live="polite"></p></nav>
 <details id="ejerciciosGasSeparados" class="gas-detalles solo-pantalla"><summary>Ejercicios y demostraciones · separados de mis proyectos</summary><p>Datos de prueba: no reemplazan tus instalaciones ni interpretan fotografías.</p><button class="alt" onclick="abrirEjercicioSigas19Gas()">Abrir ejercicio SIGAS · 58 m y 19 codos (proyecto separado)</button><button class="alt" onclick="generarPlanGas('ejemplo')">Probar materiales: calefón y cocina</button></details>
 <details id="herramientasGasOpcionales" class="gas-detalles solo-pantalla"><summary>Revisiones y opciones avanzadas</summary><button class="alt" onclick="mostrarEditorProyectoGas('renombrar')">Renombrar proyecto</button><p id="estadoCatalogoSistemaGas" role="status" aria-live="polite"></p><p id="estadoCombustibleGas" role="status" aria-live="polite"></p><details class="gas-detalles"><summary>Largo comercial del caño</summary><p id="estadoLargoComercialGas"></p><button id="usarLargoDocumentadoGas" class="alt oculto" onclick="usarLargoDocumentadoGas()">Usar largo documentado de 4 m para este proyecto</button></details>
 <details class="gas-detalles solo-pantalla"><summary>Entrada al casillero del medidor M</summary><label for="entradaCasilleroGas">¿Por dónde entra la cañería?</label><select id="entradaCasilleroGas" onchange="guardarCasilleroMedidorGas()"><option value="desconocida">No está indicada / pendiente</option><option value="lateral">Por un lateral</option><option value="posterior">Por atrás</option><option value="superior">Por arriba</option></select><div id="cotejoCodoCasilleroGas" class="oculto"><label for="codoCasilleroGas">Codo de 90° dentro del casillero</label><select id="codoCasilleroGas" onchange="guardarCasilleroMedidorGas()"><option value="pendiente">No sé si ya está contado</option><option value="incluido">Ya está incluido en mis cantidades o detalle</option><option value="no-incluido">No está incluido: agregar un codo</option></select></div><p id="estadoCasilleroGas" role="status" aria-live="polite"></p><p class="nota">Solo conteo de materiales. No se agregan cuplas, uniones dobles, entrerroscas ni otras conexiones del medidor.</p></details>
@@ -18550,6 +18555,16 @@ function volver(){
  window.scrollTo(0,0);
 }
 
+// Navegación de presentación: reutiliza formularios, proyecto y cálculo existentes.
+function irPasoProyectoGas(paso){
+ if(modulo!=='gas')return;
+ const destinos={foto:'referenciaOpcionalGas',cargar:'editarTramosGas',revisar:'tramosRegistradosGas'};
+ const id=destinos[paso];if(!id)return;
+ mostrarVista('croquis');
+ for(const otro of Object.values(destinos))$(otro).open=otro===id;
+ $('estadoRecorridoGas').textContent=paso==='foto'?'Referencia opcional: la fotografía no se interpreta automáticamente.':paso==='cargar'?'Cargá un tramo; después podés agregar otro o revisar los registrados.':tramos.length?'Revisá los tramos: podés editar, revisar accesorios o quitar cada uno.':'Todavía no hay tramos. Elegí Cargar o editar tramos para comenzar.';
+ desplazarResultadoMaterialesGas(id);
+}
 function irSeccionGas(destino){
  if(modulo!=='gas')return;
  mostrarVista('croquis');
@@ -19195,6 +19210,7 @@ function agregarTramo(){
  $('resultadoMateriales').textContent=
   'Tramos actualizados. Tocá CALCULAR MATERIALES.';
  guardarDatos();
+ if(modulo==='gas')$('estadoRecorridoGas').textContent='Tramo actualizado en el proyecto actual. Podés agregar otro, revisar los tramos o calcular.';
 }
 
 function renderTramos(){

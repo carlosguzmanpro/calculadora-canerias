@@ -1,0 +1,20 @@
+const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),{chromium}=require('playwright');
+test('GAS recorrido guiado Android: pasos, edición, cálculo, PDF y conservación',async()=>{
+ const b=await chromium.launch({executablePath:'/usr/bin/chromium',args:['--no-sandbox']});try{
+ const p=await b.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true}),errors=[];p.on('pageerror',e=>errors.push(e.message));p.on('dialog',d=>d.accept());
+ await p.route('https://guiado.invalid/**',r=>r.fulfill({contentType:'text/html',body:fs.readFileSync('index.html','utf8')}));await p.goto('https://guiado.invalid/');
+ await p.getByRole('button',{name:'🔥 Gas',exact:true}).tap();assert.equal(await p.locator('#referenciaOpcionalGas').getAttribute('open'),null);assert.equal(await p.locator('#editarTramosGas').getAttribute('open'),null);
+ await p.locator('#importarRespaldo').setInputFiles('informes/casa1-cierre-entradas.json');await p.waitForFunction(()=>document.getElementById('estadoRespaldo').textContent.includes('Respaldo recuperado'));
+ const antes=await p.evaluate(()=>JSON.stringify({proyectos,modelo:resultadoPreliminarSigasGas()}));
+ await p.locator('#pasoFotoGas').tap();assert.equal(await p.locator('#referenciaOpcionalGas').evaluate(e=>e.open),true);
+ await p.locator('#editarDatosGas').tap();assert.equal(await p.locator('#editarTramosGas').evaluate(e=>e.open),true);assert.equal(await p.locator('#referenciaOpcionalGas').evaluate(e=>e.open),false);
+ await p.locator('#pasoRevisarGas').tap();assert.equal(await p.locator('#tramosRegistradosGas').evaluate(e=>e.open),true);assert.equal(await p.locator('#listaTramos').getByRole('button',{name:'Editar tramo',exact:true}).count(),3);
+ await p.locator('#listaTramos').getByRole('button',{name:'Editar tramo',exact:true}).first().tap();assert.equal(await p.locator('#desde').inputValue(),'M');await p.locator('#cancelarTramo').tap();
+ assert.equal(await p.evaluate(()=>JSON.stringify({proyectos,modelo:resultadoPreliminarSigasGas()})),antes);
+ await p.locator('#calcularCaneriaGas').tap();assert.match(await p.locator('#resumenPrincipalMaterialesGas').innerText(),/26,00 m/);assert.equal(await p.getByRole('button',{name:'CALCULAR CAÑERÍA',exact:true}).count(),1);
+ await p.evaluate(()=>prepararInformeActual());assert.equal(await p.locator('#informeImpresion button,#informeImpresion input').count(),0);assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
+ await p.locator('#menuGas').screenshot({path:'/tmp/gas-recorrido-guiado-android.png'});
+ await p.getByRole('button',{name:'Nuevo proyecto',exact:true}).tap();await p.locator('#nombreProyectoGas').fill('Proyecto guiado vacío');await p.locator('#guardarNombreProyectoGas').tap();assert.equal(await p.evaluate(()=>tramos.length),0);await p.locator('#pasoRevisarGas').tap();assert.match(await p.locator('#estadoRecorridoGas').innerText(),/Todavía no hay tramos/);await p.locator('#editarDatosGas').tap();await p.locator('#desde').fill('M');await p.locator('#hasta').fill('Cocina');await p.locator('#metros').fill('4');await p.locator('#guardarTramo').tap();assert.equal(await p.evaluate(()=>tramos.length),1);assert.match(await p.locator('#estadoRecorridoGas').innerText(),/Tramo actualizado/);await p.locator('#pasoRevisarGas').tap();await p.locator('#listaTramos').getByRole('button',{name:'Quitar tramo',exact:true}).tap();assert.equal(await p.evaluate(()=>tramos.length),0);const casa=await p.locator('#ambitoGas option').evaluateAll(os=>os.find(o=>o.textContent==='Casa 1').value);await p.locator('#ambitoGas').selectOption(casa);
+ await p.reload();await p.getByRole('button',{name:'🔥 Gas',exact:true}).tap();assert.equal(await p.evaluate(()=>tramos.length),3);await p.getByRole('button',{name:'← Cambiar especialidad',exact:true}).tap();await p.getByRole('button',{name:'💧 Agua',exact:true}).tap();assert.equal(await p.locator('#menuGas').isVisible(),false);assert.deepEqual(errors,[]);
+ }finally{await b.close();}
+});

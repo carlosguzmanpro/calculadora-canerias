@@ -1462,7 +1462,7 @@ test('manual directo: cuplas y otros accesorios detallados se conservan sin crea
  const a=app();proyectoPlan(a);a.run("tramos[0].detalle={estado:'pendiente',accesorios:[{tipo:'cupla'},{tipo:'soporte'}]};calcularMaterialesManualGas()");assert.equal(cantidadManual(a,'cupla'),1);assert.equal(cantidadManual(a,'soporte'),1);assert.equal(cantidadManual(a,'llave'),0);assert.equal(a.run('revisionMaterialesGas.plan.dimensionamientoDefinitivo'),false);
 });
 test('manual directo: Calcular guarda el tramo válido en edición sin otro paso',()=>{
- assert.match(html,/desplazarResultadoMaterialesGas\('formularioGas'\)">Cargar o editar/);
+ assert.match(html,/irPasoProyectoGas\('cargar'\)">Cargar o editar/);
  const a=app();a.run("abrir('gas')");for(const [id,v]of Object.entries({desde:'M',hasta:'A',metros:'15',manualGas_codo90:'7',manualGas_tee:'1'}))a.elements.get(id).value=v;a.run('calcularMaterialesManualGas()');assert.equal(a.run('tramos.length'),1);assert.equal(cantidadManual(a,'codo90'),7);assert.equal(a.run('revisionMaterialesGas.plan.longitudInformada'),15);
 });
 test('manual directo: un borrador inválido conserva campos y muestra error visible sin usar el resultado anterior',()=>{
