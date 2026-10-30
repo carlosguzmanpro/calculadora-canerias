@@ -15417,7 +15417,7 @@ function inventarioAccesoriosParaMotorGas(red){
    const nodo=red.puntos.find(n=>n.id===pieza.nodo||String(n.nombre).trim().toLocaleLowerCase('es')===String(pieza.nodo).trim().toLocaleLowerCase('es'));
    if(nodo)pieza.conexionesDiametro=Object.entries(red.orientacion).filter(([,o])=>o.desde===nodo.id||o.hasta===nodo.id).map(([id])=>id);
   }
-  if(inventario.fisicas.filter(f=>f.tipo==='codo90').every(f=>f.tramos.length))inventario.pendientes=inventario.pendientes.filter(s=>s!=='Ubicación técnica pendiente de codo90; se conserva la cantidad conocida.');
+  if(inventario.fisicas.filter(f=>f.tipo==='codo90').every(f=>f.tramos.length||tramos.some(t=>t.id===p.calculoSigas?.vinculos?.[f.id]?.tramoAplicacion)))inventario.pendientes=inventario.pendientes.filter(s=>s!=='Ubicación técnica pendiente de codo90; se conserva la cantidad conocida.');
   return inventario;
  }finally{if(tenia)p.planCompra=original;else delete p.planCompra;}
 }
