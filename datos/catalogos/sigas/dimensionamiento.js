@@ -156,7 +156,7 @@
   const r=tecnico().validar(d);if(gas!=='GN'||r.errores.length)return {candidato:null,consultas:[],pendientes:gas!=='GN'?['Este motor usa únicamente SIGAS GN Tabla 4; no aplica GN a GLP.']:r.errores};
   return seleccionar(d,longitudM,caudalM3h);
  }
- function resolver(d,{preparacion,perfil,inventario={fisicas:[],pendientes:[]},config={}}){
+ function resolver(d,{preparacion,perfil,inventario={fisicas:[],pendientes:[]},config={}},diametrosEnsayo=null){
   const revision=tecnico().validar(d),errores=[...revision.errores,...(preparacion?.errores||[])],pendientes=[];
   const salida={estado:'pendiente',convergente:false,definitivo:false,diametrosDefinitivos:null,filas:[],historia:[],recorridos:[],pendientes,errores,fuente:d?.fuente||null,metodo:'Consulta SIGAS por recorrido completo más desfavorable, con fila superior; aplicación normativa pendiente',semillaAdicionalM:0};
   if(perfil?.catalogoTecnicoGas!=='sigas'||perfil?.gas!=='GN')errores.push('Elegir SIGAS y gas natural; no se utilizarán tablas de otra marca o combustible.');
@@ -192,6 +192,7 @@
   const faltantesInventario=[...(inventario.pendientes||[])].filter(t=>!/^Tee en .*: identificar vía directa\/giro y configuración reductora\.$|^Tipo real de llave pendiente;/.test(t));
   pendientes.push(...faltantesInventario);
   const base=new Map(ts.map(t=>[t.id,t])),firma=v=>JSON.stringify(ts.map(t=>v[t.id]??null));let vector={},vistos=new Set(),ultimo=null;
+  if(diametrosEnsayo&&ts.some(t=>!d.tablas[4].exterioresMm.includes(diametrosEnsayo[t.id]))){errores.push('Vector de diámetros de ensayo incompleto o fuera de tabla.');return salida;}
   const max=config.maxIteraciones===undefined?30:config.maxIteraciones;
   if(!Number.isSafeInteger(max)||max<1||max>100){errores.push('Límite de iteraciones inválido.');return salida;}
   for(let iteracion=0;iteracion<max;iteracion++){
@@ -274,6 +275,8 @@
     const propias=rutasCalculadas.filter(r=>r.tramos.includes(t.id)),ruta=propias.reduce((a,b)=>!a||b.longitudConsultaM>a.longitudConsultaM?b:a,null);
     const caudal=positivo(pcs)&&fuentePCS&&positivo(t.consumoKcal)?t.consumoKcal/pcs:null;
     const q=ruta?seleccionar(d,ruta.longitudConsultaM,caudal):{candidato:null,consultas:[],pendientes:['Recorrido pendiente.']};
+    // Ensayo de una combinación explícita: evalúa las pérdidas a SUS diámetros, no a los de otra alternativa.
+    if(diametrosEnsayo&&q.consultas)q.candidato=q.consultas.find(x=>x.exteriorMm===diametrosEnsayo[t.id])||null;
     const locales=propias.flatMap(r=>r.perdidasPendientes.filter(p=>p.tramos.includes(t.id))),sinUbicacion=propias.flatMap(r=>r.perdidasPendientes.filter(p=>!p.tramos.length));
     const unicos=xs=>{const m=new Map();for(const p of xs){const previo=m.get(p.piezaId);if(previo){if(!previo.motivo.includes(p.motivo))previo.motivo+=' / '+p.motivo;}else m.set(p.piezaId,{...p});}return [...m.values()];};
     const aportesLocales=(ruta?.aportes||[]).filter(a=>a.tramoId===t.id),equivalenteConocidoTramoM=aportesLocales.length?aportesLocales.reduce((n,a)=>n+a.equivalenteTotalM,0):ruta?.equivalenteCompleto?0:null;
