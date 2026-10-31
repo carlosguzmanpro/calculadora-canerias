@@ -175,7 +175,7 @@ section{box-shadow:none}
 <noscript><p>Esta aplicación necesita JavaScript. Si abriste una vista previa de Archivos, elegí abrir index.html en un navegador que ejecute JavaScript.</p></noscript>
 <header>
 <h1>CAÑERÍAS</h1>
-<p>Del croquis a los materiales</p>
+<p>Cálculo de cañerías y materiales</p>
 </header>
 <main>
 <p id="estadoGuardado" class="nota solo-pantalla" role="status"></p>
@@ -200,8 +200,7 @@ section{box-shadow:none}
 <p class="gas-paso-titulo">4 · Datos de la instalación</p><button id="editarDatosGas" class="alt" onclick="irPasoProyectoGas('cargar')">Cargar o editar tramos</button><button id="pasoRevisarGas" class="alt" onclick="irPasoProyectoGas('revisar')">Revisar tramos cargados</button>
 <p class="gas-paso-titulo">5 · Resultado y presupuesto</p><button id="calcularCaneriaGas" onclick="calcularMaterialesManualGas()">CALCULAR CAÑERÍA</button><p class="nota">El resultado reúne materiales y presupuesto. Desde allí podés generar el PDF completo.</p>
 <p id="estadoRecorridoGas" role="status" aria-live="polite"></p></nav>
-<details id="ejerciciosGasSeparados" class="gas-detalles solo-pantalla"><summary>Ejercicios y demostraciones · separados de mis proyectos</summary><p>Datos de prueba: no reemplazan tus instalaciones ni interpretan fotografías.</p><button class="alt" onclick="abrirEjercicioSigas19Gas()">Abrir ejercicio SIGAS · 58 m y 19 codos (proyecto separado)</button><button class="alt" onclick="generarPlanGas('ejemplo')">Probar materiales: calefón y cocina</button></details>
-<details id="herramientasGasOpcionales" class="gas-detalles solo-pantalla"><summary>Revisiones y opciones avanzadas</summary><button class="alt" onclick="mostrarEditorProyectoGas('renombrar')">Renombrar proyecto</button><p id="estadoCatalogoSistemaGas" role="status" aria-live="polite"></p><p id="estadoCombustibleGas" role="status" aria-live="polite"></p><details class="gas-detalles"><summary>Largo comercial del caño</summary><p id="estadoLargoComercialGas"></p><button id="usarLargoDocumentadoGas" class="alt oculto" onclick="usarLargoDocumentadoGas()">Usar largo documentado de 4 m para este proyecto</button></details>
+<details id="herramientasGasOpcionales" class="gas-detalles solo-pantalla"><summary>Herramientas técnicas</summary>
 <details class="gas-detalles solo-pantalla"><summary>Entrada al casillero del medidor M</summary><label for="entradaCasilleroGas">¿Por dónde entra la cañería?</label><select id="entradaCasilleroGas" onchange="guardarCasilleroMedidorGas()"><option value="desconocida">No está indicada / pendiente</option><option value="lateral">Por un lateral</option><option value="posterior">Por atrás</option><option value="superior">Por arriba</option></select><div id="cotejoCodoCasilleroGas" class="oculto"><label for="codoCasilleroGas">Codo de 90° dentro del casillero</label><select id="codoCasilleroGas" onchange="guardarCasilleroMedidorGas()"><option value="pendiente">No sé si ya está contado</option><option value="incluido">Ya está incluido en mis cantidades o detalle</option><option value="no-incluido">No está incluido: agregar un codo</option></select></div><p id="estadoCasilleroGas" role="status" aria-live="polite"></p><p class="nota">Solo conteo de materiales. No se agregan cuplas, uniones dobles, entrerroscas ni otras conexiones del medidor.</p></details>
 
 <nav class="opciones solo-pantalla" aria-label="Accesos directos de GAS">
@@ -214,7 +213,55 @@ section{box-shadow:none}
 <button class="alt" onclick="mostrarVista('revisionCroquis')">Revisar croquis y ejemplos</button>
 
 <button class="alt" onclick="mostrarVista('consumos')">🧮 Consulta de consumos de gas</button>
+
+<details id="deteccionOpcionalGas" class="gas-detalles"><summary>Detección de accesorios y sugerencias · opcional, SIN IA</summary><button onclick="detectarAccesoriosGas()">Detectar accesorios automáticamente</button>
+<section id="panelDeteccionGas" class="oculto" aria-label="Revisión de sugerencias de accesorios">
+<h3>Accesorios sugeridos · SIN IA</h3>
+<p>No se leyó la fotografía. Las conexiones permiten proponer piezas, pero no prueban su existencia ni la normativa. Solo las confirmadas se incorporan; las desconocidas quedan pendientes. Las cuplas confirmadas se cotejan con el plan existente, sin sumar dos veces sus uniones.</p>
+<p id="deteccionMensaje" role="status" aria-live="polite"></p><div id="deteccionFilas"></div>
+</section>
 </details>
+<details class="gas-detalles"><summary>Referencia de cálculo y detección anterior</summary><button onclick="calcularMaterialesConSugerenciasGas()">🧮 CALCULAR MATERIALES · referencia anterior</button>
+<p class="nota">Con detección activa, los accesorios confirmados están en la lista revisable del plan de compra. El resumen clásico de tiras se conserva aparte.</p>
+<div id="resultadoMateriales" class="resultado" aria-live="polite">Agregá tramos y tocá CALCULAR MATERIALES.</div>
+</details>
+<details id="opcionesAvanzadasPlanGas" class="gas-detalles"><summary>Opciones de compra y revisión avanzada (opcionales)</summary><label>Largo comercial del caño (m)<input id="matLargo" type="number" min="0.01" step="any" value="6" onchange="guardarOpcionesMaterialesGas()"></label>
+<label><input id="matReusar" type="checkbox" style="width:auto" onchange="guardarOpcionesMaterialesGas()"> Proponer reutilización de sobrantes compatibles entre segmentos</label>
+<label>Sobrante mínimo recuperable (m)<input id="matSobrante" type="number" min="0" step="any" value="0.5" onchange="guardarOpcionesMaterialesGas()"></label>
+<label><input id="matHipotesis" type="checkbox" style="width:auto" onchange="guardarOpcionesMaterialesGas()"> Mostrar hipótesis por longitud cuando faltan posiciones (NO lista de compra)</label>
+<details class="gas-detalles solo-pantalla" id="conciliacionRapidaGas">
+<summary>Revisar cantidades rápidas para materiales</summary>
+<p>Revisá cada conteo como total del tramo, incluyendo las piezas ya registradas. Identificá coincidencias antes de confirmar adicionales. Las sugerencias sin confirmar siguen separadas.</p>
+<button class="alt" onclick="renderConciliacionRapidaGas()">Actualizar revisión de cantidades rápidas</button>
+<label><input id="conciliacionSoloCargados" type="checkbox" checked style="width:auto" onchange="renderConciliacionRapidaGas()"> Mostrar solo tipos con cantidades cargadas (desmarcar para ver pendientes)</label>
+<p class="nota">1. Revisá el detalle. 2. Indicá qué piezas ya están incluidas. 3. Confirmá sólo las adicionales. Cambiar la carga rápida no cambia los tipos del detalle.</p>
+<div id="propuestasCoincidenciaGas"></div><p id="conciliacionMensaje" role="status"></p><div id="conciliacionFilas"></div>
+</details><details class="gas-detalles"><summary>Criterios de conexiones que requieren verificación</summary><p>Verificar la conexión final de cada artefacto y la entrada lateral o superior del medidor contra el croquis, el montaje real y la documentación aplicable. Son criterios pendientes de comprobación, no cantidades fijas de accesorios. Una pieza compartida o una tee que gira no debe contarse dos veces. No se agregan codos, llaves ni otras piezas sólo por estos criterios.</p></details><div id="matUniones"></div>
+<button class="alt" onclick="desplazarResultadoMaterialesGas()">Volver al resultado</button>
+
+<details><summary>Agregar otro accesorio identificado manualmente</summary>
+<label>Nombre / tipo<input id="matExtraNombre" maxlength="100"></label>
+<label>Diámetro o conexiones (separar con →)<input id="matExtraDiametro" maxlength="100" placeholder="Ej.: 1&quot; → 3/4&quot;"></label>
+<label>Cantidad<input id="matExtraCantidad" type="number" min="1" step="1"></label>
+<label>Tramo o ubicación<input id="matExtraUbicacion" maxlength="100"></label>
+<label>Nodo físico, si corresponde (obligatorio para tee)<select id="matExtraNodo"><option value="">Sin nodo identificado</option></select></label>
+<label><input id="matExtraConfirmado" type="checkbox" style="width:auto"> Confirmé este accesorio y su cantidad en el croquis</label>
+<button onclick="agregarExtraMaterialGas()">Agregar a la revisión de mi proyecto</button>
+</details>
+</details>
+<details id="ajustesAvanzadosGas" class="gas-detalles"><summary>Detalle técnico y edición avanzada de materiales</summary><div id="matResultado" class="resultado" aria-live="polite"></div></details>
+<details class="gas-detalles"><summary>Supuestos de compra y advertencia profesional</summary><p>
+Estimación de compra: tiras de <span id="largoComercialAdvertenciaGas">largo configurado</span> por segmento continuo y cuplas solo entre tiras del mismo segmento. Tees, codos y reducciones se cuentan según los datos revisados. Los tramos pendientes conservan la estimación anterior por longitud, marcada como provisoria; no confirman ausencia de accesorios. No verifica diámetros ni incluye conexiones adicionales exigidas por el sistema constructivo. Antes de construir, un profesional habilitado debe comprobar el diseño y la normativa de gas.
+</p></details>
+<details class="gas-detalles solo-pantalla" id="planoOpcionalGas"><summary>Plano opcional · mismos datos del proyecto</summary><button class="alt" onclick="mostrarPlanoOpcionalGas()">Agregar plano (opcional)</button><div id="estadoPlanoOpcionalGas"></div><button class="alt" onclick="revisarCroquisParaEntrega()">Ver fotografía de referencia</button><button class="alt" onclick="irSeccionGas('tramos')">Completar sólo los datos faltantes en los tramos</button></details>
+<details id="entregaGasOpcional" class="gas-detalles"><summary>Documento PDF de entrega</summary><h3 id="documentoEntregaGas">Documento de entrega de GAS</h3>
+<button id="revisarEntrega" class="alt" onclick="revisarCroquisParaEntrega()">Revisar croquis para entrega</button>
+<label class="confirmacion-entrega" for="entregaCroquisConfirmado"><input id="entregaCroquisConfirmado" type="checkbox" aria-describedby="entregaEstado" onchange="confirmarCroquisEntrega()"><span>Confirmo que la foto es legible y muestra los tramos, artefactos y posiciones de esta red actual.</span></label>
+<p id="entregaAccion" role="status" aria-live="polite"></p>
+<p id="entregaEstado" role="status" aria-live="polite">Croquis pendiente de revisión. La planilla y los materiales se imprimen aunque no haya croquis confirmado.</p>
+<button class="alt" onclick="window.print()">Imprimir o guardar esta revisión</button></details></details>
+<details id="ejerciciosGasSeparados" class="gas-detalles solo-pantalla"><summary>Ejercicios y demostraciones</summary><p>Datos de prueba: no reemplazan tus instalaciones ni interpretan fotografías.</p><button class="alt" onclick="abrirEjercicioSigas19Gas()">Abrir ejercicio SIGAS · 58 m y 19 codos (proyecto separado)</button><button class="alt" onclick="generarPlanGas('ejemplo')">Probar materiales: calefón y cocina</button></details>
+
 </div>
 
 <section id="dimensionGas" class="oculto">
@@ -383,7 +430,7 @@ section{box-shadow:none}
 <option>Otro artefacto</option>
 </select>
 <input id="llave" type="hidden" aria-hidden="true"><!-- Compatibilidad interna con respaldos; el único control visible es Llaves de paso. -->
-<div class="detalle" id="cantidadesManualesGas"><h3>Accesorios del tramo · totales manuales</h3><p class="nota">Incluí las piezas del detalle en estos totales. Vacío = pendiente; 0 = no hay. Una tee es una sola pieza aunque su ramal gire. No sumes una pieza compartida nuevamente en otro tramo.</p><div class="gas-campos-manuales"><label>Codos de 90°<input id="manualGas_codo90" type="number" min="0" step="1" inputmode="numeric" placeholder="Pendiente"></label><label>Codos de 45°<input id="manualGas_codo45" type="number" min="0" step="1" inputmode="numeric" placeholder="Pendiente"></label><label>Tees<input id="manualGas_tee" type="number" min="0" step="1" inputmode="numeric" placeholder="Pendiente"></label><label>Reducciones independientes<input id="manualGas_reduccion" type="number" min="0" step="1" inputmode="numeric" placeholder="Pendiente"></label><label>Llaves de paso<input id="manualGas_llave" type="number" min="0" step="1" inputmode="numeric" placeholder="Pendiente"></label></div><p id="mensajeCargaManualGas" role="status" aria-live="polite"></p></div><button id="guardarTramo" onclick="agregarTramo()">+ AGREGAR TRAMO</button>
+<details class="detalle" id="agregarAccesoriosGas"><summary>Agregar accesorios</summary><div id="cantidadesManualesGas"><h3>Accesorios del tramo · totales manuales</h3><p class="nota">Incluí las piezas del detalle en estos totales. Vacío = pendiente; 0 = no hay. Una tee es una sola pieza aunque su ramal gire. No sumes una pieza compartida nuevamente en otro tramo.</p><div class="gas-campos-manuales"><label>Codos de 90°<input id="manualGas_codo90" type="number" min="0" step="1" inputmode="numeric" placeholder="Pendiente"></label><label>Codos de 45°<input id="manualGas_codo45" type="number" min="0" step="1" inputmode="numeric" placeholder="Pendiente"></label><label>Tees<input id="manualGas_tee" type="number" min="0" step="1" inputmode="numeric" placeholder="Pendiente"></label><label>Reducciones independientes<input id="manualGas_reduccion" type="number" min="0" step="1" inputmode="numeric" placeholder="Pendiente"></label><label>Llaves de paso<input id="manualGas_llave" type="number" min="0" step="1" inputmode="numeric" placeholder="Pendiente"></label></div><p id="mensajeCargaManualGas" role="status" aria-live="polite"></p></div></details><button id="guardarTramo" onclick="agregarTramo()">+ AGREGAR TRAMO</button>
 <button id="cancelarTramo" class="alt oculto" onclick="cancelarEdicionTramo()">Cancelar edición del tramo</button>
 </div></details><div><details id="tramosRegistradosGas" class="gas-detalles"><summary id="resumenTramosRegistradosGas">Tramos registrados · editar o quitar</summary><div id="listaTramos"></div></details>
 <section id="editorAccesorios" class="oculto solo-pantalla" aria-label="Accesorios del tramo">
@@ -417,58 +464,20 @@ section{box-shadow:none}
 <button onclick="guardarAccesorios()">Guardar accesorios del tramo</button><button class="alt" onclick="guardarDetalleYConciliarGas()">Guardar detalle y volver a conciliación</button>
 <button class="alt" onclick="cerrarAccesorios()">Cancelar</button>
 </section>
-<details id="deteccionOpcionalGas" class="gas-detalles"><summary>Detección de accesorios y sugerencias · opcional, SIN IA</summary><button onclick="detectarAccesoriosGas()">Detectar accesorios automáticamente</button>
-<section id="panelDeteccionGas" class="oculto" aria-label="Revisión de sugerencias de accesorios">
-<h3>Accesorios sugeridos · SIN IA</h3>
-<p>No se leyó la fotografía. Las conexiones permiten proponer piezas, pero no prueban su existencia ni la normativa. Solo las confirmadas se incorporan; las desconocidas quedan pendientes. Las cuplas confirmadas se cotejan con el plan existente, sin sumar dos veces sus uniones.</p>
-<p id="deteccionMensaje" role="status" aria-live="polite"></p><div id="deteccionFilas"></div>
-</section>
-</details><details class="gas-detalles"><summary>Referencia de cálculo y detección anterior</summary><button onclick="calcularMaterialesConSugerenciasGas()">🧮 CALCULAR MATERIALES · referencia anterior</button>
-<p class="nota">Con detección activa, los accesorios confirmados están en la lista revisable del plan de compra. El resumen clásico de tiras se conserva aparte.</p>
-<div id="resultadoMateriales" class="resultado" aria-live="polite">Agregá tramos y tocá CALCULAR MATERIALES.</div>
-</details>
+
 <section id="planCompraGas" class="oculto">
 <div id="resumenPrincipalMaterialesGas" class="resultado" aria-live="polite"></div>
-<details id="opcionesAvanzadasPlanGas" class="gas-detalles"><summary>Opciones de compra y revisión avanzada (opcionales)</summary><label>Largo comercial del caño (m)<input id="matLargo" type="number" min="0.01" step="any" value="6" onchange="guardarOpcionesMaterialesGas()"></label>
-<label><input id="matReusar" type="checkbox" style="width:auto" onchange="guardarOpcionesMaterialesGas()"> Proponer reutilización de sobrantes compatibles entre segmentos</label>
-<label>Sobrante mínimo recuperable (m)<input id="matSobrante" type="number" min="0" step="any" value="0.5" onchange="guardarOpcionesMaterialesGas()"></label>
-<label><input id="matHipotesis" type="checkbox" style="width:auto" onchange="guardarOpcionesMaterialesGas()"> Mostrar hipótesis por longitud cuando faltan posiciones (NO lista de compra)</label>
-<details class="gas-detalles solo-pantalla" id="conciliacionRapidaGas">
-<summary>Revisar cantidades rápidas para materiales</summary>
-<p>Revisá cada conteo como total del tramo, incluyendo las piezas ya registradas. Identificá coincidencias antes de confirmar adicionales. Las sugerencias sin confirmar siguen separadas.</p>
-<button class="alt" onclick="renderConciliacionRapidaGas()">Actualizar revisión de cantidades rápidas</button>
-<label><input id="conciliacionSoloCargados" type="checkbox" checked style="width:auto" onchange="renderConciliacionRapidaGas()"> Mostrar solo tipos con cantidades cargadas (desmarcar para ver pendientes)</label>
-<p class="nota">1. Revisá el detalle. 2. Indicá qué piezas ya están incluidas. 3. Confirmá sólo las adicionales. Cambiar la carga rápida no cambia los tipos del detalle.</p>
-<div id="propuestasCoincidenciaGas"></div><p id="conciliacionMensaje" role="status"></p><div id="conciliacionFilas"></div>
-</details><details class="gas-detalles"><summary>Criterios de conexiones que requieren verificación</summary><p>Verificar la conexión final de cada artefacto y la entrada lateral o superior del medidor contra el croquis, el montaje real y la documentación aplicable. Son criterios pendientes de comprobación, no cantidades fijas de accesorios. Una pieza compartida o una tee que gira no debe contarse dos veces. No se agregan codos, llaves ni otras piezas sólo por estos criterios.</p></details><div id="matUniones"></div>
-<button class="alt" onclick="desplazarResultadoMaterialesGas()">Volver al resultado</button>
+<p id="matMensaje" aria-live="polite"></p>
 
-<details><summary>Agregar otro accesorio identificado manualmente</summary>
-<label>Nombre / tipo<input id="matExtraNombre" maxlength="100"></label>
-<label>Diámetro o conexiones (separar con →)<input id="matExtraDiametro" maxlength="100" placeholder="Ej.: 1&quot; → 3/4&quot;"></label>
-<label>Cantidad<input id="matExtraCantidad" type="number" min="1" step="1"></label>
-<label>Tramo o ubicación<input id="matExtraUbicacion" maxlength="100"></label>
-<label>Nodo físico, si corresponde (obligatorio para tee)<select id="matExtraNodo"><option value="">Sin nodo identificado</option></select></label>
-<label><input id="matExtraConfirmado" type="checkbox" style="width:auto"> Confirmé este accesorio y su cantidad en el croquis</label>
-<button onclick="agregarExtraMaterialGas()">Agregar a la revisión de mi proyecto</button>
-</details>
-</details><p id="matMensaje" aria-live="polite"></p>
-<details id="ajustesAvanzadosGas" class="gas-detalles"><summary>Detalle técnico y edición avanzada de materiales</summary><div id="matResultado" class="resultado" aria-live="polite"></div></details>
-<details id="exportarListaGas" class="gas-detalles"><summary>Lista de compras · PDF y CSV</summary><button class="alt" onclick="imprimirMaterialesGas()">Imprimir lista revisada</button>
-<button class="alt" onclick="descargarMaterialesGas()">Descargar lista revisada (CSV)</button></details>
+
 </section>
-<details class="gas-detalles"><summary>Supuestos de compra y advertencia profesional</summary><p>
-Estimación de compra sin reutilizar sobrantes: tiras de 6 m por segmento continuo y cuplas solo entre tiras del mismo segmento. Tees, codos y reducciones se cuentan según los datos revisados. Los tramos pendientes conservan la estimación anterior por longitud, marcada como provisoria; no confirman ausencia de accesorios. No verifica diámetros ni incluye conexiones adicionales exigidas por el sistema constructivo. Antes de construir, un profesional habilitado debe comprobar el diseño y la normativa de gas.
-</p></details>
+
 </div>
-<details class="solo-pantalla"><summary>Respaldos y ajustes de resultados anteriores</summary><button class="alt" onclick="descargarRespaldoCompleto()">Descargar respaldo completo JSON</button><label>Recuperar respaldo completo JSON<input id="importarRespaldo" type="file" accept="application/json,.json"></label><p id="estadoRespaldo" role="status"></p><div id="respaldosGas"></div></details>
-<details class="gas-detalles solo-pantalla" id="planoOpcionalGas"><summary>Plano opcional · mismos datos del proyecto</summary><button class="alt" onclick="mostrarPlanoOpcionalGas()">Agregar plano (opcional)</button><div id="estadoPlanoOpcionalGas"></div><button class="alt" onclick="revisarCroquisParaEntrega()">Ver fotografía de referencia</button><button class="alt" onclick="irSeccionGas('tramos')">Completar sólo los datos faltantes en los tramos</button></details>
-<details id="entregaGasOpcional" class="gas-detalles"><summary>Documento PDF de entrega</summary><h3 id="documentoEntregaGas">Documento de entrega de GAS</h3>
-<button id="revisarEntrega" class="alt" onclick="revisarCroquisParaEntrega()">Revisar croquis para entrega</button>
-<label class="confirmacion-entrega" for="entregaCroquisConfirmado"><input id="entregaCroquisConfirmado" type="checkbox" aria-describedby="entregaEstado" onchange="confirmarCroquisEntrega()"><span>Confirmo que la foto es legible y muestra los tramos, artefactos y posiciones de esta red actual.</span></label>
-<p id="entregaAccion" role="status" aria-live="polite"></p>
-<p id="entregaEstado" role="status" aria-live="polite">Croquis pendiente de revisión. La planilla y los materiales se imprimen aunque no haya croquis confirmado.</p>
-<button class="alt" onclick="window.print()">Imprimir o guardar esta revisión</button></details>
+
+<div id="ubicacionRespaldosOriginal"><details id="respaldosConfiguracionGas" class="solo-pantalla gas-detalles"><summary>Respaldos y configuración</summary><button class="alt" onclick="descargarRespaldoCompleto()">Descargar respaldo completo JSON</button><label>Recuperar respaldo completo JSON<input id="importarRespaldo" type="file" accept="application/json,.json"></label><p id="estadoRespaldo" role="status"></p><div id="respaldosGas"></div><div id="configuracionProyectoGas" class="oculto"><button class="alt" onclick="mostrarEditorProyectoGas('renombrar')">Renombrar proyecto</button><p id="estadoCatalogoSistemaGas" role="status" aria-live="polite"></p><p id="estadoCombustibleGas" role="status" aria-live="polite"></p><details class="gas-detalles"><summary>Largo comercial del caño</summary><p id="estadoLargoComercialGas"></p><button id="usarLargoDocumentadoGas" class="alt oculto" onclick="usarLargoDocumentadoGas()">Usar largo documentado de 4 m para este proyecto</button></details></div><details id="exportarListaGas" class="gas-detalles"><summary>Lista de compras · PDF y CSV</summary><button class="alt" onclick="imprimirMaterialesGas()">Imprimir lista revisada</button>
+<button class="alt" onclick="descargarMaterialesGas()">Descargar lista revisada (CSV)</button></details></details></div>
+
+
 </div>
 
 <div id="consumos" class="oculto">
@@ -1140,13 +1149,13 @@ function firmaMaterialesGas(){return JSON.stringify({fuente:fuenteMaterialesGas,
 function invalidarMaterialesGas(){if(modulo==='gas'&&revisionMaterialesGas)sincronizarMaterialesGas(fuenteMaterialesGas);}
 function abrirPlanGas(){
  if(modulo!=='gas')return;
- $('planCompraGas').classList.remove('oculto');const o=opcionesMaterialesGas();
+ $('planCompraGas').classList.remove('oculto');const o=opcionesMaterialesGas();actualizarTextoLargoGas();
  $('matLargo').value=o.largoComercial??6;$('matReusar').checked=!!o.reutilizar;$('matSobrante').value=o.minimoSobrante??.5;$('matHipotesis').checked=!!o.hipotesisSinPosiciones;
  renderUnionesMaterialesGas();renderConciliacionRapidaGas();
 }
 function guardarOpcionesMaterialesGas(){
  Object.assign(datosPlanGas().opciones,{largoComercial:Number($('matLargo').value),reutilizar:$('matReusar').checked,minimoSobrante:Number($('matSobrante').value),hipotesisSinPosiciones:$('matHipotesis').checked});
- invalidarMaterialesGas();guardarDatos();
+ invalidarMaterialesGas();guardarDatos();actualizarTextoLargoGas();
 }
 function renderUnionesMaterialesGas(){
  const out=$('matUniones');out.replaceChildren();const e=entradaMaterialesGas(fuenteMaterialesGas);
@@ -15148,6 +15157,7 @@ function sincronizarPerfilTecnicoGas(){
  renderCasilleroMedidorGas();
  const c=combustibleTecnicoGas();$('combustibleSistemaGas').value=c.gas||'';if(!c.conflicto&&['GN','GLP','propano-gaseoso'].includes(c.gas))$('gt').value=c.gas==='GN'?'9300':'22300';
  $('estadoCombustibleGas').textContent=c.pendientes.join(' ')||'Combustible del perfil: '+(c.gas||'Pendiente')+'. La referencia de kcal/m³ no confirma condiciones técnicas.';
+ actualizarTextoLargoGas();actualizarControlesCompraGas();
  const e=estadoLargoComercialGas();$('estadoLargoComercialGas').textContent='Largo comercial: '+e.configurado+' m. '+e.estado+'.'+(e.documentado?' Manual del sistema: '+e.documentado+' m (p.'+e.pagina+').'+(e.pendiente?' Diferencia pendiente de revisión; no se cambió el proyecto.':''):'');
  $('usarLargoDocumentadoGas').classList.toggle('oculto',!e.pendiente);
 }
@@ -18527,7 +18537,7 @@ const fmt=n=>Number(n).toLocaleString('es-AR',{maximumFractionDigits:2});
 function abrir(m){
  if(!especialidades.includes(m))return;
  if(modulo)guardarDatos();
- modulo=m;
+ modulo=m;organizarSecundariosGas(m);
  $('referenciaOpcionalGas').open=m!=='gas';$('resumenReferenciaGas').classList.toggle('oculto',m!=='gas');
  $('duda').value=datosEspecialidadActual().aclaracion||'';
  $('revision').textContent=datosEspecialidadActual().revision||'Todavía no hay una revisión registrada.';
@@ -18555,6 +18565,22 @@ function volver(){
  window.scrollTo(0,0);
 }
 
+function actualizarControlesCompraGas(){
+ if(modulo!=='gas')return;
+ const o=opcionesMaterialesGas();
+ $('matLargo').value=o.largoComercial;$('matReusar').checked=!!o.reutilizar;$('matSobrante').value=o.minimoSobrante;$('matHipotesis').checked=!!o.hipotesisSinPosiciones;
+}
+function actualizarTextoLargoGas(){
+ if(modulo!=='gas')return;
+ const largo=opcionesMaterialesGas().largoComercial;
+ $('largoComercialAdvertenciaGas').textContent=Number.isFinite(largo)&&largo>0?fmt(largo)+' m':'pendiente de configurar';
+}
+function organizarSecundariosGas(m){
+ const grupo=$('respaldosConfiguracionGas'),destino=$(m==='gas'?'menuGas':'ubicacionRespaldosOriginal');
+ // Se mueve el mismo control; no se duplican inputs, eventos ni registros.
+ if(destino?.appendChild&&grupo?.parentNode)destino.appendChild(grupo);
+ $('configuracionProyectoGas').classList.toggle('oculto',m!=='gas');$('exportarListaGas').classList.toggle('oculto',m!=='gas');
+}
 // Navegación de presentación: reutiliza formularios, proyecto y cálculo existentes.
 function irPasoProyectoGas(paso){
  if(modulo!=='gas')return;
@@ -19183,7 +19209,7 @@ function agregarTramo(){
  }
  const repetido=tramos.find((t,i)=>i!==editandoTramo&&parFisicoManualGas(t)===parFisicoManualGas({desde,hasta}));
  if(repetido){$('mensajeCargaManualGas').textContent='El tramo '+repetido.desde+'–'+repetido.hasta+' ya está registrado. Editá ese tramo; invertir los extremos no crea otro caño.';return;}
- let cantidades;try{cantidades=leerCantidadesFormularioGas();}catch(e){$('mensajeCargaManualGas').textContent=e.message;$('resultadoMateriales').textContent=e.message;return;}
+ let cantidades;try{cantidades=leerCantidadesFormularioGas();}catch(e){$('agregarAccesoriosGas').open=true;$('mensajeCargaManualGas').textContent=e.message;$('resultadoMateriales').textContent=e.message;return;}
  $('mensajeCargaManualGas').textContent='';
  const datos={desde,hasta,metros:Number(m),consumo:c===''?null:Number(c),diametro:di||null,
   artefacto:$('destinoArtefacto').value,llave:$('llave').checked};

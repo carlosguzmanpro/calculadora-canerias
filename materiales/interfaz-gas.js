@@ -34,13 +34,13 @@ function firmaMaterialesGas(){return JSON.stringify({fuente:fuenteMaterialesGas,
 function invalidarMaterialesGas(){if(modulo==='gas'&&revisionMaterialesGas)sincronizarMaterialesGas(fuenteMaterialesGas);}
 function abrirPlanGas(){
  if(modulo!=='gas')return;
- $('planCompraGas').classList.remove('oculto');const o=opcionesMaterialesGas();
+ $('planCompraGas').classList.remove('oculto');const o=opcionesMaterialesGas();actualizarTextoLargoGas();
  $('matLargo').value=o.largoComercial??6;$('matReusar').checked=!!o.reutilizar;$('matSobrante').value=o.minimoSobrante??.5;$('matHipotesis').checked=!!o.hipotesisSinPosiciones;
  renderUnionesMaterialesGas();renderConciliacionRapidaGas();
 }
 function guardarOpcionesMaterialesGas(){
  Object.assign(datosPlanGas().opciones,{largoComercial:Number($('matLargo').value),reutilizar:$('matReusar').checked,minimoSobrante:Number($('matSobrante').value),hipotesisSinPosiciones:$('matHipotesis').checked});
- invalidarMaterialesGas();guardarDatos();
+ invalidarMaterialesGas();guardarDatos();actualizarTextoLargoGas();
 }
 function renderUnionesMaterialesGas(){
  const out=$('matUniones');out.replaceChildren();const e=entradaMaterialesGas(fuenteMaterialesGas);
