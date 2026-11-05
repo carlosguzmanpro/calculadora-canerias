@@ -53,3 +53,28 @@ test('catálogos: ambigüedad entre dos paquetes se bloquea, nunca elige el prim
 test('catálogos: ensayos y diagnóstico educativo nunca se seleccionan',()=>{
  const {p,perfil}=caso();for(const q of [{...p,soloPruebas:true},{...p,datos:{...p.datos,soloPruebas:true}},{...p,datos:{...p.datos,diagnosticoEducativo:true}}])assert.equal(api.seleccionar([q],perfil,()=>[]).catalogo,null);
 });
+
+function preparacionPCS(poderCalorifico,fuenteGas){
+ if(arguments.length<2)fuenteGas='Referencia explícita del ensayo';
+ const ts=[{id:'ensayo-pcs',desde:'M',hasta:'Cocina',metros:7}],red={errores:[],faltantes:[],avisos:[],excluidos:[],orientacion:{'ensayo-pcs':{desde:'m',hasta:'c'}},porTramo:{'ensayo-pcs':9300},puntos:[{id:'m',nombre:'M'},{id:'c',nombre:'Cocina'}]};
+ const perfil={pais:'AR',uso:'domiciliario',gas:'GN',poderCalorifico,fuenteGas};
+ return {perfil,resultado:api.prepararRed(red,ts,perfil)};
+}
+test('PCS: número y texto documentados producen iguales caudales sin mutar el perfil ni habilitar diámetros',()=>{
+ const n=preparacionPCS(9300),s=preparacionPCS('9300');assert.deepEqual(n.resultado,s.resultado);assert.equal(n.resultado.poderCalorifico,9300);assert.equal(n.resultado.porTramo[0].caudal,1);assert.equal(n.resultado.recorridos[0].caudal,1);assert.equal(n.perfil.poderCalorifico,9300);assert.equal(s.perfil.poderCalorifico,'9300');assert.equal(n.resultado.listoParaDimensionar,false);assert.equal(n.resultado.diametros,null);assert.deepEqual(preparacionPCS(' 9300 ').resultado,n.resultado);
+});
+test('PCS: vacío, inválido, no positivo y tipos no numéricos permanecen pendientes, sin valores por defecto',()=>{
+ for(const v of [undefined,null,'','   ',0,'0',-9300,'-9300',NaN,Infinity,-Infinity,'Infinity','NaN','9300 kcal/m³','abc',true,false,[],[9300],{valueOf:()=>9300}]){const r=preparacionPCS(v).resultado;assert.equal(r.poderCalorifico,null,String(v));assert.equal(r.porTramo[0].caudal,null);assert.equal(r.recorridos[0].caudal,null);assert.ok(r.pendientes.some(p=>p.startsWith('Poder calorífico y fuente')));assert.equal(r.diametros,null);}
+});
+test('PCS: número o texto sin fuente válida no permiten calcular caudales',()=>{
+ for(const pcs of [9300,'9300'])for(const fuente of [undefined,null,'','   ',123,false,{}]){const r=preparacionPCS(pcs,fuente).resultado;assert.equal(r.poderCalorifico,null);assert.equal(r.porTramo[0].caudal,null);assert.equal(r.recorridos[0].caudal,null);}
+ const r=preparacionPCS(9300).resultado;assert.ok(r.pendientes.length>0);assert.equal(r.listoParaDimensionar,false);
+});
+test('PCS: selección de metadatos acepta número y texto sin omitir el resto de verificaciones',()=>{
+ const {p,perfil}=caso(),n={...perfil,poderCalorifico:Number(perfil.poderCalorifico)};assert.deepEqual(api.revisarPaquete(p,n,()=>[]),api.revisarPaquete(p,perfil,()=>[]));assert.equal(api.seleccionar([p],{...n,fuenteGas:''},()=>[]).catalogo,null);assert.equal(api.seleccionar([p],n).catalogo,null);assert.equal(api.seleccionar([],n).catalogo,null);
+});
+test('PCS: formulario real Casa 1, preparador y motor SIGAS GN entregan los mismos caudales y conservan resultados',()=>{
+ const a=require('./helpers/casa1-cierre.cjs')();assert.equal(a.run('typeof instalacionGas.perfil.poderCalorifico'),'number');
+ const r=JSON.parse(a.run(`JSON.stringify((()=>{const perfil=perfilTecnicoActualGas(),red=redFisicaManualGas(),n=PreparacionDiametrosGas.prepararRed(red,tramos,perfil),s=PreparacionDiametrosGas.prepararRed(red,tramos,{...perfil,poderCalorifico:String(perfil.poderCalorifico)}),motor=resultadoPreliminarSigasGas();return {n,s,motor: motor.resultado.filas.map(f=>({id:f.id,caudal:f.caudalM3h,diametro:f.candidato?.exteriorMm})),definitivo:motor.resultado.definitivo,cantidades:motor.cantidadesDeclaradas,guardado:typeof proyectoGasActual().instalacion.perfil.poderCalorifico};})())`));
+ assert.deepEqual(r.n,r.s);assert.deepEqual(r.n.porTramo.map(t=>t.caudal),r.motor.map(t=>t.caudal));assert.deepEqual(r.motor.map(t=>t.diametro),[32,25,25]);assert.deepEqual(r.cantidades,{codo90:7,tee:1,llave:2});assert.equal(r.definitivo,false);assert.equal(r.n.diametros,null);assert.equal(r.guardado,'number');
+});

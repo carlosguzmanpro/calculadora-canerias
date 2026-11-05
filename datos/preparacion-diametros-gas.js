@@ -1,6 +1,8 @@
 /* Preparación de datos, sin tablas nuevas, sin habilitación técnica ni escrituras. */
 (function(root){
  const positivo=x=>typeof x==='number'&&Number.isFinite(x)&&x>0;
+ // Admitir el PCS numérico del formulario y el texto de respaldos, sin coercionar otros tipos.
+ const numeroPCS=v=>(typeof v==='number'||typeof v==='string'&&v.trim()!=='')&&positivo(Number(v))?Number(v):null;
  const unicos=xs=>[...new Set(xs)];
  function inventario(t3,t18,validar){
   const revision=validar(t3,t18);
@@ -16,7 +18,7 @@
   if(!p?.id||p.soloPruebas||p.datos?.soloPruebas||p.datos?.diagnosticoEducativo)faltantes.push('Paquete sin identidad técnica o reservado para ensayo.');
   if(p?.unidades?.capacidad!=='m3/h'||p?.unidades?.longitud!=='m'||p?.unidades?.presion!=='Pa'||p?.unidades?.diametroInterior!=='mm')faltantes.push('Unidades del adaptador pendientes: m3/h, m, Pa y mm interiores.');
   if(perfil?.unidadPresion!=='Pa')faltantes.push('Presiones del proyecto en Pa pendientes.');
-  for(const k of ['presionDisponible','presionMinima','perdidaMaxima','poderCalorifico','densidadRelativa'])if(!(typeof perfil?.[k]==='string'&&perfil[k].trim()&&positivo(Number(perfil[k]))))faltantes.push('Condición del proyecto pendiente: '+k+'.');
+  for(const k of ['presionDisponible','presionMinima','perdidaMaxima','poderCalorifico','densidadRelativa'])if(k==='poderCalorifico'?numeroPCS(perfil?.[k])===null:!(typeof perfil?.[k]==='string'&&perfil[k].trim()&&positivo(Number(perfil[k]))))faltantes.push('Condición del proyecto pendiente: '+k+'.');
   for(const k of ['fuenteGas','fuentePresiones','referenciaNormativa'])if(typeof perfil?.[k]!=='string'||!perfil[k].trim())faltantes.push('Fuente del proyecto pendiente: '+k+'.');
   if(!positivo(c.presionMinPa)||!positivo(c.presionMaxPa)||c.presionMaxPa<c.presionMinPa||Number(perfil?.presionDisponible)<c.presionMinPa||Number(perfil?.presionDisponible)>c.presionMaxPa)faltantes.push('Presión fuera de alcance o rango no documentado.');
   if(!positivo(c.densidadRelativa)||Number(perfil?.densidadRelativa)!==c.densidadRelativa)faltantes.push('Densidad relativa fuera de alcance.');
@@ -34,7 +36,7 @@
  function prepararRed(red,ts,perfil={}){
   const errores=[...red.errores],pendientes=[...red.faltantes],ids=new Set(),mapa=new Map();
   for(const t of ts){if(!t.id||ids.has(t.id))errores.push('Identificador de tramo faltante o duplicado.');ids.add(t.id);mapa.set(t.id,t);if(!positivo(t.metros))errores.push('Longitud positiva pendiente en '+t.desde+'–'+t.hasta+'.');}
-  const pcs=typeof perfil.poderCalorifico==='string'&&perfil.poderCalorifico.trim()&&positivo(Number(perfil.poderCalorifico))&&typeof perfil.fuenteGas==='string'&&perfil.fuenteGas.trim()?Number(perfil.poderCalorifico):null;
+  const pcs=typeof perfil.fuenteGas==='string'&&perfil.fuenteGas.trim()?numeroPCS(perfil.poderCalorifico):null;
   for(const [k,nombre]of Object.entries({material:'material de la cañería',sistema:'sistema de unión',provincia:'provincia',localidad:'localidad',distribuidora:'distribuidora',densidadRelativa:'densidad relativa',unidadPresion:'unidad de presión',presionDisponible:'presión disponible',presionMinima:'presión mínima de los artefactos',perdidaMaxima:'pérdida admisible',fuentePresiones:'fuente de presiones',referenciaNormativa:'método y referencia normativa'}))if(typeof perfil[k]!=='string'||!perfil[k].trim())pendientes.push('Dato técnico del proyecto pendiente: '+nombre+'.');
   if(perfil.pais!=='AR'||perfil.uso!=='domiciliario'||perfil.gas!=='GN')pendientes.push('El motor actual estudia solamente Argentina / domiciliario / GN; otros perfiles necesitan método y tablas propios.');
   if(!pcs)pendientes.push('Poder calorífico y fuente del proyecto pendientes; no se aplica 9300 automáticamente.');
