@@ -39,7 +39,10 @@ function abrirPlanGas(){
  renderUnionesMaterialesGas();renderConciliacionRapidaGas();
 }
 function guardarOpcionesMaterialesGas(){
- Object.assign(datosPlanGas().opciones,{largoComercial:Number($('matLargo').value),reutilizar:$('matReusar').checked,minimoSobrante:Number($('matSobrante').value),hipotesisSinPosiciones:$('matHipotesis').checked});
+ if(!validarCamposDecimalesGas(['matLargo','matSobrante']))return;
+ const largo=numeroDecimalGas($('matLargo').value),sobrante=numeroDecimalGas($('matSobrante').value);
+ if(!Number.isFinite(largo)||largo<=0||!Number.isFinite(sobrante)||sobrante<0){$('matMensaje').textContent='Completá un largo comercial positivo y un sobrante válido. No se cambiaron las opciones.';return;}
+ Object.assign(datosPlanGas().opciones,{largoComercial:largo,reutilizar:$('matReusar').checked,minimoSobrante:sobrante,hipotesisSinPosiciones:$('matHipotesis').checked});
  invalidarMaterialesGas();guardarDatos();actualizarTextoLargoGas();
 }
 function renderUnionesMaterialesGas(){
@@ -667,7 +670,11 @@ function redFisicaManualGas(ts=tramos,arts=artefactos,inst=instalacionGas){
   if(hijos.length){if(n.tipo==='artefacto')errores.push('El artefacto '+n.nombre+' tiene otros tramos después de su conexión.');let total=0,conocido=0;for(const e of hijos){const d=demanda.get(orientacion[e.t.id].hasta);porTramo[e.t.id]=d?.total??null;parciales[e.t.id]=d?.conocido??0;if(d?.total===null||!d)total=null;else if(total!==null)total+=d.total;conocido+=d?.conocido??0;}demanda.set(id,{total,conocido});continue;}
   if(id===raiz){demanda.set(id,{total:0,conocido:0});continue;}
   const e=padre.get(id)?.e,t=e?.t,etiqueta=nombrePuntoManualGas(t?.artefacto)||nombrePuntoManualGas(n.nombre);
-  let candidatos=n.artefactoId?arts.filter(a=>a.id===n.artefactoId):arts.filter(a=>nombrePuntoManualGas(a.nombre)===etiqueta);
+  // Alias y acentos conservan la identidad existente; una elección manual distinta prevalece.
+  const sinAcentos=v=>v.normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  const coincideDestino=sinAcentos(nombrePuntoManualGas(n.nombre))===sinAcentos(etiqueta)||(nombrePuntoManualGas(n.nombre)==='termo'&&etiqueta==='termotanque');
+  const porExtremo=coincideDestino?arts.filter(a=>nombrePuntoManualGas(a.nombre)===nombrePuntoManualGas(n.nombre)):[];
+  let candidatos=n.artefactoId?arts.filter(a=>a.id===n.artefactoId):porExtremo.length?porExtremo:arts.filter(a=>nombrePuntoManualGas(a.nombre)===etiqueta);
   let consumo=null;
   if(candidatos.length===1){const a=candidatos[0],key=a.id||a;if(usados.has(key)){errores.push('El artefacto '+a.nombre+' está conectado más de una vez.');}else{usados.add(key);if(Number.isFinite(a.consumo)&&a.consumo>0)consumo=a.consumo;}}
   else if(candidatos.length>1)errores.push('Consumo ambiguo en '+n.nombre+': hay más de un artefacto con ese nombre.');

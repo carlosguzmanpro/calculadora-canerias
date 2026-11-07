@@ -225,9 +225,9 @@ section{box-shadow:none}
 <p class="nota">Con detección activa, los accesorios confirmados están en la lista revisable del plan de compra. El resumen clásico de tiras se conserva aparte.</p>
 <div id="resultadoMateriales" class="resultado" aria-live="polite">Agregá tramos y tocá CALCULAR MATERIALES.</div>
 </details>
-<details id="opcionesAvanzadasPlanGas" class="gas-detalles"><summary>Opciones de compra y revisión avanzada (opcionales)</summary><label>Largo comercial del caño (m)<input id="matLargo" type="number" min="0.01" step="any" value="6" onchange="guardarOpcionesMaterialesGas()"></label>
+<details id="opcionesAvanzadasPlanGas" class="gas-detalles"><summary>Opciones de compra y revisión avanzada (opcionales)</summary><label>Largo comercial del caño (m)<input id="matLargo" type="text" inputmode="decimal" min="0.01" step="any" value="6" onchange="guardarOpcionesMaterialesGas()"></label>
 <label><input id="matReusar" type="checkbox" style="width:auto" onchange="guardarOpcionesMaterialesGas()"> Proponer reutilización de sobrantes compatibles entre segmentos</label>
-<label>Sobrante mínimo recuperable (m)<input id="matSobrante" type="number" min="0" step="any" value="0.5" onchange="guardarOpcionesMaterialesGas()"></label>
+<label>Sobrante mínimo recuperable (m)<input id="matSobrante" type="text" inputmode="decimal" min="0" step="any" value="0.5" onchange="guardarOpcionesMaterialesGas()"></label>
 <label><input id="matHipotesis" type="checkbox" style="width:auto" onchange="guardarOpcionesMaterialesGas()"> Mostrar hipótesis por longitud cuando faltan posiciones (NO lista de compra)</label>
 <details class="gas-detalles solo-pantalla" id="conciliacionRapidaGas">
 <summary>Revisar cantidades rápidas para materiales</summary>
@@ -288,8 +288,8 @@ Estimación de compra: tiras de <span id="largoComercialAdvertenciaGas">largo co
 <div id="informeMetodoClase" class="resultado" aria-live="polite"></div>
 <h3>Motor general y diagnóstico anterior</h3>
 <div class="aviso">No se requiere ingresar diámetros. El motor solo puede producir medidas con tablas verificadas para el material y sistema exactos. No hay catálogos técnicos habilitados todavía. Las referencias del ejercicio no se usan como resultados del motor.</div>
-<label for="dimPCS">Poder calorífico comprobado (kcal/m³)</label><input id="dimPCS" type="number" min="0" step="any" onchange="guardarCondicionesDimensionamiento()">
-<label for="dimDensidad">Densidad relativa comprobada</label><input id="dimDensidad" type="number" min="0" step="any" onchange="guardarCondicionesDimensionamiento()">
+<label for="dimPCS">Poder calorífico comprobado (kcal/m³)</label><input id="dimPCS" type="text" inputmode="decimal" min="0" step="any" onchange="guardarCondicionesDimensionamiento()">
+<label for="dimDensidad">Densidad relativa comprobada</label><input id="dimDensidad" type="text" inputmode="decimal" min="0" step="any" onchange="guardarCondicionesDimensionamiento()">
 <label for="dimFuenteGas">Fuente de las propiedades del gas</label><input id="dimFuenteGas" maxlength="160" onchange="guardarCondicionesDimensionamiento()">
 <p>Material, sistema, localidad, presiones y sus fuentes se cargan en «Instalación: datos y conexiones». Para este motor las presiones deben estar expresadas en Pa. No transforma la presión de referencia de una tabla en presión de suministro.</p>
 <button onclick="ejecutarDimensionamientoGas()">Calcular diámetros de mi red</button>
@@ -315,9 +315,9 @@ Estimación de compra: tiras de <span id="largoComercialAdvertenciaGas">largo co
 <label for="redMaterial">Material de cañería</label><input id="redMaterial" maxlength="80" onchange="guardarPerfilGas()">
 <label for="redSistema">Sistema de unión / familia comercial</label><input id="redSistema" maxlength="80" onchange="guardarPerfilGas()">
 <label for="redUnidad">Unidad común de presión</label><select id="redUnidad" onchange="guardarPerfilGas()"><option value="">Elegir unidad</option><option value="mbar">mbar</option><option value="Pa">Pa</option><option value="mmca">mm de columna de agua</option></select>
-<label for="redPresion">Presión disponible a la salida del medidor</label><input id="redPresion" type="number" min="0" step="any" onchange="guardarPerfilGas()">
-<label for="redMinima">Presión mínima requerida por los artefactos (la más exigente)</label><input id="redMinima" type="number" min="0" step="any" onchange="guardarPerfilGas()">
-<label for="redPerdida">Pérdida máxima admisible indicada para el proyecto</label><input id="redPerdida" type="number" min="0" step="any" onchange="guardarPerfilGas()">
+<label for="redPresion">Presión disponible a la salida del medidor</label><input id="redPresion" type="text" inputmode="decimal" min="0" step="any" onchange="guardarPerfilGas()">
+<label for="redMinima">Presión mínima requerida por los artefactos (la más exigente)</label><input id="redMinima" type="text" inputmode="decimal" min="0" step="any" onchange="guardarPerfilGas()">
+<label for="redPerdida">Pérdida máxima admisible indicada para el proyecto</label><input id="redPerdida" type="text" inputmode="decimal" min="0" step="any" onchange="guardarPerfilGas()">
 <label for="redFuente">Fuente de presiones y pérdida admisible</label><input id="redFuente" maxlength="160" onchange="guardarPerfilGas()">
 <label for="redNorma">Referencia normativa / requisitos de distribuidora aportados</label><input id="redNorma" maxlength="160" onchange="guardarPerfilGas()">
 <label for="redDemanda">Criterio de la suma de consumos</label><select id="redDemanda" onchange="guardarPerfilGas()"><option value="">Pendiente de confirmar</option><option value="placa-total">Sumar todos los consumos de placa, sin simultaneidad</option></select>
@@ -399,11 +399,11 @@ Estimación de compra: tiras de <span id="largoComercialAdvertenciaGas">largo co
 <label for="desde">Desde</label>
 <input id="desde" placeholder="Ej.: M" maxlength="35">
 <label for="hasta">Hasta</label>
-<input id="hasta" placeholder="Ej.: A o TERMO" maxlength="35">
+<input id="hasta" placeholder="Ej.: A o TERMO" maxlength="35" oninput="sincronizarDestinoArtefactoGas()">
 <label for="metros">Metros del tramo</label>
-<input id="metros" type="number" min="0" step="any" placeholder="Ej.: 15">
+<input id="metros" type="text" inputmode="decimal" min="0" step="any" placeholder="Ej.: 15"><p class="nota">Coma o punto decimal: 7,50 = 7.50 m. Sin separadores de miles.</p>
 <label for="consumoTramo">Consumo del artefacto (kcal/h; opcional, en el tramo terminal)</label>
-<input id="consumoTramo" type="number" min="0" step="any" placeholder="Ej.: 16000">
+<input id="consumoTramo" type="text" inputmode="decimal" min="0" step="any" placeholder="Ej.: 16000">
 <details><summary>Opcional: cargar un diámetro manual conocido</summary>
 <label for="diametro">Diámetro manual opcional (secundario)</label>
 <select id="diametro">
@@ -419,7 +419,7 @@ Estimación de compra: tiras de <span id="largoComercialAdvertenciaGas">largo co
 <input id="otroDiametro" class="oculto" placeholder="Diámetro indicado" maxlength="25">
 </details>
 <label for="destinoArtefacto">Artefacto de destino (opcional)</label>
-<select id="destinoArtefacto">
+<select id="destinoArtefacto" onchange="destinoArtefactoManualGas=true">
 <option value="">No corresponde / tramo principal</option>
 <option>Termotanque</option>
 <option>Calefactor</option>
@@ -457,7 +457,7 @@ Estimación de compra: tiras de <span id="largoComercialAdvertenciaGas">largo co
 <div id="filasAccesorios"></div>
 <button class="alt" onclick="nuevoAccesorio()">+ Agregar accesorio</button>
 <label for="metrosFinal">Metros desde el último accesorio hasta el final</label>
-<input id="metrosFinal" type="number" min="0" step="any">
+<input id="metrosFinal" type="text" inputmode="decimal" min="0" step="any">
 <p>Un segmento puede medir 0 m si dos accesorios están conectados directamente o el accesorio está en un extremo. No se cuentan cuplas en ese espacio. Las longitudes deben sumar los metros del tramo.</p>
 </details>
 <p id="errorAccesorios" role="status" class="aviso"></p>
@@ -494,7 +494,7 @@ Estimación de compra: tiras de <span id="largoComercialAdvertenciaGas">largo co
 <option>Otro</option>
 </select>
 <label for="gp">Consumo de placa (kcal/h)</label>
-<input id="gp" type="number" min="0" step="any" placeholder="Ej: 16000">
+<input id="gp" type="text" inputmode="decimal" min="0" step="any" placeholder="Ej: 16000">
 <button onclick="agregarArtefacto()">Agregar artefacto</button>
 <div id="listaGas"></div>
 <label for="gt">Tipo de gas (referencia orientativa)</label>
@@ -1154,7 +1154,10 @@ function abrirPlanGas(){
  renderUnionesMaterialesGas();renderConciliacionRapidaGas();
 }
 function guardarOpcionesMaterialesGas(){
- Object.assign(datosPlanGas().opciones,{largoComercial:Number($('matLargo').value),reutilizar:$('matReusar').checked,minimoSobrante:Number($('matSobrante').value),hipotesisSinPosiciones:$('matHipotesis').checked});
+ if(!validarCamposDecimalesGas(['matLargo','matSobrante']))return;
+ const largo=numeroDecimalGas($('matLargo').value),sobrante=numeroDecimalGas($('matSobrante').value);
+ if(!Number.isFinite(largo)||largo<=0||!Number.isFinite(sobrante)||sobrante<0){$('matMensaje').textContent='Completá un largo comercial positivo y un sobrante válido. No se cambiaron las opciones.';return;}
+ Object.assign(datosPlanGas().opciones,{largoComercial:largo,reutilizar:$('matReusar').checked,minimoSobrante:sobrante,hipotesisSinPosiciones:$('matHipotesis').checked});
  invalidarMaterialesGas();guardarDatos();actualizarTextoLargoGas();
 }
 function renderUnionesMaterialesGas(){
@@ -1782,7 +1785,11 @@ function redFisicaManualGas(ts=tramos,arts=artefactos,inst=instalacionGas){
   if(hijos.length){if(n.tipo==='artefacto')errores.push('El artefacto '+n.nombre+' tiene otros tramos después de su conexión.');let total=0,conocido=0;for(const e of hijos){const d=demanda.get(orientacion[e.t.id].hasta);porTramo[e.t.id]=d?.total??null;parciales[e.t.id]=d?.conocido??0;if(d?.total===null||!d)total=null;else if(total!==null)total+=d.total;conocido+=d?.conocido??0;}demanda.set(id,{total,conocido});continue;}
   if(id===raiz){demanda.set(id,{total:0,conocido:0});continue;}
   const e=padre.get(id)?.e,t=e?.t,etiqueta=nombrePuntoManualGas(t?.artefacto)||nombrePuntoManualGas(n.nombre);
-  let candidatos=n.artefactoId?arts.filter(a=>a.id===n.artefactoId):arts.filter(a=>nombrePuntoManualGas(a.nombre)===etiqueta);
+  // Alias y acentos conservan la identidad existente; una elección manual distinta prevalece.
+  const sinAcentos=v=>v.normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  const coincideDestino=sinAcentos(nombrePuntoManualGas(n.nombre))===sinAcentos(etiqueta)||(nombrePuntoManualGas(n.nombre)==='termo'&&etiqueta==='termotanque');
+  const porExtremo=coincideDestino?arts.filter(a=>nombrePuntoManualGas(a.nombre)===nombrePuntoManualGas(n.nombre)):[];
+  let candidatos=n.artefactoId?arts.filter(a=>a.id===n.artefactoId):porExtremo.length?porExtremo:arts.filter(a=>nombrePuntoManualGas(a.nombre)===etiqueta);
   let consumo=null;
   if(candidatos.length===1){const a=candidatos[0],key=a.id||a;if(usados.has(key)){errores.push('El artefacto '+a.nombre+' está conectado más de una vez.');}else{usados.add(key);if(Number.isFinite(a.consumo)&&a.consumo>0)consumo=a.consumo;}}
   else if(candidatos.length>1)errores.push('Consumo ambiguo en '+n.nombre+': hay más de un artefacto con ese nombre.');
@@ -10224,7 +10231,7 @@ function renderVerificacionTabularSigasGas(out){
  const suministro=document.createElement('details'),ss=document.createElement('summary');ss.textContent='Suministro · datos que faltan';suministro.append(ss);for(const aviso of v.suministro.pendientes){const n=document.createElement('p');n.textContent=aviso;suministro.append(n);}d.append(suministro);
  const form=document.createElement('details'),st=document.createElement('summary');st.textContent='Completar datos una sola vez para este proyecto';form.append(st);
  const campos=[['sigasUnidad','Unidad común de presión','unidadPresion','select',['','Pa','mbar','mmca']],['sigasPresion','Presión disponible a la salida del medidor','presionDisponible','number'],['sigasMinima','Presión mínima más exigente de los artefactos','presionMinima','number'],['sigasPerdida','Pérdida máxima admisible','perdidaMaxima','number'],['sigasFuente','Fuente de presiones y pérdida admisible','fuentePresiones','text'],['sigasDensidad','Densidad relativa del suministro (tabla GN: 0,65)','densidadRelativa','number'],['sigasPCS','Poder calorífico (kcal/m³)','poderCalorifico','number'],['sigasFuenteGas','Fuente de propiedades del gas','fuenteGas','text'],['sigasNorma','Referencia normativa y requisitos de distribuidora','referenciaNormativa','text'],['sigasDemanda','Demanda','criterioDemanda','select',['','placa-total']]];
- for(const [id,nombre,k,tipo,opciones] of campos){const l=document.createElement('label'),i=document.createElement(tipo==='select'?'select':'input');l.textContent=nombre;i.name=id;i.ariaLabel=nombre;if(tipo==='select')for(const val of opciones){const o=document.createElement('option');o.value=val;o.textContent=val==='placa-total'?'Sumar consumos de placa sin simultaneidad':val||'Pendiente';i.append(o);}else{i.type=tipo;i.step='any';if(tipo==='number')i.min='0';else i.maxLength=300;}i.value=p[k]??'';l.append(i);form.append(l);}
+ for(const [id,nombre,k,tipo,opciones] of campos){const l=document.createElement('label'),i=document.createElement(tipo==='select'?'select':'input');l.textContent=nombre;i.name=id;i.ariaLabel=nombre;if(tipo==='select')for(const val of opciones){const o=document.createElement('option');o.value=val;o.textContent=val==='placa-total'?'Sumar consumos de placa sin simultaneidad':val||'Pendiente';i.append(o);}else{i.type=tipo==='number'?'text':tipo;i.step='any';if(tipo==='number'){i.inputMode='decimal';i.min='0';}else i.maxLength=300;}i.value=p[k]??'';l.append(i);form.append(l);}
  for(const [id,nombre,checked] of [['sigasInventario','Verifiqué que todos los accesorios y cuplas reales del circuito están registrados, incluidas cantidades cero comprobadas. No usar las cuplas estimadas de compra como inventario real.',entrada.config.inventarioPerdidasCompleto]]){const l=document.createElement('label'),i=document.createElement('input');i.type='checkbox';i.style.width='auto';i.name=id;i.checked=checked;l.append(i,document.createTextNode(nombre));form.append(l);}
  const l=document.createElement('label'),f=document.createElement('input');l.textContent='Fuente de revisión del inventario (croquis/listado real revisado)';f.name='sigasFuenteInventario';f.maxLength=300;f.value=entrada.config.revisionInventario?.fuente||'';l.append(f);form.append(l);
  const nota=document.createElement('p');nota.textContent='No hacen falta posiciones dentro de un tramo uniforme. Sí deben conocerse las cantidades reales y el producto de sus uniones. Si faltan cuplas reales, registralas en accesorios; esta revisión no agrega piezas ni cambia estimaciones. Un cambio de red, cantidades o productos deja la revisión anterior pendiente. Completar presiones no obliga a repetir la revisión del inventario.';form.append(nota);
@@ -10359,7 +10366,7 @@ function construirResultadoEjercicioSigasGas(cualquierProyecto=false){
 // Campos mínimos del proyecto; comparten perfil y registro terminal con la edición avanzada.
 function guardarPCSPreliminarSigasGas(valor,fuente){
  if(modulo!=='gas'||CatalogosSistemasGas.identificar(instalacionGas.perfil)!=='sigas'||instalacionGas.perfil.gas!=='GN')return false;
- const pcs=Number(valor),origen=String(fuente||'').trim();if(String(valor).trim()===''||!Number.isFinite(pcs)||pcs<=0||!origen)return false;
+ const pcs=numeroDecimalGas(valor),origen=String(fuente||'').trim();if(String(valor).trim()===''||!Number.isFinite(pcs)||pcs<=0||!origen)return false;
  instalacionGas.perfil.poderCalorifico=pcs;instalacionGas.perfil.fuenteGas=origen;
  guardarDatos();calcularMaterialesManualGas();return true;
 }
@@ -10369,7 +10376,7 @@ function renderDatosMinimosPreliminarSigasGas(modelo){
  const caja=document.createElement('div');caja.className='sigas-datos-minimos';
  const form=document.createElement(pcsCompleto?'details':'div');
  const titulo=document.createElement(pcsCompleto?'summary':'h3');titulo.textContent=pcsCompleto?'Editar PCS del proyecto':'Completar PCS para calcular caudales';form.append(titulo);
- const valor=document.createElement('input'),fuente=document.createElement('input');valor.type='number';valor.min='0';valor.step='any';valor.inputMode='decimal';valor.value=p.poderCalorifico||'';valor.ariaLabel='PCS del proyecto (kcal/m³)';fuente.type='text';fuente.value=p.fuenteGas||'';fuente.ariaLabel='Fuente del PCS del proyecto';
+ const valor=document.createElement('input'),fuente=document.createElement('input');valor.type='text';valor.min='0';valor.step='any';valor.inputMode='decimal';valor.value=p.poderCalorifico||'';valor.ariaLabel='PCS del proyecto (kcal/m³)';fuente.type='text';fuente.value=p.fuenteGas||'';fuente.ariaLabel='Fuente del PCS del proyecto';
  for(const [nombre,i]of [['PCS del proyecto (kcal/m³)',valor],['Fuente del PCS del proyecto',fuente]]){const l=document.createElement('label');l.textContent=nombre;l.append(i);form.append(l);}
  const nota=document.createElement('p');nota.textContent='Ingresá el valor del suministro o la referencia de tu ensayo. No se aplica 9.300 automáticamente ni se exige presión para consultar la tabla.';form.append(nota);
  const boton=document.createElement('button'),error=document.createElement('p');boton.type='button';boton.textContent='Usar PCS y recalcular';error.setAttribute?.('role','status');
@@ -18168,6 +18175,7 @@ function ejecutarClaseMiRedGas(){
 }
 
 function guardarCondicionesDimensionamiento(){
+ if(!validarCamposDecimalesGas(['dimPCS','dimDensidad']))return;
  instalacionGas.perfil.poderCalorifico=$('dimPCS').value.trim();instalacionGas.perfil.densidadRelativa=$('dimDensidad').value.trim();instalacionGas.perfil.fuenteGas=$('dimFuenteGas').value.trim();instalacionGas.perfil.condicionesCombustiblePendientes=false;guardarDatos();sincronizarPerfilTecnicoGas();
 }
 function catalogoParaGas(inst){return CATALOGOS_GAS_VERIFICADOS.find(c=>c.material===inst.perfil.material&&c.sistema===inst.perfil.sistema&&c.gas===inst.perfil.gas)||null;}
@@ -18233,6 +18241,7 @@ function restaurarInstalacionGas(g){
  renderRedGas();
 }
 function guardarPerfilGas(){
+ if(!validarCamposDecimalesGas(['redPresion','redMinima','redPerdida']))return;
  Object.entries(CAMPOS_INSTALACION).forEach(([k,id])=>instalacionGas.perfil[k]=$(id).value.trim());
  guardarDatos();
 }
@@ -18567,6 +18576,49 @@ function volver(){
  window.scrollTo(0,0);
 }
 
+// Normalización de entradas GAS: no modifica fórmulas ni valores de tablas.
+function numeroDecimalGas(valor){
+ if(typeof valor==='number')return Number.isFinite(valor)?valor:NaN;
+ if(typeof valor!=='string'||!/^[-+]?(?:\d+(?:[.,]\d+)?|[.,]\d+)$/.test(valor.trim()))return NaN;
+ const n=Number(valor.trim().replace(',','.'));return Number.isFinite(n)?n:NaN;
+}
+function normalizarDecimalCampoGas(campo){
+ if(!campo||String(campo.value).trim()===''){campo?.setCustomValidity?.('');return true;}
+ const n=numeroDecimalGas(campo.value),min=campo.min!==undefined&&campo.min!==''?Number(campo.min):null;
+ const valido=Number.isFinite(n)&&(min===null||!Number.isFinite(min)||n>=min);
+ campo.setCustomValidity?.(valido?'':'Ingresá un decimal válido con coma o punto, sin separadores de miles, dentro del rango indicado.');
+ if(valido)campo.value=String(campo.value).trim().replace(',','.');return valido;
+}
+function validarCamposDecimalesGas(ids){
+ for(const id of ids){const c=$(id);if(!normalizarDecimalCampoGas(c)){c.reportValidity?.();return false;}}return true;
+}
+let destinoArtefactoManualGas=false;
+function reconocerDestinoArtefactoGas(nombre){
+ const limpiar=v=>String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim().toLowerCase().replace(/\s+/g,' '),n=limpiar(nombre);
+ const puntos=(instalacionGas.nodos||[]).filter(p=>limpiar(p.nombre)===n);
+ if(puntos.some(p=>p.tipo&&p.tipo!=='artefacto'))return {tipo:'',ambiguo:false};
+ const tipos={cocina:'Cocina',calefactor:'Calefactor',termo:'Termotanque',termotanque:'Termotanque',calefon:'Calefón',horno:'Horno',caldera:'Caldera'};
+ return {tipo:tipos[n]||'',ambiguo:!tipos[n]&&/cocina|calefactor|termo|calefon|horno|caldera/.test(n)};
+}
+function sincronizarDestinoArtefactoGas(){
+ if(modulo!=='gas'||destinoArtefactoManualGas)return;
+ const r=reconocerDestinoArtefactoGas($('hasta').value);$('destinoArtefacto').value=r.tipo;
+ if(r.ambiguo)$('mensajeCargaManualGas').textContent='Destino ambiguo: elegí explícitamente el artefacto de destino.';
+ else if($('mensajeCargaManualGas').textContent.startsWith('Destino ambiguo:'))$('mensajeCargaManualGas').textContent='';
+}
+// Captura antes de los manejadores existentes, también para campos creados dinámicamente.
+if(document.addEventListener){
+ for(const evento of ['input','change'])document.addEventListener(evento,e=>{
+  if(modulo!=='gas'||e.target?.inputMode!=='decimal')return;
+  if(!normalizarDecimalCampoGas(e.target)){e.stopImmediatePropagation();if(evento==='change')e.target.reportValidity?.();}
+ },true);
+ document.addEventListener('click',e=>{
+  if(modulo!=='gas')return;const b=e.target.closest?.('button');if(!b)return;
+  const accion=b.getAttribute('onclick')||String(b.onclick||'');
+  if(!/guardar|agregarTramo|agregarArtefacto|calcularMateriales|guardarPCS/.test(accion))return;
+  for(const c of document.querySelectorAll('input[inputmode="decimal"]'))if(c.getClientRects().length&&!normalizarDecimalCampoGas(c)){e.preventDefault();e.stopImmediatePropagation();c.reportValidity?.();return;}
+ },true);
+}
 function actualizarControlesCompraGas(){
  if(modulo!=='gas')return;
  const o=opcionesMaterialesGas();
@@ -18699,14 +18751,14 @@ function guardarRevision(){
 }
 
 function agregarArtefacto(){
- const v=$('gp').value;
- if(v===''||!Number.isFinite(Number(v))||Number(v)<=0){
+ const v=String($('gp').value).trim(),n=numeroDecimalGas(v);
+ if(v===''||!Number.isFinite(n)||n<=0){
   alert('Ingresá un consumo mayor a cero.');
   return;
  }
  artefactos.push({
   nombre:$('ga').value,
-  consumo:Number(v)
+  consumo:n
  });
  $('gp').value='';
  renderGas();
@@ -18894,7 +18946,7 @@ function renderRevisionCroquis(){
     (k==='revisionAccesorios'?[['pendiente','Accesorios pendientes de revisar'],['ninguno','Confirmo que no hay tees, codos ni reducciones'],['identificados','Lista de accesorios revisada']]:[['','Pendiente: no identificado'],['tee','Tee'],['codo45','Codo de 45°'],['codo90','Codo de 90°'],['reduccion','Reducción independiente'],['llave','Llave de paso']]).forEach(([v,n])=>{
      const o=document.createElement('option');o.value=v;o.textContent=n;input.append(o);
     });
-   }else{input.type=def[1];if(def[1]==='number'){input.min='0';input.step='any';}else input.maxLength=80;}
+   }else{input.type=def[1]==='number'?'text':def[1];if(def[1]==='number'){input.inputMode='decimal';input.min='0';input.step='any';}else input.maxLength=80;}
    input.value=d.valor??'';if(booleanoNullable)input.value=d.valor===null?'':String(d.valor);if(def[1]==='checkbox' && !booleanoNullable){input.checked=!!d.valor;input.style.width='auto';}
    input.disabled=bloqueado;
    const confirmar=document.createElement('input');confirmar.type='checkbox';confirmar.style.width='auto';confirmar.checked=d.confirmado;confirmar.disabled=bloqueado;
@@ -19048,6 +19100,7 @@ function actualizarTramos(){
  guardarDatos();
 }
 function cancelarEdicionTramo(){
+ destinoArtefactoManualGas=false;
  editandoTramo=-1;
  $('guardarTramo').textContent='+ AGREGAR TRAMO';
  $('cancelarTramo').classList.add('oculto');
@@ -19060,6 +19113,7 @@ function editarTramo(i){
  if(modulo==='gas')$('editarTramosGas').open=true;
  cerrarAccesorios();
  editandoTramo=i;const t=tramos[i];
+ destinoArtefactoManualGas=!!t.artefacto&&t.artefacto!==reconocerDestinoArtefactoGas(t.hasta).tipo;
  $('desde').value=t.desde;$('hasta').value=t.hasta;
  $('metros').value=t.metros;$('consumoTramo').value=t.consumo??'';
  const comunes=['1/2"','3/4"','1"','1 1/4"','1 1/2"','2"'];
@@ -19147,7 +19201,7 @@ function renderAccesorios(){
   function campo(texto,clave,tipo='text'){
    const label=document.createElement('label');label.textContent=texto;
    const input=document.createElement('input');input.type=tipo;input.value=a[clave]??'';
-   if(tipo==='number'){input.min='0';input.step='any';}
+   if(tipo==='number'){input.type='text';input.inputMode='decimal';input.min='0';input.step='any';}
    else input.maxLength=35;
    input.oninput=()=>{a[clave]=tipo==='number'?(input.value===''?'':Number(input.value)):input.value;};
    if(clave==='salida')input.onchange=renderAccesorios;
@@ -19199,13 +19253,17 @@ function guardarAccesorios(){
 function agregarTramo(){
  const desde=$('desde').value.trim();
  const hasta=$('hasta').value.trim();
- const m=$('metros').value;
- const c=$('consumoTramo').value;
+ const m=String($('metros').value).trim();
+ const c=String($('consumoTramo').value).trim();
+ const metrosLeidos=numeroDecimalGas(m),consumoLeido=c===''?null:numeroDecimalGas(c);
+ const destino=reconocerDestinoArtefactoGas($('hasta').value);
+ if(!$('destinoArtefacto').value&&!destinoArtefactoManualGas&&destino.tipo)$('destinoArtefacto').value=destino.tipo;
+ if(destino.ambiguo&&!$('destinoArtefacto').value){$('mensajeCargaManualGas').textContent='Destino ambiguo: elegí explícitamente el artefacto de destino.';return;}
  const di=$('diametro').value==='Otro (especificar)'?
   $('otroDiametro').value.trim():$('diametro').value;
 
- if(!desde||!hasta||m===''||!Number.isFinite(Number(m))||
- Number(m)<=0||(c!==''&&(!Number.isFinite(Number(c))||Number(c)<0))){
+ if(!desde||!hasta||m===''||!Number.isFinite(metrosLeidos)||
+ metrosLeidos<=0||(c!==''&&(!Number.isFinite(consumoLeido)||consumoLeido<0))){
   alert('Completá Desde, Hasta, metros mayores a cero. El diámetro manual es opcional. Si completás consumo manual, debe ser un número no negativo.');
   return;
  }
@@ -19213,7 +19271,7 @@ function agregarTramo(){
  if(repetido){$('mensajeCargaManualGas').textContent='El tramo '+repetido.desde+'–'+repetido.hasta+' ya está registrado. Editá ese tramo; invertir los extremos no crea otro caño.';return;}
  let cantidades;try{cantidades=leerCantidadesFormularioGas();}catch(e){$('agregarAccesoriosGas').open=true;$('mensajeCargaManualGas').textContent=e.message;$('resultadoMateriales').textContent=e.message;return;}
  $('mensajeCargaManualGas').textContent='';
- const datos={desde,hasta,metros:Number(m),consumo:c===''?null:Number(c),diametro:di||null,
+ const datos={desde,hasta,metros:metrosLeidos,consumo:consumoLeido,diametro:di||null,
   artefacto:$('destinoArtefacto').value,llave:$('llave').checked};
  if(editandoTramo>=0){
   const anterior=tramos[editandoTramo];
