@@ -255,6 +255,31 @@ function renderPreseleccionSigasGas(out,plan=null){
  renderVinculosSigasGas(out,r);
  const nota=document.createElement('p');nota.textContent=textoCuplasSigasGas(plan);out.append(nota);
 }
+// Demostración optativa: comparte el flujo manual, nunca los registros de otro proyecto.
+function abrirEjemploTeesRapidasGas(){
+ if(modulo!=='gas')return false;modoCargaGas='rapida';actualizarModoCargaGas();
+ const existente=registrosProyectosGas().find(p=>p.datos.ejemploTeesRapidas===1);
+ if(existente){seleccionarAmbitoGas('proyecto:'+existente.id);renderTramos();calcularMaterialesManualGas();return true;}
+ const base='Ejemplo de prueba SIGAS · 20,60 m';let nombre=base;
+ for(let n=2;;n++){try{nombreProyectoValidoGas(nombre);break;}catch(error){nombre=base+' ('+n+')';}}
+ if(!crearProyectoGas(nombre))return false;
+ const filas=[['M','A',7.9,0,5,1,0,''],['A','B',3.9,0,2,1,0,''],['A','Calefactor',4.5,6000,5,0,1,'Calefactor'],['B','Cocina',2.15,11000,2,0,1,'Cocina'],['B','Termotanque',2.15,4800,2,0,1,'Termotanque']];
+ tramos=filas.map(([desde,hasta,metros,consumo,codos,tees,llaves,artefacto])=>({id:idGas('tramo'),desde,hasta,metros,consumo:consumo||null,artefacto,diametro:null,detalle:{estado:'pendiente',accesorios:tees?[{tipo:'tee',nodo:hasta,idFisico:'ejemplo-tees-'+hasta}]:[]}}));
+ artefactos=[];instalacionGas={version:1,perfil:{pais:'AR',uso:'domiciliario',gas:'GN',catalogoTecnicoGas:'sigas',material:'Acero-polietileno SIGAS Thermofusión',sistema:'Thermofusión',largosDocumentados2026:true},nodos:[]};
+ const p=proyectoGasActual();p.ejemploTeesRapidas=1;p.conteosRapidosGas=Object.fromEntries(filas.map((f,i)=>[tramos[i].id,{codo90:f[4],codo45:0,tee:f[5],llave:f[6]}]));p.calculoSigas={version:1,vinculos:{}};
+ datosPlanGas().opciones.cargaManualDirecta=true;
+ guardarDatos();
+ const tee=entradaPreseleccionSigasGas()?.inventario.fisicas.find(p=>p.tipo==='tee'&&String(p.nodo).replace(/^nombre:/,'').toLowerCase()==='a');
+ if(tee)guardarConfiguracionTeeSigasGas(tee.id,{modo:'ambas',fuenteOrientacion:'manual-ejemplo',viasPorTramo:{[tramos[1].id]:'giro',[tramos[2].id]:'directo'}});
+ cancelarEdicionTramo();renderTramos();renderGas();renderAmbitoGas();calcularMaterialesManualGas();return true;
+}
+function quitarEjemploTeesRapidasGas(){
+ if(modulo!=='gas'||proyectoGasActual().ejemploTeesRapidas!==1||!ambitoGas.startsWith('proyecto:'))return false;
+ if(!window.confirm('¿Quitar únicamente este ejemplo de prueba? Tus otros proyectos y demostraciones se conservan.'))return false;
+ const id=ambitoGas.slice(9);seleccionarAmbitoGas('proyecto');
+ proyectos.gas.proyectosGuardados=proyectos.gas.proyectosGuardados.filter(p=>p.id!==id);guardarDatos();renderAmbitoGas();
+ $('mensajeProyectosGas').textContent=registrosProyectosGas(ultimoGuardadoValido).some(p=>p.id===id)?'No pudo guardarse la eliminación; el ejemplo puede reaparecer al abrir.':'Ejemplo quitado. Los otros proyectos se conservaron.';return true;
+}
 function abrirEjercicioSigas19Gas(){
  if(modulo!=='gas')return false;
  const existente=registrosProyectosGas().find(p=>p.datos.referenciaSigas19===true);
@@ -498,18 +523,18 @@ function renderConfiguracionTeeRapidaGas(tramoPreferido=null){
  const selector=$('nodoTeeRapidaGas'),cont=$('viasTeeRapidaGas'),estado=$('estadoTeeRapidaGas'),previo=selector.value;
  selector.replaceChildren();cont.replaceChildren();
  let e;try{e=entradaPreseleccionSigasGas();}catch(error){e=null;}
- const piezas=perfilTecnicoActualGas().catalogoTecnicoGas==='sigas'?(e?.inventario.fisicas||[]).filter(p=>p.tipo==='tee'):[];
+ const piezas=CatalogosSistemasGas.identificar(instalacionGas.perfil)==='sigas'?(e?.inventario.fisicas||[]).filter(p=>p.tipo==='tee'):[];
  const visible=Number($('manualGas_tee').value)>0||piezas.length>0;$('panelTeeRapidaGas').classList.toggle('oculto',!visible);if(!visible)return;
  for(const p of piezas){const o=document.createElement('option');o.value=p.id;o.textContent='Tee '+String(p.nodo||'ubicación pendiente').replace(/^nombre:/,'').toUpperCase();selector.append(o);}
  selector.disabled=!piezas.length;
- if(!piezas.length){estado.textContent=perfilTecnicoActualGas().catalogoTecnicoGas!=='sigas'?'La orientación rápida para este sistema todavía no está integrada. No se aplican tablas de otros fabricantes.':'Guardá la cantidad de tees y los tramos conectados. Podés volver aquí después; los datos del formulario se conservan. No se asigna una orientación automáticamente.';return;}
+ if(!piezas.length){estado.textContent=CatalogosSistemasGas.identificar(instalacionGas.perfil)!=='sigas'?'La orientación rápida para este sistema todavía no está integrada. No se aplican tablas de otros fabricantes.':'Guardá la cantidad de tees y los tramos conectados. Podés volver aquí después; los datos del formulario se conservan. No se asigna una orientación automáticamente.';return;}
  const actual=piezas.find(p=>tramoPreferido&&p.tramos.includes(tramoPreferido))||piezas.find(p=>p.id===previo)||piezas.find(p=>editandoTramo>=0&&p.tramos.includes(tramos[editandoTramo]?.id))||piezas[0];selector.value=actual.id;
  estado.textContent='Elegí cada salida según tu croquis. No hace falta indicar distancias.';
  renderViasManualesTeeGas(cont,actual.tramos[0],{soloCirculacion:true,teeId:actual.id});
 }
 // Orientación independiente del producto físico; el registro técnico existente es la única fuente.
 function renderViasManualesTeeGas(cont,tramoId,{soloCirculacion=false,teeId=null}={}){
- if(modulo!=='gas'||perfilTecnicoActualGas().catalogoTecnicoGas!=='sigas')return;
+ if(modulo!=='gas'||CatalogosSistemasGas.identificar(instalacionGas.perfil)!=='sigas')return;
  let entrada;try{entrada=entradaPreseleccionSigasGas();}catch(e){return;}if(!entrada)return;
  const nombres=id=>entrada.preparacion.porTramo.find(t=>t.id===id)?.nombre||id;
  for(const pieza of entrada.inventario.fisicas.filter(p=>p.tipo==='tee'&&p.tramos.includes(tramoId)&&(!teeId||p.id===teeId))){

@@ -4,6 +4,7 @@ function sincronizarSistemaPrincipalGas(){
  sincronizarPerfilTecnicoGas();
  const id=CatalogosSistemasGas.identificar(instalacionGas.perfil);
  $('catalogoSistemaGas').value=id||'';
+ if(typeof renderConfiguracionTeeRapidaGas==='function')renderConfiguracionTeeRapidaGas();
  $('estadoCatalogoSistemaGas').textContent=(id==='sigas'?'SIGAS Thermofusión':id==='fusiogas'?'FUSIOGAS Thermofusión':id?'Acero epoxi':'Elegí el sistema del proyecto')+' · materiales disponibles; diámetros pendientes de verificación técnica.';
 }
 function estadoCierreGas(){

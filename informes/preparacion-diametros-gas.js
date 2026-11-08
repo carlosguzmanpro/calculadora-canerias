@@ -5,7 +5,7 @@ function seleccionarCatalogoSistemaGas(id){
  if(id&&!tramos.length&&!artefactos.length&&!proyectoGasActual().planCompra?.revisiones?.proyecto)instalacionGas.perfil.largosDocumentados2026=true;
  instalacionGas.perfil.catalogoTecnicoGas=id;
  if(id&&!instalacionGas.perfil.material&&!instalacionGas.perfil.sistema){instalacionGas.perfil.material=id==='sigas'?'Acero-polietileno SIGAS Thermofusión':id==='fusiogas'?'Acero-polietileno FUSIOGAS Thermofusión':'Acero con revestimiento epoxi';instalacionGas.perfil.sistema=id==='sigas'||id==='fusiogas'?'Thermofusión':'Roscado';}
- guardarDatos();sincronizarPerfilTecnicoGas();try{mostrarPreparacionDiametrosGas();}catch(e){$('estadoCatalogoSistemaGas').textContent='Selección conservada. Diagnóstico técnico pendiente: '+e.message;}renderResumenPrincipalGas();
+ guardarDatos();sincronizarPerfilTecnicoGas();renderTramos();try{mostrarPreparacionDiametrosGas();}catch(e){$('estadoCatalogoSistemaGas').textContent='Selección conservada. Diagnóstico técnico pendiente: '+e.message;}renderResumenPrincipalGas();
  const guardado=proyectoGuardadoGas()?.instalacion?.perfil?.catalogoTecnicoGas;
  $('estadoCatalogoSistemaGas').textContent=(id?'Selección conservada para este proyecto.':'Sin selección; los datos de material y unión se conservaron.')+(guardado!==instalacionGas.perfil.catalogoTecnicoGas?' Guardado local no confirmado: conservá un respaldo.':'')+' Los diámetros siguen pendientes de verificación.';
  return true;
