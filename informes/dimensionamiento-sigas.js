@@ -518,6 +518,12 @@ function renderPropuestaConjuntoTeeGas(caja,id){
  const b=document.createElement('button');b.type='button';b.textContent='Confirmar este conjunto';b.onclick=()=>{const enCarga=$('croquis').classList.contains?.('oculto')===false,r=confirmarConjuntoTeeGas(id,sel.value);mensaje.textContent=r.mensaje;if(enCarga){mostrarVista('croquis');$('tramosRegistradosGas').open=true;}if(!r.ok)window.alert?.(r.mensaje);};
  const aviso=document.createElement('p');aviso.setAttribute?.('role','status');aviso.textContent=estado.mensaje;d.append(contenido,aviso,b,mensaje);caja.append(d);
 }
+// Solo describe dos salidas anónimas: no asigna IDs de recorrido ni equivalencias.
+function renderOrientacionTeeProvisionalGas(cont){
+ for(const [valor,texto]of [['directo-giro','Salida 1: A través · Salida 2: Giro 90°'],['giro-directo','Salida 1: Giro 90° · Salida 2: A través']]){
+  const l=document.createElement('label'),r=document.createElement('input');l.className='tee-opcion-provisional';r.type='radio';r.name='tee-orientacion-provisional';r.value=valor;r.checked=orientacionTeeFormularioGas===valor;r.onchange=()=>{orientacionTeeFormularioGas=valor;guardarDatos();};l.append(r,document.createTextNode(texto));cont.append(l);
+ }
+}
 // Acceso desde las cantidades: no crea piezas ni copia configuraciones.
 function renderConfiguracionTeeRapidaGas(tramoPreferido=null){
  const selector=$('nodoTeeRapidaGas'),cont=$('viasTeeRapidaGas'),estado=$('estadoTeeRapidaGas'),previo=selector.value;
@@ -527,9 +533,12 @@ function renderConfiguracionTeeRapidaGas(tramoPreferido=null){
  const visible=Number($('manualGas_tee').value)>0||piezas.length>0;$('panelTeeRapidaGas').classList.toggle('oculto',!visible);if(!visible)return;
  for(const p of piezas){const o=document.createElement('option');o.value=p.id;o.textContent='Tee '+String(p.nodo||'ubicación pendiente').replace(/^nombre:/,'').toUpperCase();selector.append(o);}
  selector.disabled=!piezas.length;
- if(!piezas.length){estado.textContent=CatalogosSistemasGas.identificar(instalacionGas.perfil)!=='sigas'?'La orientación rápida para este sistema todavía no está integrada. No se aplican tablas de otros fabricantes.':'Guardá la cantidad de tees y los tramos conectados. Podés volver aquí después; los datos del formulario se conservan. No se asigna una orientación automáticamente.';return;}
+ $('conexionTeeRapidaGas').classList.toggle('oculto',!piezas.length);
+ if(!piezas.length){estado.textContent='Provisional: salidas por identificar. Se conserva la elección sin asignarla a recorridos ni verificar diámetros.';renderOrientacionTeeProvisionalGas(cont);return;}
  const actual=piezas.find(p=>tramoPreferido&&p.tramos.includes(tramoPreferido))||piezas.find(p=>p.id===previo)||piezas.find(p=>editandoTramo>=0&&p.tramos.includes(tramos[editandoTramo]?.id))||piezas[0];selector.value=actual.id;
  estado.textContent='Elegí cada salida según tu croquis. No hace falta indicar distancias.';
+ const ids=actual.conexionesDiametro||[],entradas=[...new Set((e?.preparacion.recorridos||[]).map(r=>r.tramos.filter(id=>ids.includes(id))).filter(r=>r.length===2).map(r=>r[0]))];
+ if(ids.length!==3||entradas.length!==1){estado.textContent='Provisional: faltan conexiones. No se aplica a recorridos ni diámetros.';renderOrientacionTeeProvisionalGas(cont);}else if(orientacionTeeFormularioGas){estado.textContent='La elección provisional se conserva sin vincular. Identificá las salidas reales abajo para aplicarla al cálculo.';}
  renderViasManualesTeeGas(cont,actual.tramos[0],{soloCirculacion:true,teeId:actual.id});
 }
 // Orientación independiente del producto físico; el registro técnico existente es la única fuente.

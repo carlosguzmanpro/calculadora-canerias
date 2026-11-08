@@ -171,6 +171,7 @@ section{box-shadow:none}
 .gas-paso-titulo{font-weight:700;margin:16px 0 6px;color:#215b53}.gas-recorrido{padding:0;display:block}.gas-recorrido button{min-height:48px}.gas-recorrido .nota{font-size:13px;margin:6px 0}#estadoRecorridoGas:empty{display:none}@media(min-width:701px){.gas-recorrido{max-width:720px}}
 #trabajo.gas-carga-rapida .gas-profesional{display:none!important}
 .campo-tee-rapida{grid-column:1/-1}
+.tee-opcion-provisional{display:flex;align-items:center;gap:10px;padding:10px;margin:8px 0;border:1px solid #bfd2cc;border-radius:8px}.tee-opcion-provisional input{width:24px;min-width:24px;height:24px;margin:0}
 </style>
 </head>
 <body>
@@ -432,7 +433,7 @@ Estimación de compra: tiras de <span id="largoComercialAdvertenciaGas">largo co
 <option>Otro artefacto</option>
 </select>
 <input id="llave" type="hidden" aria-hidden="true"><!-- Compatibilidad interna con respaldos; el único control visible es Llaves de paso. -->
-<details class="detalle" id="agregarAccesoriosGas"><summary>Agregar accesorios</summary><div id="cantidadesManualesGas"><h3>Accesorios del tramo · totales manuales</h3><p class="nota">Incluí las piezas del detalle en estos totales. Vacío = pendiente; 0 = no hay. Una tee es una sola pieza aunque su ramal gire. No sumes una pieza compartida nuevamente en otro tramo.</p><div class="gas-campos-manuales"><label>Codos de 90°<input id="manualGas_codo90" type="number" min="0" step="1" inputmode="numeric" placeholder="Pendiente"></label><label>Codos de 45°<input id="manualGas_codo45" type="number" min="0" step="1" inputmode="numeric" placeholder="Pendiente"></label><div class="campo-tee-rapida"><label for="manualGas_tee">Tees</label><input id="manualGas_tee" oninput="renderConfiguracionTeeRapidaGas()" type="number" min="0" step="1" inputmode="numeric" placeholder="Pendiente"><div id="panelTeeRapidaGas" class="oculto"><label for="nodoTeeRapidaGas">Tee por nodo de conexión</label><select id="nodoTeeRapidaGas" onchange="renderConfiguracionTeeRapidaGas()"></select><p id="estadoTeeRapidaGas" class="nota" role="status"></p><div id="viasTeeRapidaGas"></div></div></div><label>Reducciones independientes<input id="manualGas_reduccion" type="number" min="0" step="1" inputmode="numeric" placeholder="Pendiente"></label><label>Llaves de paso<input id="manualGas_llave" type="number" min="0" step="1" inputmode="numeric" placeholder="Pendiente"></label></div><p id="mensajeCargaManualGas" role="status" aria-live="polite"></p></div></details><button id="guardarTramo" onclick="agregarTramo()">Guardar tramo y continuar</button>
+<details class="detalle" id="agregarAccesoriosGas"><summary>Agregar accesorios</summary><div id="cantidadesManualesGas"><h3>Accesorios del tramo · totales manuales</h3><p class="nota">Incluí las piezas del detalle en estos totales. Vacío = pendiente; 0 = no hay. Una tee es una sola pieza aunque su ramal gire. No sumes una pieza compartida nuevamente en otro tramo.</p><div class="gas-campos-manuales"><label>Codos de 90°<input id="manualGas_codo90" type="number" min="0" step="1" inputmode="numeric" placeholder="Pendiente"></label><label>Codos de 45°<input id="manualGas_codo45" type="number" min="0" step="1" inputmode="numeric" placeholder="Pendiente"></label><div class="campo-tee-rapida"><label for="manualGas_tee">Tees</label><input id="manualGas_tee" oninput="renderConfiguracionTeeRapidaGas()" type="number" min="0" step="1" inputmode="numeric" placeholder="Pendiente"><div id="panelTeeRapidaGas" class="oculto"><p id="preguntaTeeRapidaGas"><strong>¿Cómo circula el gas por esta tee?</strong></p><div id="conexionTeeRapidaGas"><label for="nodoTeeRapidaGas">Tee por nodo de conexión</label><select id="nodoTeeRapidaGas" onchange="renderConfiguracionTeeRapidaGas()"></select></div><p id="estadoTeeRapidaGas" class="nota" role="status"></p><div id="viasTeeRapidaGas"></div></div></div><label>Reducciones independientes<input id="manualGas_reduccion" type="number" min="0" step="1" inputmode="numeric" placeholder="Pendiente"></label><label>Llaves de paso<input id="manualGas_llave" type="number" min="0" step="1" inputmode="numeric" placeholder="Pendiente"></label></div><p id="mensajeCargaManualGas" role="status" aria-live="polite"></p></div></details><button id="guardarTramo" onclick="agregarTramo()">Guardar tramo y continuar</button>
 <button id="cancelarTramo" class="alt oculto" onclick="cancelarEdicionTramo()">Cancelar edición del tramo</button>
 </div></details><div><details id="tramosRegistradosGas" class="gas-detalles"><summary id="resumenTramosRegistradosGas">Tramos registrados · editar o quitar</summary><div id="listaTramos"></div></details>
 <section id="editorAccesorios" class="oculto solo-pantalla gas-profesional" aria-label="Accesorios del tramo">
@@ -607,11 +608,13 @@ const camposBorradorProyectoGas=['desde','hasta','metros','consumoTramo','diamet
 function capturarBorradorProyectoGas(){
  if(modulo!=='gas')return;const valores={};for(const id of [...camposBorradorProyectoGas,...tiposRapidosGas.map(([k])=>'manualGas_'+k)])if($(id))valores[id]=$(id).value;
  const d={valores,tramo:tramos[editandoTramo]?.id||null,nodo:editandoNodoGas||null};
+ if(['directo-giro','giro-directo'].includes(orientacionTeeFormularioGas))d.teeProvisional=orientacionTeeFormularioGas;
  if(editandoAccesorios>=0&&tramos[editandoAccesorios]){d.accesorios={tramo:tramos[editandoAccesorios].id,datos:JSON.parse(JSON.stringify(borradorAccesorios)),estado:$('estadoAccesorios').value,final:$('metrosFinal').value,rapidos:{}};for(const [k]of tiposRapidosGas)if($('rapidoGas_'+k))d.accesorios.rapidos[k]=$('rapidoGas_'+k).value;}
  const utiles=Object.entries(valores).some(([id,v])=>!['ga','redTipoNodo','redArtefactoNodo'].includes(id)&&String(v??'').trim()!=='')||(valores.ga&&valores.ga!=='Cocina')||!!d.tramo||!!d.nodo||!!d.accesorios;
  if(utiles)proyectoGasActual().borradorFormularioGas=d;else delete proyectoGasActual().borradorFormularioGas;
 }
 function restaurarBorradorProyectoGas(){
+ orientacionTeeFormularioGas=null;
  for(const id of camposBorradorProyectoGas)if($(id))$(id).value=id==='ga'?'Cocina':id==='redTipoNodo'?'derivacion':'';
  const d=proyectoGasActual().borradorFormularioGas;if(!d)return;try{validarBorradorProyectoGas(proyectoGasActual());}catch(e){$('mensajeProyectosGas').textContent=e.message;return;}
  const i=d.tramo?tramos.findIndex(t=>t.id===d.tramo):-1;if(i>=0)editarTramo(i);
@@ -619,6 +622,8 @@ function restaurarBorradorProyectoGas(){
  for(const [id,v]of Object.entries(d.valores||{}))if([...camposBorradorProyectoGas,...tiposRapidosGas.map(([k])=>'manualGas_'+k)].includes(id)&&$(id))$(id).value=v;
  editandoNodoGas=instalacionGas.nodos.some(n=>n.id===d.nodo)?d.nodo:null;if(editandoNodoGas)$('redGuardarNodo').textContent='Guardar cambios del punto';
  $('otroDiametro').classList.toggle('oculto',$('diametro').value!=='Otro (especificar)');
+ if(Object.hasOwn(d,'teeProvisional'))orientacionTeeFormularioGas=['directo-giro','giro-directo'].includes(d.teeProvisional)?d.teeProvisional:null;
+ renderConfiguracionTeeRapidaGas(tramos[editandoTramo]?.id);
 }
 
 function validarBorradorProyectoGas(p){
@@ -1118,6 +1123,7 @@ function ubicacionLegibleGas(texto,contexto=null){
 <script data-local="materiales/interfaz-gas.js">
 /* Interfaz de revisión de materiales; usa el estado existente, nunca activa diámetros. */
 let revisionMaterialesGas=null,fuenteMaterialesGas='proyecto';
+let orientacionTeeFormularioGas=null;
 function datosPlanGas(){
  const p=proyectoGasActual();
  if(!p.planCompra||typeof p.planCompra!=='object'||Array.isArray(p.planCompra))p.planCompra={};
@@ -1729,6 +1735,7 @@ function calcularMaterialesManualGas(){
  $('matMensaje').textContent='Lista actualizada con las cantidades ingresadas. Sin segunda confirmación. Diámetros, posiciones y compra no verificados conservan sus advertencias.';
 }
 function cargarCantidadesFormularioGas(t){
+ orientacionTeeFormularioGas=['directo-giro','giro-directo'].includes(t?.orientacionTeeProvisional?.orden)?t.orientacionTeeProvisional.orden:null;
  const datos=t?conteoRapidoDelTramoGas(t):{};
  for(const [tipo]of tiposRapidosGas){const heredada=tipo==='llave'&&t?cantidadLlavesHeredadasGas(t):null;$('manualGas_'+tipo).value=Number.isSafeInteger(datos[tipo])&&datos[tipo]>=0?datos[tipo]:heredada??'';}
  if(modulo==='gas'&&typeof renderConfiguracionTeeRapidaGas==='function')renderConfiguracionTeeRapidaGas(t?.id);
@@ -10052,6 +10059,12 @@ function renderPropuestaConjuntoTeeGas(caja,id){
  const b=document.createElement('button');b.type='button';b.textContent='Confirmar este conjunto';b.onclick=()=>{const enCarga=$('croquis').classList.contains?.('oculto')===false,r=confirmarConjuntoTeeGas(id,sel.value);mensaje.textContent=r.mensaje;if(enCarga){mostrarVista('croquis');$('tramosRegistradosGas').open=true;}if(!r.ok)window.alert?.(r.mensaje);};
  const aviso=document.createElement('p');aviso.setAttribute?.('role','status');aviso.textContent=estado.mensaje;d.append(contenido,aviso,b,mensaje);caja.append(d);
 }
+// Solo describe dos salidas anónimas: no asigna IDs de recorrido ni equivalencias.
+function renderOrientacionTeeProvisionalGas(cont){
+ for(const [valor,texto]of [['directo-giro','Salida 1: A través · Salida 2: Giro 90°'],['giro-directo','Salida 1: Giro 90° · Salida 2: A través']]){
+  const l=document.createElement('label'),r=document.createElement('input');l.className='tee-opcion-provisional';r.type='radio';r.name='tee-orientacion-provisional';r.value=valor;r.checked=orientacionTeeFormularioGas===valor;r.onchange=()=>{orientacionTeeFormularioGas=valor;guardarDatos();};l.append(r,document.createTextNode(texto));cont.append(l);
+ }
+}
 // Acceso desde las cantidades: no crea piezas ni copia configuraciones.
 function renderConfiguracionTeeRapidaGas(tramoPreferido=null){
  const selector=$('nodoTeeRapidaGas'),cont=$('viasTeeRapidaGas'),estado=$('estadoTeeRapidaGas'),previo=selector.value;
@@ -10061,9 +10074,12 @@ function renderConfiguracionTeeRapidaGas(tramoPreferido=null){
  const visible=Number($('manualGas_tee').value)>0||piezas.length>0;$('panelTeeRapidaGas').classList.toggle('oculto',!visible);if(!visible)return;
  for(const p of piezas){const o=document.createElement('option');o.value=p.id;o.textContent='Tee '+String(p.nodo||'ubicación pendiente').replace(/^nombre:/,'').toUpperCase();selector.append(o);}
  selector.disabled=!piezas.length;
- if(!piezas.length){estado.textContent=CatalogosSistemasGas.identificar(instalacionGas.perfil)!=='sigas'?'La orientación rápida para este sistema todavía no está integrada. No se aplican tablas de otros fabricantes.':'Guardá la cantidad de tees y los tramos conectados. Podés volver aquí después; los datos del formulario se conservan. No se asigna una orientación automáticamente.';return;}
+ $('conexionTeeRapidaGas').classList.toggle('oculto',!piezas.length);
+ if(!piezas.length){estado.textContent='Provisional: salidas por identificar. Se conserva la elección sin asignarla a recorridos ni verificar diámetros.';renderOrientacionTeeProvisionalGas(cont);return;}
  const actual=piezas.find(p=>tramoPreferido&&p.tramos.includes(tramoPreferido))||piezas.find(p=>p.id===previo)||piezas.find(p=>editandoTramo>=0&&p.tramos.includes(tramos[editandoTramo]?.id))||piezas[0];selector.value=actual.id;
  estado.textContent='Elegí cada salida según tu croquis. No hace falta indicar distancias.';
+ const ids=actual.conexionesDiametro||[],entradas=[...new Set((e?.preparacion.recorridos||[]).map(r=>r.tramos.filter(id=>ids.includes(id))).filter(r=>r.length===2).map(r=>r[0]))];
+ if(ids.length!==3||entradas.length!==1){estado.textContent='Provisional: faltan conexiones. No se aplica a recorridos ni diámetros.';renderOrientacionTeeProvisionalGas(cont);}else if(orientacionTeeFormularioGas){estado.textContent='La elección provisional se conserva sin vincular. Identificá las salidas reales abajo para aplicarla al cálculo.';}
  renderViasManualesTeeGas(cont,actual.tramos[0],{soloCirculacion:true,teeId:actual.id});
 }
 // Orientación independiente del producto físico; el registro técnico existente es la única fuente.
@@ -19343,6 +19359,7 @@ function agregarTramo(){
  $('mensajeCargaManualGas').textContent='';
  const datos={desde,hasta,metros:metrosLeidos,consumo:consumoLeido,diametro:di||null,
   artefacto:$('destinoArtefacto').value,llave:$('llave').checked};
+ if(modulo==='gas'&&['directo-giro','giro-directo'].includes(orientacionTeeFormularioGas))datos.orientacionTeeProvisional={version:1,orden:orientacionTeeFormularioGas,estado:'provisional',sinVincular:true};
  if(editandoTramo>=0){
   const anterior=tramos[editandoTramo];
   datos.detalle=anterior.detalle;datos.origen=anterior.origen;datos.id=anterior.id;datos.red=anterior.red;
