@@ -494,7 +494,7 @@ function renderPropuestaConjuntoTeeGas(caja,id){
  const aviso=document.createElement('p');aviso.setAttribute?.('role','status');aviso.textContent=estado.mensaje;d.append(contenido,aviso,b,mensaje);caja.append(d);
 }
 // Acceso desde las cantidades: no crea piezas ni copia configuraciones.
-function renderConfiguracionTeeRapidaGas(){
+function renderConfiguracionTeeRapidaGas(tramoPreferido=null){
  const selector=$('nodoTeeRapidaGas'),cont=$('viasTeeRapidaGas'),estado=$('estadoTeeRapidaGas'),previo=selector.value;
  selector.replaceChildren();cont.replaceChildren();
  let e;try{e=entradaPreseleccionSigasGas();}catch(error){e=null;}
@@ -503,7 +503,7 @@ function renderConfiguracionTeeRapidaGas(){
  for(const p of piezas){const o=document.createElement('option');o.value=p.id;o.textContent='Tee '+String(p.nodo||'ubicación pendiente').replace(/^nombre:/,'').toUpperCase();selector.append(o);}
  selector.disabled=!piezas.length;
  if(!piezas.length){estado.textContent=perfilTecnicoActualGas().catalogoTecnicoGas!=='sigas'?'La orientación rápida para este sistema todavía no está integrada. No se aplican tablas de otros fabricantes.':'Guardá la cantidad de tees y los tramos conectados. Podés volver aquí después; los datos del formulario se conservan. No se asigna una orientación automáticamente.';return;}
- const actual=piezas.find(p=>p.id===previo)||piezas.find(p=>editandoTramo>=0&&p.tramos.includes(tramos[editandoTramo]?.id))||piezas[0];selector.value=actual.id;
+ const actual=piezas.find(p=>tramoPreferido&&p.tramos.includes(tramoPreferido))||piezas.find(p=>p.id===previo)||piezas.find(p=>editandoTramo>=0&&p.tramos.includes(tramos[editandoTramo]?.id))||piezas[0];selector.value=actual.id;
  estado.textContent='Elegí cada salida según tu croquis. No hace falta indicar distancias.';
  renderViasManualesTeeGas(cont,actual.tramos[0],{soloCirculacion:true,teeId:actual.id});
 }

@@ -613,6 +613,7 @@ function calcularMaterialesManualGas(){
 function cargarCantidadesFormularioGas(t){
  const datos=t?conteoRapidoDelTramoGas(t):{};
  for(const [tipo]of tiposRapidosGas){const heredada=tipo==='llave'&&t?cantidadLlavesHeredadasGas(t):null;$('manualGas_'+tipo).value=Number.isSafeInteger(datos[tipo])&&datos[tipo]>=0?datos[tipo]:heredada??'';}
+ if(modulo==='gas'&&typeof renderConfiguracionTeeRapidaGas==='function')renderConfiguracionTeeRapidaGas(t?.id);
 }
 function leerCantidadesFormularioGas(){
  const datos={};for(const [tipo]of tiposRapidosGas){const valor=String($('manualGas_'+tipo).value).trim();if(!valor)continue;const n=Number(valor);if(!Number.isSafeInteger(n)||n<0)throw Error('Las cantidades de accesorios deben ser enteros no negativos. Vacío significa pendiente.');datos[tipo]=n;}return datos;
