@@ -494,7 +494,7 @@ function renderPropuestaConjuntoTeeGas(caja,id){
  const aviso=document.createElement('p');aviso.setAttribute?.('role','status');aviso.textContent=estado.mensaje;d.append(contenido,aviso,b,mensaje);caja.append(d);
 }
 // Orientación independiente del producto físico; el registro técnico existente es la única fuente.
-function renderViasManualesTeeGas(cont,tramoId){
+function renderViasManualesTeeGas(cont,tramoId,{soloCirculacion=false}={}){
  if(modulo!=='gas'||perfilTecnicoActualGas().catalogoTecnicoGas!=='sigas')return;
  let entrada;try{entrada=entradaPreseleccionSigasGas();}catch(e){return;}if(!entrada)return;
  const nombres=id=>entrada.preparacion.porTramo.find(t=>t.id===id)?.nombre||id;
@@ -507,10 +507,10 @@ function renderViasManualesTeeGas(cont,tramoId){
   for(const salida of ids.filter(id=>id!==entradas[0])){
    const l=document.createElement('label'),sel=document.createElement('select');l.textContent='Desde '+nombres(entradas[0])+' hacia '+nombres(salida);sel.ariaLabel=l.textContent;
    for(const [valor,texto]of [['','Pendiente: indicar vía'],['directo','A través (paso directo)'],['giro','A 90° (giro)']]){const o=document.createElement('option');o.value=valor;o.textContent=texto;sel.append(o);}
-   sel.value=conf.viasPorTramo?.[salida]||'';sel.onchange=()=>{const borrador=editandoAccesorios>=0?Object.fromEntries(tiposRapidosGas.map(([k])=>[k,$('rapidoGas_'+k)?.value])):null;const enCarga=$('croquis').classList.contains?.('oculto')===false;guardarConfiguracionTeeSigasGas(pieza.id,{modo:'ambas',viasPorTramo:{...(proyectoGasActual().calculoSigas?.tees?.[pieza.id]?.viasPorTramo||{}),[salida]:sel.value},fuenteOrientacion:'manual'});renderTramos();if(editandoAccesorios>=0){mostrarConteoRapidoGas();for(const [k,v]of Object.entries(borrador||{}))if(v!==undefined&&$('rapidoGas_'+k))$('rapidoGas_'+k).value=v;}if(enCarga){mostrarVista('croquis');$('editarTramosGas').open=true;}};l.append(sel);caja.append(l);
+   sel.value=conf.viasPorTramo?.[salida]||'';sel.onchange=()=>{const borrador=editandoAccesorios>=0?Object.fromEntries(tiposRapidosGas.map(([k])=>[k,$('rapidoGas_'+k)?.value])):null;const enCarga=$('croquis').classList.contains?.('oculto')===false,formularioAbierto=$('editarTramosGas').open;guardarConfiguracionTeeSigasGas(pieza.id,{modo:'ambas',viasPorTramo:{...(proyectoGasActual().calculoSigas?.tees?.[pieza.id]?.viasPorTramo||{}),[salida]:sel.value},fuenteOrientacion:'manual'});renderTramos();if(editandoAccesorios>=0){mostrarConteoRapidoGas();for(const [k,v]of Object.entries(borrador||{}))if(v!==undefined&&$('rapidoGas_'+k))$('rapidoGas_'+k).value=v;}if(enCarga){mostrarVista('croquis');$('editarTramosGas').open=formularioAbierto;}};l.append(sel);caja.append(l);
    if(!sel.value){const n=document.createElement('p');n.textContent='Tee '+String(pieza.nodo||'').replace(/^nombre:/,'')+' → '+nombres(salida)+': vía pendiente.';caja.append(n);}
   }
-  const n=document.createElement('small');n.textContent='La circulación no confirma el modelo físico ni sus reducciones. Las pérdidas se aplican solo con una pieza compatible documentada.';caja.append(n);renderPropuestaConjuntoTeeGas(caja,pieza.id);cont.append(caja);
+  const n=document.createElement('small');n.textContent='La circulación no confirma el modelo físico ni sus reducciones. Las pérdidas se aplican solo con una pieza compatible documentada.';caja.append(n);if(!soloCirculacion)renderPropuestaConjuntoTeeGas(caja,pieza.id);else{const e=estadoConfirmacionConjuntoTeeGas(pieza.id),estado=document.createElement('p');estado.className='nota';estado.textContent=e.estado==='vigente'?'Conjunto físico guardado y vigente; revisión normativa pendiente.':e.estado==='solo-sesion'?e.mensaje:e.estado==='requiere-confirmacion'?e.mensaje:'Diámetros, modelo físico y reducciones: pendientes de verificación.';caja.append(estado);}cont.append(caja);
  }
 }
 function prepararViasReferenciaTeeGas(){

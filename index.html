@@ -169,6 +169,7 @@ section{box-shadow:none}
 @media screen and (max-width:700px){.gas-informe-compacto .materiales-diametro table{display:table;width:100%;table-layout:auto}.gas-informe-compacto .materiales-diametro thead{display:table-header-group}.gas-informe-compacto .materiales-diametro tbody{display:table-row-group}.gas-informe-compacto .materiales-diametro tr{display:table-row}.gas-informe-compacto .materiales-diametro td,.gas-informe-compacto .materiales-diametro th{display:table-cell;padding:6px;font-size:14px;width:auto;border:1px solid #aab9c5}.gas-informe-compacto .materiales-diametro td:before{content:none}.gas-informe-compacto .materiales-diametro td:first-child{width:65%}}
 .gas-informe-compacto>section{padding:0;margin:0 0 16px;background:transparent;box-shadow:none;border-radius:0}.gas-informe-compacto h3{margin:12px 0 6px}.gas-informe-compacto .materiales-diametro th:nth-child(n+2),.gas-informe-compacto .materiales-diametro td:nth-child(n+2){white-space:nowrap;overflow-wrap:normal}
 .gas-paso-titulo{font-weight:700;margin:16px 0 6px;color:#215b53}.gas-recorrido{padding:0;display:block}.gas-recorrido button{min-height:48px}.gas-recorrido .nota{font-size:13px;margin:6px 0}#estadoRecorridoGas:empty{display:none}@media(min-width:701px){.gas-recorrido{max-width:720px}}
+#trabajo.gas-carga-rapida .gas-profesional{display:none!important}
 </style>
 </head>
 <body>
@@ -197,7 +198,7 @@ section{box-shadow:none}
 <p class="gas-paso-titulo">2 · Sistema y combustible</p><label for="catalogoSistemaGas">Sistema de cañería</label><select id="catalogoSistemaGas" onchange="seleccionarCatalogoSistemaGas(this.value)"><option value="">Pendiente de seleccionar</option><option value="acero-epoxi-roscado-gn">Acero epoxi · roscado</option><option value="sigas">SIGAS Thermofusión · manual ed.15 / 2025</option><option value="fusiogas">FUSIOGAS Thermofusión · V.1.2026</option></select>
 <label for="combustibleSistemaGas">Tipo de combustible</label><select id="combustibleSistemaGas" onchange="seleccionarCombustibleGas(this.value)"><option value="">Pendiente / revisar datos guardados</option><option value="GN">Gas natural</option><option value="GLP">GLP (composición por verificar)</option><option value="propano-gaseoso">Propano gaseoso identificado (SIGAS Tabla 5)</option></select><nav class="gas-recorrido solo-pantalla" aria-label="Pasos del proyecto GAS">
 <p class="gas-paso-titulo">3 · Referencia visual (opcional)</p><button id="pasoFotoGas" class="alt" onclick="irPasoProyectoGas('foto')">Cargar croquis o fotografía</button>
-<p class="gas-paso-titulo">4 · Datos de la instalación</p><button id="editarDatosGas" class="alt" onclick="irPasoProyectoGas('cargar')">Cargar o editar tramos</button><button id="pasoRevisarGas" class="alt" onclick="irPasoProyectoGas('revisar')">Revisar tramos cargados</button>
+<p class="gas-paso-titulo">4 · Datos de la instalación</p><label for="modoCargaGas">Modo de carga</label><select id="modoCargaGas" onchange="cambiarModoCargaGas(this.value)"><option value="rapida">Carga rápida · cantidades sin distancias</option><option value="profesional">Carga profesional · detalle técnico opcional</option></select><p id="ayudaModoCargaGas" class="nota"></p><button id="editarDatosGas" class="alt" onclick="irPasoProyectoGas('cargar')">Cargar o editar tramos</button><button id="pasoRevisarGas" class="alt" onclick="irPasoProyectoGas('revisar')">Revisar tramos cargados</button>
 <p class="gas-paso-titulo">5 · Resultado y presupuesto</p><button id="calcularCaneriaGas" onclick="calcularMaterialesManualGas()">CALCULAR CAÑERÍA</button><p class="nota">El resultado reúne materiales y presupuesto. Desde allí podés generar el PDF completo.</p>
 <p id="estadoRecorridoGas" role="status" aria-live="polite"></p></nav>
 <details id="herramientasGasOpcionales" class="gas-detalles solo-pantalla"><summary>Herramientas técnicas</summary>
@@ -404,7 +405,7 @@ Estimación de compra: tiras de <span id="largoComercialAdvertenciaGas">largo co
 <input id="metros" type="text" inputmode="decimal" min="0" step="any" placeholder="Ej.: 15"><p class="nota">Coma o punto decimal: 7,50 = 7.50 m. Sin separadores de miles.</p>
 <label for="consumoTramo">Consumo del artefacto (kcal/h; opcional, en el tramo terminal)</label>
 <input id="consumoTramo" type="text" inputmode="decimal" min="0" step="any" placeholder="Ej.: 16000">
-<details><summary>Opcional: cargar un diámetro manual conocido</summary>
+<details class="gas-profesional"><summary>Opcional: cargar un diámetro manual conocido</summary>
 <label for="diametro">Diámetro manual opcional (secundario)</label>
 <select id="diametro">
 <option value="">Automático: no ingresar medida</option>
@@ -430,10 +431,10 @@ Estimación de compra: tiras de <span id="largoComercialAdvertenciaGas">largo co
 <option>Otro artefacto</option>
 </select>
 <input id="llave" type="hidden" aria-hidden="true"><!-- Compatibilidad interna con respaldos; el único control visible es Llaves de paso. -->
-<details class="detalle" id="agregarAccesoriosGas"><summary>Agregar accesorios</summary><div id="cantidadesManualesGas"><h3>Accesorios del tramo · totales manuales</h3><p class="nota">Incluí las piezas del detalle en estos totales. Vacío = pendiente; 0 = no hay. Una tee es una sola pieza aunque su ramal gire. No sumes una pieza compartida nuevamente en otro tramo.</p><div class="gas-campos-manuales"><label>Codos de 90°<input id="manualGas_codo90" type="number" min="0" step="1" inputmode="numeric" placeholder="Pendiente"></label><label>Codos de 45°<input id="manualGas_codo45" type="number" min="0" step="1" inputmode="numeric" placeholder="Pendiente"></label><label>Tees<input id="manualGas_tee" type="number" min="0" step="1" inputmode="numeric" placeholder="Pendiente"></label><label>Reducciones independientes<input id="manualGas_reduccion" type="number" min="0" step="1" inputmode="numeric" placeholder="Pendiente"></label><label>Llaves de paso<input id="manualGas_llave" type="number" min="0" step="1" inputmode="numeric" placeholder="Pendiente"></label></div><p id="mensajeCargaManualGas" role="status" aria-live="polite"></p></div></details><button id="guardarTramo" onclick="agregarTramo()">+ AGREGAR TRAMO</button>
+<details class="detalle" id="agregarAccesoriosGas"><summary>Agregar accesorios</summary><div id="cantidadesManualesGas"><h3>Accesorios del tramo · totales manuales</h3><p class="nota">Incluí las piezas del detalle en estos totales. Vacío = pendiente; 0 = no hay. Una tee es una sola pieza aunque su ramal gire. No sumes una pieza compartida nuevamente en otro tramo.</p><div class="gas-campos-manuales"><label>Codos de 90°<input id="manualGas_codo90" type="number" min="0" step="1" inputmode="numeric" placeholder="Pendiente"></label><label>Codos de 45°<input id="manualGas_codo45" type="number" min="0" step="1" inputmode="numeric" placeholder="Pendiente"></label><label>Tees<input id="manualGas_tee" type="number" min="0" step="1" inputmode="numeric" placeholder="Pendiente"></label><label>Reducciones independientes<input id="manualGas_reduccion" type="number" min="0" step="1" inputmode="numeric" placeholder="Pendiente"></label><label>Llaves de paso<input id="manualGas_llave" type="number" min="0" step="1" inputmode="numeric" placeholder="Pendiente"></label></div><p id="mensajeCargaManualGas" role="status" aria-live="polite"></p></div></details><button id="guardarTramo" onclick="agregarTramo()">Guardar tramo y continuar</button>
 <button id="cancelarTramo" class="alt oculto" onclick="cancelarEdicionTramo()">Cancelar edición del tramo</button>
 </div></details><div><details id="tramosRegistradosGas" class="gas-detalles"><summary id="resumenTramosRegistradosGas">Tramos registrados · editar o quitar</summary><div id="listaTramos"></div></details>
-<section id="editorAccesorios" class="oculto solo-pantalla" aria-label="Accesorios del tramo">
+<section id="editorAccesorios" class="oculto solo-pantalla gas-profesional" aria-label="Accesorios del tramo">
 <h3 id="tituloAccesorios"></h3>
 <p>Recorré el tramo desde su inicio hasta su final. Cada accesorio separa dos segmentos de caño. Indicá las longitudes reales entre accesorios, sin descontar medidas de accesorios que no conozcas.</p>
 <label for="estadoAccesorios">1. ¿Ya revisaste todos los accesorios de este tramo?</label>
@@ -10024,7 +10025,7 @@ function renderPropuestaConjuntoTeeGas(caja,id){
  const aviso=document.createElement('p');aviso.setAttribute?.('role','status');aviso.textContent=estado.mensaje;d.append(contenido,aviso,b,mensaje);caja.append(d);
 }
 // Orientación independiente del producto físico; el registro técnico existente es la única fuente.
-function renderViasManualesTeeGas(cont,tramoId){
+function renderViasManualesTeeGas(cont,tramoId,{soloCirculacion=false}={}){
  if(modulo!=='gas'||perfilTecnicoActualGas().catalogoTecnicoGas!=='sigas')return;
  let entrada;try{entrada=entradaPreseleccionSigasGas();}catch(e){return;}if(!entrada)return;
  const nombres=id=>entrada.preparacion.porTramo.find(t=>t.id===id)?.nombre||id;
@@ -10037,10 +10038,10 @@ function renderViasManualesTeeGas(cont,tramoId){
   for(const salida of ids.filter(id=>id!==entradas[0])){
    const l=document.createElement('label'),sel=document.createElement('select');l.textContent='Desde '+nombres(entradas[0])+' hacia '+nombres(salida);sel.ariaLabel=l.textContent;
    for(const [valor,texto]of [['','Pendiente: indicar vía'],['directo','A través (paso directo)'],['giro','A 90° (giro)']]){const o=document.createElement('option');o.value=valor;o.textContent=texto;sel.append(o);}
-   sel.value=conf.viasPorTramo?.[salida]||'';sel.onchange=()=>{const borrador=editandoAccesorios>=0?Object.fromEntries(tiposRapidosGas.map(([k])=>[k,$('rapidoGas_'+k)?.value])):null;const enCarga=$('croquis').classList.contains?.('oculto')===false;guardarConfiguracionTeeSigasGas(pieza.id,{modo:'ambas',viasPorTramo:{...(proyectoGasActual().calculoSigas?.tees?.[pieza.id]?.viasPorTramo||{}),[salida]:sel.value},fuenteOrientacion:'manual'});renderTramos();if(editandoAccesorios>=0){mostrarConteoRapidoGas();for(const [k,v]of Object.entries(borrador||{}))if(v!==undefined&&$('rapidoGas_'+k))$('rapidoGas_'+k).value=v;}if(enCarga){mostrarVista('croquis');$('editarTramosGas').open=true;}};l.append(sel);caja.append(l);
+   sel.value=conf.viasPorTramo?.[salida]||'';sel.onchange=()=>{const borrador=editandoAccesorios>=0?Object.fromEntries(tiposRapidosGas.map(([k])=>[k,$('rapidoGas_'+k)?.value])):null;const enCarga=$('croquis').classList.contains?.('oculto')===false,formularioAbierto=$('editarTramosGas').open;guardarConfiguracionTeeSigasGas(pieza.id,{modo:'ambas',viasPorTramo:{...(proyectoGasActual().calculoSigas?.tees?.[pieza.id]?.viasPorTramo||{}),[salida]:sel.value},fuenteOrientacion:'manual'});renderTramos();if(editandoAccesorios>=0){mostrarConteoRapidoGas();for(const [k,v]of Object.entries(borrador||{}))if(v!==undefined&&$('rapidoGas_'+k))$('rapidoGas_'+k).value=v;}if(enCarga){mostrarVista('croquis');$('editarTramosGas').open=formularioAbierto;}};l.append(sel);caja.append(l);
    if(!sel.value){const n=document.createElement('p');n.textContent='Tee '+String(pieza.nodo||'').replace(/^nombre:/,'')+' → '+nombres(salida)+': vía pendiente.';caja.append(n);}
   }
-  const n=document.createElement('small');n.textContent='La circulación no confirma el modelo físico ni sus reducciones. Las pérdidas se aplican solo con una pieza compatible documentada.';caja.append(n);renderPropuestaConjuntoTeeGas(caja,pieza.id);cont.append(caja);
+  const n=document.createElement('small');n.textContent='La circulación no confirma el modelo físico ni sus reducciones. Las pérdidas se aplican solo con una pieza compatible documentada.';caja.append(n);if(!soloCirculacion)renderPropuestaConjuntoTeeGas(caja,pieza.id);else{const e=estadoConfirmacionConjuntoTeeGas(pieza.id),estado=document.createElement('p');estado.className='nota';estado.textContent=e.estado==='vigente'?'Conjunto físico guardado y vigente; revisión normativa pendiente.':e.estado==='solo-sesion'?e.mensaje:e.estado==='requiere-confirmacion'?e.mensaje:'Diámetros, modelo físico y reducciones: pendientes de verificación.';caja.append(estado);}cont.append(caja);
  }
 }
 function prepararViasReferenciaTeeGas(){
@@ -18548,7 +18549,7 @@ const fmt=n=>Number(n).toLocaleString('es-AR',{maximumFractionDigits:2});
 function abrir(m){
  if(!especialidades.includes(m))return;
  if(modulo)guardarDatos();
- modulo=m;organizarSecundariosGas(m);
+ modulo=m;organizarSecundariosGas(m);actualizarModoCargaGas();
  $('referenciaOpcionalGas').open=m!=='gas';$('resumenReferenciaGas').classList.toggle('oculto',m!=='gas');
  $('duda').value=datosEspecialidadActual().aclaracion||'';
  $('revision').textContent=datosEspecialidadActual().revision||'Todavía no hay una revisión registrada.';
@@ -18618,6 +18619,22 @@ if(document.addEventListener){
   if(!/guardar|agregarTramo|agregarArtefacto|calcularMateriales|guardarPCS/.test(accion))return;
   for(const c of document.querySelectorAll('input[inputmode="decimal"]'))if(c.getClientRects().length&&!normalizarDecimalCampoGas(c)){e.preventDefault();e.stopImmediatePropagation();c.reportValidity?.();return;}
  },true);
+}
+// Modalidad de presentación: comparte los mismos registros, no cambia el método técnico.
+let modoCargaGas='rapida';
+function actualizarModoCargaGas(){
+ $('trabajo').classList.toggle('gas-carga-rapida',modulo==='gas'&&modoCargaGas==='rapida');
+ $('modoCargaGas').value=modoCargaGas;
+ $('ayudaModoCargaGas').textContent=modoCargaGas==='rapida'?'Una carga de cantidades y un guardado por tramo. Las vías de las tees se revisan junto a los tramos, sin distancias. Los datos profesionales anteriores se conservan.':'Los mismos datos, con acceso opcional a medidas, posiciones y detalle profesional. No es otro proyecto ni una confirmación técnica.';
+}
+function cambiarModoCargaGas(modo){
+ if(modulo!=='gas'||!['rapida','profesional'].includes(modo))return false;
+ modoCargaGas=modo;actualizarModoCargaGas();renderTramos();return true;
+}
+function revisarAccesoriosCargaGas(i){
+ if(modoCargaGas==='profesional'){abrirAccesorios(i);return;}
+ editarTramo(i);$('agregarAccesoriosGas').open=true;
+ desplazarResultadoMaterialesGas('cantidadesManualesGas');
 }
 function actualizarControlesCompraGas(){
  if(modulo!=='gas')return;
@@ -19102,7 +19119,7 @@ function actualizarTramos(){
 function cancelarEdicionTramo(){
  destinoArtefactoManualGas=false;
  editandoTramo=-1;
- $('guardarTramo').textContent='+ AGREGAR TRAMO';
+ $('guardarTramo').textContent='Guardar tramo y continuar';
  $('cancelarTramo').classList.add('oculto');
  ['desde','hasta','metros','consumoTramo','otroDiametro'].forEach(id=>$(id).value='');
  $('diametro').value='';$('otroDiametro').classList.add('oculto');
@@ -19169,6 +19186,7 @@ function resumenConteoRapidoGas(t){
  return (modoManualGasActivo()?'Totales manuales · incluidos sin segunda confirmación: ':'Carga rápida · disponibles con Calcular materiales: ')+tiposRapidosGas.map(([k,n])=>n+': '+(Number.isSafeInteger(datos[k])&&datos[k]>=0?(datos[k]===0?'0 (ausencia confirmada)':datos[k]):'Pendiente')).join(' · ');
 }
 function abrirAccesorios(i){
+ if(modulo==='gas'){modoCargaGas='profesional';actualizarModoCargaGas();$('editarTramosGas').open=false;}
  cancelarEdicionTramo();editandoAccesorios=i;
  const t=tramos[i],d=t.detalle||{estado:'pendiente'};
  borradorAccesorios=Array.isArray(d.accesorios)?JSON.parse(JSON.stringify(d.accesorios)):[];
@@ -19316,12 +19334,13 @@ function renderTramos(){
   estado.textContent=evaluado.pendiente?'Accesorios pendientes: '+evaluado.motivo:
    (evaluado.accesorios.length?'Accesorios revisados: '+evaluado.accesorios.length:'Revisado: sin tees, codos ni reducciones. Las cuplas se calculan por longitud.');
   if(modulo==='gas'&&modoManualGasActivo()&&evaluado.pendiente&&tiposRapidosGas.every(([tipo])=>Number.isSafeInteger(conteoRapidoDelTramoGas(t)[tipo])&&conteoRapidoDelTramoGas(t)[tipo]>=0))estado.textContent='Cantidades manuales guardadas. Distancias, medidas y vías técnicas pendientes; no repitas las cantidades.';
+  if(modulo==='gas'&&modoCargaGas==='rapida')estado.textContent=tiposRapidosGas.every(([tipo])=>Number.isSafeInteger(conteoRapidoDelTramoGas(t)[tipo])&&conteoRapidoDelTramoGas(t)[tipo]>=0)?'Cantidades manuales guardadas · medidas y validación técnica por revisar.':'Cantidades registradas o pendientes · medidas y validación técnica por revisar.';
   const editar=document.createElement('button');editar.className='peq alt';
   editar.textContent='Editar tramo';editar.onclick=()=>editarTramo(i);
   const accesorios=document.createElement('button');accesorios.className='peq alt';
-  accesorios.textContent='Revisar accesorios';accesorios.onclick=()=>abrirAccesorios(i);
+  accesorios.textContent='Revisar accesorios';accesorios.onclick=()=>revisarAccesoriosCargaGas(i);
   d.append(s,estado,editar,accesorios);
-  if(typeof renderViasManualesTeeGas==='function')renderViasManualesTeeGas(d,t.id);
+  if(typeof renderViasManualesTeeGas==='function')renderViasManualesTeeGas(d,t.id,{soloCirculacion:modoCargaGas==='rapida'});
   const rapido=resumenConteoRapidoGas(t);if(rapido){const resumen=document.createElement('p');resumen.className='nota';resumen.textContent=rapido;d.append(resumen);}
   const b=document.createElement('button');
   b.className='peq alt';
