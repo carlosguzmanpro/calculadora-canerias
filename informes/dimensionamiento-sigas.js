@@ -520,7 +520,7 @@ function renderPropuestaConjuntoTeeGas(caja,id){
 }
 // Solo describe dos salidas anónimas: no asigna IDs de recorrido ni equivalencias.
 function renderOrientacionTeeProvisionalGas(cont){
- for(const [valor,texto]of [['directo-giro','Salida 1: A través · Salida 2: Giro 90°'],['giro-directo','Salida 1: Giro 90° · Salida 2: A través']]){
+ for(const [valor,texto]of [['directo-giro','Salida 1: A través · Salida 2: Giro 90°'],['giro-directo','Salida 1: Giro 90° · Salida 2: A través'],['giro-giro','Salida 1: Giro 90° · Salida 2: Giro 90°']]){
   const l=document.createElement('label'),r=document.createElement('input');l.className='tee-opcion-provisional';r.type='radio';r.name='tee-orientacion-provisional';r.value=valor;r.checked=orientacionTeeFormularioGas===valor;r.onchange=()=>{orientacionTeeFormularioGas=valor;guardarDatos();};l.append(r,document.createTextNode(texto));cont.append(l);
  }
 }

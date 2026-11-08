@@ -82,7 +82,7 @@ const camposBorradorProyectoGas=['desde','hasta','metros','consumoTramo','diamet
 function capturarBorradorProyectoGas(){
  if(modulo!=='gas')return;const valores={};for(const id of [...camposBorradorProyectoGas,...tiposRapidosGas.map(([k])=>'manualGas_'+k)])if($(id))valores[id]=$(id).value;
  const d={valores,tramo:tramos[editandoTramo]?.id||null,nodo:editandoNodoGas||null};
- if(['directo-giro','giro-directo'].includes(orientacionTeeFormularioGas))d.teeProvisional=orientacionTeeFormularioGas;
+ if(['directo-giro','giro-directo','giro-giro'].includes(orientacionTeeFormularioGas))d.teeProvisional=orientacionTeeFormularioGas;
  if(editandoAccesorios>=0&&tramos[editandoAccesorios]){d.accesorios={tramo:tramos[editandoAccesorios].id,datos:JSON.parse(JSON.stringify(borradorAccesorios)),estado:$('estadoAccesorios').value,final:$('metrosFinal').value,rapidos:{}};for(const [k]of tiposRapidosGas)if($('rapidoGas_'+k))d.accesorios.rapidos[k]=$('rapidoGas_'+k).value;}
  const utiles=Object.entries(valores).some(([id,v])=>!['ga','redTipoNodo','redArtefactoNodo'].includes(id)&&String(v??'').trim()!=='')||(valores.ga&&valores.ga!=='Cocina')||!!d.tramo||!!d.nodo||!!d.accesorios;
  if(utiles)proyectoGasActual().borradorFormularioGas=d;else delete proyectoGasActual().borradorFormularioGas;
@@ -96,7 +96,7 @@ function restaurarBorradorProyectoGas(){
  for(const [id,v]of Object.entries(d.valores||{}))if([...camposBorradorProyectoGas,...tiposRapidosGas.map(([k])=>'manualGas_'+k)].includes(id)&&$(id))$(id).value=v;
  editandoNodoGas=instalacionGas.nodos.some(n=>n.id===d.nodo)?d.nodo:null;if(editandoNodoGas)$('redGuardarNodo').textContent='Guardar cambios del punto';
  $('otroDiametro').classList.toggle('oculto',$('diametro').value!=='Otro (especificar)');
- if(Object.hasOwn(d,'teeProvisional'))orientacionTeeFormularioGas=['directo-giro','giro-directo'].includes(d.teeProvisional)?d.teeProvisional:null;
+ if(Object.hasOwn(d,'teeProvisional'))orientacionTeeFormularioGas=['directo-giro','giro-directo','giro-giro'].includes(d.teeProvisional)?d.teeProvisional:null;
  renderConfiguracionTeeRapidaGas(tramos[editandoTramo]?.id);
 }
 

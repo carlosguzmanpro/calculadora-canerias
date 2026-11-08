@@ -608,7 +608,7 @@ const camposBorradorProyectoGas=['desde','hasta','metros','consumoTramo','diamet
 function capturarBorradorProyectoGas(){
  if(modulo!=='gas')return;const valores={};for(const id of [...camposBorradorProyectoGas,...tiposRapidosGas.map(([k])=>'manualGas_'+k)])if($(id))valores[id]=$(id).value;
  const d={valores,tramo:tramos[editandoTramo]?.id||null,nodo:editandoNodoGas||null};
- if(['directo-giro','giro-directo'].includes(orientacionTeeFormularioGas))d.teeProvisional=orientacionTeeFormularioGas;
+ if(['directo-giro','giro-directo','giro-giro'].includes(orientacionTeeFormularioGas))d.teeProvisional=orientacionTeeFormularioGas;
  if(editandoAccesorios>=0&&tramos[editandoAccesorios]){d.accesorios={tramo:tramos[editandoAccesorios].id,datos:JSON.parse(JSON.stringify(borradorAccesorios)),estado:$('estadoAccesorios').value,final:$('metrosFinal').value,rapidos:{}};for(const [k]of tiposRapidosGas)if($('rapidoGas_'+k))d.accesorios.rapidos[k]=$('rapidoGas_'+k).value;}
  const utiles=Object.entries(valores).some(([id,v])=>!['ga','redTipoNodo','redArtefactoNodo'].includes(id)&&String(v??'').trim()!=='')||(valores.ga&&valores.ga!=='Cocina')||!!d.tramo||!!d.nodo||!!d.accesorios;
  if(utiles)proyectoGasActual().borradorFormularioGas=d;else delete proyectoGasActual().borradorFormularioGas;
@@ -622,7 +622,7 @@ function restaurarBorradorProyectoGas(){
  for(const [id,v]of Object.entries(d.valores||{}))if([...camposBorradorProyectoGas,...tiposRapidosGas.map(([k])=>'manualGas_'+k)].includes(id)&&$(id))$(id).value=v;
  editandoNodoGas=instalacionGas.nodos.some(n=>n.id===d.nodo)?d.nodo:null;if(editandoNodoGas)$('redGuardarNodo').textContent='Guardar cambios del punto';
  $('otroDiametro').classList.toggle('oculto',$('diametro').value!=='Otro (especificar)');
- if(Object.hasOwn(d,'teeProvisional'))orientacionTeeFormularioGas=['directo-giro','giro-directo'].includes(d.teeProvisional)?d.teeProvisional:null;
+ if(Object.hasOwn(d,'teeProvisional'))orientacionTeeFormularioGas=['directo-giro','giro-directo','giro-giro'].includes(d.teeProvisional)?d.teeProvisional:null;
  renderConfiguracionTeeRapidaGas(tramos[editandoTramo]?.id);
 }
 
@@ -1735,7 +1735,7 @@ function calcularMaterialesManualGas(){
  $('matMensaje').textContent='Lista actualizada con las cantidades ingresadas. Sin segunda confirmación. Diámetros, posiciones y compra no verificados conservan sus advertencias.';
 }
 function cargarCantidadesFormularioGas(t){
- orientacionTeeFormularioGas=['directo-giro','giro-directo'].includes(t?.orientacionTeeProvisional?.orden)?t.orientacionTeeProvisional.orden:null;
+ orientacionTeeFormularioGas=['directo-giro','giro-directo','giro-giro'].includes(t?.orientacionTeeProvisional?.orden)?t.orientacionTeeProvisional.orden:null;
  const datos=t?conteoRapidoDelTramoGas(t):{};
  for(const [tipo]of tiposRapidosGas){const heredada=tipo==='llave'&&t?cantidadLlavesHeredadasGas(t):null;$('manualGas_'+tipo).value=Number.isSafeInteger(datos[tipo])&&datos[tipo]>=0?datos[tipo]:heredada??'';}
  if(modulo==='gas'&&typeof renderConfiguracionTeeRapidaGas==='function')renderConfiguracionTeeRapidaGas(t?.id);
@@ -10061,7 +10061,7 @@ function renderPropuestaConjuntoTeeGas(caja,id){
 }
 // Solo describe dos salidas anónimas: no asigna IDs de recorrido ni equivalencias.
 function renderOrientacionTeeProvisionalGas(cont){
- for(const [valor,texto]of [['directo-giro','Salida 1: A través · Salida 2: Giro 90°'],['giro-directo','Salida 1: Giro 90° · Salida 2: A través']]){
+ for(const [valor,texto]of [['directo-giro','Salida 1: A través · Salida 2: Giro 90°'],['giro-directo','Salida 1: Giro 90° · Salida 2: A través'],['giro-giro','Salida 1: Giro 90° · Salida 2: Giro 90°']]){
   const l=document.createElement('label'),r=document.createElement('input');l.className='tee-opcion-provisional';r.type='radio';r.name='tee-orientacion-provisional';r.value=valor;r.checked=orientacionTeeFormularioGas===valor;r.onchange=()=>{orientacionTeeFormularioGas=valor;guardarDatos();};l.append(r,document.createTextNode(texto));cont.append(l);
  }
 }
@@ -19359,7 +19359,7 @@ function agregarTramo(){
  $('mensajeCargaManualGas').textContent='';
  const datos={desde,hasta,metros:metrosLeidos,consumo:consumoLeido,diametro:di||null,
   artefacto:$('destinoArtefacto').value,llave:$('llave').checked};
- if(modulo==='gas'&&['directo-giro','giro-directo'].includes(orientacionTeeFormularioGas))datos.orientacionTeeProvisional={version:1,orden:orientacionTeeFormularioGas,estado:'provisional',sinVincular:true};
+ if(modulo==='gas'&&['directo-giro','giro-directo','giro-giro'].includes(orientacionTeeFormularioGas))datos.orientacionTeeProvisional={version:1,orden:orientacionTeeFormularioGas,estado:'provisional',sinVincular:true};
  if(editandoTramo>=0){
   const anterior=tramos[editandoTramo];
   datos.detalle=anterior.detalle;datos.origen=anterior.origen;datos.id=anterior.id;datos.red=anterior.red;

@@ -612,7 +612,7 @@ function calcularMaterialesManualGas(){
  $('matMensaje').textContent='Lista actualizada con las cantidades ingresadas. Sin segunda confirmación. Diámetros, posiciones y compra no verificados conservan sus advertencias.';
 }
 function cargarCantidadesFormularioGas(t){
- orientacionTeeFormularioGas=['directo-giro','giro-directo'].includes(t?.orientacionTeeProvisional?.orden)?t.orientacionTeeProvisional.orden:null;
+ orientacionTeeFormularioGas=['directo-giro','giro-directo','giro-giro'].includes(t?.orientacionTeeProvisional?.orden)?t.orientacionTeeProvisional.orden:null;
  const datos=t?conteoRapidoDelTramoGas(t):{};
  for(const [tipo]of tiposRapidosGas){const heredada=tipo==='llave'&&t?cantidadLlavesHeredadasGas(t):null;$('manualGas_'+tipo).value=Number.isSafeInteger(datos[tipo])&&datos[tipo]>=0?datos[tipo]:heredada??'';}
  if(modulo==='gas'&&typeof renderConfiguracionTeeRapidaGas==='function')renderConfiguracionTeeRapidaGas(t?.id);
