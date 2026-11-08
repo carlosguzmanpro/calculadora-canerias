@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CAÑERÍAS - AGUA</title>
+<style>
+*{box-sizing:border-box}body{font-family:Arial,sans-serif;background:#eef3f6;color:#203348;margin:0}header{background:#087e6a;color:#fff;padding:20px;text-align:center}main{max-width:800px;margin:auto;padding:16px}section{background:#fff;padding:18px;margin-bottom:16px;border-radius:12px}label{display:block;font-weight:bold;margin:12px 0 6px}input,select{width:100%;padding:12px;font-size:17px;border:1px solid #b5c6d5;border-radius:8px}button{background:#087e6a;color:#fff;border:0;border-radius:8px;padding:12px;margin:10px 6px 6px 0;font-size:16px}.remove{background:#a33c3c}.note{color:#526772;font-size:14px}.entry{border-bottom:1px solid #ddd;padding:12px 0}table{width:100%;border-collapse:collapse}td,th{border-bottom:1px solid #ddd;padding:10px 4px;text-align:left}
+</style></head>
+<body><header><h1>CAÑERÍAS · AGUA</h1><div>Prueba independiente — carga manual</div></header>
+<main>
+<section><h2>Agregar tramo</h2><p>Ingresá las longitudes reales del croquis. La fotografía no se interpreta automáticamente en esta versión.</p>
+<label for="tipo">Circuito</label><select id="tipo"><option value="fria">Agua fría</option><option value="caliente">Agua caliente</option></select>
+<label for="desde">Desde</label><input id="desde" placeholder="Ej.: Tanque">
+<label for="hasta">Hasta</label><input id="hasta" placeholder="Ej.: Colector">
+<label for="metros">Longitud real (m)</label><input id="metros" type="number" inputmode="decimal" min="0.01" step="0.01" placeholder="Ej.: 8">
+<label for="codos">Codos/curvas declarados</label><input id="codos" type="number" inputmode="numeric" min="0" step="1" value="0">
+<button id="agregar">Agregar tramo</button><p id="mensaje" role="alert"></p></section>
+<section><h2>Tramos</h2><div id="lista"></div></section>
+<section><h2>Resumen</h2><table><thead><tr><th>Circuito</th><th>Metros</th><th>Codos/curvas</th></tr></thead><tbody id="tabla"></tbody></table><p id="total"></p><button id="imprimir">Imprimir / guardar PDF</button></section>
+<section><h2>Diámetros y materiales técnicos</h2><p><strong>Pendiente de verificación hidráulica.</strong> No se asignan diámetros automáticamente sin conocer presión disponible, alturas, caudales, accesorios y características del sistema de cañería.</p><p class="note">Tees, llaves, reducciones y cuplas se incorporarán cuando esté definida y validada la topología de la red. Las cantidades mostradas ahora son solo las ingresadas por el usuario.</p></section>
+</main>
+<script>
+const clave="canerias_agua_manual_v1";let tramos=[];
+try{const datos=JSON.parse(localStorage.getItem(clave)||"[]");if(Array.isArray(datos))tramos=datos}catch(e){}
+const el=id=>document.getElementById(id);
+const escapar=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const formato=n=>n.toLocaleString("es-AR",{maximumFractionDigits:2});
+function dibujar(){
+el("lista").innerHTML=tramos.length?tramos.map((t,i)=>'<div class="entry"><strong>'+escapar(t.desde)+' → '+escapar(t.hasta)+'</strong><div>'+(t.tipo==="fria"?"Fría":"Caliente")+' · '+formato(t.metros)+' m · '+t.codos+' codos/curvas</div><button class="remove" data-i="'+i+'">Eliminar</button></div>').join(""):"Todavía no hay tramos.";
+let total=0;el("tabla").innerHTML=["fria","caliente"].map(tipo=>{const items=tramos.filter(t=>t.tipo===tipo),m=items.reduce((s,t)=>s+t.metros,0),c=items.reduce((s,t)=>s+t.codos,0);total+=m;return "<tr><td>"+(tipo==="fria"?"Fría":"Caliente")+"</td><td>"+formato(m)+" m</td><td>"+c+"</td></tr>"}).join("");
+el("total").textContent="Total de cañería ingresada: "+formato(total)+" m";
+try{localStorage.setItem(clave,JSON.stringify(tramos))}catch(e){el("mensaje").textContent="No se pudo guardar en este navegador."}
+}
+el("agregar").onclick=()=>{
+const tipo=el("tipo").value,desde=el("desde").value.trim(),hasta=el("hasta").value.trim(),metros=Number(el("metros").value),codos=Number(el("codos").value);
+if(!desde||!hasta||desde===hasta||!el("metros").value||!Number.isFinite(metros)||metros<=0||!el("codos").value||!Number.isInteger(codos)||codos<0){el("mensaje").textContent="Completá origen, destino distinto, metros positivos y una cantidad válida de codos/curvas.";return}
+tramos.push({tipo,desde,hasta,metros,codos});el("mensaje").textContent="Tramo agregado.";el("metros").value="";el("codos").value="0";dibujar()};
+el("lista").onclick=e=>{const boton=e.target.closest("button[data-i]");if(!boton)return;tramos.splice(Number(boton.dataset.i),1);dibujar()};
+el("imprimir").onclick=()=>window.print();dibujar();
+</script></body></html>
