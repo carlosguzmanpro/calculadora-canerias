@@ -493,12 +493,30 @@ function renderPropuestaConjuntoTeeGas(caja,id){
  const b=document.createElement('button');b.type='button';b.textContent='Confirmar este conjunto';b.onclick=()=>{const enCarga=$('croquis').classList.contains?.('oculto')===false,r=confirmarConjuntoTeeGas(id,sel.value);mensaje.textContent=r.mensaje;if(enCarga){mostrarVista('croquis');$('tramosRegistradosGas').open=true;}if(!r.ok)window.alert?.(r.mensaje);};
  const aviso=document.createElement('p');aviso.setAttribute?.('role','status');aviso.textContent=estado.mensaje;d.append(contenido,aviso,b,mensaje);caja.append(d);
 }
+// Acceso desde las cantidades: no crea piezas ni copia configuraciones.
+function alternarConfiguracionTeeRapidaGas(){
+ const panel=$('panelTeeRapidaGas'),abrir=panel.classList.contains('oculto');
+ panel.classList.toggle('oculto',!abrir);$('configurarTeeRapidaGas').setAttribute?.('aria-expanded',String(abrir));
+ if(abrir)renderConfiguracionTeeRapidaGas();
+}
+function renderConfiguracionTeeRapidaGas(){
+ const selector=$('nodoTeeRapidaGas'),cont=$('viasTeeRapidaGas'),estado=$('estadoTeeRapidaGas'),previo=selector.value;
+ selector.replaceChildren();cont.replaceChildren();
+ let e;try{e=entradaPreseleccionSigasGas();}catch(error){e=null;}
+ const piezas=perfilTecnicoActualGas().catalogoTecnicoGas==='sigas'?(e?.inventario.fisicas||[]).filter(p=>p.tipo==='tee'):[];
+ for(const p of piezas){const o=document.createElement('option');o.value=p.id;o.textContent='Tee '+String(p.nodo||'ubicación pendiente').replace(/^nombre:/,'').toUpperCase();selector.append(o);}
+ selector.disabled=!piezas.length;
+ if(!piezas.length){estado.textContent=perfilTecnicoActualGas().catalogoTecnicoGas!=='sigas'?'Seleccioná SIGAS para configurar sus vías documentadas. Las equivalencias de otros sistemas se mantienen separadas.':'Guardá la cantidad de tees y los tramos conectados. Podés volver aquí después; los datos del formulario se conservan. No se asigna una orientación automáticamente.';return;}
+ const actual=piezas.find(p=>p.id===previo)||piezas.find(p=>editandoTramo>=0&&p.tramos.includes(tramos[editandoTramo]?.id))||piezas[0];selector.value=actual.id;
+ estado.textContent='Elegí la vía de cada salida según el recorrido real. Se guarda en la misma tee, sin agregar piezas ni pedir distancias. El modelo físico y sus medidas se verifican por separado.';
+ renderViasManualesTeeGas(cont,actual.tramos[0],{soloCirculacion:true,teeId:actual.id});
+}
 // Orientación independiente del producto físico; el registro técnico existente es la única fuente.
-function renderViasManualesTeeGas(cont,tramoId,{soloCirculacion=false}={}){
+function renderViasManualesTeeGas(cont,tramoId,{soloCirculacion=false,teeId=null}={}){
  if(modulo!=='gas'||perfilTecnicoActualGas().catalogoTecnicoGas!=='sigas')return;
  let entrada;try{entrada=entradaPreseleccionSigasGas();}catch(e){return;}if(!entrada)return;
  const nombres=id=>entrada.preparacion.porTramo.find(t=>t.id===id)?.nombre||id;
- for(const pieza of entrada.inventario.fisicas.filter(p=>p.tipo==='tee'&&p.tramos.includes(tramoId))){
+ for(const pieza of entrada.inventario.fisicas.filter(p=>p.tipo==='tee'&&p.tramos.includes(tramoId)&&(!teeId||p.id===teeId))){
   const caja=document.createElement('div');caja.className='tee-manual-salidas';
   const t=document.createElement('strong');t.textContent='Circulación de tee '+String(pieza.nodo||nombres(tramoId)).replace(/^nombre:/,'');caja.append(t);
   const ids=pieza.conexionesDiametro||[],rutas=entrada.preparacion.recorridos.map(r=>r.tramos.filter(id=>ids.includes(id))).filter(a=>a.length===2),entradas=[...new Set(rutas.map(a=>a[0]))];

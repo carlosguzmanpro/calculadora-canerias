@@ -431,7 +431,7 @@ Estimación de compra: tiras de <span id="largoComercialAdvertenciaGas">largo co
 <option>Otro artefacto</option>
 </select>
 <input id="llave" type="hidden" aria-hidden="true"><!-- Compatibilidad interna con respaldos; el único control visible es Llaves de paso. -->
-<details class="detalle" id="agregarAccesoriosGas"><summary>Agregar accesorios</summary><div id="cantidadesManualesGas"><h3>Accesorios del tramo · totales manuales</h3><p class="nota">Incluí las piezas del detalle en estos totales. Vacío = pendiente; 0 = no hay. Una tee es una sola pieza aunque su ramal gire. No sumes una pieza compartida nuevamente en otro tramo.</p><div class="gas-campos-manuales"><label>Codos de 90°<input id="manualGas_codo90" type="number" min="0" step="1" inputmode="numeric" placeholder="Pendiente"></label><label>Codos de 45°<input id="manualGas_codo45" type="number" min="0" step="1" inputmode="numeric" placeholder="Pendiente"></label><label>Tees<input id="manualGas_tee" type="number" min="0" step="1" inputmode="numeric" placeholder="Pendiente"></label><label>Reducciones independientes<input id="manualGas_reduccion" type="number" min="0" step="1" inputmode="numeric" placeholder="Pendiente"></label><label>Llaves de paso<input id="manualGas_llave" type="number" min="0" step="1" inputmode="numeric" placeholder="Pendiente"></label></div><p id="mensajeCargaManualGas" role="status" aria-live="polite"></p></div></details><button id="guardarTramo" onclick="agregarTramo()">Guardar tramo y continuar</button>
+<details class="detalle" id="agregarAccesoriosGas"><summary>Agregar accesorios</summary><div id="cantidadesManualesGas"><h3>Accesorios del tramo · totales manuales</h3><p class="nota">Incluí las piezas del detalle en estos totales. Vacío = pendiente; 0 = no hay. Una tee es una sola pieza aunque su ramal gire. No sumes una pieza compartida nuevamente en otro tramo.</p><div class="gas-campos-manuales"><label>Codos de 90°<input id="manualGas_codo90" type="number" min="0" step="1" inputmode="numeric" placeholder="Pendiente"></label><label>Codos de 45°<input id="manualGas_codo45" type="number" min="0" step="1" inputmode="numeric" placeholder="Pendiente"></label><div><label for="manualGas_tee">Tees</label><input id="manualGas_tee" type="number" min="0" step="1" inputmode="numeric" placeholder="Pendiente"><button type="button" id="configurarTeeRapidaGas" class="peq alt" aria-expanded="false" aria-controls="panelTeeRapidaGas" onclick="alternarConfiguracionTeeRapidaGas()">Configurar tee</button></div><label>Reducciones independientes<input id="manualGas_reduccion" type="number" min="0" step="1" inputmode="numeric" placeholder="Pendiente"></label><label>Llaves de paso<input id="manualGas_llave" type="number" min="0" step="1" inputmode="numeric" placeholder="Pendiente"></label></div><div id="panelTeeRapidaGas" class="oculto"><label for="nodoTeeRapidaGas">Tee por nodo de conexión</label><select id="nodoTeeRapidaGas" onchange="renderConfiguracionTeeRapidaGas()"></select><p id="estadoTeeRapidaGas" class="nota" role="status"></p><div id="viasTeeRapidaGas"></div></div><p id="mensajeCargaManualGas" role="status" aria-live="polite"></p></div></details><button id="guardarTramo" onclick="agregarTramo()">Guardar tramo y continuar</button>
 <button id="cancelarTramo" class="alt oculto" onclick="cancelarEdicionTramo()">Cancelar edición del tramo</button>
 </div></details><div><details id="tramosRegistradosGas" class="gas-detalles"><summary id="resumenTramosRegistradosGas">Tramos registrados · editar o quitar</summary><div id="listaTramos"></div></details>
 <section id="editorAccesorios" class="oculto solo-pantalla gas-profesional" aria-label="Accesorios del tramo">
@@ -10024,12 +10024,30 @@ function renderPropuestaConjuntoTeeGas(caja,id){
  const b=document.createElement('button');b.type='button';b.textContent='Confirmar este conjunto';b.onclick=()=>{const enCarga=$('croquis').classList.contains?.('oculto')===false,r=confirmarConjuntoTeeGas(id,sel.value);mensaje.textContent=r.mensaje;if(enCarga){mostrarVista('croquis');$('tramosRegistradosGas').open=true;}if(!r.ok)window.alert?.(r.mensaje);};
  const aviso=document.createElement('p');aviso.setAttribute?.('role','status');aviso.textContent=estado.mensaje;d.append(contenido,aviso,b,mensaje);caja.append(d);
 }
+// Acceso desde las cantidades: no crea piezas ni copia configuraciones.
+function alternarConfiguracionTeeRapidaGas(){
+ const panel=$('panelTeeRapidaGas'),abrir=panel.classList.contains('oculto');
+ panel.classList.toggle('oculto',!abrir);$('configurarTeeRapidaGas').setAttribute?.('aria-expanded',String(abrir));
+ if(abrir)renderConfiguracionTeeRapidaGas();
+}
+function renderConfiguracionTeeRapidaGas(){
+ const selector=$('nodoTeeRapidaGas'),cont=$('viasTeeRapidaGas'),estado=$('estadoTeeRapidaGas'),previo=selector.value;
+ selector.replaceChildren();cont.replaceChildren();
+ let e;try{e=entradaPreseleccionSigasGas();}catch(error){e=null;}
+ const piezas=perfilTecnicoActualGas().catalogoTecnicoGas==='sigas'?(e?.inventario.fisicas||[]).filter(p=>p.tipo==='tee'):[];
+ for(const p of piezas){const o=document.createElement('option');o.value=p.id;o.textContent='Tee '+String(p.nodo||'ubicación pendiente').replace(/^nombre:/,'').toUpperCase();selector.append(o);}
+ selector.disabled=!piezas.length;
+ if(!piezas.length){estado.textContent=perfilTecnicoActualGas().catalogoTecnicoGas!=='sigas'?'Seleccioná SIGAS para configurar sus vías documentadas. Las equivalencias de otros sistemas se mantienen separadas.':'Guardá la cantidad de tees y los tramos conectados. Podés volver aquí después; los datos del formulario se conservan. No se asigna una orientación automáticamente.';return;}
+ const actual=piezas.find(p=>p.id===previo)||piezas.find(p=>editandoTramo>=0&&p.tramos.includes(tramos[editandoTramo]?.id))||piezas[0];selector.value=actual.id;
+ estado.textContent='Elegí la vía de cada salida según el recorrido real. Se guarda en la misma tee, sin agregar piezas ni pedir distancias. El modelo físico y sus medidas se verifican por separado.';
+ renderViasManualesTeeGas(cont,actual.tramos[0],{soloCirculacion:true,teeId:actual.id});
+}
 // Orientación independiente del producto físico; el registro técnico existente es la única fuente.
-function renderViasManualesTeeGas(cont,tramoId,{soloCirculacion=false}={}){
+function renderViasManualesTeeGas(cont,tramoId,{soloCirculacion=false,teeId=null}={}){
  if(modulo!=='gas'||perfilTecnicoActualGas().catalogoTecnicoGas!=='sigas')return;
  let entrada;try{entrada=entradaPreseleccionSigasGas();}catch(e){return;}if(!entrada)return;
  const nombres=id=>entrada.preparacion.porTramo.find(t=>t.id===id)?.nombre||id;
- for(const pieza of entrada.inventario.fisicas.filter(p=>p.tipo==='tee'&&p.tramos.includes(tramoId))){
+ for(const pieza of entrada.inventario.fisicas.filter(p=>p.tipo==='tee'&&p.tramos.includes(tramoId)&&(!teeId||p.id===teeId))){
   const caja=document.createElement('div');caja.className='tee-manual-salidas';
   const t=document.createElement('strong');t.textContent='Circulación de tee '+String(pieza.nodo||nombres(tramoId)).replace(/^nombre:/,'');caja.append(t);
   const ids=pieza.conexionesDiametro||[],rutas=entrada.preparacion.recorridos.map(r=>r.tramos.filter(id=>ids.includes(id))).filter(a=>a.length===2),entradas=[...new Set(rutas.map(a=>a[0]))];
@@ -19357,6 +19375,7 @@ function renderTramos(){
   d.append(b);
   cont.append(d);
  });
+ if(modulo==='gas'&&$('panelTeeRapidaGas').classList.contains?.('oculto')===false)renderConfiguracionTeeRapidaGas();
 }
 
 function calcularMateriales(){
