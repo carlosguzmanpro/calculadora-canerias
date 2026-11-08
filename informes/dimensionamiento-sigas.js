@@ -258,19 +258,17 @@ function renderPreseleccionSigasGas(out,plan=null){
 // Demostración optativa: comparte el flujo manual, nunca los registros de otro proyecto.
 function abrirEjemploTeesRapidasGas(){
  if(modulo!=='gas')return false;modoCargaGas='rapida';actualizarModoCargaGas();
- const existente=registrosProyectosGas().find(p=>p.datos.ejemploTeesRapidas===1);
+ const existente=registrosProyectosGas().find(p=>p.datos.ejemploTeesRapidas===1&&p.datos.versionInstalacionPrueba===2);
  if(existente){seleccionarAmbitoGas('proyecto:'+existente.id);renderTramos();calcularMaterialesManualGas();return true;}
- const base='Ejemplo de prueba SIGAS · 20,60 m';let nombre=base;
+ const base='Instalación de prueba SIGAS · 20,60 m';let nombre=base;
  for(let n=2;;n++){try{nombreProyectoValidoGas(nombre);break;}catch(error){nombre=base+' ('+n+')';}}
  if(!crearProyectoGas(nombre))return false;
- const filas=[['M','A',7.9,0,5,1,0,''],['A','B',3.9,0,2,1,0,''],['A','Calefactor',4.5,6000,5,0,1,'Calefactor'],['B','Cocina',2.15,11000,2,0,1,'Cocina'],['B','Termotanque',2.15,4800,2,0,1,'Termotanque']];
+ const filas=[['M','A',7.9,0,5,1,0,''],['A','B',3.9,0,2,1,0,''],['A','Calefactor',4.5,6000,4,0,1,'Calefactor'],['B','Cocina',2.15,11000,2,0,1,'Cocina'],['B','Termotanque',2.15,4800,2,0,1,'Termotanque']];
  tramos=filas.map(([desde,hasta,metros,consumo,codos,tees,llaves,artefacto])=>({id:idGas('tramo'),desde,hasta,metros,consumo:consumo||null,artefacto,diametro:null,detalle:{estado:'pendiente',accesorios:tees?[{tipo:'tee',nodo:hasta,idFisico:'ejemplo-tees-'+hasta}]:[]}}));
  artefactos=[];instalacionGas={version:1,perfil:{pais:'AR',uso:'domiciliario',gas:'GN',catalogoTecnicoGas:'sigas',material:'Acero-polietileno SIGAS Thermofusión',sistema:'Thermofusión',largosDocumentados2026:true},nodos:[]};
- const p=proyectoGasActual();p.ejemploTeesRapidas=1;p.conteosRapidosGas=Object.fromEntries(filas.map((f,i)=>[tramos[i].id,{codo90:f[4],codo45:0,tee:f[5],llave:f[6]}]));p.calculoSigas={version:1,vinculos:{}};
+ const p=proyectoGasActual();p.ejemploTeesRapidas=1;p.versionInstalacionPrueba=2;p.conteosRapidosGas=Object.fromEntries(filas.map((f,i)=>[tramos[i].id,{codo90:f[4],codo45:0,tee:f[5],llave:f[6]}]));p.calculoSigas={version:1,vinculos:{}};
  datosPlanGas().opciones.cargaManualDirecta=true;
  guardarDatos();
- const tee=entradaPreseleccionSigasGas()?.inventario.fisicas.find(p=>p.tipo==='tee'&&String(p.nodo).replace(/^nombre:/,'').toLowerCase()==='a');
- if(tee)guardarConfiguracionTeeSigasGas(tee.id,{modo:'ambas',fuenteOrientacion:'manual-ejemplo',viasPorTramo:{[tramos[1].id]:'giro',[tramos[2].id]:'directo'}});
  cancelarEdicionTramo();renderTramos();renderGas();renderAmbitoGas();calcularMaterialesManualGas();return true;
 }
 function quitarEjemploTeesRapidasGas(){

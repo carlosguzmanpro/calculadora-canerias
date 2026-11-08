@@ -195,7 +195,7 @@ section{box-shadow:none}
 <h2 id="titulo"></h2><button id="imprimirGeneral" class="alt" onclick="imprimirInformeActual()">Imprimir informe / guardar PDF</button>
 
 <div id="menuGas" class="oculto">
-<p class="gas-paso-titulo">1 · Proyecto</p><div class="gas-selector-proyectos"><label>Proyecto de GAS <select id="ambitoGas" onchange="seleccionarAmbitoGas(this.value)"><option value="proyecto">Mi proyecto</option><option value="demostracion">Demostración separada</option></select></label><button class="alt" onclick="mostrarEditorProyectoGas('crear')">Nuevo proyecto</button></div>
+<p class="gas-paso-titulo">1 · Proyecto</p><button id="cargarEjemploTeesGas" class="alt" onclick="abrirEjemploTeesRapidasGas()">Cargar instalación de prueba</button><div class="gas-selector-proyectos"><label>Proyecto de GAS <select id="ambitoGas" onchange="seleccionarAmbitoGas(this.value)"><option value="proyecto">Mi proyecto</option><option value="demostracion">Demostración separada</option></select></label><button class="alt" onclick="mostrarEditorProyectoGas('crear')">Nuevo proyecto</button></div>
 <div id="editorProyectosGas" class="detalle oculto"><label for="nombreProyectoGas">Nombre del proyecto</label><input id="nombreProyectoGas" type="text" maxlength="80" placeholder="Ej.: Casa de Ana"><button id="guardarNombreProyectoGas" onclick="guardarNombreProyectoGas()">Crear proyecto vacío</button><button class="alt" onclick="cancelarEditorProyectoGas()">Cancelar</button></div><p id="mensajeProyectosGas" role="status" aria-live="polite"></p><p id="estadoAmbitoGas"></p>
 <p class="gas-paso-titulo">2 · Sistema y combustible</p><label for="catalogoSistemaGas">Sistema de cañería</label><select id="catalogoSistemaGas" onchange="seleccionarCatalogoSistemaGas(this.value)"><option value="">Pendiente de seleccionar</option><option value="acero-epoxi-roscado-gn">Acero epoxi · roscado</option><option value="sigas">SIGAS Thermofusión · manual ed.15 / 2025</option><option value="fusiogas">FUSIOGAS Thermofusión · V.1.2026</option></select>
 <label for="combustibleSistemaGas">Tipo de combustible</label><select id="combustibleSistemaGas" onchange="seleccionarCombustibleGas(this.value)"><option value="">Pendiente / revisar datos guardados</option><option value="GN">Gas natural</option><option value="GLP">GLP (composición por verificar)</option><option value="propano-gaseoso">Propano gaseoso identificado (SIGAS Tabla 5)</option></select><nav class="gas-recorrido solo-pantalla" aria-label="Pasos del proyecto GAS">
@@ -263,7 +263,7 @@ Estimación de compra: tiras de <span id="largoComercialAdvertenciaGas">largo co
 <p id="entregaAccion" role="status" aria-live="polite"></p>
 <p id="entregaEstado" role="status" aria-live="polite">Croquis pendiente de revisión. La planilla y los materiales se imprimen aunque no haya croquis confirmado.</p>
 <button class="alt" onclick="window.print()">Imprimir o guardar esta revisión</button></details></details>
-<details id="ejerciciosGasSeparados" class="gas-detalles solo-pantalla"><summary>Ejercicios y demostraciones</summary><p>Datos de prueba: no reemplazan tus instalaciones ni interpretan fotografías.</p><button id="cargarEjemploTeesGas" class="alt" onclick="abrirEjemploTeesRapidasGas()">Cargar ejemplo de prueba</button><button id="quitarEjemploTeesGas" class="alt oculto" onclick="quitarEjemploTeesRapidasGas()">Quitar ejemplo de prueba</button><button class="alt" onclick="abrirEjercicioSigas19Gas()">Abrir ejercicio SIGAS · 58 m y 19 codos (proyecto separado)</button><button class="alt" onclick="generarPlanGas('ejemplo')">Probar materiales: calefón y cocina</button></details>
+<details id="ejerciciosGasSeparados" class="gas-detalles solo-pantalla"><summary>Ejercicios y demostraciones</summary><p>Datos de prueba: no reemplazan tus instalaciones ni interpretan fotografías.</p><button id="quitarEjemploTeesGas" class="alt oculto" onclick="quitarEjemploTeesRapidasGas()">Quitar ejemplo de prueba</button><button class="alt" onclick="abrirEjercicioSigas19Gas()">Abrir ejercicio SIGAS · 58 m y 19 codos (proyecto separado)</button><button class="alt" onclick="generarPlanGas('ejemplo')">Probar materiales: calefón y cocina</button></details>
 
 </div>
 
@@ -9799,19 +9799,17 @@ function renderPreseleccionSigasGas(out,plan=null){
 // Demostración optativa: comparte el flujo manual, nunca los registros de otro proyecto.
 function abrirEjemploTeesRapidasGas(){
  if(modulo!=='gas')return false;modoCargaGas='rapida';actualizarModoCargaGas();
- const existente=registrosProyectosGas().find(p=>p.datos.ejemploTeesRapidas===1);
+ const existente=registrosProyectosGas().find(p=>p.datos.ejemploTeesRapidas===1&&p.datos.versionInstalacionPrueba===2);
  if(existente){seleccionarAmbitoGas('proyecto:'+existente.id);renderTramos();calcularMaterialesManualGas();return true;}
- const base='Ejemplo de prueba SIGAS · 20,60 m';let nombre=base;
+ const base='Instalación de prueba SIGAS · 20,60 m';let nombre=base;
  for(let n=2;;n++){try{nombreProyectoValidoGas(nombre);break;}catch(error){nombre=base+' ('+n+')';}}
  if(!crearProyectoGas(nombre))return false;
- const filas=[['M','A',7.9,0,5,1,0,''],['A','B',3.9,0,2,1,0,''],['A','Calefactor',4.5,6000,5,0,1,'Calefactor'],['B','Cocina',2.15,11000,2,0,1,'Cocina'],['B','Termotanque',2.15,4800,2,0,1,'Termotanque']];
+ const filas=[['M','A',7.9,0,5,1,0,''],['A','B',3.9,0,2,1,0,''],['A','Calefactor',4.5,6000,4,0,1,'Calefactor'],['B','Cocina',2.15,11000,2,0,1,'Cocina'],['B','Termotanque',2.15,4800,2,0,1,'Termotanque']];
  tramos=filas.map(([desde,hasta,metros,consumo,codos,tees,llaves,artefacto])=>({id:idGas('tramo'),desde,hasta,metros,consumo:consumo||null,artefacto,diametro:null,detalle:{estado:'pendiente',accesorios:tees?[{tipo:'tee',nodo:hasta,idFisico:'ejemplo-tees-'+hasta}]:[]}}));
  artefactos=[];instalacionGas={version:1,perfil:{pais:'AR',uso:'domiciliario',gas:'GN',catalogoTecnicoGas:'sigas',material:'Acero-polietileno SIGAS Thermofusión',sistema:'Thermofusión',largosDocumentados2026:true},nodos:[]};
- const p=proyectoGasActual();p.ejemploTeesRapidas=1;p.conteosRapidosGas=Object.fromEntries(filas.map((f,i)=>[tramos[i].id,{codo90:f[4],codo45:0,tee:f[5],llave:f[6]}]));p.calculoSigas={version:1,vinculos:{}};
+ const p=proyectoGasActual();p.ejemploTeesRapidas=1;p.versionInstalacionPrueba=2;p.conteosRapidosGas=Object.fromEntries(filas.map((f,i)=>[tramos[i].id,{codo90:f[4],codo45:0,tee:f[5],llave:f[6]}]));p.calculoSigas={version:1,vinculos:{}};
  datosPlanGas().opciones.cargaManualDirecta=true;
  guardarDatos();
- const tee=entradaPreseleccionSigasGas()?.inventario.fisicas.find(p=>p.tipo==='tee'&&String(p.nodo).replace(/^nombre:/,'').toLowerCase()==='a');
- if(tee)guardarConfiguracionTeeSigasGas(tee.id,{modo:'ambas',fuenteOrientacion:'manual-ejemplo',viasPorTramo:{[tramos[1].id]:'giro',[tramos[2].id]:'directo'}});
  cancelarEdicionTramo();renderTramos();renderGas();renderAmbitoGas();calcularMaterialesManualGas();return true;
 }
 function quitarEjemploTeesRapidasGas(){
