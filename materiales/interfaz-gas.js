@@ -601,13 +601,15 @@ function planificarVistaMaterialesGas(entrada,opciones){
  for(const f of manual.ceros)plan.filas.push({id:'manual-cero:'+f.ubicacion+':'+f.tipo,revisado:false,...f});
  return plan;
 }
-function calcularMaterialesManualGas(){
+function calcularMaterialesManualGas({desplazar=false}={}){
  if(modulo!=='gas')return;
  datosPlanGas().opciones.cargaManualDirecta=true;
+ if(!(typeof conservandoVistaOrientacionTeeGas!=='undefined'&&conservandoVistaOrientacionTeeGas)){
  const borrador=()=>['desde','hasta','metros'].some(id=>String($(id).value).trim()!=='');
  if(borrador()){agregarTramo();if(borrador()){$('mensajeCargaManualGas').textContent=$('mensajeCargaManualGas').textContent||'Completá el tramo en edición antes de calcular. No se mostraron resultados anteriores como actuales.';$('resumenPrincipalMaterialesGas').replaceChildren();$('resumenPrincipalMaterialesGas').textContent='Borrador sin guardar: el resultado anterior se conserva como respaldo, no representa los cambios en edición.';if($('cantidadesManualesGas').scrollIntoView)$('cantidadesManualesGas').scrollIntoView({block:'center'});return;}}
- mostrarVista('croquis');$('resultadoMateriales').classList.add('oculto');
- generarPlanGas('proyecto',true);guardarDatos();
+ }
+ if(desplazar)mostrarVista('croquis');$('resultadoMateriales').classList.add('oculto');
+ generarPlanGas('proyecto',desplazar);guardarDatos();
  if(!revisionMaterialesGas){$('matMensaje').textContent=$('matResultado').textContent||'No se pudo calcular; los datos se conservaron.';return;}
  $('matMensaje').textContent='Lista actualizada con las cantidades ingresadas. Sin segunda confirmación. Diámetros, posiciones y compra no verificados conservan sus advertencias.';
 }
