@@ -135,52 +135,64 @@ function guia(){
  a.puntos.forEach(p=>{const label=document.createElement('label');label.textContent=p;const select=document.createElement('select');select.setAttribute('aria-label','Agua para '+p);[['','Elegí qué necesita'],['fria','Solo fría'],['caliente','Solo caliente'],['ambas','Fría y caliente'],['ninguna','No requiere conexión de agua']].forEach(([v,t])=>select.add(new Option(t,v)));select.value=a.servicios[p]||'';select.onchange=()=>{a.servicios[p]=select.value;guardar();guia();};label.append(select);el('servicios').append(label);});
  el('guiaCircuito').value=a.circuitoGuia||'fria';el('guiaCircuito').onchange=()=>{a.circuitoGuia=el('guiaCircuito').value;guardar();circuitoGuia();};circuitoGuia();
 }
+function avanzarInterior(){
+ const titulo=el('tituloInterior');
+ if(!titulo||el('interiorGuia').hidden)return;
+ el('pasoLlegada').open=false;
+ titulo.focus({preventScroll:true});
+ titulo.scrollIntoView({block:'start',behavior:'instant'});
+}
 function circuitoGuia(){
  const a=ambienteActual(),c=el('guiaCircuito').value;
  const llegadas=tramos.filter(t=>t.ambientes.includes(a.id)&&t.tipo===c&&t.etapa==='llegada');
+ const llegada=llegadas[0];
  const puntos=[...new Set([inicio(a,c),...tramos.filter(t=>t.tipo===c).flatMap(t=>[t.desde,t.hasta])])];
  const destinos=a.puntos.filter(p=>['ambas',c].includes(a.servicios[p]));
  const opts=destinos.map(p=>`<option value="${escapar(puntoArtefacto(a,p))}">${escapar(p)}</option>`).join('');
  el('circuitoGuia').innerHTML=`<p>${c==='fria'?'Primero, medí desde el colector hasta el inicio de la distribución del ambiente. Después agregá cada recorrido interior.':'La caliente se define por separado, desde el termotanque o un punto de su red ya cargado. Podés compartir recorridos entre ambientes sin volver a sumar sus metros.'}</p>
- ${llegadas.length?`<p>Llegada registrada: ${llegadas.map(t=>escapar(descripcion(t))).join('; ')}. Seguí con la distribución interior.</p>`:''}
- <details id="pasoLlegada" ${llegadas.length?'':'open'}><summary>${llegadas.length?'Otra llegada o corregir desde Editar':'Llegada al ambiente'}</summary>
- <label for="origenGuia">${c==='fria'?'Desde el colector o punto real':'Desde el termotanque o punto real de agua caliente'}</label><input id="origenGuia" list="soloCircuito" value="${c==='fria'?'Colector':'Termotanque'}">
- <label for="inicioGuia">Inicio de la distribución (podés cambiarlo)</label><input id="inicioGuia" list="soloCircuito" value="${escapar(inicio(a,c))}">
- <label for="medidaLlegada">Metros medidos de llegada</label><input id="medidaLlegada" inputmode="decimal">
- <label for="incluyeInterior">¿La medida incluye distribución interior?</label><select id="incluyeInterior"><option value="">Elegí antes de sumar</option><option value="no">No: termina en el inicio de la distribución</option><option value="si">Sí: incluye metros interiores</option></select>
- <div id="separar" hidden><p>Separá la medición antes de guardarla. Esos metros interiores se descontarán de la llegada y se registrarán una sola vez.</p><label for="parteInterior">Metros interiores incluidos en esa medida</label><input id="parteInterior" inputmode="decimal"><label for="finIncluido">Hasta dónde llegan esos metros interiores</label><input id="finIncluido" list="destinosGuia" placeholder="Elegí un artefacto o escribí el punto real"></div>
- <p id="previewSeparacion" aria-live="polite"></p><button id="guardarLlegada">Guardar llegada y continuar</button></details>
- <div id="interiorGuia" ${llegadas.length?'':'hidden'}><h4>Distribución interior, sin salir del ambiente</h4><p>Agregá cada parte física una sola vez. Si varios artefactos comparten una parte, cargala hasta su punto de derivación y continuá desde allí.</p>
+ 
+ <details id="pasoLlegada" ${llegadas.length?'':'open'}><summary>${llegada?'Llegada registrada: '+formato(llegada.metros)+' m · editar':c==='fria'?'Llegada desde el colector':'Llegada desde el termotanque'}</summary>
+ <label for="origenGuia">${c==='fria'?'Desde el colector o punto real':'Desde el termotanque o punto real de agua caliente'}</label><input id="origenGuia" list="soloCircuito" value="${escapar(llegada?llegada.desde:c==='fria'?'Colector':'Termotanque')}">
+ <label for="inicioGuia">Inicio de la distribución (podés cambiarlo)</label><input id="inicioGuia" list="soloCircuito" value="${escapar(llegada?llegada.hasta:inicio(a,c))}">
+ <p>${a.clase==='Baño'?'Medí hasta donde comienza la distribución interior del baño':'Medí hasta donde comienza la distribución interior del ambiente'}</p>
+ <label for="medidaLlegada">Metros de llegada</label><input id="medidaLlegada" inputmode="decimal" value="${llegada?formato(llegada.metros):''}">
+ ${llegada&&llegada.ambientes.length>1?'<p>Este recorrido es compartido: editarlo actualiza sus metros en todos los ambientes vinculados.</p>':''}
+ <details id="ajusteMedicion"><summary>Mi medición también incluye metros interiores (opcional)</summary> <div id="separar"><p>Separá la medición antes de guardarla. Esos metros interiores se descontarán de la llegada y se registrarán una sola vez.</p><label for="parteInterior">Metros interiores incluidos en esa medida</label><input id="parteInterior" inputmode="decimal"><label for="finIncluido">Hasta dónde llegan esos metros interiores</label><input id="finIncluido" list="destinosGuia" placeholder="Elegí un artefacto o escribí el punto real"></div>
+ <p id="previewSeparacion" aria-live="polite"></p></details><button id="guardarLlegada">Guardar y continuar</button></details>
+ <div id="interiorGuia" ${llegadas.length?'':'hidden'}><h4 id="tituloInterior" tabindex="-1">Distribución interior ${a.clase==='Baño'?'del baño':'del ambiente'}</h4>
+ <p id="llegadaRegistrada" role="status">${llegada?'Llegada registrada: '+formato(llegada.metros)+' m de agua '+circuitoNombre(c).toLowerCase()+'.':''}</p>
+ <p><strong>Agregá solamente los metros interiores que todavía no cargaste</strong></p>
+ <p>${escapar(destinos.filter(p=>!alcanzados(c).has(puntoArtefacto(a,p))).length?'Conexiones pendientes en este circuito: '+destinos.filter(p=>!alcanzados(c).has(puntoArtefacto(a,p))).join(', '):'No hay conexiones pendientes entre los artefactos definidos para este circuito.')}</p><p>Agregá cada parte física una sola vez. Si varios artefactos comparten una parte, cargala hasta su punto de derivación y continuá desde allí.</p>
  <label for="desdeInterior">Desde el inicio o un punto ya definido</label><input id="desdeInterior" list="soloCircuito" value="${escapar(llegadas.length?llegadas[0].hasta:inicio(a,c))}">
  <label for="hastaInterior">Hasta el artefacto o punto real</label><input id="hastaInterior" list="destinosGuia" placeholder="Elegí una opción o escribí un punto de derivación">
  <label for="metrosInterior">Metros de este recorrido interior</label><input id="metrosInterior" inputmode="decimal"><button id="guardarInterior">Guardar recorrido interior</button></div>
  <datalist id="soloCircuito">${puntos.map(p=>`<option value="${escapar(p)}"></option>`).join('')}</datalist><datalist id="destinosGuia">${opts}${puntos.map(p=>`<option value="${escapar(p)}"></option>`).join('')}</datalist>
  <details><summary>La llegada ya está cargada en este ambiente</summary><label for="llegadaExistente">Elegí el recorrido que llega al inicio de la distribución</label><select id="llegadaExistente"><option value="">Elegí un recorrido de este circuito</option>${tramos.filter(t=>t.tipo===c&&t.ambientes.includes(a.id)).map(t=>`<option value="${escapar(t.id)}">${escapar(descripcion(t))}</option>`).join('')}</select><p>Confirmá solamente si su origen es la alimentación real de este circuito. No suma metros.</p><button id="confirmarLlegada">Usar como llegada</button></details><p>¿Ya lo cargaste? <button id="abrirReuso" class="secondary">Elegir recorrido existente</button></p>`;
- el('confirmarLlegada').onclick=()=>{const t=tramos.find(t=>t.id===el('llegadaExistente').value);if(!t)return;t.etapa='llegada';guardar();dibujar();};
+ el('confirmarLlegada').onclick=()=>{const t=tramos.find(t=>t.id===el('llegadaExistente').value);if(!t)return;t.etapa='llegada';guardar();dibujar();avanzarInterior();};
  el('abrirReuso').onclick=()=>{el('reutilizar').open=true;el('compartido').focus();};
- const preview=()=>{const incluye=el('incluyeInterior').value==='si';el('separar').hidden=!incluye;const total=decimal(el('medidaLlegada').value),parte=incluye?decimal(el('parteInterior').value):0;el('previewSeparacion').textContent=Number.isFinite(total)&&Number.isFinite(parte)&&total>parte&&parte>=0?`Se sumará: ${formato(total-parte)} m de llegada${incluye?' + '+formato(parte)+' m interiores':''} = ${formato(total)} m. No vuelvas a cargar la parte interior incluida.`:'Completá y revisá la separación antes de guardar.';};
- ['incluyeInterior','medidaLlegada','parteInterior'].forEach(id=>el(id).oninput=preview);
+ const preview=()=>{const total=decimal(el('medidaLlegada').value),parte=decimal(el('parteInterior').value);el('previewSeparacion').textContent=Number.isFinite(total)&&Number.isFinite(parte)&&total>parte&&parte>0?`Quedará: ${formato(total-parte)} m de llegada + ${formato(parte)} m interiores = ${formato(total)} m. No vuelvas a cargar esa parte interior.`:'Indicá los metros interiores incluidos y su punto final antes de guardar.';};
+ ['medidaLlegada','parteInterior'].forEach(id=>el(id).oninput=preview);
  const mensaje=t=>el('guiaMensaje').textContent=t;
  const nuevo=(desde,hasta,metros,etapa)=>({id:uid(),ambientes:[a.id],tipo:c,desde,hasta,metros,codos:0,etapa,accesoriosPendientes:true});
- function agregarGrupo(grupo){
+ function agregarGrupo(grupo,reemplazo=null){
   if(grupo.some(t=>!t.desde||!t.hasta||t.desde===t.hasta||!Number.isFinite(t.metros)||t.metros<=0)){mensaje('Indicá puntos distintos y longitudes positivas.');return false;}
-  const todos=[...tramos];for(const t of grupo){if(todos.some(x=>x.tipo===c&&((x.desde===t.desde&&x.hasta===t.hasta)||(x.desde===t.hasta&&x.hasta===t.desde)))){mensaje('Ese recorrido ya existe: editá o reutilizá el existente, sin repetir sus metros.');return false;}todos.push(t);}
-  tramos.push(...grupo);guardar();dibujar();return true;
+  const todos=tramos.filter(t=>t.id!==reemplazo);for(const t of grupo){if(todos.some(x=>x.tipo===c&&((x.desde===t.desde&&x.hasta===t.hasta)||(x.desde===t.hasta&&x.hasta===t.desde)))){mensaje('Ese recorrido ya existe: editá o reutilizá el existente, sin repetir sus metros.');return false;}todos.push(t);}
+  tramos=tramos.filter(t=>t.id!==reemplazo);tramos.push(...grupo);guardar();dibujar();return true;
  }
  el('guardarLlegada').onclick=()=>{
-  const modo=el('incluyeInterior').value,total=decimal(el('medidaLlegada').value),parte=modo==='si'?decimal(el('parteInterior').value):0,desde=el('origenGuia').value.trim(),hasta=el('inicioGuia').value.trim();
-  if(!modo){mensaje('Indicá si la medida de llegada incluye distribución interior.');return;}
+  const modo=el('ajusteMedicion').open?'si':'no',total=decimal(el('medidaLlegada').value),parte=modo==='si'?decimal(el('parteInterior').value):0,desde=el('origenGuia').value.trim(),hasta=el('inicioGuia').value.trim();
   if(!Number.isFinite(total)||!Number.isFinite(parte)||total<=parte||parte<0||(modo==='si'&&parte<=0)){mensaje('La parte interior debe ser positiva y menor que la medida total. Si toda la medida es interior, cargala como distribución interior, sin llegada adicional.');return;}
-  const grupo=[nuevo(desde,hasta,total-parte,'llegada')];
+  const grupo=[llegada?{...llegada,desde,hasta,metros:total-parte}:nuevo(desde,hasta,total-parte,'llegada')];delete grupo[0].medicionOriginal;
   if(modo==='si'){const fin=el('finIncluido').value.trim();if(fin===desde){mensaje('Revisá el punto final interior: no puede volver al origen de la llegada.');return;}grupo.push(nuevo(hasta,fin,parte,'interior'));grupo[0].medicionOriginal={total,interiorIncluido:parte};}
-  agregarGrupo(grupo);
+  if(agregarGrupo(grupo,llegada?llegada.id:null))avanzarInterior();
  };
  el('guardarInterior').onclick=()=>{
   const desde=el('desdeInterior').value.trim();if(!alcanzados(c).has(desde)){mensaje('Primero conectá ese punto desde la llegada o reutilizá el recorrido que lo alimenta.');return;}
-  agregarGrupo([nuevo(desde,el('hastaInterior').value.trim(),decimal(el('metrosInterior').value),'interior')]);
+  if(agregarGrupo([nuevo(desde,el('hastaInterior').value.trim(),decimal(el('metrosInterior').value),'interior')]))avanzarInterior();
  };
 }
 el('imprimir').onclick=()=>window.print();
 if(bloqueado){el('mensaje').textContent='No se pudieron leer los datos guardados. No se sobrescribió el almacenamiento. Conservá los datos del navegador para recuperarlos.';document.querySelectorAll('button,input,select').forEach(x=>x.disabled=true);}else dibujar();
 </script></body></html>
+
 
