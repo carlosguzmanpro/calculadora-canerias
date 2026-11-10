@@ -59,6 +59,7 @@
   const fallo=motivo=>({estado:'pendiente',motivo});
   if(ids.length!==3||new Set(ids).size!==3||enRuta.length!==2)return fallo('Vincular las tres conexiones de la tee al recorrido desde el medidor.');
   const [entrada,salida]=enRuta,diametros=ids.map(id=>vector[id]),opciones=opcionesTee(d,diametros,seleccion.tipo),tipos=[...new Set(opciones.map(tipoTee))];
+  if(diametros.some(D=>!positivo(D)))return fallo('Diámetros de las conexiones pendientes de cálculo; completar caudal/PCS antes de comprobar el modelo de tee.');
   if(tipos.length!==1)return fallo(tipos.length?'Identificar solamente la familia real de tee (central o extremo); hay varias configuraciones compatibles.':'No hay tee documentada con estas tres medidas: '+diametros.join('/')+' mm. Verificar la pieza real y posibles reducciones; no se añaden piezas ni equivalentes por suposición.');
   if(seleccion.dibujo&&pieza.nodo&&String(seleccion.dibujo.nodo?.id).replace(/^nombre:/,'').toLowerCase()!==String(pieza.nodo).replace(/^nombre:/,'').toLowerCase())return fallo('El nodo del dibujo no corresponde a esta tee; revisar el vínculo sin asumir la circulación.');
   const dib=seleccion.dibujo?interpretarTeeVectorial(seleccion.dibujo,entrada,ids):null;

@@ -256,10 +256,20 @@ function renderPreseleccionSigasGas(out,plan=null){
  const nota=document.createElement('p');nota.textContent=textoCuplasSigasGas(plan);out.append(nota);
 }
 // Demostración optativa: comparte el flujo manual, nunca los registros de otro proyecto.
+function esInstalacionPruebaSigasGas(){
+ const p=proyectoGasActual();return modulo==='gas'&&p.ejemploTeesRapidas===1&&p.versionInstalacionPrueba===2&&CatalogosSistemasGas.identificar(instalacionGas.perfil)==='sigas'&&instalacionGas.perfil.gas==='GN';
+}
+function prepararPCSEnsayoInstalacionGas(){
+ if(!esInstalacionPruebaSigasGas())return false;
+ const p=instalacionGas.perfil;
+ // Conservar incluso datos parciales o inválidos ingresados: no sustituirlos por el ensayo.
+ if(String(p.poderCalorifico??'').trim()||String(p.fuenteGas??'').trim())return false;
+ p.poderCalorifico=9300;p.fuenteGas='PCS de ensayo de la instalación de prueba SIGAS; no corresponde a un suministro real';return true;
+}
 function abrirEjemploTeesRapidasGas(){
  if(modulo!=='gas')return false;modoCargaGas='rapida';actualizarModoCargaGas();
  const existente=registrosProyectosGas().find(p=>p.datos.ejemploTeesRapidas===1&&p.datos.versionInstalacionPrueba===2);
- if(existente){seleccionarAmbitoGas('proyecto:'+existente.id);renderTramos();calcularMaterialesManualGas();return true;}
+ if(existente){seleccionarAmbitoGas('proyecto:'+existente.id);if(prepararPCSEnsayoInstalacionGas())guardarDatos();renderTramos();calcularMaterialesManualGas();return true;}
  const base='Instalación de prueba SIGAS · 20,60 m';let nombre=base;
  for(let n=2;;n++){try{nombreProyectoValidoGas(nombre);break;}catch(error){nombre=base+' ('+n+')';}}
  if(!crearProyectoGas(nombre))return false;
@@ -268,6 +278,7 @@ function abrirEjemploTeesRapidasGas(){
  artefactos=[];instalacionGas={version:1,perfil:{pais:'AR',uso:'domiciliario',gas:'GN',catalogoTecnicoGas:'sigas',material:'Acero-polietileno SIGAS Thermofusión',sistema:'Thermofusión',largosDocumentados2026:true},nodos:[]};
  const p=proyectoGasActual();p.ejemploTeesRapidas=1;p.versionInstalacionPrueba=2;p.conteosRapidosGas=Object.fromEntries(filas.map((f,i)=>[tramos[i].id,{codo90:f[4],codo45:0,tee:f[5],llave:f[6]}]));p.calculoSigas={version:1,vinculos:{}};
  datosPlanGas().opciones.cargaManualDirecta=true;
+ prepararPCSEnsayoInstalacionGas();
  guardarDatos();
  cancelarEdicionTramo();renderTramos();renderGas();renderAmbitoGas();calcularMaterialesManualGas();return true;
 }
@@ -905,6 +916,7 @@ function construirResultadoEjercicioSigasGas(cualquierProyecto=false){
     for(const id of salidas)if(!['directo','giro'].includes(vias[id])){vias[id]='giro';hipotesis.push('Tee '+(p.nodo?.split(':').at(-1)||'de derivación')+': '+(directas.length===1?'la segunda salida gira porque la otra es directa.':'se propone entrada por ramal y salidas a 90°; la topología no determina por sí sola la orientación real.'));}
     seleccion.viasPorTramo=vias;
    }
+   if(ids.some(id=>!Number.isFinite(vector[id])||vector[id]<=0)){temporales.push('Tee '+(p.nodo?.split(':').at(-1)||'de derivación')+': primero calcular los diámetros; completar PCS y fuente si faltan. No se evaluó todavía la compatibilidad del producto.');continue;}
    const opciones=DimensionamientoSigas.proponerConjuntosTee(SIGAS_ED15_2025,p,entrada.preparacion.recorridos,vector,seleccion),op=opciones.find(o=>o.id===seleccion.conjunto?.opcionId&&o.firma===seleccion.conjunto?.firma)||opciones.find(o=>o.id==='normal-bujes');
    if(!op){temporales.push('No hay conjunto de tee documentado compatible con las vías y medidas actuales en '+(p.nodo?.split(':').at(-1)||'la derivación')+'.');continue;}
    const reutilizadas={};let compatible=true;
@@ -945,6 +957,17 @@ function construirResultadoEjercicioSigasGas(cualquierProyecto=false){
  const cortesOrientativos=compra.tramos.map(t=>({tramoId:t.id,piezas:t.segmentos.flatMap(s=>{const n=Math.floor(s.metros/compra.largoComercial),resto=s.metros-n*compra.largoComercial;return [...Array(n).fill(compra.largoComercial),...(resto>1e-9?[resto]:[])];})}));
  const cantidadesDeclaradas=Object.fromEntries(['codo90','tee','llave'].map(tipo=>[tipo,reg.piezas.filter(p=>p.tipo===tipo).reduce((n,p)=>n+p.cantidad,0)]));
  const modelo={ensayos,simulacion:true,esEjercicio:proyectoGasActual().referenciaSigas19===true,confirmada:false,propuestasTopologia:propuestasTopologia.map(p=>({id:p.id,tipo:p.tipo,cantidad:p.cantidad,nodo:p.nodo,confirmada:false,afectaInventario:false})),cantidadesDeclaradas,cortesOrientativos,completo:estable&&bloqueos.length===0&&r.filas.every(f=>f.comprobadoPorTabla),resultado:r,selecciones:escenario.selecciones,cuplas,materiales:[...materiales.values()],compra,memoria:DimensionamientoSigas.memoriaCalculo(r).map(f=>({...f,diametroProvisorioMm:reg.calculo.historia[0]?.diametrosExteriorMm?.[f.id]??f.diametroProvisorioMm})),resoluciones:[...new Set(resoluciones)],validacion,bloqueos:[...new Set(bloqueos.map(limpiar))],fuente:'Manual SIGAS ed.15/2025: Tabla 3 pp.24–25; Tabla 4 GN p.22, densidad relativa 0,65 y caída de referencia 10 mmca. PCS '+(reg.entradaTecnica.perfil.poderCalorifico||'pendiente')+' kcal/m³: '+(proyectoGasActual().referenciaSigas19?'dato del ejercicio':'dato declarado del proyecto')+', no valor universal.'};
+ modelo.instalacionPrueba=esInstalacionPruebaSigasGas();
+ modelo.pcs={valor:reg.entradaTecnica.perfil.poderCalorifico??null,fuente:reg.entradaTecnica.perfil.fuenteGas||null};
+ modelo.pcs.ensayo=modelo.instalacionPrueba&&Number(modelo.pcs.valor)===9300&&modelo.pcs.fuente==='PCS de ensayo de la instalación de prueba SIGAS; no corresponde a un suministro real';
+ modelo.propuestasAccesorios=escenario.selecciones.map(s=>({material:s.nombre,cantidad:s.cantidad,codigo:s.codigo||null,confirmada:false,motivo:s.hipotesis}));
+ const vectorFinal=Object.fromEntries(r.filas.map(f=>[f.id,f.candidato?.exteriorMm]));
+ for(const p of entrada.inventario.fisicas.filter(p=>p.tipo==='tee')){
+  const seleccion=entrada.config.tees[p.id]||{},conjunto=seleccion.conjunto;
+  const op=DimensionamientoSigas.proponerConjuntosTee(SIGAS_ED15_2025,p,entrada.preparacion.recorridos,vectorFinal,seleccion).find(o=>o.id===conjunto?.opcionId&&o.firma===conjunto?.firma);
+  const real=reg.entradaTecnica.config.tees?.[p.id]?.conjunto;
+  if(op&&!(real?.confirmado&&real.opcionId===op.id&&real.firma===op.firma))modelo.propuestasAccesorios.push({material:'Tee '+(p.nodo?.split(':').at(-1)||'sin nodo')+': '+op.nombre,cantidad:1,codigo:op.codigoTee,confirmada:false,motivo:'Conjunto documentado propuesto para el escenario; no incorporado al inventario real.',componentes:op.reducciones.map(x=>({material:x.nombre,codigo:x.codigo,equivalenteM:x.equivalenteM}))});
+ }
  cacheResultadoEjercicioSigasGas={registro:reg,modelo};return modelo;
 }
 // Campos mínimos del proyecto; comparten perfil y registro terminal con la edición avanzada.
@@ -958,6 +981,9 @@ function renderDatosMinimosPreliminarSigasGas(modelo){
  if(modelo.esEjercicio!==false)return null;
  const entrada=entradaPreseleccionSigasGas(),p=instalacionGas.perfil,pcsCompleto=Number(p.poderCalorifico)>0&&typeof p.fuenteGas==='string'&&p.fuenteGas.trim();
  const caja=document.createElement('div');caja.className='sigas-datos-minimos';
+ if(esInstalacionPruebaSigasGas()&&!String(p.poderCalorifico??'').trim()&&!String(p.fuenteGas??'').trim()){
+  const ensayo=document.createElement('button');ensayo.type='button';ensayo.textContent='Usar PCS de ensayo: 9.300 kcal/m³';ensayo.onclick=()=>{if(prepararPCSEnsayoInstalacionGas()){guardarDatos();calcularMaterialesManualGas();}};caja.append(ensayo);
+ }
  const form=document.createElement(pcsCompleto?'details':'div');
  const titulo=document.createElement(pcsCompleto?'summary':'h3');titulo.textContent=pcsCompleto?'Editar PCS del proyecto':'Completar PCS para calcular caudales';form.append(titulo);
  const valor=document.createElement('input'),fuente=document.createElement('input');valor.type='text';valor.min='0';valor.step='any';valor.inputMode='decimal';valor.value=p.poderCalorifico||'';valor.ariaLabel='PCS del proyecto (kcal/m³)';fuente.type='text';fuente.value=p.fuenteGas||'';fuente.ariaLabel='Fuente del PCS del proyecto';
@@ -968,7 +994,7 @@ function renderDatosMinimosPreliminarSigasGas(modelo){
  valor.onchange=fuente.onchange=()=>{if(Number(valor.value)>0&&fuente.value.trim())guardarPCSPreliminarSigasGas(valor.value,fuente.value);};form.append(boton,error);caja.append(form);
  if(pcsCompleto){
   const faltantes=(entrada.inventario.necesidadesTerminales||[]).filter(n=>!entrada.config.terminales?.[n.id]?.rosca);
-  if(faltantes.length){const titulo=document.createElement('h3');titulo.textContent='Solo faltan medidas de rosca para cerrar las conexiones';caja.append(titulo);
+  if(faltantes.length){const titulo=document.createElement('h3');titulo.textContent='Conexiones terminales: faltan medidas de rosca';caja.append(titulo);
    for(const n of faltantes){const l=document.createElement('label'),sel=document.createElement('select');l.textContent=n.nombre+' · medida de rosca';sel.ariaLabel=l.textContent;
     const valores=[...new Set(SIGAS_ED15_2025.tablas[3].filas.map(f=>DimensionamientoSigas.atributosTerminal(f)?.rosca).filter(Boolean))];
     for(const v of ['',...valores]){const o=document.createElement('option');o.value=v;o.textContent=v?v+'″':'Seleccionar medida real';sel.append(o);}sel.value='';sel.onchange=()=>guardarDatoTerminalSigasGas(n.id,'rosca',sel.value);l.append(sel);caja.append(l);
