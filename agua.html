@@ -4,13 +4,13 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>CAÑERÍAS - AGUA</title>
 <style>
-*{box-sizing:border-box}body{font-family:Arial,sans-serif;background:#eef3f6;color:#203348;margin:0}header{background:#087e6a;color:#fff;padding:20px;text-align:center}main{max-width:800px;margin:auto;padding:16px}section{background:#fff;padding:18px;margin-bottom:16px;border-radius:12px}label{display:block;font-weight:bold;margin:12px 0 6px}input,select{width:100%;padding:12px;font-size:17px;border:1px solid #b5c6d5;border-radius:8px}button{background:#087e6a;color:#fff;border:0;border-radius:8px;padding:12px;margin:10px 6px 6px 0;font-size:16px}.remove{background:#a33c3c}.note{color:#526772;font-size:14px}.entry{border-bottom:1px solid #ddd;padding:12px 0}table{width:100%;border-collapse:collapse}td,th{border-bottom:1px solid #ddd;padding:10px 4px;text-align:left}
+*{box-sizing:border-box}body{font-family:Arial,sans-serif;background:#eef3f6;color:#203348;margin:0}header{background:#087e6a;color:#fff;padding:20px;text-align:center}main{max-width:800px;margin:auto;padding:16px}section{background:#fff;padding:18px;margin-bottom:16px;border-radius:12px}label{display:block;font-weight:bold;margin:12px 0 6px}input,select{width:100%;padding:12px;font-size:17px;border:1px solid #b5c6d5;border-radius:8px}button{background:#087e6a;color:#fff;border:0;border-radius:8px;padding:12px;margin:10px 6px 6px 0;font-size:16px}.remove{background:#a33c3c}.note{color:#526772;font-size:14px}.entry{overflow-wrap:anywhere;border-bottom:1px solid #ddd;padding:12px 0}table{width:100%;border-collapse:collapse}td,th{border-bottom:1px solid #ddd;padding:10px 4px;text-align:left}
 
 .choices{display:flex;flex-wrap:wrap;gap:6px}.choices label{font-weight:normal;margin:4px;padding:8px;background:#eef3f6;border-radius:8px}.choices input{width:auto}button.secondary{background:#e4eeed;color:#135f53}button[aria-pressed="true"]{outline:3px solid #203348}select{max-width:100%}.entry button{font-size:14px} .editing{border:2px solid #087e6a;padding:10px}
 @media print{.controls,button,#mensaje{display:none!important}body{background:white}section{padding:8px;break-inside:avoid}header{background:white;color:#203348} .entry{break-inside:avoid}}
 </style></head>
 <body><header><h1>CAÑERÍAS · AGUA</h1><div>Prueba independiente — carga manual</div></header>
-<main>
+<main><section class="controls"><label for="modalidad">Modalidad de carga</label><select id="modalidad"><option value="profesional">Cálculo de diámetro y materiales</option><option value="rapida">Cálculo de diámetro</option></select><p class="note">Modalidades de carga preparatorias. El cálculo hidráulico y los diámetros siguen pendientes de validación. Ambas usan los mismos recorridos. En la carga profesional, registrá Desde, Hasta y longitud; luego abrí «Accesorios y ramas» en ese recorrido.</p></section>
 <section class="controls"><h2>Ambientes o sectores</h2>
 <p>Completá fría y caliente en el mismo ambiente. Los recorridos compartidos se registran una sola vez por circuito.</p>
 <label for="ambiente">Volver a un ambiente</label><select id="ambiente"></select>
@@ -29,20 +29,20 @@
 <datalist id="puntos"></datalist><label for="metros">Longitud real (m)</label><input id="metros" type="text" inputmode="decimal" placeholder="Ej.: 8">
 <label for="codos">Codos/curvas declarados</label><input id="codos" type="number" inputmode="numeric" min="0" step="1" value="0">
 <button id="agregar">Agregar tramo</button><button id="cancelar" class="secondary" hidden>Cancelar edición</button><p id="mensaje" role="alert"></p></details><details id="reutilizar"><summary>Usar un recorrido ya cargado</summary><h2>Reutilizar un recorrido</h2><p>Vinculá un tramo existente al ambiente actual, sin volver a sumar sus metros. Editarlo actualiza todos los ambientes vinculados.</p><label for="compartido">Recorrido existente</label><select id="compartido"></select><button id="vincular">Vincular al ambiente</button></details>
-<h2>Recorridos del ambiente: <span id="actual"></span></h2><div id="lista"></div></section>
-<section><h2>Todos los recorridos (cada uno contado una vez)</h2><div id="todos"></div></section><section><h2>Resumen</h2><table><thead><tr><th>Circuito</th><th>Metros</th><th>Codos/curvas</th></tr></thead><tbody id="tabla"></tbody></table><p id="total"></p><p class="note">Los codos/curvas del resumen incluyen solo cantidades declaradas. Los recorridos guiados quedan con accesorios sin declarar hasta que los completes en Editar.</p><button id="imprimir">Imprimir / guardar PDF</button></section>
-<section><h2>Diámetros y materiales técnicos</h2><p><strong>Pendiente de verificación hidráulica.</strong> No se asignan diámetros automáticamente sin conocer presión disponible, alturas, caudales, accesorios y características del sistema de cañería.</p><p class="note">Tees, llaves, reducciones y cuplas se incorporarán cuando esté definida y validada la topología de la red. Las cantidades mostradas ahora son solo las ingresadas por el usuario.</p></section>
+<h2>Recorridos del ambiente: <span id="actual"></span></h2><div id="lista"></div><div id="detalleProfesional"></div></section>
+<section><h2>Todos los recorridos (cada uno contado una vez)</h2><div id="todos"></div></section><section><h2>Resumen</h2><table><thead><tr><th>Circuito</th><th>Metros</th><th>Codos/curvas anteriores</th></tr></thead><tbody id="tabla"></tbody></table><p id="total"></p><p class="note">La columna de codos/curvas conserva las cantidades anteriores sin clasificar; no se suma al detalle profesional que aparece debajo. Los recorridos guiados quedan con accesorios sin declarar hasta que los completes en Editar.</p><button id="imprimir">Imprimir / guardar PDF</button></section>
+<section><h2>Accesorios detallados declarados</h2><div id="resumenAccesorios"></div><p class="note">Distancias entre accesorios sobre el recorrido medido; no son longitudes de corte. No se descuentan inserciones ni se estiman cuplas, reducciones o compras.</p></section><section><h2>Diámetros y materiales técnicos</h2><p><strong>Pendiente de verificación hidráulica.</strong> No se asignan diámetros automáticamente sin conocer presión disponible, alturas, caudales, accesorios y características del sistema de cañería.</p><p class="note">Las tees y sus ramas se registran según lo declarado. No se estiman llaves, reducciones ni cuplas. Las cantidades mostradas son solo las ingresadas por el usuario.</p></section>
 </main>
 <script>
 const clave="canerias_agua_manual_v1", claveNueva="canerias_agua_ambientes_v2";
 const uid=()=>crypto.randomUUID();
-let tramos=[],ambientes=[],activo='',editando=null,bloqueado=false;
+let tramos=[],ambientes=[],activo='',editando=null,bloqueado=false,detalleId=null,editAcc=null,modalidad='profesional';
 try{
  const guardado=localStorage.getItem(claveNueva);
  if(guardado!==null){
   const d=JSON.parse(guardado);
   if(d.version!==2||!Array.isArray(d.tramos)||!Array.isArray(d.ambientes)||!d.ambientes.length)throw Error();
-  tramos=d.tramos;ambientes=d.ambientes;
+  tramos=d.tramos;ambientes=d.ambientes;modalidad=d.modalidad==='rapida'?'rapida':'profesional';
  }else{
   const anteriores=JSON.parse(localStorage.getItem(clave)||"[]");
   if(!Array.isArray(anteriores))throw Error();
@@ -50,6 +50,8 @@ try{
   tramos=anteriores.map(t=>({...t,id:uid(),ambientes:[id]}));
  }
  if(ambientes.some(a=>!a.id||typeof a.nombre!=="string"||!Array.isArray(a.puntos))||tramos.some(t=>!t.id||!['fria','caliente'].includes(t.tipo)||typeof t.desde!=="string"||typeof t.hasta!=="string"||!Number.isFinite(t.metros)||t.metros<=0||!Number.isInteger(t.codos)||t.codos<0||!Array.isArray(t.ambientes)||!t.ambientes.length||t.ambientes.some(id=>!ambientes.some(a=>a.id===id))))throw Error();
+ if(tramos.some(t=>t.accesorios!==undefined&&(!Array.isArray(t.accesorios)||t.accesorios.some(x=>!x.id||!['curva','codo','tee','otro'].includes(x.tipo)||!Number.isFinite(x.distancia)||x.distancia<0||(x.tipo==='otro'&&typeof x.nombre!=='string'))||t.accesorios.reduce((s,x)=>s+x.distancia,0)>t.metros+1e-8)))throw Error();
+ if(tramos.some(t=>t.origenTee&&!tramos.some(p=>p.id===t.origenTee.tramo&&p.tipo===t.tipo&&(p.accesorios||[]).some(x=>x.id===t.origenTee.accesorio&&x.tipo==='tee'))))throw Error();
  activo=ambientes[0].id;
 }catch(e){bloqueado=true;}
 const el=id=>document.getElementById(id);
@@ -58,10 +60,11 @@ const formato=n=>n.toLocaleString("es-AR",{maximumFractionDigits:2});
 const catalogo={"Baño":["Lavatorio","Ducha","Bañera","Bidé","Inodoro"],"Cocina":["Pileta de cocina","Lavavajillas"],"Lavadero":["Pileta de lavar","Lavarropas"],"Otro":[]};
 const ambienteActual=()=>ambientes.find(a=>a.id===activo);
 const nombres=t=>t.ambientes.map(id=>ambientes.find(a=>a.id===id).nombre).join(', ');
-const descripcion=t=>`${t.desde} → ${t.hasta} · ${t.tipo==='fria'?'Fría':'Caliente'} · ${formato(t.metros)} m · ${t.accesoriosPendientes?'accesorios sin declarar':t.codos+' codos/curvas'}`;
+function etiquetaPunto(p){for(const t of tramos){for(const [i,x] of (t.accesorios||[]).entries()){if(x.tipo==='tee'&&p===nodoTee(t,x))return `Tee ${i+1} del recorrido a ${t.hasta}`;}}return p;}
+const descripcion=t=>`${etiquetaPunto(t.desde)} → ${t.hasta} · ${t.tipo==='fria'?'Fría':'Caliente'} · ${formato(t.metros)} m · ${(t.accesorios||[]).length?(t.accesorios.length+' accesorios detallados'+(t.codos>0?' · '+t.codos+' codos/curvas anteriores sin clasificar':'')):t.accesoriosPendientes?'accesorios sin declarar':t.codos+' codos/curvas'}`;
 function guardar(){
  if(bloqueado)return;
- try{localStorage.setItem(claveNueva,JSON.stringify({version:2,ambientes,tramos}));}
+ try{localStorage.setItem(claveNueva,JSON.stringify({version:2,ambientes,tramos,modalidad}));}
  catch(e){el('mensaje').textContent='No se pudo guardar en este navegador. Mantené esta página abierta y guardá un PDF antes de salir.';}
 }
 function opciones(){
@@ -80,11 +83,12 @@ function opcionesPuntos(){
 function dibujar(){
  opciones();
  const visibles=tramos.filter(t=>t.ambientes.includes(activo));
- el('lista').innerHTML=visibles.length?visibles.map(t=>`<div class="entry"><strong>${escapar(descripcion(t))}</strong><div>Ambientes: ${escapar(nombres(t))}</div><button data-editar="${escapar(t.id)}">Editar</button><button class="remove" data-quitar="${escapar(t.id)}">${t.ambientes.length>1?'Desvincular de este ambiente':'Eliminar'}</button></div>`).join(''):'Todavía no hay tramos en este ambiente.';
+ el('lista').innerHTML=visibles.length?visibles.map(t=>`<div class="entry"><strong>${escapar(descripcion(t))}</strong><div>Ambientes: ${escapar(nombres(t))}</div><button data-editar="${escapar(t.id)}">Editar</button>${modalidad==='profesional'?`<button data-detalle="${escapar(t.id)}">Accesorios y ramas</button>`:''}<button class="remove" data-quitar="${escapar(t.id)}">${t.ambientes.length>1?'Desvincular de este ambiente':'Eliminar'}</button></div>`).join(''):'Todavía no hay tramos en este ambiente.';
  el('todos').innerHTML=tramos.map(t=>`<div class="entry">${escapar(descripcion(t))}<div>${escapar(nombres(t))}</div></div>`).join('')||'Todavía no hay tramos.';
  el('compartido').innerHTML='<option value="">Elegí un recorrido</option>'+tramos.filter(t=>!t.ambientes.includes(activo)).map(t=>`<option value="${escapar(t.id)}">${escapar(descripcion(t))}</option>`).join('');
  let total=0;el('tabla').innerHTML=['fria','caliente'].map(tipo=>{const items=tramos.filter(t=>t.tipo===tipo),m=items.reduce((s,t)=>s+t.metros,0),c=items.reduce((s,t)=>s+t.codos,0);total+=m;return '<tr><td>'+(tipo==='fria'?'Fría':'Caliente')+'</td><td>'+formato(m)+' m</td><td>'+c+'</td></tr>';}).join('');
  el('total').textContent='Total de cañería ingresada: '+formato(total)+' m';
+ el('modalidad').value=modalidad;dibujarDetalle();resumenDetalle();
 }
 function cancelar(){editando=null;el('agregar').textContent='Agregar tramo';el('cancelar').hidden=true;el('metros').value='';el('codos').value='0';}
 el('cancelar').onclick=cancelar;
@@ -98,13 +102,16 @@ el('agregar').onclick=()=>{
  if(!desde||!hasta||desde===hasta||!Number.isFinite(metros)||metros<=0||!el('codos').value||!Number.isInteger(codos)||codos<0){el('mensaje').textContent='Completá origen, destino distinto, metros positivos y una cantidad válida de codos/curvas.';return;}
  const repetido=tramos.find(t=>t.id!==editando&&t.tipo===tipo&&((t.desde===desde&&t.hasta===hasta)||(t.desde===hasta&&t.hasta===desde)));
  if(repetido){el('mensaje').textContent='Ya existe un recorrido entre esos puntos en este circuito. Editalo o vinculalo desde Reutilizar un recorrido. Para otro recorrido físico, identificá puntos distintos.';return;}
+ if(editando&&!validarRecorrido(tramos.find(t=>t.id===editando),metros,tipo,desde)){el('mensaje').textContent='La edición dejaría accesorios fuera del recorrido o desconectaría ramas. Revisá primero su detalle.';return;}
  if(editando)Object.assign(tramos.find(t=>t.id===editando),{tipo,desde,hasta,metros,codos,accesoriosPendientes:false});
  else tramos.push({id:uid(),ambientes:[activo],tipo,desde,hasta,metros,codos});
- el('mensaje').textContent=editando?'Tramo actualizado en todos sus ambientes.':'Tramo agregado.';cancelar();guardar();dibujar();
+ const detalleGuardado=editando||tramos[tramos.length-1].id;
+ el('mensaje').textContent=editando?'Tramo actualizado en todos sus ambientes.':'Tramo agregado.';cancelar();guardar();if(modalidad==='profesional')detalleId=detalleGuardado;dibujar();if(modalidad==='profesional')el('detalleProfesional').scrollIntoView({block:'start'});
 };
-el('lista').onclick=e=>{const boton=e.target.closest('button');if(!boton)return;const t=tramos.find(t=>t.id===(boton.dataset.editar||boton.dataset.quitar));if(!t)return;
+el('lista').onclick=e=>{const boton=e.target.closest('button');if(!boton)return;const t=tramos.find(t=>t.id===(boton.dataset.editar||boton.dataset.quitar||boton.dataset.detalle));if(!t)return;
+ if(boton.dataset.detalle){detalleId=t.id;editAcc=null;dibujarDetalle();el('detalleProfesional').scrollIntoView({block:'start'});return;}
  if(boton.dataset.editar){editando=t.id;['tipo','desde','hasta','metros','codos'].forEach(k=>el(k).value=t[k]);el('agregar').textContent='Guardar cambios';el('cancelar').hidden=false;el('mensaje').textContent=t.ambientes.length>1?'Este recorrido es compartido: los cambios se aplican a todos sus ambientes.':'Editando tramo.';el('manualTecnico').open=true;el('desde').focus();}
- else {if(!confirm(t.ambientes.length>1?'¿Desvincular el tramo de este ambiente? Seguirá contado una vez en los demás.':'¿Eliminar este tramo y descontarlo del total?'))return;t.ambientes=t.ambientes.filter(id=>id!==activo);if(!t.ambientes.length)tramos=tramos.filter(x=>x.id!==t.id);cancelar();guardar();dibujar();}
+ else {if(tramos.some(r=>r.origenTee?.tramo===t.id)&&t.ambientes.length===1){el('manualTecnico').open=true;el('mensaje').textContent='Este recorrido tiene ramas: eliminá o reasigná primero sus ramas para conservar las conexiones.';return;}if(!confirm(t.ambientes.length>1?'¿Desvincular el tramo de este ambiente? Seguirá contado una vez en los demás.':'¿Eliminar este tramo y descontarlo del total?'))return;t.ambientes=t.ambientes.filter(id=>id!==activo);if(!t.ambientes.length)tramos=tramos.filter(x=>x.id!==t.id);cancelar();guardar();dibujar();}
 };
 
 const decimal=v=>/^\d+(?:[.,]\d+)?$/.test(v.trim())?Number(v.trim().replace(',','.')):NaN;
@@ -113,7 +120,7 @@ const inicio=(a,c)=>`Inicio · ${a.nombre} · ${circuitoNombre(c)}`;
 const puntoArtefacto=(a,p)=>a.nombre+' · '+p;
 function alcanzados(c){
  const lista=tramos.filter(t=>t.tipo===c),vistos=new Set(lista.filter(t=>t.etapa==='llegada').map(t=>t.desde));
- let cambio=true;while(cambio){cambio=false;lista.forEach(t=>{if(vistos.has(t.desde)&&!vistos.has(t.hasta)){vistos.add(t.hasta);cambio=true;}});}
+ let cambio=true;while(cambio){cambio=false;lista.forEach(t=>{if(vistos.has(t.desde))(t.accesorios||[]).filter(x=>x.tipo==='tee').forEach(x=>{const n=nodoTee(t,x);if(!vistos.has(n)){vistos.add(n);cambio=true;}});if(vistos.has(t.desde)&&!vistos.has(t.hasta)){vistos.add(t.hasta);cambio=true;}});}
  return vistos;
 }
 function estado(a){
@@ -162,7 +169,7 @@ function circuitoGuia(){
  <div id="interiorGuia" ${llegadas.length?'':'hidden'}><h4 id="tituloInterior" tabindex="-1">Distribución interior ${a.clase==='Baño'?'del baño':'del ambiente'}</h4>
  <p id="llegadaRegistrada" role="status">${llegada?'Llegada registrada: '+formato(llegada.metros)+' m de agua '+circuitoNombre(c).toLowerCase()+'.':''}</p>
  <p><strong>Agregá solamente los metros interiores que todavía no cargaste</strong></p>
- <p>${escapar(destinos.filter(p=>!alcanzados(c).has(puntoArtefacto(a,p))).length?'Conexiones pendientes en este circuito: '+destinos.filter(p=>!alcanzados(c).has(puntoArtefacto(a,p))).join(', '):'No hay conexiones pendientes entre los artefactos definidos para este circuito.')}</p><p>Agregá cada parte física una sola vez. Si varios artefactos comparten una parte, cargala hasta su punto de derivación y continuá desde allí.</p>
+ <p>${escapar(destinos.filter(p=>!alcanzados(c).has(puntoArtefacto(a,p))).length?'Conexiones pendientes en este circuito: '+escapar(destinos.filter(p=>!alcanzados(c).has(puntoArtefacto(a,p))).join(', ')):'No hay conexiones pendientes entre los artefactos definidos para este circuito.')}</p><p>Agregá cada parte física una sola vez. Si varios artefactos comparten una parte, cargala hasta su punto de derivación y continuá desde allí.</p>
  <label for="desdeInterior">Desde el inicio o un punto ya definido</label><input id="desdeInterior" list="soloCircuito" value="${escapar(llegadas.length?llegadas[0].hasta:inicio(a,c))}">
  <label for="hastaInterior">Hasta el artefacto o punto real</label><input id="hastaInterior" list="destinosGuia" placeholder="Elegí una opción o escribí un punto de derivación">
  <label for="metrosInterior">Metros de este recorrido interior</label><input id="metrosInterior" inputmode="decimal"><button id="guardarInterior">Guardar recorrido interior</button></div>
@@ -176,6 +183,7 @@ function circuitoGuia(){
  const nuevo=(desde,hasta,metros,etapa)=>({id:uid(),ambientes:[a.id],tipo:c,desde,hasta,metros,codos:0,etapa,accesoriosPendientes:true});
  function agregarGrupo(grupo,reemplazo=null){
   if(grupo.some(t=>!t.desde||!t.hasta||t.desde===t.hasta||!Number.isFinite(t.metros)||t.metros<=0)){mensaje('Indicá puntos distintos y longitudes positivas.');return false;}
+  if(reemplazo&&!validarRecorrido(tramos.find(t=>t.id===reemplazo),grupo[0].metros,grupo[0].tipo,grupo[0].desde)){mensaje('La corrección dejaría accesorios fuera del recorrido o desconectaría ramas. Revisá primero su detalle.');return false;}
   const todos=tramos.filter(t=>t.id!==reemplazo);for(const t of grupo){if(todos.some(x=>x.tipo===c&&((x.desde===t.desde&&x.hasta===t.hasta)||(x.desde===t.hasta&&x.hasta===t.desde)))){mensaje('Ese recorrido ya existe: editá o reutilizá el existente, sin repetir sus metros.');return false;}todos.push(t);}
   tramos=tramos.filter(t=>t.id!==reemplazo);tramos.push(...grupo);guardar();dibujar();return true;
  }
@@ -191,8 +199,77 @@ function circuitoGuia(){
   if(agregarGrupo([nuevo(desde,el('hastaInterior').value.trim(),decimal(el('metrosInterior').value),'interior')]))avanzarInterior();
  };
 }
+
+// Un recorrido conserva su longitud; sus accesorios solo distribuyen esa longitud.
+const accesorios=t=>t.accesorios||[];
+const distribuido=t=>accesorios(t).reduce((s,x)=>s+x.distancia,0);
+const nodoTee=(t,x)=>`Tee · ${t.id} · ${x.id}`;
+function validarRecorrido(t,m,tipo,desde){
+ let pos=0;for(const x of accesorios(t)){pos+=x.distancia;if(x.tipo==='tee'&&pos<m-1e-8&&tramos.some(r=>r.origenTee?.accesorio===x.id&&r.origenTee.salida===1))return false;}
+ return distribuido(t)<=m+1e-8&&(!(t.origenTee||tramos.some(r=>r.origenTee?.tramo===t.id))||(tipo===t.tipo&&desde===t.desde));
+}
+function resumenDetalle(){
+ const lineas=tramos.flatMap(t=>accesorios(t).map(x=>({t,x})));
+ el('resumenAccesorios').innerHTML=lineas.length?lineas.map(({t,x})=>`<div class="entry">${escapar(etiquetaPunto(t.desde))} → ${escapar(t.hasta)}: ${escapar(x.tipo==='otro'?x.nombre:x.tipo)} · a ${formato(accesorios(t).slice(0,accesorios(t).indexOf(x)+1).reduce((s,a)=>s+a.distancia,0))} m del origen</div>`).join(''):'Sin accesorios detallados. Las cantidades anteriores de codos/curvas se conservan aparte, sin clasificación automática.';
+}
+el('modalidad').onchange=()=>{modalidad=el('modalidad').value;guardar();dibujar();};
+function dibujarDetalle(){
+ const cont=el('detalleProfesional'),t=tramos.find(t=>t.id===detalleId);
+ if(modalidad!=='profesional'||!t){cont.replaceChildren();return;}
+ const xs=accesorios(t),edit=xs.find(x=>x.id===editAcc);
+ cont.innerHTML=`<h3>Detalle del recorrido</h3><p>${escapar(descripcion(t))}</p><p>Longitud original: <strong>${formato(t.metros)} m</strong>. Distribuido hasta el último accesorio: <strong>${formato(distribuido(t))} m</strong>. Resta hasta ${escapar(t.hasta)}: <strong>${formato(Math.max(0,t.metros-distribuido(t)))} m</strong>.</p><p class="note">Estas distancias ya pertenecen al recorrido: no se suman otra vez. No son longitudes de corte. No se presupone orientación de curvas o codos.</p>
+ ${t.codos>0?`<p>Registro anterior: ${t.codos} codos/curvas sin clasificar. Se conserva como referencia; no se suma automáticamente al detalle nuevo.</p>`:''}
+ <div id="accesoriosLista"></div><h4>${edit?'Editar accesorio':'Continuar con un accesorio'}</h4>
+ <label for="accesorioTipo">Tipo de accesorio</label><select id="accesorioTipo"><option value="curva">Curva</option><option value="codo">Codo</option><option value="tee">Tee</option><option value="otro">Otro</option></select>
+ <div id="otroAccesorio" hidden><label for="accesorioNombre">Nombre del accesorio</label><input id="accesorioNombre"></div>
+ <label for="accesorioDistancia">Distancia desde ${edit&&xs.indexOf(edit)===0||!edit&&!xs.length?'el origen del recorrido':'el accesorio anterior'}</label><input id="accesorioDistancia" inputmode="decimal">
+ <label for="accesorioUnidad">Unidad</label><select id="accesorioUnidad"><option value="m">Metros</option><option value="cm">Centímetros</option></select>
+ <button id="guardarAccesorio">${edit?'Guardar cambios':'Agregar y continuar'}</button>${edit?'<button id="cancelarAccesorio" class="secondary">Cancelar edición</button>':''}
+ <p id="errorAccesorio" role="alert"></p><div id="ramasGuia"></div>`;
+ let posicion=0;
+ xs.forEach((x,i)=>{posicion+=x.distancia;const div=document.createElement('div');div.className='entry';div.innerHTML=`<strong>${escapar(x.tipo==='otro'?x.nombre:x.tipo)}</strong> · ${formato(x.distancia)} m desde el punto anterior · posición ${formato(posicion)} m <button data-acc-editar="${escapar(x.id)}">Editar</button><button class="remove" data-acc-borrar="${escapar(x.id)}">Eliminar</button>`;el('accesoriosLista').append(div);});
+ el('accesorioTipo').value=edit?.tipo||'curva';el('accesorioNombre').value=edit?.nombre||'';el('accesorioDistancia').value=edit?String(edit.distancia):'';
+ const otro=()=>el('otroAccesorio').hidden=el('accesorioTipo').value!=='otro';otro();el('accesorioTipo').onchange=otro;
+ if(edit)el('cancelarAccesorio').onclick=()=>{editAcc=null;dibujarDetalle();};
+ const error=msg=>el('errorAccesorio').textContent=msg;
+ el('guardarAccesorio').onclick=()=>{
+  const tipo=el('accesorioTipo').value,nombre=el('accesorioNombre').value.trim(),distancia=decimal(el('accesorioDistancia').value)/(el('accesorioUnidad').value==='cm'?100:1);
+  if(!Number.isFinite(distancia)||distancia<0||(tipo==='otro'&&!nombre)){error('Ingresá una distancia válida (puede ser cero si están juntos) y el nombre para Otro.');return;}
+  if(edit&&edit.tipo==='tee'&&tipo!=='tee'&&tramos.some(r=>r.origenTee?.accesorio===edit.id)){error('La tee tiene ramas vinculadas. Conservá la tee o eliminá primero esas ramas.');return;}
+  const suma=distribuido(t)-(edit?.distancia||0)+distancia;if(suma>t.metros+1e-8){error('Las distancias superan la longitud del recorrido. Corregí la distancia; no se agregó ningún metro.');return;}
+  const nuevo={...(edit||{}),id:edit?.id||uid(),tipo,nombre,distancia};
+  // Mover una tee no puede dejar una salida que ocupa el recorrido principal además de una rama.
+  const propuesta=xs.map(x=>x.id===edit?.id?nuevo:x);if(!edit)propuesta.push(nuevo);
+  let p=0;for(const x of propuesta){p+=x.distancia;if(x.tipo==='tee'&&p<t.metros-1e-8&&tramos.some(r=>r.origenTee?.accesorio===x.id&&r.origenTee.salida===1)){error('La salida 1 ya tiene una rama. Una tee interna usa esa salida para continuar por el recorrido principal.');return;}}
+  t.accesorios=propuesta;editAcc=null;guardar();dibujar();
+ };
+ el('accesoriosLista').onclick=e=>{const b=e.target.closest('button');if(!b)return;const id=b.dataset.accEditar||b.dataset.accBorrar,i=xs.findIndex(x=>x.id===id);if(i<0)return;
+  if(b.dataset.accEditar){editAcc=id;dibujarDetalle();return;}
+  if(tramos.some(r=>r.origenTee?.accesorio===id)){error('Este accesorio tiene ramas: eliminá primero sus ramas para no perder conexiones.');return;}
+  // Mantener las posiciones físicas de los accesorios siguientes al eliminar uno intermedio.
+  if(i+1<xs.length)xs[i+1].distancia+=xs[i].distancia;t.accesorios=xs.filter(x=>x.id!==id);editAcc=null;guardar();dibujar();
+ };
+ dibujarRamas(t);
+}
+function dibujarRamas(t){
+ const cont=el('ramasGuia');let pos=0;
+ accesorios(t).forEach((x,i)=>{pos+=x.distancia;if(x.tipo!=='tee')return;
+  const interna=pos<t.metros-1e-8,ramas=tramos.filter(r=>r.origenTee?.tramo===t.id&&r.origenTee.accesorio===x.id);
+  const salidas=[1,2].filter(n=>!(n===1&&interna)&&!ramas.some(r=>r.origenTee.salida===n));
+  const div=document.createElement('details');div.innerHTML=`<summary>Tee ${i+1} · posición ${formato(pos)} m: salidas y ramas</summary><p>Entrada: desde ${escapar(t.desde)}. ${interna?'Salida 1: continúa por este recorrido hasta '+escapar(t.hasta)+'; sus metros ya están incluidos.':'La tee está al final del recorrido: definí sus dos salidas con ramas.'}</p>${ramas.map(r=>`<p>Salida ${r.origenTee.salida}: ${escapar(r.hasta)} · ${formato(r.metros)} m. Editá la rama desde la lista de recorridos.</p>`).join('')}
+ ${salidas.length?`<label>Salida<select class="salida">${salidas.map(n=>`<option value="${n}">Salida ${n}</option>`).join('')}</select></label><label>Hasta (artefacto o punto real)<input class="destinoRama" list="puntos"></label><label>Longitud adicional de la rama<input class="metrosRama" inputmode="decimal"></label><label>Unidad<select class="unidadRama"><option value="m">Metros</option><option value="cm">Centímetros</option></select></label><p>Solamente desde la tee hasta el destino: no repitas la llegada compartida.</p><button class="crearRama">Registrar rama</button>`:'<p>Las dos salidas están definidas.</p>'}<p class="errorRama" role="alert"></p>`;
+  cont.append(div);
+  if(!salidas.length)return;
+  div.querySelector('.crearRama').onclick=()=>{const salida=Number(div.querySelector('.salida').value),hasta=div.querySelector('.destinoRama').value.trim(),metros=decimal(div.querySelector('.metrosRama').value)/(div.querySelector('.unidadRama').value==='cm'?100:1),desde=nodoTee(t,x);const fail=msg=>div.querySelector('.errorRama').textContent=msg;
+   if(!hasta||hasta===desde||hasta===t.desde||!Number.isFinite(metros)||metros<=0){fail('Indicá un destino real y una longitud adicional positiva.');return;}
+   if(tramos.some(r=>r.tipo===t.tipo&&((r.desde===desde&&r.hasta===hasta)||(r.hasta===desde&&r.desde===hasta)))){fail('Esa rama ya existe; editá o reutilizá su recorrido.');return;}
+   tramos.push({id:uid(),ambientes:[activo],tipo:t.tipo,desde,hasta,metros,codos:0,accesoriosPendientes:true,etapa:'interior',origenTee:{tramo:t.id,accesorio:x.id,salida}});guardar();dibujar();
+  };
+ });
+}
 el('imprimir').onclick=()=>window.print();
 if(bloqueado){el('mensaje').textContent='No se pudieron leer los datos guardados. No se sobrescribió el almacenamiento. Conservá los datos del navegador para recuperarlos.';document.querySelectorAll('button,input,select').forEach(x=>x.disabled=true);}else dibujar();
 </script></body></html>
+
 
 
