@@ -5,36 +5,108 @@
 <title>CAÑERÍAS - AGUA</title>
 <style>
 *{box-sizing:border-box}body{font-family:Arial,sans-serif;background:#eef3f6;color:#203348;margin:0}header{background:#087e6a;color:#fff;padding:20px;text-align:center}main{max-width:800px;margin:auto;padding:16px}section{background:#fff;padding:18px;margin-bottom:16px;border-radius:12px}label{display:block;font-weight:bold;margin:12px 0 6px}input,select{width:100%;padding:12px;font-size:17px;border:1px solid #b5c6d5;border-radius:8px}button{background:#087e6a;color:#fff;border:0;border-radius:8px;padding:12px;margin:10px 6px 6px 0;font-size:16px}.remove{background:#a33c3c}.note{color:#526772;font-size:14px}.entry{border-bottom:1px solid #ddd;padding:12px 0}table{width:100%;border-collapse:collapse}td,th{border-bottom:1px solid #ddd;padding:10px 4px;text-align:left}
+
+.choices{display:flex;flex-wrap:wrap;gap:6px}.choices label{font-weight:normal;margin:4px;padding:8px;background:#eef3f6;border-radius:8px}.choices input{width:auto}button.secondary{background:#e4eeed;color:#135f53}button[aria-pressed="true"]{outline:3px solid #203348}select{max-width:100%}.entry button{font-size:14px} .editing{border:2px solid #087e6a;padding:10px}
+@media print{.controls,button,#mensaje{display:none!important}body{background:white}section{padding:8px;break-inside:avoid}header{background:white;color:#203348} .entry{break-inside:avoid}}
 </style></head>
 <body><header><h1>CAÑERÍAS · AGUA</h1><div>Prueba independiente — carga manual</div></header>
 <main>
-<section><h2>Agregar tramo</h2><p>Ingresá las longitudes reales del croquis. La fotografía no se interpreta automáticamente en esta versión.</p>
+<section class="controls"><h2>Ambientes o sectores</h2>
+<p>Completá fría y caliente en el mismo ambiente. Los recorridos compartidos se registran una sola vez por circuito.</p>
+<label for="ambiente">Volver a un ambiente</label><select id="ambiente"></select>
+<label for="clase">Agregar ambiente</label><select id="clase"><option>Baño</option><option>Cocina</option><option>Lavadero</option><option>Otro</option></select>
+<label for="nombreAmbiente">Nombre personalizado (opcional, obligatorio para Otro)</label><input id="nombreAmbiente" placeholder="Ej.: Baño planta alta">
+<button id="crearAmbiente">Agregar ambiente</button>
+<label for="renombre">Nombre del ambiente actual</label><input id="renombre"><button id="renombrar" class="secondary">Guardar nombre</button>
+<h3>Artefactos del ambiente</h3><div id="artefactos" class="choices"></div>
+<label for="manual">Otro artefacto o conexión</label><input id="manual" placeholder="Ej.: Colector patio"><button id="crearPunto" class="secondary">Agregar opción</button>
+<p class="note">Seleccioná los artefactos que correspondan. Podés reutilizarlos en Desde y Hasta o escribir otro punto. No se presupone cómo están conectados.</p>
+</section>
+<section class="controls"><h2>Agregar tramo</h2><p>Ingresá las longitudes reales del croquis. La fotografía no se interpreta automáticamente en esta versión.</p>
 <label for="tipo">Circuito</label><select id="tipo"><option value="fria">Agua fría</option><option value="caliente">Agua caliente</option></select>
-<label for="desde">Desde</label><input id="desde" placeholder="Ej.: Tanque">
-<label for="hasta">Hasta</label><input id="hasta" placeholder="Ej.: Colector">
-<label for="metros">Longitud real (m)</label><input id="metros" type="number" inputmode="decimal" min="0.01" step="0.01" placeholder="Ej.: 8">
+<label for="desde">Desde</label><input list="puntos" id="desde" placeholder="Ej.: Tanque">
+<label for="hasta">Hasta</label><input list="puntos" id="hasta" placeholder="Ej.: Colector">
+<datalist id="puntos"></datalist><label for="metros">Longitud real (m)</label><input id="metros" type="text" inputmode="decimal" placeholder="Ej.: 8">
 <label for="codos">Codos/curvas declarados</label><input id="codos" type="number" inputmode="numeric" min="0" step="1" value="0">
-<button id="agregar">Agregar tramo</button><p id="mensaje" role="alert"></p></section>
-<section><h2>Tramos</h2><div id="lista"></div></section>
-<section><h2>Resumen</h2><table><thead><tr><th>Circuito</th><th>Metros</th><th>Codos/curvas</th></tr></thead><tbody id="tabla"></tbody></table><p id="total"></p><button id="imprimir">Imprimir / guardar PDF</button></section>
+<button id="agregar">Agregar tramo</button><button id="cancelar" class="secondary" hidden>Cancelar edición</button><p id="mensaje" role="alert"></p></section>
+<section class="controls"><h2>Reutilizar un recorrido</h2><p>Vinculá un tramo existente al ambiente actual, sin volver a sumar sus metros. Editarlo actualiza todos los ambientes vinculados.</p><label for="compartido">Recorrido existente</label><select id="compartido"></select><button id="vincular">Vincular al ambiente</button></section>
+<section><h2>Tramos del ambiente: <span id="actual"></span></h2><div id="lista"></div></section>
+<section><h2>Todos los recorridos (cada uno contado una vez)</h2><div id="todos"></div></section><section><h2>Resumen</h2><table><thead><tr><th>Circuito</th><th>Metros</th><th>Codos/curvas</th></tr></thead><tbody id="tabla"></tbody></table><p id="total"></p><button id="imprimir">Imprimir / guardar PDF</button></section>
 <section><h2>Diámetros y materiales técnicos</h2><p><strong>Pendiente de verificación hidráulica.</strong> No se asignan diámetros automáticamente sin conocer presión disponible, alturas, caudales, accesorios y características del sistema de cañería.</p><p class="note">Tees, llaves, reducciones y cuplas se incorporarán cuando esté definida y validada la topología de la red. Las cantidades mostradas ahora son solo las ingresadas por el usuario.</p></section>
 </main>
 <script>
-const clave="canerias_agua_manual_v1";let tramos=[];
-try{const datos=JSON.parse(localStorage.getItem(clave)||"[]");if(Array.isArray(datos))tramos=datos}catch(e){}
+const clave="canerias_agua_manual_v1", claveNueva="canerias_agua_ambientes_v2";
+const uid=()=>crypto.randomUUID();
+let tramos=[],ambientes=[],activo='',editando=null,bloqueado=false;
+try{
+ const guardado=localStorage.getItem(claveNueva);
+ if(guardado!==null){
+  const d=JSON.parse(guardado);
+  if(d.version!==2||!Array.isArray(d.tramos)||!Array.isArray(d.ambientes)||!d.ambientes.length)throw Error();
+  tramos=d.tramos;ambientes=d.ambientes;
+ }else{
+  const anteriores=JSON.parse(localStorage.getItem(clave)||"[]");
+  if(!Array.isArray(anteriores))throw Error();
+  const id=uid();ambientes=[{id,nombre:anteriores.length?"Sin asignar (tramos anteriores)":"General",clase:"Otro",puntos:[]}];
+  tramos=anteriores.map(t=>({...t,id:uid(),ambientes:[id]}));
+ }
+ if(ambientes.some(a=>!a.id||typeof a.nombre!=="string"||!Array.isArray(a.puntos))||tramos.some(t=>!t.id||!['fria','caliente'].includes(t.tipo)||typeof t.desde!=="string"||typeof t.hasta!=="string"||!Number.isFinite(t.metros)||t.metros<=0||!Number.isInteger(t.codos)||t.codos<0||!Array.isArray(t.ambientes)||!t.ambientes.length||t.ambientes.some(id=>!ambientes.some(a=>a.id===id))))throw Error();
+ activo=ambientes[0].id;
+}catch(e){bloqueado=true;}
 const el=id=>document.getElementById(id);
 const escapar=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const formato=n=>n.toLocaleString("es-AR",{maximumFractionDigits:2});
-function dibujar(){
-el("lista").innerHTML=tramos.length?tramos.map((t,i)=>'<div class="entry"><strong>'+escapar(t.desde)+' → '+escapar(t.hasta)+'</strong><div>'+(t.tipo==="fria"?"Fría":"Caliente")+' · '+formato(t.metros)+' m · '+t.codos+' codos/curvas</div><button class="remove" data-i="'+i+'">Eliminar</button></div>').join(""):"Todavía no hay tramos.";
-let total=0;el("tabla").innerHTML=["fria","caliente"].map(tipo=>{const items=tramos.filter(t=>t.tipo===tipo),m=items.reduce((s,t)=>s+t.metros,0),c=items.reduce((s,t)=>s+t.codos,0);total+=m;return "<tr><td>"+(tipo==="fria"?"Fría":"Caliente")+"</td><td>"+formato(m)+" m</td><td>"+c+"</td></tr>"}).join("");
-el("total").textContent="Total de cañería ingresada: "+formato(total)+" m";
-try{localStorage.setItem(clave,JSON.stringify(tramos))}catch(e){el("mensaje").textContent="No se pudo guardar en este navegador."}
+const catalogo={"Baño":["Lavatorio","Ducha","Bañera","Bidé","Inodoro"],"Cocina":["Pileta de cocina","Lavavajillas"],"Lavadero":["Pileta de lavar","Lavarropas"],"Otro":[]};
+const ambienteActual=()=>ambientes.find(a=>a.id===activo);
+const nombres=t=>t.ambientes.map(id=>ambientes.find(a=>a.id===id).nombre).join(', ');
+const descripcion=t=>`${t.desde} → ${t.hasta} · ${t.tipo==='fria'?'Fría':'Caliente'} · ${formato(t.metros)} m · ${t.codos} codos/curvas`;
+function guardar(){
+ if(bloqueado)return;
+ try{localStorage.setItem(claveNueva,JSON.stringify({version:2,ambientes,tramos}));}
+ catch(e){el('mensaje').textContent='No se pudo guardar en este navegador. Mantené esta página abierta y guardá un PDF antes de salir.';}
 }
-el("agregar").onclick=()=>{
-const tipo=el("tipo").value,desde=el("desde").value.trim(),hasta=el("hasta").value.trim(),metros=Number(el("metros").value),codos=Number(el("codos").value);
-if(!desde||!hasta||desde===hasta||!el("metros").value||!Number.isFinite(metros)||metros<=0||!el("codos").value||!Number.isInteger(codos)||codos<0){el("mensaje").textContent="Completá origen, destino distinto, metros positivos y una cantidad válida de codos/curvas.";return}
-tramos.push({tipo,desde,hasta,metros,codos});el("mensaje").textContent="Tramo agregado.";el("metros").value="";el("codos").value="0";dibujar()};
-el("lista").onclick=e=>{const boton=e.target.closest("button[data-i]");if(!boton)return;tramos.splice(Number(boton.dataset.i),1);dibujar()};
-el("imprimir").onclick=()=>window.print();dibujar();
+function opciones(){
+ const a=ambienteActual();
+ el('ambiente').innerHTML=ambientes.map(x=>`<option value="${escapar(x.id)}">${escapar(x.nombre)}</option>`).join('');el('ambiente').value=activo;
+ el('renombre').value=a.nombre;el('actual').textContent=a.nombre;
+ const opciones=[...new Set([...(catalogo[a.clase]||[]),...a.puntos])];
+ el('artefactos').replaceChildren();
+ opciones.forEach(nombre=>{const label=document.createElement('label'),input=document.createElement('input');input.type='checkbox';input.checked=a.puntos.includes(nombre);input.onchange=()=>{if(input.checked)a.puntos.push(nombre);else a.puntos=a.puntos.filter(p=>p!==nombre);guardar();opcionesPuntos();};label.append(input,document.createTextNode(' '+nombre));el('artefactos').append(label);});
+ opcionesPuntos();
+}
+function opcionesPuntos(){
+ const puntos=[...new Set(['Tanque','Colector','Calentador',...ambientes.flatMap(a=>a.puntos.map(p=>a.nombre+' · '+p)),...tramos.flatMap(t=>[t.desde,t.hasta])])];
+ el('puntos').innerHTML=puntos.map(p=>`<option value="${escapar(p)}"></option>`).join('');
+}
+function dibujar(){
+ opciones();
+ const visibles=tramos.filter(t=>t.ambientes.includes(activo));
+ el('lista').innerHTML=visibles.length?visibles.map(t=>`<div class="entry"><strong>${escapar(descripcion(t))}</strong><div>Ambientes: ${escapar(nombres(t))}</div><button data-editar="${escapar(t.id)}">Editar</button><button class="remove" data-quitar="${escapar(t.id)}">${t.ambientes.length>1?'Desvincular de este ambiente':'Eliminar'}</button></div>`).join(''):'Todavía no hay tramos en este ambiente.';
+ el('todos').innerHTML=tramos.map(t=>`<div class="entry">${escapar(descripcion(t))}<div>${escapar(nombres(t))}</div></div>`).join('')||'Todavía no hay tramos.';
+ el('compartido').innerHTML='<option value="">Elegí un recorrido</option>'+tramos.filter(t=>!t.ambientes.includes(activo)).map(t=>`<option value="${escapar(t.id)}">${escapar(descripcion(t))}</option>`).join('');
+ let total=0;el('tabla').innerHTML=['fria','caliente'].map(tipo=>{const items=tramos.filter(t=>t.tipo===tipo),m=items.reduce((s,t)=>s+t.metros,0),c=items.reduce((s,t)=>s+t.codos,0);total+=m;return '<tr><td>'+(tipo==='fria'?'Fría':'Caliente')+'</td><td>'+formato(m)+' m</td><td>'+c+'</td></tr>';}).join('');
+ el('total').textContent='Total de cañería ingresada: '+formato(total)+' m';
+}
+function cancelar(){editando=null;el('agregar').textContent='Agregar tramo';el('cancelar').hidden=true;el('metros').value='';el('codos').value='0';}
+el('cancelar').onclick=cancelar;
+el('ambiente').onchange=()=>{cancelar();activo=el('ambiente').value;el('desde').value='';el('hasta').value='';dibujar();};
+el('crearAmbiente').onclick=()=>{const clase=el('clase').value,nombre=el('nombreAmbiente').value.trim()|| (clase==='Otro'?'':clase);if(!nombre){el('mensaje').textContent='Escribí el nombre del ambiente.';return;}if(ambientes.some(a=>a.nombre.toLocaleLowerCase()===nombre.toLocaleLowerCase())){el('mensaje').textContent='Ese ambiente ya existe; elegilo en la lista.';return;}const a={id:uid(),nombre,clase,puntos:[]};ambientes.push(a);activo=a.id;cancelar();el('desde').value='';el('hasta').value='';el('nombreAmbiente').value='';guardar();dibujar();};
+el('renombrar').onclick=()=>{const nombre=el('renombre').value.trim();if(!nombre||ambientes.some(a=>a.id!==activo&&a.nombre.toLocaleLowerCase()===nombre.toLocaleLowerCase())){el('mensaje').textContent='Ingresá un nombre único y no vacío.';return;}const a=ambienteActual(),prefijo=a.nombre+' · ';tramos.forEach(t=>{['desde','hasta'].forEach(k=>{if(t[k].startsWith(prefijo)&&a.puntos.includes(t[k].slice(prefijo.length)))t[k]=nombre+' · '+t[k].slice(prefijo.length);});});a.nombre=nombre;guardar();dibujar();};
+el('crearPunto').onclick=()=>{const nombre=el('manual').value.trim();if(!nombre)return;const a=ambienteActual();if(!a.puntos.includes(nombre))a.puntos.push(nombre);el('manual').value='';guardar();opciones();};
+el('vincular').onclick=()=>{const t=tramos.find(t=>t.id===el('compartido').value);if(!t||t.ambientes.includes(activo))return;t.ambientes.push(activo);guardar();dibujar();};
+el('agregar').onclick=()=>{
+ const tipo=el('tipo').value,desde=el('desde').value.trim(),hasta=el('hasta').value.trim(),texto=el('metros').value.trim(),metros=/^\d+(?:[.,]\d+)?$/.test(texto)?Number(texto.replace(',','.')):NaN,codos=Number(el('codos').value);
+ if(!desde||!hasta||desde===hasta||!Number.isFinite(metros)||metros<=0||!el('codos').value||!Number.isInteger(codos)||codos<0){el('mensaje').textContent='Completá origen, destino distinto, metros positivos y una cantidad válida de codos/curvas.';return;}
+ const repetido=tramos.find(t=>t.id!==editando&&t.tipo===tipo&&((t.desde===desde&&t.hasta===hasta)||(t.desde===hasta&&t.hasta===desde)));
+ if(repetido){el('mensaje').textContent='Ya existe un recorrido entre esos puntos en este circuito. Editalo o vinculalo desde Reutilizar un recorrido. Para otro recorrido físico, identificá puntos distintos.';return;}
+ if(editando)Object.assign(tramos.find(t=>t.id===editando),{tipo,desde,hasta,metros,codos});
+ else tramos.push({id:uid(),ambientes:[activo],tipo,desde,hasta,metros,codos});
+ el('mensaje').textContent=editando?'Tramo actualizado en todos sus ambientes.':'Tramo agregado.';cancelar();guardar();dibujar();
+};
+el('lista').onclick=e=>{const boton=e.target.closest('button');if(!boton)return;const t=tramos.find(t=>t.id===(boton.dataset.editar||boton.dataset.quitar));if(!t)return;
+ if(boton.dataset.editar){editando=t.id;['tipo','desde','hasta','metros','codos'].forEach(k=>el(k).value=t[k]);el('agregar').textContent='Guardar cambios';el('cancelar').hidden=false;el('mensaje').textContent=t.ambientes.length>1?'Este recorrido es compartido: los cambios se aplican a todos sus ambientes.':'Editando tramo.';el('desde').focus();}
+ else {if(!confirm(t.ambientes.length>1?'¿Desvincular el tramo de este ambiente? Seguirá contado una vez en los demás.':'¿Eliminar este tramo y descontarlo del total?'))return;t.ambientes=t.ambientes.filter(id=>id!==activo);if(!t.ambientes.length)tramos=tramos.filter(x=>x.id!==t.id);cancelar();guardar();dibujar();}
+};
+el('imprimir').onclick=()=>window.print();
+if(bloqueado){el('mensaje').textContent='No se pudieron leer los datos guardados. No se sobrescribió el almacenamiento. Conservá los datos del navegador para recuperarlos.';document.querySelectorAll('button,input,select').forEach(x=>x.disabled=true);}else dibujar();
 </script></body></html>
