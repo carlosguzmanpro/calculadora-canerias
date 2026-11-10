@@ -516,10 +516,43 @@ function renderPropuestaConjuntoTeeGas(caja,id){
  const b=document.createElement('button');b.type='button';b.textContent='Confirmar este conjunto';b.onclick=()=>{const enCarga=$('croquis').classList.contains?.('oculto')===false,r=confirmarConjuntoTeeGas(id,sel.value);mensaje.textContent=r.mensaje;if(enCarga){mostrarVista('croquis');$('tramosRegistradosGas').open=true;}if(!r.ok)window.alert?.(r.mensaje);};
  const aviso=document.createElement('p');aviso.setAttribute?.('role','status');aviso.textContent=estado.mensaje;d.append(contenido,aviso,b,mensaje);caja.append(d);
 }
-// Solo describe dos salidas anónimas: no asigna IDs de recorrido ni equivalencias.
-function renderOrientacionTeeProvisionalGas(cont){
- for(const [valor,texto]of [['directo-giro','Salida 1: A través · Salida 2: Giro 90°'],['giro-directo','Salida 1: Giro 90° · Salida 2: A través'],['giro-giro','Salida 1: Giro 90° · Salida 2: Giro 90°']]){
-  const l=document.createElement('label'),r=document.createElement('input');l.className='tee-opcion-provisional';r.type='radio';r.name='tee-orientacion-provisional';r.value=valor;r.checked=orientacionTeeFormularioGas===valor;r.onchange=()=>{orientacionTeeFormularioGas=valor;guardarDatos();};l.append(r,document.createTextNode(texto));cont.append(l);
+// Una sola pregunta: sin conexiones conserva un borrador; con conexiones usa IDs reales.
+let vinculandoTeesRapidasGas=false;
+function contextoOrientacionTeeGas(pieza,entrada){
+ const ids=pieza.conexionesDiametro||[],rutas=(entrada.preparacion.recorridos||[]).map(r=>r.tramos.filter(id=>ids.includes(id))).filter(r=>r.length===2),origenes=[...new Set(rutas.map(r=>r[0]))];
+ if(pieza.cantidad!==1||pieza.conflicto||!pieza.nodo||ids.length!==3||new Set(ids).size!==3||origenes.length!==1)return null;
+ const nombre=id=>entrada.preparacion.porTramo.find(t=>t.id===id)?.nombre;
+ const salidas=ids.filter(id=>id!==origenes[0]);if(salidas.length!==2||[...salidas,origenes[0]].some(id=>!nombre(id)))return null;
+ salidas.sort((a,b)=>nombre(a).localeCompare(nombre(b),'es'));
+ return {piezaId:pieza.id,nodo:pieza.nodo,entrada:origenes[0],entradaNombre:nombre(origenes[0]),salidas,nombres:salidas.map(nombre)};
+}
+function provisionalDeTeeGas(pieza,entrada){
+ if(pieza.tramos.length!==1)return null;
+ const owner=pieza.tramos[0],ubicadas=entrada.inventario.fisicas.filter(p=>p.tipo==='tee'&&p.tramos.includes(owner));
+ if(ubicadas.length!==1)return null;return tramos.find(t=>t.id===owner)?.orientacionTeeProvisional||null;
+}
+function guardarOrientacionTeeVinculadaGas(contexto,orden){
+ if(!['directo-giro','giro-directo','giro-giro'].includes(orden))return false;
+ const [a,b]=orden.split('-'),previo=proyectoGasActual().calculoSigas?.tees?.[contexto.piezaId]||{};
+ return guardarConfiguracionTeeSigasGas(contexto.piezaId,{modo:'ambas',fuenteOrientacion:'manual',dibujoAnterior:previo.dibujo||previo.dibujoAnterior||null,dibujo:null,viasPorTramo:{[contexto.salidas[0]]:a,[contexto.salidas[1]]:b}});
+}
+function vincularGirosProvisionalesTeeGas(pieza,contexto,entrada){
+ if(vinculandoTeesRapidasGas||!contexto||provisionalDeTeeGas(pieza,entrada)?.orden!=='giro-giro')return false;
+ const previo=proyectoGasActual().calculoSigas?.tees?.[pieza.id]||{};
+ if(previo.dibujo||Object.values(previo.viasPorTramo||{}).some(v=>['directo','giro'].includes(v)))return false;
+ vinculandoTeesRapidasGas=true;try{return guardarOrientacionTeeVinculadaGas(contexto,'giro-giro');}finally{vinculandoTeesRapidasGas=false;}
+}
+function renderOrientacionTeeProvisionalGas(cont,contexto=null){
+ const conf=contexto?proyectoGasActual().calculoSigas?.tees?.[contexto.piezaId]||{}:null;
+ let vias=conf?.viasPorTramo||{};
+ if(contexto&&conf.dibujo&&String(conf.dibujo.nodo?.id).replace(/^nombre:/,'').toLowerCase()===String(contexto.nodo).replace(/^nombre:/,'').toLowerCase()){
+  const geometria=DimensionamientoSigas.interpretarTeeVectorial(conf.dibujo,contexto.entrada,[contexto.entrada,...contexto.salidas]);if(geometria.estado==='identificada')vias=geometria.viasPorTramo;
+ }
+ const seleccion=contexto?contexto.salidas.map(id=>vias[id]||'').join('-'):orientacionTeeFormularioGas,nombres=contexto?.nombres||['Salida 1','Salida 2'];
+ for(const orden of ['directo-giro','giro-directo','giro-giro']){
+  const valores=orden.split('-'),texto=nombres.map((nombre,i)=>nombre+': '+(valores[i]==='directo'?'A través':'Giro 90°')).join(' · ');
+  const l=document.createElement('label'),r=document.createElement('input');l.className='tee-opcion-provisional';r.type='radio';r.name='tee-orientacion-provisional';r.value=orden;r.checked=seleccion===orden;
+  r.onchange=()=>{if(contexto){guardarOrientacionTeeVinculadaGas(contexto,orden);}else{orientacionTeeFormularioGas=orden;guardarDatos();}};l.append(r,document.createTextNode(texto));cont.append(l);
  }
 }
 // Acceso desde las cantidades: no crea piezas ni copia configuraciones.
@@ -532,12 +565,19 @@ function renderConfiguracionTeeRapidaGas(tramoPreferido=null){
  for(const p of piezas){const o=document.createElement('option');o.value=p.id;o.textContent='Tee '+String(p.nodo||'ubicación pendiente').replace(/^nombre:/,'').toUpperCase();selector.append(o);}
  selector.disabled=!piezas.length;
  $('conexionTeeRapidaGas').classList.toggle('oculto',!piezas.length);
+ let vinculada=false;for(const pieza of piezas)if(vincularGirosProvisionalesTeeGas(pieza,contextoOrientacionTeeGas(pieza,e),e))vinculada=true;
+ if(vinculada)return renderConfiguracionTeeRapidaGas(tramoPreferido);
  if(!piezas.length){estado.textContent='Provisional: salidas por identificar. Se conserva la elección sin asignarla a recorridos ni verificar diámetros.';renderOrientacionTeeProvisionalGas(cont);return;}
  const actual=piezas.find(p=>tramoPreferido&&p.tramos.includes(tramoPreferido))||piezas.find(p=>p.id===previo)||piezas.find(p=>editandoTramo>=0&&p.tramos.includes(tramos[editandoTramo]?.id))||piezas[0];selector.value=actual.id;
  estado.textContent='Elegí cada salida según tu croquis. No hace falta indicar distancias.';
- const ids=actual.conexionesDiametro||[],entradas=[...new Set((e?.preparacion.recorridos||[]).map(r=>r.tramos.filter(id=>ids.includes(id))).filter(r=>r.length===2).map(r=>r[0]))];
- if(ids.length!==3||entradas.length!==1){estado.textContent='Provisional: faltan conexiones. No se aplica a recorridos ni diámetros.';renderOrientacionTeeProvisionalGas(cont);}else if(orientacionTeeFormularioGas){estado.textContent='La elección provisional se conserva sin vincular. Identificá las salidas reales abajo para aplicarla al cálculo.';}
- renderViasManualesTeeGas(cont,actual.tramos[0],{soloCirculacion:true,teeId:actual.id});
+ const contexto=contextoOrientacionTeeGas(actual,e);
+ if(!contexto){estado.textContent='Provisional: faltan conexiones. No se aplica a recorridos ni diámetros.';renderOrientacionTeeProvisionalGas(cont);const nota=document.createElement('p');nota.textContent='Falta vincular la entrada y las dos salidas de esta tee.';cont.append(nota);return;}
+ const vias=proyectoGasActual().calculoSigas?.tees?.[actual.id]?.viasPorTramo||{};
+ const mixta=provisionalDeTeeGas(actual,e)?.orden;
+ estado.textContent='Entrada: '+contexto.entradaNombre+'. Elegí la circulación de las salidas. Producto, medidas y equivalencias pendientes se verifican por separado.';
+ if(['directo-giro','giro-directo'].includes(mixta)&&!contexto.salidas.some(id=>['directo','giro'].includes(vias[id])))estado.textContent='Entrada: '+contexto.entradaNombre+'. La elección provisional no identifica qué salida pasa a través: elegí una vez con los nombres reales.';
+ const dibujo=proyectoGasActual().calculoSigas?.tees?.[actual.id]?.dibujo;if(dibujo&&String(dibujo.nodo?.id).replace(/^nombre:/,'').toLowerCase()===String(contexto.nodo).replace(/^nombre:/,'').toLowerCase()&&DimensionamientoSigas.interpretarTeeVectorial(dibujo,contexto.entrada,[contexto.entrada,...contexto.salidas]).estado==='identificada')estado.textContent+=' Vías según geometría vectorial vinculada; permiten corrección manual.';
+ renderOrientacionTeeProvisionalGas(cont,contexto);
 }
 // Orientación independiente del producto físico; el registro técnico existente es la única fuente.
 function renderViasManualesTeeGas(cont,tramoId,{soloCirculacion=false,teeId=null}={}){

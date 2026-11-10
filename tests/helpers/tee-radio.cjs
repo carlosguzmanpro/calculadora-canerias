@@ -1,0 +1,4 @@
+const assert=require('node:assert/strict');
+async function contexto(panel,etiqueta){const texto=await panel.locator('.tee-opcion-provisional').first().innerText(),nombres=texto.split(' · ').map(x=>x.slice(0,x.lastIndexOf(': '))),nombre=etiqueta.split(' hacia ').at(-1),indice=nombres.indexOf(nombre);assert.notEqual(indice,-1,'Salida real visible: '+nombre);const elegido=panel.locator('input[type=radio]:checked'),orden=await elegido.count()?await elegido.inputValue():'';return {indice,orden};}
+exports.viaMostrada=async(panel,etiqueta)=>{const {indice,orden}=await contexto(panel,etiqueta);return orden?orden.split('-')[indice]:'';};
+exports.elegirVia=async(panel,etiqueta,via)=>{const {indice,orden}=await contexto(panel,etiqueta),valores=orden?orden.split('-'):['giro','giro'];valores[indice]=via;if(valores.every(v=>v==='directo'))valores[1-indice]='giro';await panel.locator('input[type=radio][value="'+valores.join('-')+'"]').check();};
