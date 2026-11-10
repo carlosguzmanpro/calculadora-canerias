@@ -958,6 +958,7 @@ function construirResultadoEjercicioSigasGas(cualquierProyecto=false){
  const cantidadesDeclaradas=Object.fromEntries(['codo90','tee','llave'].map(tipo=>[tipo,reg.piezas.filter(p=>p.tipo===tipo).reduce((n,p)=>n+p.cantidad,0)]));
  const modelo={ensayos,simulacion:true,esEjercicio:proyectoGasActual().referenciaSigas19===true,confirmada:false,propuestasTopologia:propuestasTopologia.map(p=>({id:p.id,tipo:p.tipo,cantidad:p.cantidad,nodo:p.nodo,confirmada:false,afectaInventario:false})),cantidadesDeclaradas,cortesOrientativos,completo:estable&&bloqueos.length===0&&r.filas.every(f=>f.comprobadoPorTabla),resultado:r,selecciones:escenario.selecciones,cuplas,materiales:[...materiales.values()],compra,memoria:DimensionamientoSigas.memoriaCalculo(r).map(f=>({...f,diametroProvisorioMm:reg.calculo.historia[0]?.diametrosExteriorMm?.[f.id]??f.diametroProvisorioMm})),resoluciones:[...new Set(resoluciones)],validacion,bloqueos:[...new Set(bloqueos.map(limpiar))],fuente:'Manual SIGAS ed.15/2025: Tabla 3 pp.24–25; Tabla 4 GN p.22, densidad relativa 0,65 y caída de referencia 10 mmca. PCS '+(reg.entradaTecnica.perfil.poderCalorifico||'pendiente')+' kcal/m³: '+(proyectoGasActual().referenciaSigas19?'dato del ejercicio':'dato declarado del proyecto')+', no valor universal.'};
  modelo.instalacionPrueba=esInstalacionPruebaSigasGas();
+ modelo.comprobacionRealPorTramo=Object.fromEntries(reg.calculo.filas.map(f=>[f.id,f.comprobadoPorTabla?f.diametroCalculadoMm:null]));
  modelo.pcs={valor:reg.entradaTecnica.perfil.poderCalorifico??null,fuente:reg.entradaTecnica.perfil.fuenteGas||null};
  modelo.pcs.ensayo=modelo.instalacionPrueba&&Number(modelo.pcs.valor)===9300&&modelo.pcs.fuente==='PCS de ensayo de la instalación de prueba SIGAS; no corresponde a un suministro real';
  modelo.propuestasAccesorios=escenario.selecciones.map(s=>({material:s.nombre,cantidad:s.cantidad,codigo:s.codigo||null,confirmada:false,motivo:s.hipotesis}));
@@ -993,13 +994,22 @@ function renderDatosMinimosPreliminarSigasGas(modelo){
  boton.onclick=()=>{if(!guardarPCSPreliminarSigasGas(valor.value,fuente.value))error.textContent='Indicá un PCS positivo y su fuente o referencia del ensayo. No se cambiaron datos.';};
  valor.onchange=fuente.onchange=()=>{if(Number(valor.value)>0&&fuente.value.trim())guardarPCSPreliminarSigasGas(valor.value,fuente.value);};form.append(boton,error);caja.append(form);
  if(pcsCompleto){
-  const faltantes=(entrada.inventario.necesidadesTerminales||[]).filter(n=>!entrada.config.terminales?.[n.id]?.rosca);
-  if(faltantes.length){const titulo=document.createElement('h3');titulo.textContent='Conexiones terminales: faltan medidas de rosca';caja.append(titulo);
-   for(const n of faltantes){const l=document.createElement('label'),sel=document.createElement('select');l.textContent=n.nombre+' · medida de rosca';sel.ariaLabel=l.textContent;
+  const faltantes=(entrada.inventario.necesidadesTerminales||[]).filter(n=>modelo.instalacionPrueba||!entrada.config.terminales?.[n.id]?.rosca);
+  if(faltantes.length){const titulo=document.createElement('h3');titulo.textContent=faltantes.some(n=>!entrada.config.terminales?.[n.id]?.rosca)?'Conexiones terminales: faltan medidas de rosca':'Conexiones terminales · medidas guardadas y opciones';caja.append(titulo);
+   for(const n of faltantes){const grupo=document.createElement('div'),l=document.createElement('label'),sel=document.createElement('select');l.textContent=n.nombre+' · medida de rosca';sel.ariaLabel=l.textContent;
     const valores=[...new Set(SIGAS_ED15_2025.tablas[3].filas.map(f=>DimensionamientoSigas.atributosTerminal(f)?.rosca).filter(Boolean))];
-    for(const v of ['',...valores]){const o=document.createElement('option');o.value=v;o.textContent=v?v+'″':'Seleccionar medida real';sel.append(o);}sel.value='';sel.onchange=()=>guardarDatoTerminalSigasGas(n.id,'rosca',sel.value);l.append(sel);caja.append(l);
+    for(const v of ['',...valores]){const o=document.createElement('option');o.value=v;o.textContent=v?v+'″':'Seleccionar medida';sel.append(o);}sel.value=entrada.config.terminales?.[n.id]?.rosca||'';sel.onchange=()=>conservarVistaCambioTeeGas(()=>guardarDatoTerminalSigasGas(n.id,'rosca',sel.value),sel);l.append(sel);grupo.append(l);
+    if(modelo.instalacionPrueba){
+     const D=modelo.resultado.filas.find(f=>n.tramos.includes(f.id))?.candidato?.exteriorMm,nota=document.createElement('p');nota.className='nota';nota.textContent='Fusión: '+(D?D+' mm, diámetro candidato del tramo':'pendiente de calcular')+'. Rosca: '+(sel.value?sel.value+'″ seleccionada':'pendiente; no se deduce del diámetro de fusión')+'.';grupo.append(nota);
+     if(n.id==='terminal-medidor'&&!sel.value){const sugerir=document.createElement('button');sugerir.type='button';sugerir.textContent='Usar ¾″ sugerida para el ensayo';sugerir.onclick=()=>conservarVistaCambioTeeGas(()=>guardarDatoTerminalSigasGas(n.id,'rosca','3/4'),sel);grupo.append(sugerir);const aviso=document.createElement('p');aviso.textContent='Sugerencia doméstica editable: no identifica la conexión real del medidor.';grupo.append(aviso);}
+     if(D&&sel.value){const opciones=DimensionamientoSigas.opcionesTerminal(SIGAS_ED15_2025,{rosca:sel.value},D),d=document.createElement('details'),s=document.createElement('summary');s.textContent='Opciones documentadas · '+n.nombre;d.append(s);
+      for(const f of opciones){const p=document.createElement('p'),a=DimensionamientoSigas.atributosTerminal(f);p.textContent=f.nombreOriginal+' · '+(a.geometria==='recta'?'transición recta':'codo existente a reutilizar si corresponde')+' · '+(codigoVarianteSigasGas(f)?codigoVarianteSigasGas(f)+' · ':'')+'LE '+f.longitudEquivalenteM+' m · Tabla 3, p.'+f.pagina+'.';d.append(p);}
+      const p=document.createElement('p');p.textContent=opciones.length?'La forma, el sexo y la variante reales deben corresponder a la pieza instalada. El escenario propone una referencia documentada sin confirmar ni añadir codos. Corregí las excepciones en los detalles técnicos existentes.':'No hay pieza directa documentada para esta combinación. Revisar los conjuntos compatibles y su ubicación; pérdida pendiente, nunca cero.';d.append(p);grupo.append(d);
+     }
+    }
+    caja.append(grupo);
    }
-   const nota=document.createElement('p');nota.textContent='La rosca no se deduce del consumo ni del diámetro de fusión. Se reutilizan los codos registrados para las variantes orientativas; no se agregan piezas. Mientras falte este dato, longitudes y diámetros son parciales.';caja.append(nota);
+   const nota=document.createElement('p');nota.textContent='Las medidas se guardan para este proyecto y siguen siendo editables. No confirman una instalación real. La rosca no se deduce del consumo ni del diámetro de fusión; las piezas propuestas no se duplican ni se consideran instaladas.';caja.append(nota);
   }
  }
  return caja;
