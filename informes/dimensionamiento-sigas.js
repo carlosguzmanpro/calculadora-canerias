@@ -1050,7 +1050,31 @@ function renderDatosMinimosPreliminarSigasGas(modelo){
  }
  return caja;
 }
+// Organización de pantalla exclusivamente. El modelo y el PDF conservan su detalle completo.
+function compactarVistaResultadoSigasGas(caja,minimos,modelo,estado){
+ const root=caja.querySelector?.('.gas-informe-compacto');if(!root)return false;
+ root.classList.add('sigas-vista-sencilla');root.ambitoVistaGas=ambitoGas;
+ const previo=estado?.ambito===ambitoGas?estado:null;
+ const desplegable=(titulo,clase,abierto=false)=>{const d=document.createElement('details'),s=document.createElement('summary');d.className=clase;d.open=abierto;s.textContent=titulo;d.append(s);return d;};
+ const materiales=desplegable('Materiales y accesorios · detalle por diámetro','sigas-piezas-detalle',previo?.materiales===true),tecnicos=desplegable('Detalles técnicos y memoria de cálculo','sigas-tecnicos-detalle',previo?.tecnicos===true);
+ const tabla=root.querySelector('.resultados-tramos table');
+ if(tabla){const copia=tabla.cloneNode(true);for(const fila of copia.rows)for(let i=fila.cells.length-2;i>0;i--)fila.deleteCell(i);const refs=desplegable('Filas y capacidades SIGAS por tramo','sigas-referencias-tabulares');refs.append(copia);tecnicos.append(refs);
+  for(const fila of tabla.tBodies[0]?.rows||[]){const c=fila.cells[fila.cells.length-1];c.textContent=c.textContent.startsWith('Diámetro calculado y comprobado')?'Comprobado por tabla':c.textContent.startsWith('Comprobada')?'Comprobada':'Preliminar';}
+ }
+ const pcs=root.querySelector('.pcs-ensayo');if(pcs?.querySelector('strong')){const breve=document.createElement('p');breve.className='pcs-ensayo';breve.textContent=pcs.querySelector('strong').textContent;pcs.before(breve);pcs.className='pcs-fuente';tecnicos.append(pcs);}
+ for(const nodo of [...root.children]){
+  const titulo=nodo.tagName==='DETAILS'?nodo.querySelector('summary')?.textContent||'':'';
+  if(nodo.matches('.materiales-conocidos,.materiales-diametro')||/^(Propuestas SIGAS|Codos registrados)/.test(titulo))materiales.append(nodo);
+  else if(/^(Recorridos y memoria|Referencias y decisiones)/.test(titulo)||nodo.tagName==='P'&&/^(Uniones:|Diámetros preliminares calculados)/.test(nodo.textContent))tecnicos.append(nodo);
+  else if(titulo==='Cortes por barra del ensayo')root.querySelector('.compra-estimada')?.append(nodo);
+ }
+ const avisos=root.querySelector('.verificaciones-finales');
+ if(avisos&&modelo.bloqueos.length){const faltantes=desplegable('Datos concretos pendientes · '+modelo.bloqueos.length,'sigas-pendientes-reales');for(const p of [...avisos.children].filter(n=>n.tagName==='P').slice(1))faltantes.append(p);avisos.append(faltantes);}
+ if(minimos){const incompleto=!(Number(modelo.pcs?.valor)>0&&modelo.pcs?.fuente)||[...minimos.querySelectorAll('select')].some(s=>!s.value),datos=desplegable('PCS y conexiones · completar o editar','sigas-datos-proyecto',typeof previo?.datos==='boolean'?previo.datos:incompleto);datos.append(minimos);root.append(datos);}
+ root.append(materiales,tecnicos);if(avisos)root.append(avisos);
+ return true;
+}
 function renderResultadoEjercicioSigasGas(out){
  const modelo=resultadoPreliminarSigasGas();if(!modelo)return;
- const caja=document.createElement('section');caja.className='ejercicio-sigas';caja.innerHTML=InformeProyecto.ejercicioSigas(modelo);const minimos=renderDatosMinimosPreliminarSigasGas(modelo);if(minimos){if(caja.insertBefore)caja.insertBefore(minimos,caja.firstChild);else caja.append(minimos);}if(modelo.instalacionPrueba)renderEnsayoCortesIdealGas(caja,modelo);out.append(caja);
+ const caja=document.createElement('section');caja.className='ejercicio-sigas';caja.innerHTML=InformeProyecto.ejercicioSigas(modelo);const minimos=renderDatosMinimosPreliminarSigasGas(modelo);if(!compactarVistaResultadoSigasGas(caja,minimos,modelo,out.vistaSigasGas)&&minimos){if(caja.insertBefore)caja.insertBefore(minimos,caja.firstChild);else caja.append(minimos);}if(modelo.instalacionPrueba)renderEnsayoCortesIdealGas(caja.querySelector?.('.compra-estimada')||caja,modelo);out.append(caja);
 }

@@ -11,10 +11,10 @@ test('Móvil SIGAS: PCS marcado como ensayo, vías persistentes y resultados par
  await p.locator('#calcularCaneriaGas').tap();await p.waitForTimeout(900);
  const informe=p.locator('#resumenPrincipalMaterialesGas > .ejercicio-sigas');
  assert.match(await informe.locator('.pcs-ensayo').innerText(),/EXCLUSIVAMENTE DE ENSAYO.*9\.300/);
- assert.match(await informe.innerText(),/10 mmca/);assert.match(await informe.innerText(),/no tienen pérdida cero|pérdidas aún desconocidas no son cero/);
+ assert.match(await informe.innerText(),/10 mmca/);await informe.locator('.sigas-tecnicos-detalle > summary').tap();assert.match(await informe.innerText(),/no tienen pérdida cero|pérdidas aún desconocidas no son cero/);
  const filas=informe.locator('.resultados-tramos tbody tr');assert.equal(await filas.count(),5);
  for(const [i,d]of [25,25,20,25,20].entries())assert.match(await filas.nth(i).innerText(),new RegExp('\\b'+d+' mm\\b'));
- assert.match(await informe.locator('.materiales-conocidos').innerText(),/Codos de 90°\s+15/);assert.match(await informe.locator('.materiales-conocidos').innerText(),/Tees físicas\s+2/);
+ await informe.locator('.sigas-piezas-detalle > summary').tap();assert.match(await informe.locator('.materiales-conocidos').innerText(),/Codos de 90°\s+15/);assert.match(await informe.locator('.materiales-conocidos').innerText(),/Tees físicas\s+2/);
  const antes=await p.evaluate(()=>({tees:JSON.stringify(proyectoGasActual().calculoSigas.tees),datos:localStorage.getItem('canerias-proyectos-v1')}));
  await informe.getByText('Propuestas SIGAS · no confirmadas',{exact:true}).tap();assert.match(await informe.innerText(),/60-130025000/);assert.match(await informe.innerText(),/60-241025020/);
  assert.equal(await p.evaluate(()=>localStorage.getItem('canerias-proyectos-v1')),antes.datos);
