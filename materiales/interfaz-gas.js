@@ -855,7 +855,7 @@ function renderEnsayoCortesIdealGas(out,modelo){
   texto(r.instalacion.criterio,resultado);
   if(guardar){proyectoGasActual().ensayoCortesIdealGas=nuevo;guardarDatos();const persistido=buscarProyectoGas(ambitoGas,ultimoGuardadoValido)?.ensayoCortesIdealGas;estado.textContent=JSON.stringify(persistido)===JSON.stringify(nuevo)?'Ensayo guardado; no se modificaron los datos de la instalación.':'Ensayo solo en esta sesión; no pudo guardarse. Conservá un respaldo.';}
  }catch(e){estado.textContent='Revisá el ensayo: '+e.message+' No se cambiaron los datos guardados.';resultado.replaceChildren();}};
- for(const i of [largo,reserva,...campos.values()])i.onchange=()=>actualizar(true);
+ for(const i of [largo,reserva,...campos.values()])i.onchange=()=>conservarVistaCambioTeeGas(()=>{actualizar(true);if(!estado.textContent.startsWith('Revisá')){const mensaje=estado.textContent;renderResumenPrincipalGas();const nueva=$('resumenPrincipalMaterialesGas').querySelector?.('.ensayo-cortes-ideal-gas');if(nueva){nueva.open=true;const aviso=nueva.querySelector('[role=status]');if(aviso)aviso.textContent=mensaje;}}},i);
  actualizar();out.append(caja);
 }
 function prepararCompraActualGas(plan){

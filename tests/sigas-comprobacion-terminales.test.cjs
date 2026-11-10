@@ -5,7 +5,7 @@ function roscas(a){a.run("for(const [n,r]of [['medidor','3/4'],['Cocina','1/2'],
 test('Con roscas declaradas para ensayo: escenario estable, capacidades y equivalencias trazables',()=>{
  const a=ejemplo(),antes=a.run('JSON.stringify({tramos,artefactos,conteos:proyectoGasActual().conteosRapidosGas,tees:proyectoGasActual().calculoSigas.tees})');roscas(a);
  const m=leer(a,'resultadoPreliminarSigasGas()');assert.equal(m.completo,true);assert.deepEqual(m.resultado.filas.map(f=>f.candidato.exteriorMm),[25,25,20,25,20]);
- assert.deepEqual(m.resultado.filas.map(f=>f.longitudConsultaM),[24.167,24.167,21.988,22.991,24.167]);
+ assert.deepEqual(m.resultado.filas.map(f=>Number(f.longitudConsultaM.toFixed(3))),[23.925,23.925,21.377,22.749,23.925]);
  for(const f of m.resultado.filas){assert.equal(f.caudalM3h,f.consumoKcal/9300);assert.ok(f.candidato.capacidadM3h>=f.caudalM3h);assert.ok(f.candidato.longitudFilaM>=f.longitudConsultaM);assert.equal(m.comprobacionRealPorTramo[f.id],null);}
  for(const r of m.resultado.recorridos){assert.equal(new Set(r.aportes.map(p=>p.piezaId)).size,r.aportes.length);assert.ok(Math.abs(r.aportes.reduce((n,p)=>n+p.equivalenteTotalM,0)-r.equivalenteConocidoM)<1e-9);assert.equal(r.perdidasPendientes.length,0);}
  assert.deepEqual(m.cantidadesDeclaradas,{codo90:15,tee:2,llave:3});assert.ok(m.selecciones.every(s=>s.confirmada===false));assert.doesNotMatch(a.saved(),/terminal-preliminar|escenario-uniones/);
