@@ -245,5 +245,27 @@
   }return [...grupos].map(([tema,detalles])=>({tema,detalles}));
  }
 
- const api={planificarCortes,planificarMateriales,prepararCompra,estimarCuplasCompra,continuidadCuplas,firmaCortesCompra,validarDistribucionCompra,agruparPendientesCompra};if(typeof module==='object'&&module.exports)module.exports=api;else root.MaterialesGas=api;
+ // Ensayo independiente: longitudes netas, sin merma ni conexiones adicionales.
+ // Unidades enteras evitan perder un corte que ajusta exactamente por redondeo binario.
+ function planificarEnsayoIdeal(tramos,{largoComercial=4,reservaCuplas=0}={}){
+  const U=1000000,entero=m=>{const n=Math.round(m*U);if(!valido(m)||!Number.isSafeInteger(n)||Math.abs(m*U-n)>1e-6)throw Error('Longitudes positivas con hasta seis decimales.');return n;};
+  const L=entero(largoComercial),grupos=new Map(),ids=new Set(),filas=[];
+  if(!Number.isSafeInteger(reservaCuplas)||reservaCuplas<0)throw Error('Reserva de cuplas: entero no negativo.');
+  if(!Array.isArray(tramos)||!tramos.length)throw Error('Faltan segmentos del ensayo.');
+  for(const t of tramos){
+   if(!t.id||ids.has(t.id))throw Error('Tramos con identificadores únicos.');ids.add(t.id);
+   if(!t.material||!t.sistema||!t.diametro||/pendiente/i.test(String(t.diametro)))throw Error('Falta diámetro, material o sistema para agrupar los cortes.');
+   if(!Array.isArray(t.segmentos)||!t.segmentos.length)throw Error('Faltan longitudes netas entre accesorios.');
+   const key=JSON.stringify([t.diametro,t.material,t.sistema]);
+   if(!grupos.has(key))grupos.set(key,{diametro:t.diametro,material:t.material,sistema:t.sistema,segmentos:[]});
+   const ss=t.segmentos.map((m,i)=>({id:JSON.stringify([t.id,i]),metros:entero(m),ubicacion:t.id}));grupos.get(key).segmentos.push(...ss);
+   filas.push({id:t.id,nombre:t.nombre||t.id,diametro:t.diametro,metros:ss.reduce((n,s)=>n+s.metros,0)/U,segmentos:t.segmentos.slice(),cuplas:ss.reduce((n,s)=>n+Math.max(0,Math.ceil(s.metros/L)-1),0)});
+  }
+  const compra=[...grupos.values()].map(g=>{
+   const p=planificarCortes(g.segmentos,{largoComercial:L,reutilizar:true,minimoSobrante:0});
+   return {diametro:g.diametro,material:g.material,sistema:g.sistema,metros:p.metros/U,tiras:p.compraEstimada,metrosComerciales:p.compraEstimada*largoComercial,sobrante:(p.compraEstimada*L-p.metros)/U,cuplas:p.cuplasPropuestas,minimoTeorico:p.minimoTeorico,garantiaOptimo:p.compraEstimada===p.minimoTeorico,barras:p.barras.map(b=>({id:b.id,sobrante:b.sobrante/U,cortes:b.cortes.map(c=>({tramo:g.segmentos.find(s=>s.id===c.segmento).ubicacion,segmento:c.segmento,metros:c.metros/U}))}))};
+  });
+  return {ensayo:true,confirmado:false,largoComercial,perdidaPorCorte:0,tramos:filas,compra,metros:compra.reduce((n,g)=>n+g.metros,0),tiras:compra.reduce((n,g)=>n+g.tiras,0),cuplasNecesarias:compra.reduce((n,g)=>n+g.cuplas,0),reservaCuplas,criterio:'Cortes netos ficticios; una pieza por segmento siempre que alcance el largo comercial. Reutilización entre tramos solo del mismo diámetro, material y sistema, sin unir sobrantes para fabricar un corte. FFD; mínimo demostrado solo si coincide con la cota por metraje. Reserva separada, sin incorporar accesorios ni pérdidas hidráulicas.'};
+ }
+ const api={planificarEnsayoIdeal,planificarCortes,planificarMateriales,prepararCompra,estimarCuplasCompra,continuidadCuplas,firmaCortesCompra,validarDistribucionCompra,agruparPendientesCompra};if(typeof module==='object'&&module.exports)module.exports=api;else root.MaterialesGas=api;
 })(globalThis);

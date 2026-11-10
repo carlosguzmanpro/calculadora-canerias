@@ -1006,5 +1006,5 @@ function renderDatosMinimosPreliminarSigasGas(modelo){
 }
 function renderResultadoEjercicioSigasGas(out){
  const modelo=resultadoPreliminarSigasGas();if(!modelo)return;
- const caja=document.createElement('section');caja.className='ejercicio-sigas';caja.innerHTML=InformeProyecto.ejercicioSigas(modelo);const minimos=renderDatosMinimosPreliminarSigasGas(modelo);if(minimos){if(caja.insertBefore)caja.insertBefore(minimos,caja.firstChild);else caja.append(minimos);}out.append(caja);
+ const caja=document.createElement('section');caja.className='ejercicio-sigas';caja.innerHTML=InformeProyecto.ejercicioSigas(modelo);const minimos=renderDatosMinimosPreliminarSigasGas(modelo);if(minimos){if(caja.insertBefore)caja.insertBefore(minimos,caja.firstChild);else caja.append(minimos);}if(modelo.instalacionPrueba)renderEnsayoCortesIdealGas(caja,modelo);out.append(caja);
 }

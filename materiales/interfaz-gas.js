@@ -802,6 +802,62 @@ function completarContinuidadCompraGas(entrada){
  }
  return entrada;
 }
+// Distribución ficticia de compra, independiente del inventario y del motor SIGAS.
+function datosEnsayoCortesIdealGas(){
+ if(!esInstalacionPruebaSigasGas())return null;
+ if(proyectoGasActual().ensayoCortesIdealGas)return JSON.parse(JSON.stringify(proyectoGasActual().ensayoCortesIdealGas));
+ const referencia=[['M','A',[1.2,1.5,.9,1.8,1.1,1.4]],['A','B',[1.3,1.1,1.5]],['A','Calefactor',[.8,1.2,.9,.7,.9]],['B','Cocina',[.65,.8,.7]],['B','Termotanque',[.75,.6,.8]]];
+ const segmentosPorTramo={};for(const [desde,hasta,ms]of referencia){
+  const t=tramos.find(t=>t.desde===desde&&t.hasta===hasta||t.desde===hasta&&t.hasta===desde);if(!t)return null;
+  segmentosPorTramo[t.id]=t.desde===desde?ms:ms.slice().reverse();
+ }
+ return {version:1,largoComercial:4,reservaCuplas:0,segmentosPorTramo};
+}
+function calcularEnsayoCortesIdealGas(datos=datosEnsayoCortesIdealGas(),modelo=resultadoPreliminarSigasGas()){
+ if(!datos||!modelo||!esInstalacionPruebaSigasGas())throw Error('Ensayo disponible únicamente para la instalación de prueba SIGAS.');
+ if(tramos.length!==5||Object.keys(datos.segmentosPorTramo||{}).length!==5)throw Error('Cambió la red: revisar los cinco tramos del ensayo sin inventar segmentos.');
+ const perfil=instalacionGas.perfil,entrada=tramos.map(t=>{
+  const ss=datos.segmentosPorTramo[t.id],codos=conteoRapidoDelTramoGas(t).codo90;
+  if(!Array.isArray(ss)||!Number.isSafeInteger(codos)||ss.length!==codos+1)throw Error('Revisá '+t.desde+'–'+t.hasta+': conservar una separación más que los codos declarados.');
+  const f=modelo.resultado.filas.find(f=>f.id===t.id),D=f?.candidato?.exteriorMm;
+  return {id:t.id,nombre:t.desde+'–'+t.hasta,diametro:D?D+' mm':null,material:perfil.material,sistema:perfil.sistema,segmentos:ss};
+ });
+ const opciones={largoComercial:datos.largoComercial,reservaCuplas:datos.reservaCuplas},instalacion=MaterialesGas.planificarEnsayoIdeal(entrada,opciones);
+ const control=MaterialesGas.planificarEnsayoIdeal([{...entrada[0],id:'recta-control',nombre:'Recta independiente de 5 m',segmentos:[5]}],{...opciones,reservaCuplas:0});
+ return {instalacion,control,difiereMetrajeProyecto:instalacion.tramos.some(f=>Math.abs(f.metros-tramos.find(t=>t.id===f.id).metros)>1e-8),diametrosProvisionales:true};
+}
+function renderEnsayoCortesIdealGas(out,modelo){
+ const datos=datosEnsayoCortesIdealGas();if(!datos)return;
+ const fmtCorte=v=>v.toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:6});
+ const caja=document.createElement('details'),sum=document.createElement('summary');caja.className='ensayo-cortes-ideal-gas';sum.textContent='Ensayo ficticio de cortes y cuplas';caja.append(sum);
+ const texto=(s,cont=caja)=>{const p=document.createElement('p');p.textContent=s;cont.append(p);};
+ texto('ENSAYO IDEAL · longitudes netas ficticias, merma cero y reutilización entre tramos del mismo diámetro y sistema. No modifica metros, accesorios, orientaciones ni pérdidas SIGAS. No representa una instalación verificada.');
+ const campo=(nombre,valor)=>{const l=document.createElement('label'),i=document.createElement('input');l.textContent=nombre;i.type='text';i.inputMode='decimal';i.ariaLabel=nombre;i.value=valor;l.append(i);caja.append(l);return i;};
+ const largo=campo('Largo comercial del ensayo (m)',datos.largoComercial),reserva=campo('Reserva opcional de cuplas para compra',datos.reservaCuplas),campos=new Map();
+ // Es una lista de decimales, no un único campo decimal: validar cada corte por separado.
+ for(const t of tramos){const i=campo('Cortes netos de ensayo '+t.desde+'–'+t.hasta+' (m, separados por /)',(datos.segmentosPorTramo[t.id]||[]).join(' / '));i.inputMode='text';campos.set(t.id,i);}
+ const resultado=document.createElement('div'),estado=document.createElement('p');estado.setAttribute?.('role','status');caja.append(estado,resultado);
+ const tabla=(cont,cab,filas)=>{const t=document.createElement('table');t.className='ejercicio-tabla';const head=document.createElement('thead'),r=document.createElement('tr');for(const s of cab){const th=document.createElement('th');th.textContent=s;r.append(th);}head.append(r);t.append(head);const body=document.createElement('tbody');for(const fila of filas){const row=document.createElement('tr');fila.forEach((v,i)=>{const td=document.createElement('td');td.textContent=String(v);td.setAttribute?.('data-label',cab[i]);row.append(td);});body.append(row);}t.append(body);cont.append(t);};
+ const pintar=(r,nombre)=>{
+  const h=document.createElement('h3');h.textContent=nombre;resultado.append(h);
+  texto(fmtCorte(r.metros)+' m netos · '+r.tiras+' tiras · Cuplas necesarias: '+r.cuplasNecesarias+' · Reserva opcional: '+r.reservaCuplas+'.',resultado);
+  tabla(resultado,['Diámetro candidato','Metros netos','Tiras','Metros comerciales','Sobrante','Cuplas necesarias'],r.compra.map(g=>[g.diametro,fmtCorte(g.metros),g.tiras,fmtCorte(g.metrosComerciales),fmtCorte(g.sobrante),g.cuplas]));
+  for(const g of r.compra){const d=document.createElement('details'),s=document.createElement('summary');s.textContent='Ver cortes de '+g.diametro;d.append(s);for(const b of g.barras)texto(b.id+': '+b.cortes.map(c=>{const t=tramos.find(t=>t.id===c.tramo);return fmtCorte(c.metros)+' m ('+(t?t.desde+'–'+t.hasta:'recta de control')+')';}).join(' + ')+' · sobrante '+fmtCorte(b.sobrante)+' m.',d);texto(g.garantiaOptimo?'Cantidad mínima demostrada: alcanza la cota por metraje.':'Plan factible FFD: no se garantiza el mínimo óptimo.',d);resultado.append(d);}
+ };
+ const actualizar=(guardar=false)=>{try{
+  const nuevo={version:1,largoComercial:numeroDecimalGas(largo.value),reservaCuplas:numeroDecimalGas(reserva.value),segmentosPorTramo:Object.fromEntries([...campos].map(([id,i])=>[id,i.value.split('/').map(v=>numeroDecimalGas(v))]))};
+  const r=calcularEnsayoCortesIdealGas(nuevo,modelo);resultado.replaceChildren();
+  pintar(r.instalacion,'Cinco tramos · cortes de ensayo');
+  tabla(resultado,['Tramo','Metros netos del ensayo','Diámetro candidato','Cuplas necesarias'],r.instalacion.tramos.map(t=>[t.nombre,fmtCorte(t.metros),t.diametro,t.cuplas]));
+  if(r.difiereMetrajeProyecto)texto('Cambiaste el metraje ficticio: estos cortes no coinciden con los metros del proyecto. El cálculo SIGAS y los datos reales permanecen intactos.',resultado);
+  pintar(r.control,'Control independiente · recta continua de 5 m');
+  texto('No sumar el control independiente al proyecto. Sus empalmes unen piezas dentro de una recta; los codos y tees ya resuelven las uniones entre segmentos del ensayo.',resultado);
+  texto(r.instalacion.criterio,resultado);
+  if(guardar){proyectoGasActual().ensayoCortesIdealGas=nuevo;guardarDatos();const persistido=buscarProyectoGas(ambitoGas,ultimoGuardadoValido)?.ensayoCortesIdealGas;estado.textContent=JSON.stringify(persistido)===JSON.stringify(nuevo)?'Ensayo guardado; no se modificaron los datos de la instalación.':'Ensayo solo en esta sesión; no pudo guardarse. Conservá un respaldo.';}
+ }catch(e){estado.textContent='Revisá el ensayo: '+e.message+' No se cambiaron los datos guardados.';resultado.replaceChildren();}};
+ for(const i of [largo,reserva,...campos.values()])i.onchange=()=>actualizar(true);
+ actualizar();out.append(caja);
+}
 function prepararCompraActualGas(plan){
  const entrada=entradaManualMaterialesGas(false,true),opciones=opcionesMaterialesGas('proyecto');
  completarContinuidadCompraGas(entrada);
