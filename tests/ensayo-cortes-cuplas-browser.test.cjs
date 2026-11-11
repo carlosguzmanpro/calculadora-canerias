@@ -4,7 +4,7 @@ test('Móvil: mismo proyecto, cortes ficticios editables, reserva separada, pers
  const p=await b.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true}),errores=[];
  p.on('pageerror',e=>errores.push(e.message));p.on('dialog',d=>d.accept());
  try{
-  await p.route('https://cortes-ensayo.invalid/**',r=>r.fulfill({contentType:'text/html',body:fs.readFileSync('index.html','utf8')}));await p.goto('https://cortes-ensayo.invalid');await p.getByRole('button',{name:'🔥 Gas',exact:true}).tap();await p.getByRole('button',{name:'Cargar instalación de prueba',exact:true}).tap();
+  await p.route('https://cortes-ensayo.invalid/**',r=>r.fulfill({contentType:'text/html',body:fs.readFileSync('index.html','utf8')}));await p.goto('https://cortes-ensayo.invalid');await p.getByRole('button',{name:'🔥 Gas',exact:true}).tap();await p.getByRole('button',{name:'Cálculo completo y materiales',exact:true}).tap();await p.getByRole('button',{name:'Cargar instalación de prueba',exact:true}).tap();
   await p.locator('#pasoRevisarGas').tap();for(const [i,orden]of [[0,'giro-directo'],[1,'giro-giro']]){await p.locator('#listaTramos').getByRole('button',{name:'Revisar accesorios',exact:true}).nth(i).tap();await p.locator('#viasTeeRapidaGas input[value="'+orden+'"]').check();}
   await p.locator('#calcularCaneriaGas').tap();await p.waitForTimeout(800);
   const estado=()=>p.evaluate(()=>JSON.stringify({tramos,artefactos,instalacionGas,conteos:proyectoGasActual().conteosRapidosGas,config:proyectoGasActual().calculoSigas,r:calcularPreseleccionSigasGas()}));
@@ -21,6 +21,6 @@ test('Móvil: mismo proyecto, cortes ficticios editables, reserva separada, pers
   assert.equal(await estado(),antes);assert.equal(await p.evaluate(()=>ambitoGas),id);assert.equal(await p.evaluate(()=>registrosProyectosGas().length),proyectos);
   await p.evaluate(()=>prepararInformeActual());assert.notEqual(await p.locator('#informeImpresion').innerHTML(),pdf);assert.match(await p.locator('#informeImpresion').innerText(),/cortes ficticios no coinciden/);
   const guardado=await p.evaluate(()=>JSON.stringify(proyectoGasActual().ensayoCortesIdealGas));await cortes.fill('incorrecto');await cortes.press('Tab');assert.match(await panel.innerText(),/Revisá el ensayo/);assert.equal(await p.evaluate(()=>JSON.stringify(proyectoGasActual().ensayoCortesIdealGas)),guardado);
-  await p.reload();await p.getByRole('button',{name:'🔥 Gas',exact:true}).tap();const recuperado=p.locator('.ensayo-cortes-ideal-gas');await recuperado.locator(':scope > summary').tap();assert.equal(await recuperado.getByLabel('Reserva opcional de cuplas para compra',{exact:true}).inputValue(),'3');assert.match(await recuperado.innerText(),/23,60 m netos/);assert.equal(await estado(),antes);assert.deepEqual(errores,[]);
+  await p.reload();await p.getByRole('button',{name:'🔥 Gas',exact:true}).tap();await p.getByRole('button',{name:'Cálculo completo y materiales',exact:true}).tap();const recuperado=p.locator('.ensayo-cortes-ideal-gas');await recuperado.locator(':scope > summary').tap();assert.equal(await recuperado.getByLabel('Reserva opcional de cuplas para compra',{exact:true}).inputValue(),'3');assert.match(await recuperado.innerText(),/23,60 m netos/);assert.equal(await estado(),antes);assert.deepEqual(errores,[]);
  }finally{await b.close();}
 });

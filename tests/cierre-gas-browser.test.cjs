@@ -2,7 +2,7 @@ const {test}=require('node:test'),assert=require('node:assert/strict'),{chromium
 test('móvil GAS: sistema principal, una carga, un cálculo, lista única y estado técnico',async()=>{
  const browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||'/usr/bin/chromium',headless:true,args:['--no-sandbox']});
  try{
-  const page=await browser.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true}),errores=[];page.on('pageerror',e=>errores.push(e.message));await page.route(/^https?:/,route=>route.abort());await page.setContent(require('node:fs').readFileSync('index.html','utf8'),{waitUntil:'load'});await page.getByRole('button',{name:'🔥 Gas',exact:true}).tap();
+  const page=await browser.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true}),errores=[];page.on('pageerror',e=>errores.push(e.message));await page.route(/^https?:/,route=>route.abort());await page.setContent(require('node:fs').readFileSync('index.html','utf8'),{waitUntil:'load'});await page.getByRole('button',{name:'🔥 Gas',exact:true}).tap();await page.getByRole('button',{name:'Cálculo completo y materiales',exact:true}).tap();
   for(const sistema of ['acero-epoxi-roscado-gn','sigas','fusiogas']){
    await page.getByRole('button',{name:'Nuevo proyecto',exact:true}).tap();await page.locator('#nombreProyectoGas').fill('Prueba '+sistema);await page.locator('#guardarNombreProyectoGas').tap();
    assert.equal(await page.locator('#catalogoSistemaGas').isVisible(),true);await page.locator('#catalogoSistemaGas').selectOption(sistema);if(!await page.locator('#editarTramosGas').evaluate(e=>e.open))await page.locator('#editarTramosGas > summary').tap();

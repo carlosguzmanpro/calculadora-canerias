@@ -3,7 +3,7 @@ async function movil(accion){
  const b=await chromium.launch({executablePath:'/usr/bin/chromium',args:['--no-sandbox']});
  const p=await b.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
  const errores=[];p.on('pageerror',e=>errores.push(e.message));p.on('dialog',d=>d.accept());
- try{await p.route('https://pcs-ensayo.invalid/**',r=>r.fulfill({contentType:'text/html',body:fs.readFileSync('index.html','utf8')}));await p.goto('https://pcs-ensayo.invalid');await p.getByRole('button',{name:'🔥 Gas',exact:true}).tap();await accion(p);assert.deepEqual(errores,[]);}finally{await b.close();}
+ try{await p.route('https://pcs-ensayo.invalid/**',r=>r.fulfill({contentType:'text/html',body:fs.readFileSync('index.html','utf8')}));await p.goto('https://pcs-ensayo.invalid');await p.getByRole('button',{name:'🔥 Gas',exact:true}).tap();await p.getByRole('button',{name:'Cálculo completo y materiales',exact:true}).tap();await accion(p);assert.deepEqual(errores,[]);}finally{await b.close();}
 }
 test('Móvil SIGAS: PCS marcado como ensayo, vías persistentes y resultados parciales sin duplicar piezas',()=>movil(async p=>{
  await p.getByRole('button',{name:'Cargar instalación de prueba',exact:true}).tap();await p.locator('#pasoRevisarGas').tap();
@@ -23,13 +23,13 @@ test('Móvil SIGAS: PCS marcado como ensayo, vías persistentes y resultados par
  await informe.locator('.resultados-tramos').scrollIntoViewIfNeeded();await p.screenshot({path:'/tmp/sigas-pcs-ensayo-android.png'});assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
  await p.evaluate(()=>prepararInformeActual());assert.match(await p.locator('#informeImpresion').innerText(),/PCS EXCLUSIVAMENTE DE ENSAYO/);assert.equal(await p.locator('#informeImpresion select,#informeImpresion input,#informeImpresion button').count(),0);
  await p.emulateMedia({media:'print'});await p.pdf({path:'/tmp/sigas-pcs-ensayo.pdf',format:'A4',printBackground:true});await p.emulateMedia({media:'screen'});
- await p.reload();await p.getByRole('button',{name:'🔥 Gas',exact:true}).tap();assert.equal(await p.evaluate(()=>JSON.stringify(proyectoGasActual().calculoSigas.tees)),antes.tees);
+ await p.reload();await p.getByRole('button',{name:'🔥 Gas',exact:true}).tap();await p.getByRole('button',{name:'Cálculo completo y materiales',exact:true}).tap();assert.equal(await p.evaluate(()=>JSON.stringify(proyectoGasActual().calculoSigas.tees)),antes.tees);
  assert.deepEqual(await p.evaluate(()=>resultadoPreliminarSigasGas().cantidadesDeclaradas),{codo90:15,tee:2,llave:3});
  assert.deepEqual(await p.evaluate(()=>calcularPreseleccionSigasGas().filas.map(f=>f.consumoKcal)),[21800,15800,6000,11000,4800]);
 }));
 test('Móvil SIGAS: recuperar PCS propio no lo reemplaza; proyecto real sigue sin PCS automático',()=>movil(async p=>{
  await p.getByRole('button',{name:'Cargar instalación de prueba',exact:true}).tap();
- await p.evaluate(()=>guardarPCSPreliminarSigasGas(9600,'Fuente propia guardada'));await p.reload();await p.getByRole('button',{name:'🔥 Gas',exact:true}).tap();await p.getByRole('button',{name:'Cargar instalación de prueba',exact:true}).tap();
+ await p.evaluate(()=>guardarPCSPreliminarSigasGas(9600,'Fuente propia guardada'));await p.reload();await p.getByRole('button',{name:'🔥 Gas',exact:true}).tap();await p.getByRole('button',{name:'Cálculo completo y materiales',exact:true}).tap();await p.getByRole('button',{name:'Cargar instalación de prueba',exact:true}).tap();
  assert.equal(await p.evaluate(()=>instalacionGas.perfil.poderCalorifico),9600);assert.equal(await p.evaluate(()=>instalacionGas.perfil.fuenteGas),'Fuente propia guardada');
  assert.match(await p.locator('#resumenPrincipalMaterialesGas .pcs-ensayo').innerText(),/PCS guardado del proyecto.*9\.600/);
  await p.getByRole('button',{name:'Nuevo proyecto',exact:true}).tap();await p.locator('#nombreProyectoGas').fill('Proyecto real sin ensayo');await p.locator('#guardarNombreProyectoGas').tap();await p.locator('#catalogoSistemaGas').selectOption('sigas');

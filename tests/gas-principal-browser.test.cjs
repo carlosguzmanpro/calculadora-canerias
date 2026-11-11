@@ -1,7 +1,7 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),{chromium}=require('playwright');
 test('GAS principal: acciones visibles en móvil, secundarios plegados y resultados sin cambios',async()=>{
  const browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||'/usr/bin/chromium',headless:true,args:['--no-sandbox']});
- try{const page=await browser.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true}),errores=[];page.on('pageerror',e=>errores.push(e.message));await page.route(/^https?:/,r=>r.abort());await page.setContent(fs.readFileSync('index.html','utf8'),{waitUntil:'load'});await page.getByRole('button',{name:'🔥 Gas',exact:true}).tap();
+ try{const page=await browser.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true}),errores=[];page.on('pageerror',e=>errores.push(e.message));await page.route(/^https?:/,r=>r.abort());await page.setContent(fs.readFileSync('index.html','utf8'),{waitUntil:'load'});await page.getByRole('button',{name:'🔥 Gas',exact:true}).tap();await page.getByRole('button',{name:'Cálculo completo y materiales',exact:true}).tap();
  assert.equal(await page.getByRole('button',{name:'CALCULAR CAÑERÍA',exact:true}).count(),1);
  for(const id of ['ambitoGas','catalogoSistemaGas','combustibleSistemaGas','editarDatosGas','calcularCaneriaGas'])assert.equal(await page.locator('#'+id).isVisible(),true);
  assert.equal(await page.locator('#calcularCaneriaGas').evaluate(e=>e.getBoundingClientRect().bottom<=innerHeight),true);
