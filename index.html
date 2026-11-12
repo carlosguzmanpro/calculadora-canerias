@@ -238,6 +238,17 @@ section{box-shadow:none}
 <p id="tituloResultadoGas" class="gas-paso-titulo">5 · Resultado y presupuesto</p><button id="calcularCaneriaGas" onclick="calcularMaterialesManualGas({desplazar:true})">CALCULAR CAÑERÍA</button><p id="ayudaResultadoGas" class="nota">El resultado reúne materiales y presupuesto. Desde allí podés generar el PDF completo.</p>
 <p id="estadoRecorridoGas" role="status" aria-live="polite"></p></nav>
 <details id="herramientasGasOpcionales" class="gas-detalles solo-pantalla"><summary>Herramientas técnicas</summary>
+<details id="modalidadIaFuturaGas" class="gas-detalles"><summary>Cálculo con IA · futura opción premium, no disponible</summary><p>Modalidad independiente del cálculo manual gratuito. No hay reconocimiento activo, pagos ni envíos automáticos. Las reglas de medidor y artefactos requerirán verificación de cada instalación.</p><div id="panelGemini">
+<div class="aviso">Gemini está preparado pero DESACTIVADO. No hay claves ni conexión. La carga manual sigue disponible. Cuando se habilite en otra etapa, analizar requerirá enviar la foto a Google con tu autorización; nunca ocurrirá al cargarla.</div>
+<button class="alt" onclick="analizarFotoGemini()">Analizar foto con Gemini · DESACTIVADO</button>
+<p id="estadoGemini" class="aviso" role="status">No se envían fotografías.</p>
+<details class="solo-pantalla"><summary>Pruebas locales de la integración · SIN IA</summary>
+<button class="alt" onclick="cargarPruebaGemini()">Probar respuesta incompleta · SIN IA</button>
+<button class="alt" onclick="probarErrorGemini('CUOTA_AGOTADA')">Probar cuota agotada · SIN CONEXIÓN</button>
+<button class="alt" onclick="probarErrorGemini('SIN_CONEXION')">Probar error de conexión · SIN CONEXIÓN</button>
+</details>
+</div>
+</details>
 <details class="gas-detalles solo-pantalla"><summary>Entrada al casillero del medidor M</summary><label for="entradaCasilleroGas">¿Por dónde entra la cañería?</label><select id="entradaCasilleroGas" onchange="guardarCasilleroMedidorGas()"><option value="desconocida">No está indicada / pendiente</option><option value="lateral">Por un lateral</option><option value="posterior">Por atrás</option><option value="superior">Por arriba</option></select><div id="cotejoCodoCasilleroGas" class="oculto"><label for="codoCasilleroGas">Codo de 90° dentro del casillero</label><select id="codoCasilleroGas" onchange="guardarCasilleroMedidorGas()"><option value="pendiente">No sé si ya está contado</option><option value="incluido">Ya está incluido en mis cantidades o detalle</option><option value="no-incluido">No está incluido: agregar un codo</option></select></div><p id="estadoCasilleroGas" role="status" aria-live="polite"></p><p class="nota">Solo conteo de materiales. No se agregan cuplas, uniones dobles, entrerroscas ni otras conexiones del medidor.</p></details>
 
 <nav class="opciones solo-pantalla" aria-label="Accesos directos de GAS">
@@ -392,43 +403,29 @@ Estimación de compra: tiras de <span id="largoComercialAdvertenciaGas">largo co
 <button class="alt" onclick="mostrarVista('croquis')">Volver a croquis y tramos</button>
 </section>
 <div id="croquis" class="oculto">
-<details id="referenciaOpcionalGas" class="gas-detalles" open><summary id="resumenReferenciaGas">Fotografía, croquis y aclaraciones (opcional)</summary>
-<h3>1. Cargar croquis</h3>
-<details id="modalidadIaFuturaGas" class="gas-detalles"><summary>Cálculo con IA · futura opción premium, no disponible</summary><p>Modalidad independiente del cálculo manual gratuito. No hay reconocimiento activo, pagos ni envíos automáticos. Las reglas de medidor y artefactos requerirán verificación de cada instalación.</p><div id="panelGemini">
-<div class="aviso">Gemini está preparado pero DESACTIVADO. No hay claves ni conexión. La carga manual sigue disponible. Cuando se habilite en otra etapa, analizar requerirá enviar la foto a Google con tu autorización; nunca ocurrirá al cargarla.</div>
-<button class="alt" onclick="analizarFotoGemini()">Analizar foto con Gemini · DESACTIVADO</button>
-<p id="estadoGemini" class="aviso" role="status">No se envían fotografías.</p>
-<details class="solo-pantalla"><summary>Pruebas locales de la integración · SIN IA</summary>
-<button class="alt" onclick="cargarPruebaGemini()">Probar respuesta incompleta · SIN IA</button>
-<button class="alt" onclick="probarErrorGemini('CUOTA_AGOTADA')">Probar cuota agotada · SIN CONEXIÓN</button>
-<button class="alt" onclick="probarErrorGemini('SIN_CONEXION')">Probar error de conexión · SIN CONEXIÓN</button>
-</details>
-</div>
-</details><p class="nota">Fotografía opcional, sólo como referencia. Podés calcular materiales sin cargarla.</p>
+<details id="referenciaOpcionalGas" class="gas-detalles" open><summary id="resumenReferenciaGas">Croquis de referencia (opcional)</summary>
+<p class="nota">Imagen opcional compartida por ambos modos. No se interpreta automáticamente: cargá manualmente los tramos y sus longitudes.</p>
 <div id="cargaFotoEntrega" class="opciones" tabindex="-1">
 <button onclick="document.getElementById('camara').click()">📷 Sacar foto</button>
 <button class="alt" onclick="document.getElementById('galeria').click()">🖼️ Galería</button>
 </div>
 <input class="oculto" id="camara" type="file" accept="image/*" capture="environment">
 <input class="oculto" id="galeria" type="file" accept="image/*">
+<p id="estadoFoto" class="nota" role="status"></p>
 <img id="imagen" class="oculto" alt="Croquis cargado" onclick="ampliar()">
 <div id="accionesFoto" class="oculto">
 <button class="alt" onclick="ampliar()">🔎 Ampliar croquis</button>
 <button class="alt" onclick="quitarFoto()">Quitar foto</button>
 </div>
-<div class="aviso">
-<b>Foto de referencia:</b> podés verla y ampliarla. Los tramos se ingresan manualmente; la app no interpreta la imagen ni inventa longitudes.
-</div>
 
-<p id="estadoFoto" class="nota" role="status"></p>
-<h3>2. Revisar croquis</h3>
+<details id="aclaracionesCroquisGas"><summary>Aclaraciones (opcional)</summary>
 <p class="nota">Anotá cualquier aclaración sobre las medidas o los símbolos.</p>
 <label for="duda">Dato dudoso o aclaración (opcional)</label>
 <textarea id="duda" rows="3" placeholder="Ej.: En el tramo A-B dice 15 m"></textarea>
 <button class="alt" onclick="guardarRevision()">Guardar aclaración</button>
 <div id="aclaracionImpresion" class="solo-impresion"></div>
 <div id="revision" class="resultado" aria-live="polite">Todavía no hay una revisión registrada.</div>
-
+</details>
 </details>
 <details id="editarTramosGas" class="gas-detalles"><summary>Cargar o editar tramos y accesorios</summary><div id="formularioGas">
 <h3>Tramos y accesorios de GAS</h3>
@@ -775,8 +772,8 @@ function validarBorradorProyectoGas(p){
   const imagen=d.croquis&&/^(data:image\/(?:png|jpeg|webp);base64,|blob:)/.test(d.croquis.url)?'<figure class="croquis-entrega"><h2>Fotografía original del croquis</h2><img src="'+esc(d.croquis.url)+'" alt="Croquis aportado por el usuario"><figcaption>'+(d.croquis.confirmado?'Legibilidad y correspondencia confirmadas por el usuario.':'Referencia aportada: correspondencia con la red actual pendiente de confirmar.')+' Sin escala verificada.</figcaption></figure>':'';
   const dimensiones=d.planilla?tabla('Planilla de dimensionamiento',['TRAMO','REAL (m)','EQUIVALENTE (m)','DEFINITIVO (m)','CONSUMO (m³/h)','DIÁMETRO'],d.planilla.map(t=>[t.tramo,(gas?metros:numero)(t.real),(gas?metros:numero)(t.equivalente),(gas?metros:numero)(t.definitivo),numero(t.consumo),t.diametro])):
    tabla('Tramos',['Tramo','Longitud (m)','Diámetro','Estado'],d.tramos.map(t=>[t.desde+'–'+t.hasta,t.metros,t.diametro||'PENDIENTE',t.detalle?.estado==='pendiente'?'Accesorios pendientes':'Registrado; medidas manuales']));
-  const materiales=d.materialesAgrupados?tabla('Materiales para revisión',['Material / accesorio','Diámetro','Cantidad','Unidad','Estado','Ubicación'],d.materialesAgrupados.map(f=>[f.material,f.diametro,f.cantidad,f.unidad,(f.estado==='estimado'?'PROVISIONAL (ESTIMADO)':f.estado.toUpperCase())+' · '+(f.revisado?'Revisado':'Sin revisar'),f.ubicaciones.join('; ')]),gas?'materiales-entrega':''):
-   tabla('Materiales para revisión',['Material / accesorio','Diámetro','Cantidad','Unidad','Ubicación','Estado / observaciones'],d.filas.map(f=>[f.material,f.diametro,f.cantidad,f.unidad,f.ubicacion,(f.cantidad==null||/pendiente/i.test(f.diametro)?'PENDIENTE':String(f.estado).toUpperCase())+' · '+(f.revisado?'Revisado':'Sin revisar')+' · '+(f.evidencia||'')+(f.editado?' · Ajuste manual':'')]),gas?'materiales-entrega':'');
+  const materiales=d.materialesAgrupados?tabla('Materiales para revisión',['Material / accesorio','Diámetro','Cantidad','Unidad','Estado','Ubicación'],d.materialesAgrupados.map(f=>[f.material,f.diametro,gas&&f.unidad==='m'&&Number.isFinite(f.cantidad)?metros(f.cantidad):f.cantidad,f.unidad,(f.estado==='estimado'?'PROVISIONAL (ESTIMADO)':f.estado.toUpperCase())+' · '+(f.revisado?'Revisado':'Sin revisar'),f.ubicaciones.join('; ')]),gas?'materiales-entrega':''):
+   tabla('Materiales para revisión',['Material / accesorio','Diámetro','Cantidad','Unidad','Ubicación','Estado / observaciones'],d.filas.map(f=>[f.material,f.diametro,gas&&f.unidad==='m'&&Number.isFinite(f.cantidad)?metros(f.cantidad):f.cantidad,f.unidad,f.ubicacion,(f.cantidad==null||/pendiente/i.test(f.diametro)?'PENDIENTE':String(f.estado).toUpperCase())+' · '+(f.revisado?'Revisado':'Sin revisar')+' · '+(f.evidencia||'')+(f.editado?' · Ajuste manual':'')]),gas?'materiales-entrega':'');
   const compra=gas&&d.preparacionCompra,preparacion=compra?tabla('Preparación de compra · ESTIMACIÓN PROVISIONAL',['Tramo / diámetro','Real (m)','Tiras / metros comerciales','Sobrante (m)','Cuplas estimadas'],compra.tramos.map(t=>[t.id+' · '+t.diametros.map(d=>d.valor+' ('+d.estado+')').join(' / '),numero(t.metros),t.tiras+' × '+compra.largoComercial+' m = '+numero(t.metrosComerciales)+' m',numero(t.sobrante),t.cuplas===null&&compra.estimacionCuplas?compra.estimacionCuplas.tramos.find(e=>e.id===t.id).cantidad+' estimadas · orientativas':t.cuplas===null?(t.cuplasConocidas?t.cuplasConocidas+' calculadas; resto pendiente':'Pendiente'):t.cuplas]))+'<p>Distribución estimada: no sumar estas tiras o cuplas a las filas anteriores como si fueran piezas adicionales. Diámetros y conexiones pendientes; no constituye compra definitiva.</p>'+compra.supuestos.concat(compra.estimacionCuplas?[compra.estimacionCuplas.criterio]:[],compra.tramos.filter(t=>t.cuplas===null&&t.cuplasConocidas>0).map(t=>t.id+': '+t.cuplasConocidas+' calculadas; resto pendiente para cantidad exacta.'),compra.pendientes).map(s=>'<p>'+celda(s)+'</p>').join('')+tabla('Conexiones propuestas · SIN CONFIRMAR',['Ubicación','Propuesta','Medidas'],compra.propuestas.map(p=>[p.ubicacion,p.material,p.diametro])):'';
   if(d.ejercicioSigas?.esEjercicio===false){
    const conexiones=tabla('Conexiones roscadas registradas',['Conexión','Rosca (pulgadas)'],(d.conexionesRosca||[]).map(c=>[c.nombre,c.rosca?c.rosca+'″':'Pendiente']));
