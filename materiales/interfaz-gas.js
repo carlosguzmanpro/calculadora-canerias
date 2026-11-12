@@ -929,6 +929,10 @@ function renderPreparacionCompraGas(out,plan,preparada=null){
 
 function renderListaManualSimpleGas(out,plan,modelo){
  const ejercicio=resultadoPreliminarSigasGas();
+ if(!ejercicio){
+  const catalogo=CatalogosSistemasGas.obtener(CatalogosSistemasGas.identificar(instalacionGas.perfil),TABLA_NAG200_3,TABLA_NAG200_18,SIGAS_ED15_2025,FUSIOGAS_V1_2026),estado=document.createElement('p');
+  estado.className='estado-sistema-resultados';estado.textContent='Sistema seleccionado: '+catalogo.nombre+'. Diámetros pendientes de verificación. '+catalogo.pendientes.join(' ')+(presentacionGas==='completo'?' Compra provisional con largo configurado de '+fmt(estadoLargoComercialGas().configurado)+' m; verificar su disponibilidad para el producto seleccionado.':'');out.append(estado);
+ }
  renderResultadoEjercicioSigasGas(out);
  if(ejercicio){
   const preliminar=document.createElement('details'),titulo=document.createElement('summary'),nota=document.createElement('p');

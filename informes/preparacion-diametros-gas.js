@@ -1,11 +1,28 @@
-/* Diagnóstico de solo lectura: no alimenta listas de compra ni cambia proyectos. */
+/* Preparación técnica y elección de familia: no habilita tablas ni modifica fórmulas. */
+function sincronizarFamiliaElegidaGas(id,{desdeRespaldo=false}={}){
+ const proyecto=proyectoGasActual(),perfil=instalacionGas.perfil,anterior=CatalogosSistemasGas.identificar(perfil);
+ const familias={sigas:['Acero-polietileno SIGAS Thermofusión','Thermofusión'],fusiogas:['Acero-polietileno FUSIOGAS Thermofusión','Thermofusión'],'acero-epoxi-roscado-gn':['Acero con revestimiento epoxi','Roscado']};
+ if(!familias[id])return false;
+ // Recuperar solo la contradicción conocida entre familias canónicas. Los datos personalizados no se migran por suposición.
+ if(desdeRespaldo&&!Object.values(familias).some(([m,u])=>perfil.material===m&&perfil.sistema===u))return false;
+ const [material,sistema]=familias[id];
+ if(perfil.material===material&&perfil.sistema===sistema)return false;
+ const previo={catalogo:anterior,material:perfil.material??null,sistema:perfil.sistema??null};
+ const historial=proyecto.historialSistemasGas||=[];
+ if(!historial.some(h=>JSON.stringify(h)===JSON.stringify(previo)))historial.push(previo);
+ if(tramos.length&&proyecto.planCompra?.opciones?.largoComercial===undefined){
+  const largo=estadoLargoComercialGas().configurado;
+  if(Number.isFinite(largo)&&largo>0){const o=datosPlanGas().opciones;o.largoComercial=largo;o.fuenteLargoComercial='Valor conservado al cambiar sistema; verificar el producto seleccionado';}
+ }
+ perfil.material=material;perfil.sistema=sistema;return true;
+}
 function seleccionarCatalogoSistemaGas(id){
  if(modulo!=='gas'||(id&&!Object.values(CatalogosSistemasGas.IDS).includes(id)))return false;
- // Guardar solo la elección; no sobrescribir material, unión, diámetros ni cantidades heredadas.
- if(id&&!tramos.length&&!artefactos.length&&!proyectoGasActual().planCompra?.revisiones?.proyecto)instalacionGas.perfil.largosDocumentados2026=true;
- instalacionGas.perfil.catalogoTecnicoGas=id;
- if(id&&!instalacionGas.perfil.material&&!instalacionGas.perfil.sistema){instalacionGas.perfil.material=id==='sigas'?'Acero-polietileno SIGAS Thermofusión':id==='fusiogas'?'Acero-polietileno FUSIOGAS Thermofusión':'Acero con revestimiento epoxi';instalacionGas.perfil.sistema=id==='sigas'||id==='fusiogas'?'Thermofusión':'Roscado';}
- guardarDatos();sincronizarPerfilTecnicoGas();renderTramos();try{mostrarPreparacionDiametrosGas();}catch(e){$('estadoCatalogoSistemaGas').textContent='Selección conservada. Diagnóstico técnico pendiente: '+e.message;}renderResumenPrincipalGas();
+ const proyecto=proyectoGasActual(),perfil=instalacionGas.perfil;
+ if(id&&!tramos.length&&!artefactos.length&&!proyecto.planCompra?.revisiones?.proyecto)perfil.largosDocumentados2026=true;
+ if(id){sincronizarFamiliaElegidaGas(id);$('redMaterial').value=perfil.material;$('redSistema').value=perfil.sistema;}
+ perfil.catalogoTecnicoGas=id;
+ guardarDatos();sincronizarSistemaPrincipalGas();renderTramos();try{mostrarPreparacionDiametrosGas();}catch(e){$('estadoCatalogoSistemaGas').textContent='Selección conservada. Diagnóstico técnico pendiente: '+e.message;}renderResumenPrincipalGas();
  const guardado=proyectoGuardadoGas()?.instalacion?.perfil?.catalogoTecnicoGas;
  $('estadoCatalogoSistemaGas').textContent=(id?'Selección conservada para este proyecto.':'Sin selección; los datos de material y unión se conservaron.')+(guardado!==instalacionGas.perfil.catalogoTecnicoGas?' Guardado local no confirmado: conservá un respaldo.':'')+' Los diámetros siguen pendientes de verificación.';
  return true;
