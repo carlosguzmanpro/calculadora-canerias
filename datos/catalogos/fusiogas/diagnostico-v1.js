@@ -1,4 +1,4 @@
-/* Consultas documentales exclusivas FUSIOGAS. Nunca habilita diámetros. */
+/* Datos documentales y escenarios tabulares FUSIOGAS independientes; sin aprobación de instalaciones. */
 (function(root){
  const SHA='727650ead31bf85522c8bd475bd759fdf6319c2f1a8e6bf1735124f0a93f57ed';
  const positivo=x=>typeof x==='number'&&Number.isFinite(x)&&x>0;
@@ -40,7 +40,7 @@
   const t=d.tablas[gas];return {id:'fusiogas-v1-'+gas+'-pendiente',verificado:false,gas,material:'Acero-polietileno FUSIOGAS Thermofusión',sistema:'Thermofusión',fuente:d.fuente.archivo+' p.'+t.pagina,metodo:'longitud-maxima-tabular',reglaLongitud:null,redondeoSuperiorVerificado:false,condiciones:{densidadRelativa:t.densidadRelativa,presionMinPa:null,presionMaxPa:null,caidaPa:null,referenciaImpresa:t.caidaPresionImpresa},candidatos:t.exterioresMm.map((de,j)=>({id:'FUSIOGAS-'+de,exteriorMm:de,interiorMm:t.interioresTabuladosMm[j],filas:t.filas.map(f=>({longitud:f.longitudM,caudal:f.capacidadesM3h[j],pagina:t.pagina}))})),piezas:{},pendientes:['Validar método, suministro y presupuesto de presión; identificar variantes de accesorios y vías de tees.']};
  }
  function diagnostico(d,preparacion,accesorios,perfil){
-  const revision=validar(d),gas=perfil.gas,t=d.tablas[gas],pendientes=[...revision.errores,...revision.alertas];
+  const revision=validar(d),gas=perfil.gas==='propano-gaseoso'?'GLP':perfil.gas,t=d.tablas[gas],pendientes=[...revision.errores,...revision.alertas];
   if(!t)pendientes.push('Elegir GN o GLP documentado por FUSIOGAS.');
   if(t&&Number(perfil.densidadRelativa)!==t.densidadRelativa)pendientes.push('Densidad del proyecto pendiente/diferente de la tabla seleccionada.');
   const filas=preparacion.porTramo.map(p=>{
@@ -50,5 +50,128 @@
   });
   return {estado:'diagnostico-documental-fusiogas',habilitado:false,diametros:null,filas,accesoriosConocidos:accesorios.fisicas,pendientes:[...new Set(pendientes)],fuente:d.fuente};
  }
- const api={validar,capacidad,accesorio,producto,adaptador,diagnostico};if(typeof module==='object'&&module.exports)module.exports=api;else root.FusiogasTecnico=api;
+ // Verificación tabular independiente. Las propuestas nunca modifican el inventario.
+ function dimensionar(d,entrada){
+  const {preparacion:p,red,inventario,perfil,config={}}=entrada;
+  const pendientes=new Map(),avisar=(id,texto,grupo='calculo')=>pendientes.set(id,{id,texto,grupo});
+  const gas=perfil.gas,tablaGas=gas==='GN'?'GN':['GLP','propano-gaseoso'].includes(gas)?'GLP':null,t=d.tablas[tablaGas];
+  const pcs=Number(String(perfil.poderCalorifico??'').replace(',','.')),fuente=String(perfil.fuenteGas||'').trim();
+  if(!positivo(pcs)||!fuente)avisar('pcs','Ingresar PCS del combustible seleccionado y su fuente; no se reutiliza el PCS de otro gas.');
+  if(!t)avisar('gas','Combustible sin tabla FUSIOGAS aplicable.');
+  for(const x of validar(d).errores)avisar('fuente:'+x,x);
+  for(const x of p.errores||[])avisar('red:'+x,x);
+  const densidad=Number(String(perfil.densidadRelativa??'').replace(',','.'));
+  const densidadDiferente=t&&positivo(densidad)&&Math.abs(densidad-t.densidadRelativa)>1e-9;
+  if(densidadDiferente)avisar('densidad','La densidad declarada no coincide con '+t.densidadRelativa+' de la tabla FUSIOGAS; no aplicar correcciones inventadas.');
+  if(t&&!positivo(densidad))avisar('densidad-real','Verificar densidad real con su fuente frente a la referencia tabular '+t.densidadRelativa+'.','suministro');
+  if(tablaGas==='GLP')avisar('composicion','La página 20 se titula GLP (densidad 1,52), no certifica cualquier mezcla ni propano de cualquier suministro. Verificar composición y aplicabilidad.','suministro');
+  avisar('suministro','Verificar presiones reales, pérdida admisible y condiciones de los artefactos con documentación del suministro. La caída impresa de 10 mm es una referencia tabular.','suministro');
+  avisar('normativa','Aplicabilidad del método, simultaneidad (ensayo: todos los consumos completos) y aprobación normativa: revisión profesional independiente.','informacion');
+  avisar('inventario-real','Cotejar productos propuestos, conexiones y uniones reales antes del cierre técnico. Cuplas de compra estimadas no son pérdidas confirmadas.','informacion');
+  const norm=s=>String(s).normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[°º”″"\s]/g,'').toLowerCase();
+  function buscar(familia,medida,nombre){
+   const productos=d.productos.filter(x=>norm(x.familia)===norm(familia)&&norm(x.medidaOriginal)===norm(medida));
+   const eq=d.accesorios.filter(x=>norm(x.nombreOriginal)===norm(nombre));
+   return productos.length===1&&eq.length===1?{producto:productos[0],eq:eq[0]}:null;
+  }
+  const filasBase=p.porTramo.map(f=>({...f,caudal:positivo(pcs)&&fuente&&Number.isFinite(f.consumoKcal)?f.consumoKcal/pcs:null}));
+  const terminales=[];
+  for(const ruta of p.recorridos){const id='terminal-'+ruta.artefacto;if(!terminales.some(x=>x.id===id))terminales.push({id,tramo:ruta.tramos.at(-1),nombre:ruta.artefacto});}
+  const inicios=[...new Set(p.recorridos.map(r=>r.tramos[0]))];
+  if(inicios.length===1)terminales.push({id:'terminal-medidor',tramo:inicios[0],nombre:'Medidor'});
+  const fijas=new Map();for(const f of filasBase)fijas.set(f.id,t?.exterioresMm[0]||20);
+  const basePendientes=()=>new Map(pendientes);
+  const pendientesIniciales=basePendientes();
+  function evaluar(diametros){
+   pendientes.clear();for(const [k,v]of pendientesIniciales)pendientes.set(k,v);
+   let desconocidoGlobal=false;
+   const piezas=[],porTramo=new Map(filasBase.map(f=>[f.id,[]]));
+   const agregar=(identidad,tramo,cantidad,match,propuesta,motivo)=>{
+    if(!Number.isSafeInteger(cantidad)||cantidad<1)return;
+    const pieza={identidad,tramo,cantidad,producto:match?.producto||null,equivalencia:match?.eq||null,equivalenteM:match?cantidad*match.eq.longitudEquivalenteM:null,propuesta:!!propuesta,motivo:motivo||null};
+    piezas.push(pieza);porTramo.get(tramo)?.push(pieza);if(!match)avisar(identidad,(filasBase.find(f=>f.id===tramo)?.nombre||'Conexión')+': '+motivo);
+   };
+   const reservados=new Map();
+   for(const terminal of terminales){
+    const a=config.terminales?.[terminal.id]||{},de=diametros.get(terminal.tramo),codos=inventario.fisicas.filter(f=>f.tipo==='codo90'&&f.tramos.length===1&&f.tramos[0]===terminal.tramo);
+    const disponible=codos.find(f=>f.cantidad>(reservados.get(f.id)||0));
+    // Un codo existente puede representar la terminal SOLO como propuesta explícita.
+    const geometria=a.geometria||(disponible?'codo90':null),rosca=a.rosca;
+    if(geometria==='codo90'&&disponible){
+     reservados.set(disponible.id,(reservados.get(disponible.id)||0)+1);
+     const match=rosca&&(!a.sexo||a.sexo==='hembra')?buscar('Codo 90° rosca hembra',de+'x'+rosca,'Codo 90° rosca hembra '+de+'x'+rosca):null;
+     agregar(terminal.id,terminal.tramo,1,match,true,!rosca?'Falta medida de rosca de '+terminal.nombre+'.':a.sexo&&a.sexo!=='hembra'?'Conexión terminal sin codo macho documentado: identificar solución real.':'Falta producto terminal compatible '+de+' mm × '+rosca+'″; no cambiar el diámetro para hacerlo coincidir.');
+    }else if(geometria==='recta'){
+     const sexo=a.sexo,match=rosca&&['hembra','macho'].includes(sexo)?buscar('Transición '+sexo,de+'x'+rosca,'Transición '+sexo+' '+de+'x'+rosca):null;
+     agregar(terminal.id,terminal.tramo,1,match,true,'Transición recta: completar rosca/sexo o identificar producto FUSIOGAS compatible.');
+    }else agregar(terminal.id,terminal.tramo,1,null,true,'Identificar geometría y rosca de la conexión de '+terminal.nombre+'; no se agregó un codo físico.');
+   }
+   for(const f of inventario.fisicas){
+    if(f.tipo==='tee')continue;
+    const id=f.tramos.length===1?f.tramos[0]:null,de=diametros.get(id),cantidad=f.cantidad-(reservados.get(f.id)||0);
+    if(!id||f.conflicto){desconocidoGlobal=true;avisar(f.id,'Accesorio registrado: resolver tramo o cantidad contradictoria.');for(const tramo of f.tramos)agregar(f.id,tramo,Math.max(1,cantidad),null,false,'Accesorio sin ubicación técnica inequívoca.');continue;}
+    if(cantidad<1)continue;
+    const familia={codo90:'Codo 90° fusión',codo45:'Codo 45° fusión',llave:'Llave esférica fusión',cupla:'Cupla fusión'}[f.tipo];
+    const nombre=f.tipo==='llave'?'Llave de paso esférica fusión '+de:familia+' '+de;
+    agregar(f.id,id,cantidad,familia?buscar(familia,de,nombre):null,true,'Identificar '+f.tipo+' registrado y su equivalencia FUSIOGAS; no se sustituye por cero.');
+   }
+   const tees=[];
+   for(const f of inventario.fisicas.filter(f=>f.tipo==='tee')){
+    const entradas=Object.entries(red.orientacion).filter(([,o])=>o.hasta===f.nodo).map(([id])=>id),salidas=Object.entries(red.orientacion).filter(([,o])=>o.desde===f.nodo).map(([id])=>id);
+    const conex=[...entradas,...salidas],de=Math.max(...conex.map(id=>diametros.get(id)||0));
+    const tee=d.productos.find(x=>norm(x.familia)===norm('Te fusión')&&Number(x.medidaOriginal)===de);
+    const item={identidad:f.id,nodo:f.nodo,cantidad:f.cantidad,producto:tee||null,propuesta:true,reducciones:[],vias:[]};tees.push(item);
+    if(f.cantidad!==1||entradas.length!==1||salidas.length!==2||!tee){avisar(f.id,'Tee: verificar una entrada, dos salidas y producto físico compatible.');item.incompleta=true;continue;}
+    for(const id of conex){const menor=diametros.get(id);if(menor!==de){
+     const existentes=inventario.fisicas.filter(p=>p.reductor&&p.tramos.includes(id));
+     const match=existentes.length?null:buscar('Cupla reducción fusión',de+'x'+menor,'Cupla reducción fusión '+de+'x'+menor);
+     item.reducciones.push({identidad:f.id+':reduccion:'+id,tramo:id,cantidad:1,producto:match?.producto||null,equivalencia:match?.eq||null,equivalenteM:match?.eq.longitudEquivalenteM??null,propuesta:true});
+     if(!match)avisar(f.id+':reduccion:'+id,existentes.length?'Reducción ya registrada: identificar su asociación con la tee sin duplicarla.':'Sin cupla reductora FUSIOGAS documentada '+de+' × '+menor+' mm.');
+    }}
+    for(const salida of salidas){const via=config.tees?.[f.id]?.viasPorTramo?.[salida],nombre='Te fusión '+de+' - flujo '+(via==='directo'?'a través':via==='giro'?'90º':'pendiente');
+     const match=['directo','giro'].includes(via)?buscar('Te fusión',de,nombre):null;
+     item.vias.push({tramo:salida,via:via||null,equivalencia:match?.eq||null});
+     if(!match)avisar(f.id+':via:'+salida,'Tee '+String(f.nodo).replace('nombre:','').toUpperCase()+': indicar paso directo o giro hacia '+(filasBase.find(x=>x.id===salida)?.nombre||'la salida')+'.');
+    }
+   }
+   for(const nodo of new Set(Object.values(red.orientacion).map(o=>o.desde))){if(Object.values(red.orientacion).filter(o=>o.desde===nodo).length>1&&!tees.some(t=>t.nodo===nodo)){desconocidoGlobal=true;avisar('derivacion:'+nodo,'Derivación registrada sin tee física identificada: completar la conexión, sin inventar cantidades.');}}
+   const rutas=p.recorridos.map(r=>{
+    const aportes=r.tramos.flatMap(id=>porTramo.get(id)||[]),ids=new Set(r.tramos);
+    for(const tee of tees){const via=tee.vias.find(v=>ids.has(v.tramo));if(!via&&!tee.incompleta)continue;
+     if(tee.incompleta){if(!inventario.fisicas.find(f=>f.id===tee.identidad)?.tramos.some(id=>ids.has(id)))continue;aportes.push({identidad:tee.identidad,cantidad:1,equivalenteM:null});continue;}
+     aportes.push({identidad:tee.identidad,cantidad:1,producto:tee.producto,equivalencia:via?.equivalencia||null,equivalenteM:via?.equivalencia?.longitudEquivalenteM??null,via:via?.via,propuesta:true});
+     aportes.push(...tee.reducciones.filter(x=>ids.has(x.tramo)));
+    }
+    const unicos=[...new Map(aportes.map(x=>[x.identidad,x])).values()],conocido=unicos.reduce((s,x)=>s+(x.equivalenteM??0),0),completo=!desconocidoGlobal&&unicos.every(x=>x.equivalenteM!==null);
+    return {...r,aportes:unicos,equivalenteConocidoM:conocido,equivalenteM:completo?conocido:null,longitudConsultaM:r.longitudReal+conocido,completo};
+   });
+   return {piezas,tees,rutas};
+  }
+  const puede=t&&validar(d).integro&&!p.errores?.length&&positivo(pcs)&&fuente&&!densidadDiferente;
+  let ev=evaluar(fijas),convergente=false;const historia=[],vistos=new Set();
+  if(puede)for(let paso=0;paso<40;paso++){
+   const firma=JSON.stringify([...fijas]);if(vistos.has(firma)){avisar('convergencia','La iteración no converge; diámetros pendientes.');break;}vistos.add(firma);
+   const nuevos=new Map();
+   for(const f of filasBase){let elegido=null;
+    for(let j=0;j<t.exterioresMm.length;j++){const de=t.exterioresMm[j],prueba=new Map(fijas);prueba.set(f.id,de);const e=evaluar(prueba),rutas=e.rutas.filter(r=>r.tramos.includes(f.id)),l=rutas.length?Math.max(...rutas.map(r=>r.longitudConsultaM)):null,fila=t.filas.find(x=>l>0&&x.longitudM>=l);
+     if(fila&&Number.isFinite(f.caudal)&&fila.capacidadesM3h[j]>=f.caudal){elegido=de;break;}
+    }
+    nuevos.set(f.id,elegido);
+   }
+   historia.push(Object.fromEntries(nuevos));const igual=[...fijas].every(([id,de])=>nuevos.get(id)===de);
+   for(const [id,de]of nuevos)fijas.set(id,de);ev=evaluar(fijas);if(igual){convergente=true;break;}
+  }
+  ev=evaluar(fijas);
+  if(puede&&!convergente)avisar('convergencia','No se obtuvo una solución tabular consistente dentro de los límites del manual.');
+  if(!puede){pendientes.clear();for(const [k,v]of pendientesIniciales)pendientes.set(k,v);for(const terminal of terminales)if(!config.terminales?.[terminal.id]?.rosca)avisar(terminal.id,'Falta medida de rosca de '+terminal.nombre+'.');for(const ruta of ev.rutas){ruta.aportes=ruta.aportes.map(a=>({...a,equivalencia:null,equivalenteM:null}));ruta.equivalenteConocidoM=null;ruta.equivalenteM=null;ruta.longitudConsultaM=null;ruta.completo=false;}for(const pieza of ev.piezas){pieza.producto=null;pieza.equivalencia=null;pieza.equivalenteM=null;}ev.tees=[];}
+  const filas=filasBase.map(f=>{
+   const rutas=ev.rutas.filter(r=>r.tramos.includes(f.id)),ruta=rutas.reduce((a,b)=>!a||b.longitudConsultaM>a.longitudConsultaM?b:a,null),de=puede?fijas.get(f.id):null,j=t?.exterioresMm.indexOf(de),fila=t?.filas.find(x=>ruta&&x.longitudM>=ruta.longitudConsultaM),cap=de&&fila?fila.capacidadesM3h[j]:null;
+   if(puede&&!cap)avisar('limite:'+f.id,f.nombre+': fuera de filas/capacidades FUSIOGAS disponibles; no extrapolar.');
+   const comprobado=!!(convergente&&ruta&&rutas.every(r=>r.completo)&&cap>=f.caudal);
+   return {...f,diametroCandidatoMm:de,longitudConsultaM:ruta?.longitudConsultaM??null,recorridoControl:ruta?.artefacto||null,equivalenteConocidoM:ruta?.equivalenteConocidoM??null,equivalenteM:rutas.every(r=>r.completo)?ruta?.equivalenteM??null:null,filaM:cap?fila.longitudM:null,capacidadM3h:cap,pagina:t?.pagina||null,comprobadoBajoPropuestas:comprobado,diametroDefinitivo:null,estado:comprobado?'Capacidad cubierta bajo propuestas FUSIOGAS; instalación real por verificar':'Preliminar; equivalencias o condiciones incompletas'};
+  });
+  return {estado:'bloqueado',estadoTabular:filas.every(f=>f.comprobadoBajoPropuestas)?'cubierto-bajo-propuestas':'parcial',sistema:'fusiogas',gas,tablaGas,pagina:t?.pagina||null,densidadReferencia:t?.densidadRelativa??null,pcs:positivo(pcs)&&fuente?pcs:null,fuentePCS:fuente,caidaImpresa:t?.caidaPresionImpresa||null,filas,recorridos:ev.rutas,piezas:ev.piezas,tees:ev.tees,convergente,historia,pendientes:[...pendientes.values()],diametrosDefinitivos:null,aprobacionNormativa:false,terminales:terminales.map(x=>({...x,rosca:config.terminales?.[x.id]?.rosca||null})),fuente:d.fuente};
+ }
+
+ const api={validar,capacidad,accesorio,producto,adaptador,diagnostico,dimensionar};if(typeof module==='object'&&module.exports)module.exports=api;else root.FusiogasTecnico=api;
 })(globalThis);

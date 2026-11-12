@@ -85,6 +85,20 @@
   return html+'<p>'+esc(e.fuente)+'</p>';
  }
 
+ function fusiogas(r,imprimir=false){
+  if(!r)return '';
+  const n=x=>Number.isFinite(x)?x.toLocaleString('es-AR',{maximumFractionDigits:3}):'Pendiente';
+  const tabla=(tit,cab,filas)=>'<h3>'+esc(tit)+'</h3><div style="overflow-x:auto"><table class="tabla"><thead><tr>'+cab.map(x=>'<th>'+esc(x)+'</th>').join('')+'</tr></thead><tbody>'+filas.map(f=>'<tr>'+f.map(x=>'<td>'+esc(x)+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>';
+  const resultado=tabla('Diámetros preliminares FUSIOGAS · '+(r.tablaGas||'combustible pendiente'),['Tramo','kcal/h','m³/h','Diámetro (mm)','Consulta / fila (m)','Capacidad (m³/h)','Estado'],r.filas.map(f=>[f.nombre,n(f.consumoKcal),n(f.caudal),n(f.diametroCandidatoMm),n(f.longitudConsultaM)+' / '+n(f.filaM),n(f.capacidadM3h),f.estado]));
+  const canos=tabla('Caños por diámetro · preselección, no compra definitiva',['Diámetro (mm)','Longitud (m)'],[...new Set(r.filas.map(f=>f.diametroCandidatoMm))].map(de=>[n(de),n(r.filas.filter(f=>f.diametroCandidatoMm===de).reduce((s,f)=>s+f.longitudReal,0))]));
+  const rutas=tabla('Recorridos completos · equivalentes p.18',['Artefacto','Tramos','Real (m)','Equivalentes conocidos (m)','Total parcial (m)','Estado'],r.recorridos.map(x=>[x.artefacto,x.tramos.map(id=>r.filas.find(f=>f.id===id)?.nombre||'Tramo').join(' → '),n(x.longitudReal),n(x.equivalenteConocidoM),n(x.longitudConsultaM),x.completo?'Completo bajo propuestas':'Faltan equivalencias; total inferior parcial']));
+  const piezas=tabla('Referencias propuestas · no son piezas confirmadas',['Producto FUSIOGAS','Cantidad','Código','Equivalente unitario (m)','Referencia'],r.piezas.concat(r.tees.flatMap(t=>[{cantidad:t.cantidad,producto:t.producto,equivalencia:null},...t.reducciones])).map(x=>[x.producto?x.producto.familia+' '+x.producto.medidaOriginal:'Producto pendiente',x.cantidad,x.producto?.codigo||'Pendiente',n(x.equivalencia?.longitudEquivalenteM),x.equivalencia?'p.18 · '+x.equivalencia.nombreOriginal:'Vía/modelo pendiente o ver desglose por recorrido']));
+  const conexiones=tabla('Conexiones roscadas registradas',['Conexión','Rosca (pulgadas)'],(r.terminales||[]).map(x=>[x.nombre,x.rosca||'Pendiente']));
+  const desglose=r.recorridos.map(x=>tabla(x.artefacto+' · aportes',['Pieza','Cantidad','Vía','Unitario (m)','Total (m)'],x.aportes.map(a=>[a.equivalencia?.nombreOriginal||'Equivalencia pendiente',a.cantidad,a.via||'—',n(a.equivalencia?.longitudEquivalenteM),n(a.equivalenteM)]))).join('');
+  const grupos=[['calculo','Datos que impiden completar la consulta'],['suministro','Suministro real por verificar'],['informacion','Aplicación y revisión profesional']].map(([id,t])=>'<h4>'+t+'</h4>'+r.pendientes.filter(p=>p.grupo===id).map(p=>'<p>'+esc(p.texto)+'</p>').join('')).join('');
+  return '<h2>Resultado tabular FUSIOGAS</h2><p>Manual V.1.2026 · capacidades p.'+esc(r.pagina)+' · densidad de referencia '+n(r.densidadReferencia)+' · caída impresa 10 mm. PCS: '+n(r.pcs)+' kcal/m³ · '+esc(r.fuentePCS||'fuente pendiente')+'. Consumos completos, sin descuento de simultaneidad.</p>'+resultado+canos+'<p>La fila es igual o superior al recorrido completo más desfavorable. Los equivalentes dependen del diámetro local y se recalculan iterativamente. Un resultado parcial no incluye como cero las pérdidas desconocidas. Las variantes propuestas son referencias explícitas de cálculo; no confirman geometría, sexo de rosca ni piezas instaladas.</p><details'+(imprimir?' open':'')+'><summary>Memoria FUSIOGAS y referencias propuestas</summary>'+conexiones+rutas+piezas+desglose+'</details><details'+(imprimir?' open':'')+'><summary>Qué falta verificar ('+r.pendientes.length+')</summary>'+grupos+'</details><p>Sin diámetro definitivo ni aprobación normativa. La capacidad tabular no es una medición de la pérdida real de presión.</p>';
+ }
+
  function documento(d){
   // Sólo etiquetas del documento. No se modifican modelo, grupos ni cantidades.
   const gas=d.titulo==='GAS',nombres=new Map();
@@ -102,7 +116,7 @@
   const celda=v=>esc(etiqueta(v));
   const tabla=(titulo,cab,filas,clase='')=>!filas.length?'':'<h2>'+esc(titulo)+'</h2><table'+(clase?' class="'+clase+'"':'')+'><thead><tr>'+cab.map(x=>'<th>'+esc(x)+'</th>').join('')+'</tr></thead><tbody>'+filas.map(f=>'<tr>'+f.map((v,i)=>'<td>'+celda(clase&&i===5&&typeof v==='string'?v.replace(/; /g,';\n'):v)+'</td>').join('')+'</tr>').join('')+'</tbody></table>';
   const imagen=d.croquis&&/^(data:image\/(?:png|jpeg|webp);base64,|blob:)/.test(d.croquis.url)?'<figure class="croquis-entrega"><h2>Fotografía original del croquis</h2><img src="'+esc(d.croquis.url)+'" alt="Croquis aportado por el usuario"><figcaption>'+(d.croquis.confirmado?'Legibilidad y correspondencia confirmadas por el usuario.':'Referencia aportada: correspondencia con la red actual pendiente de confirmar.')+' Sin escala verificada.</figcaption></figure>':'';
-  const dimensiones=d.planilla?tabla('Planilla de dimensionamiento',['TRAMO','REAL (m)','EQUIVALENTE (m)','DEFINITIVO (m)','CONSUMO (m³/h)','DIÁMETRO'],d.planilla.map(t=>[t.tramo,(gas?metros:numero)(t.real),(gas?metros:numero)(t.equivalente),(gas?metros:numero)(t.definitivo),numero(t.consumo),t.diametro])):
+  const dimensiones=d.dimensionamientoFusiogas?fusiogas(d.dimensionamientoFusiogas,true):d.planilla?tabla('Planilla de dimensionamiento',['TRAMO','REAL (m)','EQUIVALENTE (m)','DEFINITIVO (m)','CONSUMO (m³/h)','DIÁMETRO'],d.planilla.map(t=>[t.tramo,(gas?metros:numero)(t.real),(gas?metros:numero)(t.equivalente),(gas?metros:numero)(t.definitivo),numero(t.consumo),t.diametro])):
    tabla('Tramos',['Tramo','Longitud (m)','Diámetro','Estado'],d.tramos.map(t=>[t.desde+'–'+t.hasta,t.metros,t.diametro||'PENDIENTE',t.detalle?.estado==='pendiente'?'Accesorios pendientes':'Registrado; medidas manuales']));
   const materiales=d.materialesAgrupados?tabla('Materiales para revisión',['Material / accesorio','Diámetro','Cantidad','Unidad','Estado','Ubicación'],d.materialesAgrupados.map(f=>[f.material,f.diametro,gas&&f.unidad==='m'&&Number.isFinite(f.cantidad)?metros(f.cantidad):f.cantidad,f.unidad,(f.estado==='estimado'?'PROVISIONAL (ESTIMADO)':f.estado.toUpperCase())+' · '+(f.revisado?'Revisado':'Sin revisar'),f.ubicaciones.join('; ')]),gas?'materiales-entrega':''):
    tabla('Materiales para revisión',['Material / accesorio','Diámetro','Cantidad','Unidad','Ubicación','Estado / observaciones'],d.filas.map(f=>[f.material,f.diametro,gas&&f.unidad==='m'&&Number.isFinite(f.cantidad)?metros(f.cantidad):f.cantidad,f.unidad,f.ubicacion,(f.cantidad==null||/pendiente/i.test(f.diametro)?'PENDIENTE':String(f.estado).toUpperCase())+' · '+(f.revisado?'Revisado':'Sin revisar')+' · '+(f.evidencia||'')+(f.editado?' · Ajuste manual':'')]),gas?'materiales-entrega':'');
@@ -122,5 +136,5 @@
    (d.observaciones?'<h2>Observaciones</h2><p>'+celda(d.observaciones)+'</p>':'')+
    '<p>'+celda(d.advertencia)+'</p>'+(d.ejercicioSigas?'</details>':'');
  }
- root.InformeProyecto={documento,agruparMateriales,planilla,ejercicioSigas};if(typeof module!=='undefined')module.exports=root.InformeProyecto;
+ root.InformeProyecto={documento,agruparMateriales,planilla,ejercicioSigas,fusiogas};if(typeof module!=='undefined')module.exports=root.InformeProyecto;
 })(typeof globalThis!=='undefined'?globalThis:this);

@@ -56,6 +56,7 @@ function mostrarPreparacionDiametrosGas(){
  $('estadoCatalogoSistemaGas').textContent='Catálogo: '+catalogo.nombre+'. Sin diámetros habilitados.';
  let accesorios;try{accesorios=inventarioAccesoriosParaMotorGas(redActual);}catch(e){accesorios={fisicas:[],ceros:[],pendientes:['No se pudo preparar el inventario técnico: '+e.message]};}
  const inventario=catalogo.id===CatalogosSistemasGas.IDS.epoxi?PreparacionDiametrosGas.inventario(catalogo.tablas[0],catalogo.tablas[1],ValidacionTablasGas.validarTablas):catalogo.id===CatalogosSistemasGas.IDS.sigas?{tablas:catalogo.tablas.map(t=>({numero:t.numero,tipoConteo:t.numero===3?'accesorios':'valores',valores:t.numero===3?t.filas.length:t.numero===6?t.filas.reduce((n,f)=>n+f.diametrosMm.filter(x=>x!==null).length,0):t.filas.length*9,archivo:SIGAS_ED15_2025.fuente.archivo+' · '+(t.paginas?'pp.'+t.paginas.join('–'):'p.'+t.pagina),edicion:SIGAS_ED15_2025.fuente.edicion})),errores:[],pendientes:[],otrosSistemas:'Tablas SIGAS del manual identificado; sin equivalencias ni interiores de acero epoxi.'}:catalogo.id==='fusiogas'?{tablas:[...Object.values(FUSIOGAS_V1_2026.tablas).map(t=>({numero:t.gas,tipoConteo:'capacidades',valores:360,archivo:FUSIOGAS_V1_2026.fuente.archivo+' p.'+t.pagina,edicion:'V.1.2026'})),{numero:'equivalencias',tipoConteo:'registros',valores:88,archivo:FUSIOGAS_V1_2026.fuente.archivo+' p.18',edicion:'V.1.2026'}],errores:FusiogasTecnico.validar(FUSIOGAS_V1_2026).errores,pendientes:[],otrosSistemas:'Catálogo FUSIOGAS independiente; no usa tablas de otros fabricantes.'}:{tablas:[],errores:[],pendientes:[],otrosSistemas:'Las tablas de acero epoxi y SIGAS se mantienen separadas. No hay reemplazos automáticos.'};
+ if(catalogo.id==='fusiogas'){const dimensionamientoFusiogas=dimensionamientoFusiogasActualGas();renderResultadoFusiogasGas(out);return {red:r,inventario,catalogo,accesorios,diagnosticoSigas:null,diagnosticoFusiogas:FusiogasTecnico.diagnostico(FUSIOGAS_V1_2026,r,accesorios,perfilTecnicoActualGas()),dimensionamientoFusiogas};}
  let diagnosticoSigas=null;
  if(catalogo.id===CatalogosSistemasGas.IDS.sigas){
   diagnosticoSigas=SigasTecnico.diagnostico(SIGAS_ED15_2025,r,accesorios,perfilTecnicoActualGas());
@@ -89,4 +90,39 @@ function mostrarPreparacionDiametrosGas(){
  for(const s of [...new Set([...r.errores,...r.pendientes,...inventario.errores,...inventario.pendientes,...catalogo.pendientes,...CatalogosSistemasGas.compatibilidad(perfilTecnicoActualGas(),catalogo),...accesorios.pendientes.map(s=>['sigas','fusiogas'].includes(catalogo.id)&&s.startsWith('Reducción:')?'Reducciones del sistema seleccionado: identificar producto exacto y su equivalente; no se aplica automáticamente la exclusión del método epoxi.':s),...(diagnosticoSigas?.pendientes||[]),...(diagnosticoFusiogas?.pendientes||[]),...combustibleTecnicoGas().pendientes])])texto(s,detalles);
  if(catalogo.id===CatalogosSistemasGas.IDS.epoxi)texto('Las fotos están conservadas; falta documentar edición y vigencia, fabricante/interiores reales, compatibilidad del sistema, condiciones de suministro y validación independiente. No basta con que pasen las pruebas automáticas.',detalles);
  return {red:r,inventario,catalogo,accesorios,medidas,diagnosticoSigas,diagnosticoFusiogas};
+}
+
+// Adaptador de hechos físicos compartidos, sin importar productos/equivalencias SIGAS.
+function dimensionamientoFusiogasActualGas(){
+ if(modulo!=='gas'||CatalogosSistemasGas.identificar(instalacionGas.perfil)!=='fusiogas')return null;
+ const red=redFisicaManualGas(),perfil=perfilTecnicoActualGas(),p=proyectoGasActual(),fisicos=p.calculoSigas||{};
+ const config={terminales:{},tees:{}};
+ for(const [id,a]of Object.entries(fisicos.terminales||{}))config.terminales[id]={rosca:a.rosca,sexo:a.sexo,geometria:a.geometria};
+ for(const [id,a]of Object.entries(fisicos.tees||{}))config.tees[id]={viasPorTramo:{...a.viasPorTramo}};
+ return FusiogasTecnico.dimensionar(FUSIOGAS_V1_2026,{red,perfil,config,preparacion:PreparacionDiametrosGas.prepararRed(red,tramos,perfil),inventario:inventarioAccesoriosParaMotorGas(red)});
+}
+function renderResultadoFusiogasGas(out){
+ const r=dimensionamientoFusiogasActualGas();if(!r)return;
+ const caja=document.createElement('section');caja.className='resultado-fusiogas';
+ caja.innerHTML=InformeProyecto.fusiogas(r);out.append(caja);
+ renderConexionesFusiogasGas(caja);
+ if(!r.pcs){const b=document.createElement('button');b.textContent='Completar PCS y fuente';b.className='alt solo-pantalla';b.onclick=()=>{mostrarVista('dimensionGas');const campo=$('dimPCS');for(let n=campo?.parentElement;n;n=n.parentElement)if(n.tagName==='DETAILS')n.open=true;campo?.focus();};caja.append(b);}
+}
+
+function renderConexionesFusiogasGas(caja){
+ const p=proyectoGasActual(),r=dimensionamientoFusiogasActualGas();if(!r)return;
+ const d=document.createElement('details'),s=document.createElement('summary');s.textContent='Conexiones físicas · completar solo los datos conocidos';d.append(s);
+ const nombres=['medidor',...new Set(r.recorridos.map(x=>x.artefacto))];
+ for(const nombre of nombres){const id='terminal-'+nombre,a=p.calculoSigas?.terminales?.[id]||{},l=document.createElement('label'),sel=document.createElement('select');l.textContent=nombre+' · rosca (pulgadas, independiente del diámetro de fusión)';sel.ariaLabel=l.textContent;
+ const medidas=[...new Set(FUSIOGAS_V1_2026.productos.filter(x=>/Transición|Codo 90° rosca/.test(x.familia)).map(x=>x.medidaOriginal.split('x').at(-1).replace(/[”″]/g,'')))];
+ for(const v of ['',...medidas]){const o=document.createElement('option');o.value=v;o.textContent=v?v+'″':'Pendiente';sel.append(o);}sel.value=a.rosca||'';sel.onchange=()=>guardarConexionFisicaFusiogasGas(id,'rosca',sel.value);l.append(sel);d.append(l);
+ }
+ caja.append(d);
+}
+function guardarConexionFisicaFusiogasGas(id,campo,valor){
+ if(CatalogosSistemasGas.identificar(instalacionGas.perfil)!=='fusiogas'||campo!=='rosca'||typeof valor!=='string')return false;
+ const r=dimensionamientoFusiogasActualGas(),permitidos=['terminal-medidor',...r.recorridos.map(x=>'terminal-'+x.artefacto)];if(!permitidos.includes(id))return false;
+ const medidas=FUSIOGAS_V1_2026.productos.filter(x=>/Transición|Codo 90° rosca/.test(x.familia)).map(x=>x.medidaOriginal.split('x').at(-1).replace(/[”″]/g,''));if(valor&&!medidas.includes(valor))return false;
+ const c=proyectoGasActual().calculoSigas||={version:1,vinculos:{}};c.terminales||={};c.terminales[id]||={};c.terminales[id].rosca=valor;
+ const desplazamiento=window.scrollY;guardarDatos();calcularMaterialesManualGas();if(Number.isFinite(desplazamiento))window.scrollTo({top:desplazamiento,behavior:'instant'});return true;
 }

@@ -1,0 +1,291 @@
+{
+  "base": "b907e40",
+  "estado": "Ejemplo 20,60 m con vías y roscas conocidas; propano seleccionado sin PCS propio",
+  "total": 46,
+  "nota": "Se reprodujeron 46 avisos, uno más que los 45 informados en Android. El número depende del estado guardado; no se recibió el respaldo original.",
+  "categorias": {
+    "1": "Datos indispensables del usuario",
+    "2": "Documentación técnica",
+    "3": "Comprobaciones automáticas",
+    "4": "Instalación real/revisión profesional",
+    "5": "Repetidas o derivadas"
+  },
+  "avisos": [
+    {
+      "numero": 1,
+      "texto": "Combustible cambiado: revisar poder calorífico, densidad, suministro y su fuente. Los valores anteriores se conservaron, sin utilizarlos como condiciones del nuevo gas.",
+      "categoria": 1,
+      "tratamiento": "PCS y fuente propios del combustible: no se deducen del PCS GN. Otros datos del suministro se verifican por separado."
+    },
+    {
+      "numero": 2,
+      "texto": "Dato técnico del proyecto pendiente: provincia.",
+      "categoria": 4,
+      "tratamiento": "Se conserva como verificación del suministro o de aplicación real, agrupada y separada del escenario tabular."
+    },
+    {
+      "numero": 3,
+      "texto": "Dato técnico del proyecto pendiente: localidad.",
+      "categoria": 4,
+      "tratamiento": "Se conserva como verificación del suministro o de aplicación real, agrupada y separada del escenario tabular."
+    },
+    {
+      "numero": 4,
+      "texto": "Dato técnico del proyecto pendiente: distribuidora.",
+      "categoria": 4,
+      "tratamiento": "Se conserva como verificación del suministro o de aplicación real, agrupada y separada del escenario tabular."
+    },
+    {
+      "numero": 5,
+      "texto": "Dato técnico del proyecto pendiente: densidad relativa.",
+      "categoria": 4,
+      "tratamiento": "Se conserva como verificación del suministro o de aplicación real, agrupada y separada del escenario tabular."
+    },
+    {
+      "numero": 6,
+      "texto": "Dato técnico del proyecto pendiente: unidad de presión.",
+      "categoria": 4,
+      "tratamiento": "Se conserva como verificación del suministro o de aplicación real, agrupada y separada del escenario tabular."
+    },
+    {
+      "numero": 7,
+      "texto": "Dato técnico del proyecto pendiente: presión disponible.",
+      "categoria": 4,
+      "tratamiento": "Se conserva como verificación del suministro o de aplicación real, agrupada y separada del escenario tabular."
+    },
+    {
+      "numero": 8,
+      "texto": "Dato técnico del proyecto pendiente: presión mínima de los artefactos.",
+      "categoria": 4,
+      "tratamiento": "Se conserva como verificación del suministro o de aplicación real, agrupada y separada del escenario tabular."
+    },
+    {
+      "numero": 9,
+      "texto": "Dato técnico del proyecto pendiente: pérdida admisible.",
+      "categoria": 4,
+      "tratamiento": "Se conserva como verificación del suministro o de aplicación real, agrupada y separada del escenario tabular."
+    },
+    {
+      "numero": 10,
+      "texto": "Dato técnico del proyecto pendiente: fuente de presiones.",
+      "categoria": 4,
+      "tratamiento": "Se conserva como verificación del suministro o de aplicación real, agrupada y separada del escenario tabular."
+    },
+    {
+      "numero": 11,
+      "texto": "Dato técnico del proyecto pendiente: método y referencia normativa.",
+      "categoria": 4,
+      "tratamiento": "Se conserva como verificación del suministro o de aplicación real, agrupada y separada del escenario tabular."
+    },
+    {
+      "numero": 12,
+      "texto": "El motor actual estudia solamente Argentina / domiciliario / GN; otros perfiles necesitan método y tablas propios.",
+      "categoria": 3,
+      "tratamiento": "Se reemplaza el bloqueo genérico GN por consulta FUSIOGAS propia. Topología y vías guardadas se reutilizan; no se inventan vías faltantes."
+    },
+    {
+      "numero": 13,
+      "texto": "Poder calorífico y fuente del proyecto pendientes; no se aplica 9300 automáticamente.",
+      "categoria": 1,
+      "tratamiento": "PCS y fuente propios del combustible: no se deducen del PCS GN. Otros datos del suministro se verifican por separado."
+    },
+    {
+      "numero": 14,
+      "texto": "Derivación A: verificar pieza física y vía de paso/giro; no se infieren del nombre.",
+      "categoria": 5,
+      "tratamiento": "Consolidada con su causa. Cantidades y vías conocidas se reutilizan; posiciones no son requisito hidráulico en diámetro uniforme. Productos reales desconocidos siguen por verificar."
+    },
+    {
+      "numero": 15,
+      "texto": "Derivación B: verificar pieza física y vía de paso/giro; no se infieren del nombre.",
+      "categoria": 5,
+      "tratamiento": "Consolidada con su causa. Cantidades y vías conocidas se reutilizan; posiciones no son requisito hidráulico en diámetro uniforme. Productos reales desconocidos siguen por verificar."
+    },
+    {
+      "numero": 16,
+      "texto": "Equivalentes pendientes: reutilizar cantidades conocidas; verificar tipos de válvulas y vías de tees. Para cuplas hacen falta segmentos continuos y largo comercial, sin repetir la carga de cantidades.",
+      "categoria": 5,
+      "tratamiento": "Consolidada con su causa. Cantidades y vías conocidas se reutilizan; posiciones no son requisito hidráulico en diámetro uniforme. Productos reales desconocidos siguen por verificar."
+    },
+    {
+      "numero": 17,
+      "texto": "FUSIOGAS: verificar método, discrepancias de equivalencias, variantes de productos, suministro y validación técnica independiente.",
+      "categoria": 4,
+      "tratamiento": "Se conserva como verificación del suministro o de aplicación real, agrupada y separada del escenario tabular."
+    },
+    {
+      "numero": 18,
+      "texto": "No se heredan tablas, interiores, accesorios ni exclusiones de otros sistemas.",
+      "categoria": 2,
+      "tratamiento": "Fuente FUSIOGAS presente y cotejada; no utilizar los números de tabla EPOXI de la plantilla antigua."
+    },
+    {
+      "numero": 19,
+      "texto": "Combustible sin tabla aplicable a este sistema: propano-gaseoso. SIGAS Tabla 5 requiere propano gaseoso identificado; EPOXI no tiene tabla GLP incorporada.",
+      "categoria": 3,
+      "tratamiento": "Se reemplaza el bloqueo genérico GN por consulta FUSIOGAS propia. Topología y vías guardadas se reutilizan; no se inventan vías faltantes."
+    },
+    {
+      "numero": 20,
+      "texto": "Perfil todavía no soportado: esta etapa prepara Argentina, gas natural domiciliario.",
+      "categoria": 3,
+      "tratamiento": "Se reemplaza el bloqueo genérico GN por consulta FUSIOGAS propia. Topología y vías guardadas se reutilizan; no se inventan vías faltantes."
+    },
+    {
+      "numero": 21,
+      "texto": "Completar Provincia.",
+      "categoria": 5,
+      "tratamiento": "Consolidada con su causa. Cantidades y vías conocidas se reutilizan; posiciones no son requisito hidráulico en diámetro uniforme. Productos reales desconocidos siguen por verificar."
+    },
+    {
+      "numero": 22,
+      "texto": "Completar Localidad.",
+      "categoria": 5,
+      "tratamiento": "Consolidada con su causa. Cantidades y vías conocidas se reutilizan; posiciones no son requisito hidráulico en diámetro uniforme. Productos reales desconocidos siguen por verificar."
+    },
+    {
+      "numero": 23,
+      "texto": "Completar Distribuidora.",
+      "categoria": 5,
+      "tratamiento": "Consolidada con su causa. Cantidades y vías conocidas se reutilizan; posiciones no son requisito hidráulico en diámetro uniforme. Productos reales desconocidos siguen por verificar."
+    },
+    {
+      "numero": 24,
+      "texto": "Completar Unidad.",
+      "categoria": 5,
+      "tratamiento": "Consolidada con su causa. Cantidades y vías conocidas se reutilizan; posiciones no son requisito hidráulico en diámetro uniforme. Productos reales desconocidos siguen por verificar."
+    },
+    {
+      "numero": 25,
+      "texto": "Completar Presion.",
+      "categoria": 5,
+      "tratamiento": "Consolidada con su causa. Cantidades y vías conocidas se reutilizan; posiciones no son requisito hidráulico en diámetro uniforme. Productos reales desconocidos siguen por verificar."
+    },
+    {
+      "numero": 26,
+      "texto": "Completar Minima.",
+      "categoria": 5,
+      "tratamiento": "Consolidada con su causa. Cantidades y vías conocidas se reutilizan; posiciones no son requisito hidráulico en diámetro uniforme. Productos reales desconocidos siguen por verificar."
+    },
+    {
+      "numero": 27,
+      "texto": "Completar Perdida.",
+      "categoria": 5,
+      "tratamiento": "Consolidada con su causa. Cantidades y vías conocidas se reutilizan; posiciones no son requisito hidráulico en diámetro uniforme. Productos reales desconocidos siguen por verificar."
+    },
+    {
+      "numero": 28,
+      "texto": "Completar Fuente.",
+      "categoria": 5,
+      "tratamiento": "Consolidada con su causa. Cantidades y vías conocidas se reutilizan; posiciones no son requisito hidráulico en diámetro uniforme. Productos reales desconocidos siguen por verificar."
+    },
+    {
+      "numero": 29,
+      "texto": "Completar Norma.",
+      "categoria": 5,
+      "tratamiento": "Consolidada con su causa. Cantidades y vías conocidas se reutilizan; posiciones no son requisito hidráulico en diámetro uniforme. Productos reales desconocidos siguen por verificar."
+    },
+    {
+      "numero": 30,
+      "texto": "Completar Demanda.",
+      "categoria": 4,
+      "tratamiento": "Se conserva como verificación del suministro o de aplicación real, agrupada y separada del escenario tabular."
+    },
+    {
+      "numero": 31,
+      "texto": "Poder calorífico del gas en kcal/m³ y su fuente (no se usa automáticamente el valor orientativo de la consulta).",
+      "categoria": 5,
+      "tratamiento": "Consolidada con su causa. Cantidades y vías conocidas se reutilizan; posiciones no son requisito hidráulico en diámetro uniforme. Productos reales desconocidos siguen por verificar."
+    },
+    {
+      "numero": 32,
+      "texto": "Densidad relativa del gas, comprobada para las tablas.",
+      "categoria": 5,
+      "tratamiento": "Consolidada con su causa. Cantidades y vías conocidas se reutilizan; posiciones no son requisito hidráulico en diámetro uniforme. Productos reales desconocidos siguen por verificar."
+    },
+    {
+      "numero": 33,
+      "texto": "Presiones en Pa para este motor tabular; no se reinterpretan mbar o mmca como Pa.",
+      "categoria": 4,
+      "tratamiento": "Se conserva como verificación del suministro o de aplicación real, agrupada y separada del escenario tabular."
+    },
+    {
+      "numero": 34,
+      "texto": "Tabla de capacidad/pérdida por diámetro y caudal, específica del material y sistema (Tabla N.º 3 del ejercicio pendiente de verificar).",
+      "categoria": 2,
+      "tratamiento": "Fuente FUSIOGAS presente y cotejada; no utilizar los números de tabla EPOXI de la plantilla antigua."
+    },
+    {
+      "numero": 35,
+      "texto": "Longitudes equivalentes de accesorios por medida y recorrido de tee (Tabla N.º 18 del ejercicio pendiente de verificar).",
+      "categoria": 2,
+      "tratamiento": "Fuente FUSIOGAS presente y cotejada; no utilizar los números de tabla EPOXI de la plantilla antigua."
+    },
+    {
+      "numero": 36,
+      "texto": "Catálogo de piezas compatibles: tees, codos, llaves, cuplas y reducciones.",
+      "categoria": 2,
+      "tratamiento": "Fuente FUSIOGAS presente y cotejada; no utilizar los números de tabla EPOXI de la plantilla antigua."
+    },
+    {
+      "numero": 37,
+      "texto": "Método y condiciones de aplicación verificados, con fuente y edición.",
+      "categoria": 4,
+      "tratamiento": "Se conserva como verificación del suministro o de aplicación real, agrupada y separada del escenario tabular."
+    },
+    {
+      "numero": 38,
+      "texto": "Revisar cantidad, tipo y posición de accesorios de M–A.",
+      "categoria": 5,
+      "tratamiento": "Consolidada con su causa. Cantidades y vías conocidas se reutilizan; posiciones no son requisito hidráulico en diámetro uniforme. Productos reales desconocidos siguen por verificar."
+    },
+    {
+      "numero": 39,
+      "texto": "Revisar cantidad, tipo y posición de accesorios de A–B.",
+      "categoria": 5,
+      "tratamiento": "Consolidada con su causa. Cantidades y vías conocidas se reutilizan; posiciones no son requisito hidráulico en diámetro uniforme. Productos reales desconocidos siguen por verificar."
+    },
+    {
+      "numero": 40,
+      "texto": "Revisar cantidad, tipo y posición de accesorios de A–Calefactor.",
+      "categoria": 5,
+      "tratamiento": "Consolidada con su causa. Cantidades y vías conocidas se reutilizan; posiciones no son requisito hidráulico en diámetro uniforme. Productos reales desconocidos siguen por verificar."
+    },
+    {
+      "numero": 41,
+      "texto": "Revisar cantidad, tipo y posición de accesorios de B–Cocina.",
+      "categoria": 5,
+      "tratamiento": "Consolidada con su causa. Cantidades y vías conocidas se reutilizan; posiciones no son requisito hidráulico en diámetro uniforme. Productos reales desconocidos siguen por verificar."
+    },
+    {
+      "numero": 42,
+      "texto": "Revisar cantidad, tipo y posición de accesorios de B–Termotanque.",
+      "categoria": 5,
+      "tratamiento": "Consolidada con su causa. Cantidades y vías conocidas se reutilizan; posiciones no son requisito hidráulico en diámetro uniforme. Productos reales desconocidos siguen por verificar."
+    },
+    {
+      "numero": 43,
+      "texto": "Confirmá que A es una tee real de tres conexiones.",
+      "categoria": 3,
+      "tratamiento": "Se reemplaza el bloqueo genérico GN por consulta FUSIOGAS propia. Topología y vías guardadas se reutilizan; no se inventan vías faltantes."
+    },
+    {
+      "numero": 44,
+      "texto": "Identificá paso principal y ramal de la tee A.",
+      "categoria": 3,
+      "tratamiento": "Se reemplaza el bloqueo genérico GN por consulta FUSIOGAS propia. Topología y vías guardadas se reutilizan; no se inventan vías faltantes."
+    },
+    {
+      "numero": 45,
+      "texto": "Confirmá que B es una tee real de tres conexiones.",
+      "categoria": 3,
+      "tratamiento": "Se reemplaza el bloqueo genérico GN por consulta FUSIOGAS propia. Topología y vías guardadas se reutilizan; no se inventan vías faltantes."
+    },
+    {
+      "numero": 46,
+      "texto": "Identificá paso principal y ramal de la tee B.",
+      "categoria": 3,
+      "tratamiento": "Se reemplaza el bloqueo genérico GN por consulta FUSIOGAS propia. Topología y vías guardadas se reutilizan; no se inventan vías faltantes."
+    }
+  ]
+}

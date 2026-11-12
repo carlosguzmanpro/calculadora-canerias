@@ -20,7 +20,7 @@
   const ps=[];
   if(catalogo.id===IDS.epoxi&&(perfil.material!=='Acero con revestimiento epoxi'||perfil.sistema!=='Roscado'))ps.push('El material y la unión guardados no coinciden exactamente con acero epoxi roscado. Se conservaron: revisalos en Datos de instalación.');
   if(catalogo.id===IDS.sigas&&((perfil.material==='Acero con revestimiento epoxi')||perfil.sistema==='Roscado'))ps.push('SIGAS está seleccionado, pero hay datos de acero epoxi/roscado guardados. Se conservaron sin trasladar sus tablas a SIGAS.');
-  const admitido=catalogo.id===IDS.epoxi?['GN']:catalogo.id===IDS.sigas?['GN','propano-gaseoso']:catalogo.id===IDS.fusiogas?['GN','GLP']:[];
+  const admitido=catalogo.id===IDS.epoxi?['GN']:catalogo.id===IDS.sigas?['GN','propano-gaseoso']:catalogo.id===IDS.fusiogas?['GN','GLP','propano-gaseoso']:[];
   if(!admitido.includes(perfil.gas))ps.push('Combustible sin tabla aplicable a este sistema: '+(perfil.gas||'Pendiente')+'. SIGAS Tabla 5 requiere propano gaseoso identificado; EPOXI no tiene tabla GLP incorporada.');
   if(catalogo.id===IDS.fusiogas&&((perfil.material&&perfil.material!=='Acero-polietileno FUSIOGAS Thermofusión')||(perfil.sistema&&perfil.sistema!=='Thermofusión')))ps.push('FUSIOGAS seleccionado con material/unión anteriores: se conservaron, revisalos sin trasladar tablas.');
   if(catalogo.id===IDS.sigas&&/FUSIOGAS/i.test(perfil.material||''))ps.push('Material FUSIOGAS guardado: no coincide con SIGAS.');

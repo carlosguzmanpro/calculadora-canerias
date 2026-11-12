@@ -13,6 +13,7 @@ function estadoCierreGas(){
  try{
   red=redFisicaManualGas();preparacion=PreparacionDiametrosGas.prepararRed(red,tramos,perfilTecnicoActualGas());const id=CatalogosSistemasGas.identificar(instalacionGas.perfil);sistema=id;
   const catalogo=CatalogosSistemasGas.obtener(id,TABLA_NAG200_3,TABLA_NAG200_18,SIGAS_ED15_2025,FUSIOGAS_V1_2026);
+  if(id==='fusiogas'){const f=dimensionamientoFusiogasActualGas();return {sistema:id,consumoTotalKcal:red.total,consumos:red.porTramo,recorridos:f.recorridos,estadoMateriales:'cantidades-manuales-disponibles',estadoDiametros:'pendiente-validacion-tecnica',diametros:null,motor:f,dimensionamientoFusiogas:f,faltantes:f.pendientes.map(p=>p.texto)};}
   const preparada=PreparacionDiametrosGas.prepararEntradaMotor(red,tramos,artefactos,{...instalacionGas,perfil:perfilTecnicoActualGas()});
   const paquete=id==='sigas'?SigasTecnico.adaptador(SIGAS_ED15_2025,perfilTecnicoActualGas().gas):id==='fusiogas'?FusiogasTecnico.adaptador(FUSIOGAS_V1_2026,perfilTecnicoActualGas().gas):catalogoParaGas({...instalacionGas,perfil:perfilTecnicoActualGas()});
   const motor=preparada.entrada?motorDimensionarGas(preparada.entrada.tramos,preparada.entrada.artefactos,preparada.entrada.instalacion,paquete):{estado:'bloqueado',diametros:null,faltantes:preparada.faltantes};
@@ -26,6 +27,7 @@ function diagnosticoVisibleGas(plan=null){
  const agregar=(grupo,clave,texto)=>{if(!claves.has(grupo+clave)){claves.add(grupo+clave);grupos[grupo].push({clave,texto});}};
  if(!estado)return {...grupos,candidatos:[],estado:null};
  const perfil=perfilTecnicoActualGas();
+ if(estado.dimensionamientoFusiogas){const f=estado.dimensionamientoFusiogas;for(const p of f.pendientes)agregar(p.grupo,p.id,p.texto);return {...grupos,candidatos:f.filas.filter(x=>x.diametroCandidatoMm).map(x=>({tramo:x.nombre,exteriorMm:x.diametroCandidatoMm})),estado};}
  if(estado.sistema!=='sigas'||perfil.gas!=='GN'||estado.estadoDiametros==='diagnostico-no-disponible'){
   for(const texto of estado.faltantes)agregar('calculo',texto.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[.]/g,''),texto);
   return {...grupos,candidatos:[],estado};
@@ -77,7 +79,7 @@ function renderEstadoCierreGas(out,pendientes,plan=null){
  texto(out,'Estado: materiales manuales calculados · consumo total '+(Number.isFinite(estado.consumoTotalKcal)?fmt(estado.consumoTotalKcal)+' kcal/h':'Pendiente de conexiones/consumos')+' · diámetros pendientes de verificación técnica.');
  const d=diagnosticoVisibleGas(plan);
  if(plan?.casilleroMedidorGas?.adicional===1)texto(pendientes,'Incluye un codo de 90° dentro del casillero M por entrada lateral/posterior confirmada y declarado no incluido en los tramos.');
- texto(pendientes,d.candidatos.length?'Candidatos SIGAS disponibles: '+d.candidatos.map(f=>f.tramo+' '+f.exteriorMm+' mm').join(' · ')+'. Pendientes de verificación; cantidades manuales y estimaciones disponibles.':'Las cantidades válidas siguen disponibles aunque falte completar el cálculo técnico.');
+ texto(pendientes,d.candidatos.length?'Candidatos '+(estado.sistema==='fusiogas'?'FUSIOGAS':'SIGAS')+' disponibles: '+d.candidatos.map(f=>f.tramo+' '+f.exteriorMm+' mm').join(' · ')+'. Pendientes de verificación; cantidades manuales y estimaciones disponibles.':'Las cantidades válidas siguen disponibles aunque falte completar el cálculo técnico.');
  const detalle=document.createElement('details'),titulo=document.createElement('summary');detalle.className='gas-detalles';titulo.textContent='Ver comprobaciones técnicas pendientes ('+d.calculo.length+')';detalle.append(titulo);
  for(const [clave,nombre] of [['calculo','Capacidad tabular y equivalencias'],['suministro','Compatibilidad del suministro'],['compra','Compra exacta · opcional para estimaciones'],['informacion','Información y verificación normativa']]){
   const seccion=document.createElement('details'),sum=document.createElement('summary');sum.textContent=nombre+' · '+d[clave].length;seccion.append(sum);for(const aviso of d[clave])texto(seccion,aviso.texto);detalle.append(seccion);

@@ -934,6 +934,7 @@ function renderListaManualSimpleGas(out,plan,modelo){
   estado.className='estado-sistema-resultados';estado.textContent='Sistema seleccionado: '+catalogo.nombre+'. Diámetros pendientes de verificación. '+catalogo.pendientes.concat(CatalogosSistemasGas.compatibilidad(perfilTecnicoActualGas(),catalogo),combustibleTecnicoGas().pendientes).join(' ')+(presentacionGas==='completo'?' Compra provisional con largo configurado de '+fmt(estadoLargoComercialGas().configurado)+' m; verificar su disponibilidad para el producto seleccionado.':'');out.append(estado);
  }
  renderResultadoEjercicioSigasGas(out);
+ renderResultadoFusiogasGas(out);
  if(ejercicio){
   const preliminar=document.createElement('details'),titulo=document.createElement('summary'),nota=document.createElement('p');
   preliminar.className='gas-calculo-preliminar';preliminar.ambitoPreliminar=ambitoGas;preliminar.open=out.preliminarGas?.ambito===ambitoGas&&out.preliminarGas.abierto===true;titulo.textContent=ejercicio.esEjercicio===false?'Datos registrados y verificación técnica':'Cálculo preliminar';nota.textContent='Utiliza los datos registrados e identificaciones confirmadas del proyecto. No incorpora automáticamente las hipótesis hidráulicas del escenario; por eso puede mostrar diámetros o pérdidas pendientes. Podés consultar y editar todas las funciones anteriores aquí.';

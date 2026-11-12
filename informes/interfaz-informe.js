@@ -49,6 +49,7 @@ function modeloInformeActual(){
   }catch(e){d.resumen.push('Materiales: Pendiente de corregir los datos actuales. '+e.message+'. El respaldo anterior no es una lista de compra vigente.');}
  }
  if(gas){
+  d.dimensionamientoFusiogas=dimensionamientoFusiogasActualGas();
   d.ejercicioSigas=resultadoPreliminarSigasGas();
   const reg=registroAccesoriosSigasGas();
   if(d.ejercicioSigas&&reg){
@@ -164,7 +165,7 @@ function organizarResultadoCompletoGas(out){
  }
  if(!root&&!out.querySelector('.ejercicio-sigas')&&!out.querySelector('.resultado-completo-generico')){
   const resultado=document.createElement('section');resultado.className='resultado-completo-generico';const h=document.createElement('h3');h.textContent='1 · Resultados y diámetros';resultado.append(h);
-  const sencillo=out.querySelector('.gas-calculo-sencillo');if(sencillo)resultado.append(sencillo);out.prepend(resultado);
+  const fusio=out.querySelector('.resultado-fusiogas'),sencillo=out.querySelector('.gas-calculo-sencillo');if(fusio){resultado.append(fusio);const tecnicos=out.querySelector('#detallesTecnicosResultadoGas');if(sencillo&&tecnicos)tecnicos.append(sencillo);}else if(sencillo)resultado.append(sencillo);out.prepend(resultado);
   const materiales=out.querySelector('.gas-solo-completo');if(materiales){const d=document.createElement('details'),s=document.createElement('summary');s.textContent='2 · Materiales y presupuesto';materiales.before(d);d.append(s,materiales);}
   const tecnicos=out.querySelector('#detallesTecnicosResultadoGas');if(tecnicos)tecnicos.querySelector('summary').textContent='3 · Memoria de cálculo y verificaciones';
  }
