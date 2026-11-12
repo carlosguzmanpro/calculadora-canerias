@@ -787,7 +787,7 @@ function guardarPosicionesCuplasGas(id,valores){
 }
 function renderPosicionesPendientesCuplasGas(out,compra){
  const filas=compra.tramos.filter(t=>t.cuplas===null);if(!filas.length)return;
- const d=document.createElement('details'),s=document.createElement('summary');d.className='gas-detalles';s.textContent='Cuplas pendientes: ver qué posiciones faltan';d.append(s);
+ const d=document.createElement('details'),s=document.createElement('summary');d.className='gas-detalles';s.textContent='Cuplas pendientes: ver qué posiciones faltan';d.classList.add('gas-compra-detalle');d.append(s);
  const texto=(padre,s)=>{const p=document.createElement('p');p.textContent=s;padre.append(p);};texto(d,'Compra exacta opcional: las distancias entre accesorios permiten precisar cortes y cuplas reales. No son necesarias para sumar pérdidas por cantidad y diámetro en un tramo uniforme ni para obtener estimaciones. Una fotografía de referencia no se interpreta automáticamente.');
  for(const f of filas){const t=tramos.find(t=>t.id===f.id);if(!t)continue;const datos=datosPosicionesCuplasGas(t),guardado=datosPlanGas().posicionesCuplas?.[t.id],card=document.createElement('details'),sc=document.createElement('summary');card.className='gas-detalles';sc.textContent=t.desde+'–'+t.hasta;card.append(sc);
   if(guardado&&guardado.firma!==datos.firma)texto(card,'Las posiciones anteriores se conservaron, pero cambió el tramo o sus accesorios. Revisalas antes de aplicarlas.');
