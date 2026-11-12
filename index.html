@@ -778,6 +778,14 @@ function validarBorradorProyectoGas(p){
   const materiales=d.materialesAgrupados?tabla('Materiales para revisión',['Material / accesorio','Diámetro','Cantidad','Unidad','Estado','Ubicación'],d.materialesAgrupados.map(f=>[f.material,f.diametro,f.cantidad,f.unidad,(f.estado==='estimado'?'PROVISIONAL (ESTIMADO)':f.estado.toUpperCase())+' · '+(f.revisado?'Revisado':'Sin revisar'),f.ubicaciones.join('; ')]),gas?'materiales-entrega':''):
    tabla('Materiales para revisión',['Material / accesorio','Diámetro','Cantidad','Unidad','Ubicación','Estado / observaciones'],d.filas.map(f=>[f.material,f.diametro,f.cantidad,f.unidad,f.ubicacion,(f.cantidad==null||/pendiente/i.test(f.diametro)?'PENDIENTE':String(f.estado).toUpperCase())+' · '+(f.revisado?'Revisado':'Sin revisar')+' · '+(f.evidencia||'')+(f.editado?' · Ajuste manual':'')]),gas?'materiales-entrega':'');
   const compra=gas&&d.preparacionCompra,preparacion=compra?tabla('Preparación de compra · ESTIMACIÓN PROVISIONAL',['Tramo / diámetro','Real (m)','Tiras / metros comerciales','Sobrante (m)','Cuplas estimadas'],compra.tramos.map(t=>[t.id+' · '+t.diametros.map(d=>d.valor+' ('+d.estado+')').join(' / '),numero(t.metros),t.tiras+' × '+compra.largoComercial+' m = '+numero(t.metrosComerciales)+' m',numero(t.sobrante),t.cuplas===null&&compra.estimacionCuplas?compra.estimacionCuplas.tramos.find(e=>e.id===t.id).cantidad+' estimadas · orientativas':t.cuplas===null?(t.cuplasConocidas?t.cuplasConocidas+' calculadas; resto pendiente':'Pendiente'):t.cuplas]))+'<p>Distribución estimada: no sumar estas tiras o cuplas a las filas anteriores como si fueran piezas adicionales. Diámetros y conexiones pendientes; no constituye compra definitiva.</p>'+compra.supuestos.concat(compra.estimacionCuplas?[compra.estimacionCuplas.criterio]:[],compra.tramos.filter(t=>t.cuplas===null&&t.cuplasConocidas>0).map(t=>t.id+': '+t.cuplasConocidas+' calculadas; resto pendiente para cantidad exacta.'),compra.pendientes).map(s=>'<p>'+celda(s)+'</p>').join('')+tabla('Conexiones propuestas · SIN CONFIRMAR',['Ubicación','Propuesta','Medidas'],compra.propuestas.map(p=>[p.ubicacion,p.material,p.diametro])):'';
+  if(d.ejercicioSigas?.esEjercicio===false){
+   const conexiones=tabla('Conexiones roscadas registradas',['Conexión','Rosca (pulgadas)'],(d.conexionesRosca||[]).map(c=>[c.nombre,c.rosca?c.rosca+'″':'Pendiente']));
+   const continuidad=compra?tabla('Cuplas según continuidad registrada · independiente de las propuestas',['Tramo','Cuplas calculadas'],compra.tramos.filter(t=>t.continuidad||t.cuplasConocidas>0).map(t=>[t.id,t.cuplas===null?t.cuplasConocidas+' calculadas; resto pendiente':t.cuplas+' calculadas según continuidad'])):'';
+   const comparacion=tabla('Comparación '+(d.comparacionIdentificadaParcial?'parcial':'independiente')+' · solo piezas identificadas',['Tramo','Diámetro provisional (mm)','Consulta parcial (m)','Capacidad parcial (m³/h)','Grupos de pérdidas pendientes'],(d.comparacionIdentificada||[]).map(f=>[f.tramo,f.diametro,metros(f.longitud),numero(f.capacidad),f.pendientes]));
+   return '<h1>CAÑERÍAS · '+esc(d.titulo)+'</h1><p>'+esc(d.ambito)+'</p>'+ejercicioSigas(d.ejercicioSigas,true)+conexiones+imagen+
+    '<details open><summary>Anexo · datos registrados y comparación '+(d.comparacionIdentificadaParcial?'parcial':'independiente')+'</summary><p>El resultado y la memoria principales utilizan el mismo escenario con productos propuestos documentados. La siguiente consulta utiliza solo las piezas identificadas: las pérdidas pendientes no son cero y sus diámetros provisionales no sustituyen a los del escenario principal.</p>'+comparacion+continuidad+materiales+'</details>'+
+    (d.observaciones?'<h2>Observaciones</h2><p>'+celda(d.observaciones)+'</p>':'')+'<p>'+celda(d.advertencia)+'</p>';
+  }
   return '<h1>CAÑERÍAS · '+esc(d.titulo)+'</h1><p>'+esc(d.ambito)+'</p>'+(d.ejercicioSigas?.esEjercicio===false?'':imagen)+ejercicioSigas(d.ejercicioSigas,true)+(d.ejercicioSigas?.esEjercicio===false?imagen:'')+(d.ejercicioSigas?'<details open class="calculo-preliminar-pdf"><summary>Cálculo preliminar · datos registrados</summary><p>Utiliza los datos e identificaciones confirmadas guardados en el proyecto; no incorpora automáticamente las hipótesis hidráulicas del escenario. Los resultados pendientes pertenecen a este conjunto diferente de datos.</p>':'')+dimensiones+
    (d.planilla?.length?'<p>REAL: longitud física del tramo. EQUIVALENTE: accesorios del tramo. DEFINITIVO: longitud total del recorrido de cálculo más desfavorable que lo contiene; no es REAL + EQUIVALENTE de esa fila. Consumo acumulado transportado por el tramo.</p>':'')+
    tabla('Artefactos',['Artefacto','Consumo (kcal/h)'],d.artefactos.map(a=>[a.nombre,a.consumo]))+materiales+(d.ejercicioSigas?.esEjercicio===true?'':preparacion)+
@@ -840,7 +848,15 @@ function modeloInformeActual(){
   const largo=estadoLargoComercialGas();if(largo.pendiente)d.resumen.push('Largo comercial conservado '+largo.configurado+' m; manual del sistema '+largo.documentado+' m. Revisar antes de compra.');
   }catch(e){d.resumen.push('Materiales: Pendiente de corregir los datos actuales. '+e.message+'. El respaldo anterior no es una lista de compra vigente.');}
  }
- if(gas)d.ejercicioSigas=resultadoPreliminarSigasGas();
+ if(gas){
+  d.ejercicioSigas=resultadoPreliminarSigasGas();
+  const reg=registroAccesoriosSigasGas();
+  if(d.ejercicioSigas&&reg){
+   d.conexionesRosca=(reg.entradaTecnica.inventario.necesidadesTerminales||[]).map(n=>({nombre:n.nombre,rosca:proyectoGasActual().calculoSigas?.terminales?.[n.id]?.rosca||null}));
+   d.comparacionIdentificadaParcial=reg.calculo.filas.some(f=>f.verificacionConsulta?.parcial!==false);
+   d.comparacionIdentificada=reg.calculo.filas.map(f=>({tramo:f.tramo,diametro:f.candidato?.exteriorMm??null,longitud:f.longitudConsultaM,capacidad:f.candidato?.capacidadM3h??null,pendientes:f.perdidasPendientesTramo.length}));
+  }
+ }
  return d;
 }
 function prepararInformeActual(){
@@ -909,6 +925,55 @@ function ubicacionLegibleGas(texto,contexto=null){
  if(!mapa.size)return String(texto||'Ubicación pendiente');
  const rx=new RegExp('(^|[^A-Za-z0-9_-])('+[...mapa.keys()].sort((a,b)=>b.length-a.length).map(escapar).join('|')+')(?=$|[^A-Za-z0-9_-])','g');
  return String(texto||'Ubicación pendiente').replace(rx,(_,sep,id)=>sep+mapa.get(id));
+}
+
+// Organización del modo completo exclusivamente: conserva los controles y registros originales.
+function organizarResultadoCompletoGas(out){
+ if(modulo!=='gas'||presentacionGas!=='completo'||!revisionMaterialesGas||!out?.querySelector)return;
+ const root=out.querySelector('.sigas-vista-sencilla');
+ if(root&&!root.dataset.resultadoCompleto){
+  root.dataset.resultadoCompleto='1';
+  const titulo=root.querySelector('h2');if(titulo)titulo.textContent='1 · Resultados y diámetros';
+  const materiales=root.querySelector('.sigas-piezas-detalle'),tecnicos=root.querySelector('.sigas-tecnicos-detalle');
+  if(materiales){materiales.querySelector('summary').textContent='2 · Materiales y presupuesto';const compra=root.querySelector('.compra-estimada');if(compra)materiales.append(compra);}
+  if(tecnicos){
+   tecnicos.querySelector('summary').textContent='3 · Memoria de cálculo y verificaciones';
+   const refs=tecnicos.querySelector('.sigas-referencias-tabulares'),tabla=root.querySelector('.resultados-tramos table');
+   // La fila, capacidad y estado completos se muestran una sola vez, en la tabla principal.
+   if(refs&&tabla){
+    const filas=refs.querySelectorAll('tbody tr'),modelo=resultadoPreliminarSigasGas();
+    for(const [i,tr]of [...tabla.querySelectorAll('tbody tr')].entries()){
+     const c=filas[i]?.lastElementChild,f=modelo?.resultado.filas[i];if(!c||!f)continue;
+     const estado=c.textContent.startsWith('Diámetro calculado y comprobado')||c.textContent.startsWith('Comprobada')?'Comprobado por tabla':c.textContent.startsWith('Preliminar')?'Preliminar':'Parcial';
+     tr.lastElementChild.textContent=estado+' · fila '+metrosResultadoSigasGas(f.candidato?.longitudFilaM)+' m · capacidad '+(f.candidato?f.candidato.capacidadM3h.toLocaleString('es-AR',{maximumFractionDigits:6}):'Pendiente')+' m³/h';
+    }
+    const realesComprobadas=modelo?.resultado.filas.length>0&&modelo.resultado.filas.every(f=>f.candidato&&modelo.comprobacionRealPorTramo?.[f.id]===f.candidato.exteriorMm);
+    const nota=document.createElement('p');nota.className='nota-contexto-escenario';nota.textContent=realesComprobadas?'Capacidad comprobada por tabla con piezas identificadas. El suministro y la aprobación normativa se verifican por separado.':modelo?.completo?'Preliminar · capacidad cubierta para el escenario propuesto. Las piezas reales, el suministro y la aprobación normativa se verifican por separado.':'Preliminar · consulta parcial. Las pérdidas desconocidas no se consideran cero.';tabla.before(nota);refs.remove();
+   }
+   for(const d of tecnicos.querySelectorAll(':scope > details'))if(/^Recorridos y memoria/.test(d.querySelector('summary')?.textContent||''))d.open=true;
+   const avisos=root.querySelector('.verificaciones-finales');if(avisos)tecnicos.append(avisos);
+   const confirmados=out.querySelector('.gas-calculo-preliminar');
+   if(confirmados){
+    const parcial=registroAccesoriosSigasGas()?.calculo.filas.some(f=>f.verificacionConsulta?.parcial!==false);
+    confirmados.querySelector('summary').textContent='Comparar con piezas identificadas · '+(parcial?'cálculo parcial':'cálculo independiente');
+    const nota=confirmados.querySelector('p');if(nota)nota.textContent='Esta consulta utiliza solo las piezas identificadas; cuando hay pérdidas pendientes, sus resultados son parciales. No es el escenario principal: este también utiliza propuestas documentadas, sin confirmar piezas reales. Un diámetro menor aquí no sustituye al resultado principal.';
+    const tablaParcial=confirmados.querySelector('.sigas-diametros');if(tablaParcial){const caption=document.createElement('caption');caption.textContent='Datos identificados · comparación independiente, no resultado del escenario principal';tablaParcial.prepend(caption);}
+    tecnicos.append(confirmados);
+   }
+  }
+ }
+ if(!root&&!out.querySelector('.ejercicio-sigas')&&!out.querySelector('.resultado-completo-generico')){
+  const resultado=document.createElement('section');resultado.className='resultado-completo-generico';const h=document.createElement('h3');h.textContent='1 · Resultados y diámetros';resultado.append(h);
+  const sencillo=out.querySelector('.gas-calculo-sencillo');if(sencillo)resultado.append(sencillo);out.prepend(resultado);
+  const materiales=out.querySelector('.gas-solo-completo');if(materiales){const d=document.createElement('details'),s=document.createElement('summary');s.textContent='2 · Materiales y presupuesto';materiales.before(d);d.append(s,materiales);}
+  const tecnicos=out.querySelector('#detallesTecnicosResultadoGas');if(tecnicos)tecnicos.querySelector('summary').textContent='3 · Memoria de cálculo y verificaciones';
+ }
+ if(!out.querySelector('.pdf-completo-gas')){
+  const bloque=document.createElement('section');bloque.className='pdf-completo-gas';const h=document.createElement('h3');h.textContent='4 · Generar PDF completo';
+  const b=document.createElement('button');b.type='button';b.textContent='Generar PDF completo';b.onclick=imprimirInformeActual;
+  const nota=document.createElement('p');nota.className='nota';nota.textContent='Abre la impresión de Chrome: elegí Guardar como PDF. Incluye el escenario y distingue los datos reales pendientes de verificar.';bloque.append(h,b,nota);(root||out).append(bloque);
+  const ensayo=out.querySelector('.ensayo-cortes-ideal-gas');if(ensayo){const d=document.createElement('details'),s=document.createElement('summary');d.className='avanzadas-resultado-completo';d.open=out.vistaSigasGas?.ambito===ambitoGas&&out.vistaSigasGas.avanzadas===true;s.textContent='Herramientas avanzadas · ensayo de cortes';d.append(s,ensayo);(root||out).append(d);}
+ }
 }
 
 </script>
@@ -1642,8 +1707,8 @@ function modeloResumenMaterialesGas(plan,ts=tramos){
  });
  return {totales,porTramo:ts.map(t=>({tramo:t.desde+'–'+t.hasta,filas:asignaciones.filter(a=>a.ids.includes(t.id))})),sinUbicacion:asignaciones.filter(a=>!a.ids.length)};
 }
-function renderResumenPrincipalGas(){
- const out=$('resumenPrincipalMaterialesGas');if(!out)return;const vista=out.querySelector?.('.sigas-vista-sencilla');out.vistaSigasGas=vista?{ambito:vista.ambitoVistaGas,datos:vista.querySelector('.sigas-datos-proyecto')?.open,materiales:vista.querySelector('.sigas-piezas-detalle')?.open,tecnicos:vista.querySelector('.sigas-tecnicos-detalle')?.open}:null;const previo=out.querySelector?.(':scope > .gas-calculo-preliminar');out.preliminarGas=previo?{ambito:previo.ambitoPreliminar,abierto:previo.open}:null;out.replaceChildren();
+function renderResumenPrincipalGasBase(){
+ const out=$('resumenPrincipalMaterialesGas');if(!out)return;const vista=out.querySelector?.('.sigas-vista-sencilla');out.vistaSigasGas=vista?{ambito:vista.ambitoVistaGas,datos:vista.querySelector('.sigas-datos-proyecto')?.open,materiales:vista.querySelector('.sigas-piezas-detalle')?.open,tecnicos:vista.querySelector('.sigas-tecnicos-detalle')?.open,avanzadas:out.querySelector?.('.avanzadas-resultado-completo')?.open}:null;const previo=out.querySelector?.('.gas-calculo-preliminar');out.preliminarGas=previo?{ambito:previo.ambitoPreliminar,abierto:previo.open}:null;out.replaceChildren();
  const texto=(padre,t)=>{const p=document.createElement('p');p.textContent=textoMaterialPantallaGas(t);padre.append(p);};
  if(!revisionMaterialesGas){texto(out,'Cargá los tramos y generá la lista. Los datos faltantes se mostrarán como pendientes.');return;}
  if(revisionMaterialesGas.firma!==firmaMaterialesGas()){texto(out,'Resumen desactualizado: generá la lista con los datos actuales. Se conserva el respaldo anterior.');return;}
@@ -1661,6 +1726,7 @@ function renderResumenPrincipalGas(){
  if(modelo.sinUbicacion.length){texto(detalles,'Materiales con ubicación pendiente de vincular:');for(const a of modelo.sinUbicacion)texto(detalles,a.fila.material+' · '+(a.fila.cantidad??'Pendiente')+' '+a.fila.unidad+' · '+a.fila.diametro);}
  out.append(detalles);texto(out,'Para cambiar cantidades o revisiones, usá las tarjetas editables de abajo. Foto y plano son opcionales.');
 }
+function renderResumenPrincipalGas(){renderResumenPrincipalGasBase();organizarResultadoCompletoGas($('resumenPrincipalMaterialesGas'));}
 function mostrarMaterialesPrincipalGas(){
  if(modulo!=='gas')return;mostrarVista('croquis');
  if(!tramos.length){irSeccionGas('tramos');$('resultadoMateriales').textContent='Cargá primero los tramos. La fotografía y el plano son opcionales.';return;}
@@ -18924,7 +18990,7 @@ function elegirPresentacionGas(modo){
  if(!['rapido','completo'].includes(modo))return;
  presentacionGas=modo;$('entradaGas').classList.add('oculto');
  if(modulo!=='gas')abrir('gas');
- else{$('inicio').classList.add('oculto');$('trabajo').classList.remove('oculto');actualizarPresentacionGas();renderTramos();}
+ else{$('inicio').classList.add('oculto');$('trabajo').classList.remove('oculto');actualizarPresentacionGas();renderTramos();renderResumenPrincipalGas();}
 }
 
 function abrir(m){

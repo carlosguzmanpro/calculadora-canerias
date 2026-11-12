@@ -48,7 +48,15 @@ function modeloInformeActual(){
   const largo=estadoLargoComercialGas();if(largo.pendiente)d.resumen.push('Largo comercial conservado '+largo.configurado+' m; manual del sistema '+largo.documentado+' m. Revisar antes de compra.');
   }catch(e){d.resumen.push('Materiales: Pendiente de corregir los datos actuales. '+e.message+'. El respaldo anterior no es una lista de compra vigente.');}
  }
- if(gas)d.ejercicioSigas=resultadoPreliminarSigasGas();
+ if(gas){
+  d.ejercicioSigas=resultadoPreliminarSigasGas();
+  const reg=registroAccesoriosSigasGas();
+  if(d.ejercicioSigas&&reg){
+   d.conexionesRosca=(reg.entradaTecnica.inventario.necesidadesTerminales||[]).map(n=>({nombre:n.nombre,rosca:proyectoGasActual().calculoSigas?.terminales?.[n.id]?.rosca||null}));
+   d.comparacionIdentificadaParcial=reg.calculo.filas.some(f=>f.verificacionConsulta?.parcial!==false);
+   d.comparacionIdentificada=reg.calculo.filas.map(f=>({tramo:f.tramo,diametro:f.candidato?.exteriorMm??null,longitud:f.longitudConsultaM,capacidad:f.candidato?.capacidadM3h??null,pendientes:f.perdidasPendientesTramo.length}));
+  }
+ }
  return d;
 }
 function prepararInformeActual(){
@@ -117,4 +125,53 @@ function ubicacionLegibleGas(texto,contexto=null){
  if(!mapa.size)return String(texto||'Ubicación pendiente');
  const rx=new RegExp('(^|[^A-Za-z0-9_-])('+[...mapa.keys()].sort((a,b)=>b.length-a.length).map(escapar).join('|')+')(?=$|[^A-Za-z0-9_-])','g');
  return String(texto||'Ubicación pendiente').replace(rx,(_,sep,id)=>sep+mapa.get(id));
+}
+
+// Organización del modo completo exclusivamente: conserva los controles y registros originales.
+function organizarResultadoCompletoGas(out){
+ if(modulo!=='gas'||presentacionGas!=='completo'||!revisionMaterialesGas||!out?.querySelector)return;
+ const root=out.querySelector('.sigas-vista-sencilla');
+ if(root&&!root.dataset.resultadoCompleto){
+  root.dataset.resultadoCompleto='1';
+  const titulo=root.querySelector('h2');if(titulo)titulo.textContent='1 · Resultados y diámetros';
+  const materiales=root.querySelector('.sigas-piezas-detalle'),tecnicos=root.querySelector('.sigas-tecnicos-detalle');
+  if(materiales){materiales.querySelector('summary').textContent='2 · Materiales y presupuesto';const compra=root.querySelector('.compra-estimada');if(compra)materiales.append(compra);}
+  if(tecnicos){
+   tecnicos.querySelector('summary').textContent='3 · Memoria de cálculo y verificaciones';
+   const refs=tecnicos.querySelector('.sigas-referencias-tabulares'),tabla=root.querySelector('.resultados-tramos table');
+   // La fila, capacidad y estado completos se muestran una sola vez, en la tabla principal.
+   if(refs&&tabla){
+    const filas=refs.querySelectorAll('tbody tr'),modelo=resultadoPreliminarSigasGas();
+    for(const [i,tr]of [...tabla.querySelectorAll('tbody tr')].entries()){
+     const c=filas[i]?.lastElementChild,f=modelo?.resultado.filas[i];if(!c||!f)continue;
+     const estado=c.textContent.startsWith('Diámetro calculado y comprobado')||c.textContent.startsWith('Comprobada')?'Comprobado por tabla':c.textContent.startsWith('Preliminar')?'Preliminar':'Parcial';
+     tr.lastElementChild.textContent=estado+' · fila '+metrosResultadoSigasGas(f.candidato?.longitudFilaM)+' m · capacidad '+(f.candidato?f.candidato.capacidadM3h.toLocaleString('es-AR',{maximumFractionDigits:6}):'Pendiente')+' m³/h';
+    }
+    const realesComprobadas=modelo?.resultado.filas.length>0&&modelo.resultado.filas.every(f=>f.candidato&&modelo.comprobacionRealPorTramo?.[f.id]===f.candidato.exteriorMm);
+    const nota=document.createElement('p');nota.className='nota-contexto-escenario';nota.textContent=realesComprobadas?'Capacidad comprobada por tabla con piezas identificadas. El suministro y la aprobación normativa se verifican por separado.':modelo?.completo?'Preliminar · capacidad cubierta para el escenario propuesto. Las piezas reales, el suministro y la aprobación normativa se verifican por separado.':'Preliminar · consulta parcial. Las pérdidas desconocidas no se consideran cero.';tabla.before(nota);refs.remove();
+   }
+   for(const d of tecnicos.querySelectorAll(':scope > details'))if(/^Recorridos y memoria/.test(d.querySelector('summary')?.textContent||''))d.open=true;
+   const avisos=root.querySelector('.verificaciones-finales');if(avisos)tecnicos.append(avisos);
+   const confirmados=out.querySelector('.gas-calculo-preliminar');
+   if(confirmados){
+    const parcial=registroAccesoriosSigasGas()?.calculo.filas.some(f=>f.verificacionConsulta?.parcial!==false);
+    confirmados.querySelector('summary').textContent='Comparar con piezas identificadas · '+(parcial?'cálculo parcial':'cálculo independiente');
+    const nota=confirmados.querySelector('p');if(nota)nota.textContent='Esta consulta utiliza solo las piezas identificadas; cuando hay pérdidas pendientes, sus resultados son parciales. No es el escenario principal: este también utiliza propuestas documentadas, sin confirmar piezas reales. Un diámetro menor aquí no sustituye al resultado principal.';
+    const tablaParcial=confirmados.querySelector('.sigas-diametros');if(tablaParcial){const caption=document.createElement('caption');caption.textContent='Datos identificados · comparación independiente, no resultado del escenario principal';tablaParcial.prepend(caption);}
+    tecnicos.append(confirmados);
+   }
+  }
+ }
+ if(!root&&!out.querySelector('.ejercicio-sigas')&&!out.querySelector('.resultado-completo-generico')){
+  const resultado=document.createElement('section');resultado.className='resultado-completo-generico';const h=document.createElement('h3');h.textContent='1 · Resultados y diámetros';resultado.append(h);
+  const sencillo=out.querySelector('.gas-calculo-sencillo');if(sencillo)resultado.append(sencillo);out.prepend(resultado);
+  const materiales=out.querySelector('.gas-solo-completo');if(materiales){const d=document.createElement('details'),s=document.createElement('summary');s.textContent='2 · Materiales y presupuesto';materiales.before(d);d.append(s,materiales);}
+  const tecnicos=out.querySelector('#detallesTecnicosResultadoGas');if(tecnicos)tecnicos.querySelector('summary').textContent='3 · Memoria de cálculo y verificaciones';
+ }
+ if(!out.querySelector('.pdf-completo-gas')){
+  const bloque=document.createElement('section');bloque.className='pdf-completo-gas';const h=document.createElement('h3');h.textContent='4 · Generar PDF completo';
+  const b=document.createElement('button');b.type='button';b.textContent='Generar PDF completo';b.onclick=imprimirInformeActual;
+  const nota=document.createElement('p');nota.className='nota';nota.textContent='Abre la impresión de Chrome: elegí Guardar como PDF. Incluye el escenario y distingue los datos reales pendientes de verificar.';bloque.append(h,b,nota);(root||out).append(bloque);
+  const ensayo=out.querySelector('.ensayo-cortes-ideal-gas');if(ensayo){const d=document.createElement('details'),s=document.createElement('summary');d.className='avanzadas-resultado-completo';d.open=out.vistaSigasGas?.ambito===ambitoGas&&out.vistaSigasGas.avanzadas===true;s.textContent='Herramientas avanzadas · ensayo de cortes';d.append(s,ensayo);(root||out).append(d);}
+ }
 }

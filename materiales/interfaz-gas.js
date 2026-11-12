@@ -453,8 +453,8 @@ function modeloResumenMaterialesGas(plan,ts=tramos){
  });
  return {totales,porTramo:ts.map(t=>({tramo:t.desde+'–'+t.hasta,filas:asignaciones.filter(a=>a.ids.includes(t.id))})),sinUbicacion:asignaciones.filter(a=>!a.ids.length)};
 }
-function renderResumenPrincipalGas(){
- const out=$('resumenPrincipalMaterialesGas');if(!out)return;const vista=out.querySelector?.('.sigas-vista-sencilla');out.vistaSigasGas=vista?{ambito:vista.ambitoVistaGas,datos:vista.querySelector('.sigas-datos-proyecto')?.open,materiales:vista.querySelector('.sigas-piezas-detalle')?.open,tecnicos:vista.querySelector('.sigas-tecnicos-detalle')?.open}:null;const previo=out.querySelector?.(':scope > .gas-calculo-preliminar');out.preliminarGas=previo?{ambito:previo.ambitoPreliminar,abierto:previo.open}:null;out.replaceChildren();
+function renderResumenPrincipalGasBase(){
+ const out=$('resumenPrincipalMaterialesGas');if(!out)return;const vista=out.querySelector?.('.sigas-vista-sencilla');out.vistaSigasGas=vista?{ambito:vista.ambitoVistaGas,datos:vista.querySelector('.sigas-datos-proyecto')?.open,materiales:vista.querySelector('.sigas-piezas-detalle')?.open,tecnicos:vista.querySelector('.sigas-tecnicos-detalle')?.open,avanzadas:out.querySelector?.('.avanzadas-resultado-completo')?.open}:null;const previo=out.querySelector?.('.gas-calculo-preliminar');out.preliminarGas=previo?{ambito:previo.ambitoPreliminar,abierto:previo.open}:null;out.replaceChildren();
  const texto=(padre,t)=>{const p=document.createElement('p');p.textContent=textoMaterialPantallaGas(t);padre.append(p);};
  if(!revisionMaterialesGas){texto(out,'Cargá los tramos y generá la lista. Los datos faltantes se mostrarán como pendientes.');return;}
  if(revisionMaterialesGas.firma!==firmaMaterialesGas()){texto(out,'Resumen desactualizado: generá la lista con los datos actuales. Se conserva el respaldo anterior.');return;}
@@ -472,6 +472,7 @@ function renderResumenPrincipalGas(){
  if(modelo.sinUbicacion.length){texto(detalles,'Materiales con ubicación pendiente de vincular:');for(const a of modelo.sinUbicacion)texto(detalles,a.fila.material+' · '+(a.fila.cantidad??'Pendiente')+' '+a.fila.unidad+' · '+a.fila.diametro);}
  out.append(detalles);texto(out,'Para cambiar cantidades o revisiones, usá las tarjetas editables de abajo. Foto y plano son opcionales.');
 }
+function renderResumenPrincipalGas(){renderResumenPrincipalGasBase();organizarResultadoCompletoGas($('resumenPrincipalMaterialesGas'));}
 function mostrarMaterialesPrincipalGas(){
  if(modulo!=='gas')return;mostrarVista('croquis');
  if(!tramos.length){irSeccionGas('tramos');$('resultadoMateriales').textContent='Cargá primero los tramos. La fotografía y el plano son opcionales.';return;}
