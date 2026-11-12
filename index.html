@@ -2182,7 +2182,7 @@ function renderListaManualSimpleGas(out,plan,modelo){
  const ejercicio=resultadoPreliminarSigasGas();
  if(!ejercicio){
   const catalogo=CatalogosSistemasGas.obtener(CatalogosSistemasGas.identificar(instalacionGas.perfil),TABLA_NAG200_3,TABLA_NAG200_18,SIGAS_ED15_2025,FUSIOGAS_V1_2026),estado=document.createElement('p');
-  estado.className='estado-sistema-resultados';estado.textContent='Sistema seleccionado: '+catalogo.nombre+'. Diámetros pendientes de verificación. '+catalogo.pendientes.join(' ')+(presentacionGas==='completo'?' Compra provisional con largo configurado de '+fmt(estadoLargoComercialGas().configurado)+' m; verificar su disponibilidad para el producto seleccionado.':'');out.append(estado);
+  estado.className='estado-sistema-resultados';estado.textContent='Sistema seleccionado: '+catalogo.nombre+'. Diámetros pendientes de verificación. '+catalogo.pendientes.concat(CatalogosSistemasGas.compatibilidad(perfilTecnicoActualGas(),catalogo),combustibleTecnicoGas().pendientes).join(' ')+(presentacionGas==='completo'?' Compra provisional con largo configurado de '+fmt(estadoLargoComercialGas().configurado)+' m; verificar su disponibilidad para el producto seleccionado.':'');out.append(estado);
  }
  renderResultadoEjercicioSigasGas(out);
  if(ejercicio){
@@ -15566,11 +15566,25 @@ function seleccionarCombustibleGas(gas){
  if(modulo!=='gas')return false;if(!['GN','GLP','propano-gaseoso'].includes(gas)){sincronizarPerfilTecnicoGas();return false;}
  const p=instalacionGas.perfil;
  if(p.gas!==gas||combustibleTecnicoGas().conflicto){
-  p.condicionesAnterioresCombustible=[...(Array.isArray(p.condicionesAnterioresCombustible)?p.condicionesAnterioresCombustible:[]),{gas:p.gas,poderCalorifico:p.poderCalorifico??null,densidadRelativa:p.densidadRelativa??null,fuenteGas:p.fuenteGas??null,tipoGas:proyectoGasActual().tipoGas??null}];
-  p.condicionesCombustiblePendientes=true;
+  const campos=['poderCalorifico','densidadRelativa','fuenteGas','presionDisponible','presionMinima','perdidaMaxima','unidadPresion','fuentePresiones'];
+  const historial=Array.isArray(p.condicionesAnterioresCombustible)?p.condicionesAnterioresCombustible:[];
+  const previa={gas:p.gas,tipoGas:proyectoGasActual().tipoGas??null,vinculadaAlCombustible:true,pendientes:p.condicionesCombustiblePendientes===true||combustibleTecnicoGas().conflicto};
+  for(const k of campos)previa[k]=p[k]??null;
+  p.condicionesAnterioresCombustible=[...historial,previa];
+  // Solo recuperar datos documentados de ESTE combustible. Los registros legados ambiguos no se reactivan.
+  const propia=historial.slice().reverse().find(h=>h?.gas===gas&&h.vinculadaAlCombustible===true&&h.pendientes===false&&Number(h.poderCalorifico)>0&&typeof h.fuenteGas==='string'&&h.fuenteGas.trim());
+  for(const k of campos)p[k]=propia?.[k]??'';
+  p.condicionesCombustiblePendientes=!propia;
  }
  p.gas=gas;$('gt').value=gas==='GN'?'9300':'22300';proyectoGasActual().tipoGas=$('gt').value;
- invalidarConsumos();guardarDatos();sincronizarSistemaPrincipalGas();renderResumenPrincipalGas();return true;
+ const activo=perfilTecnicoActualGas();
+ for(const [k,id]of [['poderCalorifico','dimPCS'],['densidadRelativa','dimDensidad'],['fuenteGas','dimFuenteGas'],['presionDisponible','redPresion'],['presionMinima','redMinima'],['perdidaMaxima','redPerdida'],['unidadPresion','redUnidad'],['fuentePresiones','redFuente']])$(id).value=String(activo[k]??'');
+ invalidarConsumos();guardarDatos();sincronizarSistemaPrincipalGas();refrescarResultadosCombustibleGas();return true;
+}
+function refrescarResultadosCombustibleGas(){
+ renderTramos();
+ try{mostrarPreparacionDiametrosGas();}catch(e){$('estadoCombustibleGas').textContent+=' Diagnóstico técnico pendiente: '+e.message;}
+ renderResumenPrincipalGas();
 }
 function estadoLargoComercialGas(fuente='proyecto'){
  const p=proyectoGasActual(),id=CatalogosSistemasGas.identificar(instalacionGas.perfil),documento=CatalogosSistemasGas.largoDocumentado(id),documentado=documento?.metros||null,o=p.planCompra?.opciones||{};
@@ -18617,7 +18631,7 @@ function ejecutarClaseMiRedGas(){
 
 function guardarCondicionesDimensionamiento(){
  if(!validarCamposDecimalesGas(['dimPCS','dimDensidad']))return;
- instalacionGas.perfil.poderCalorifico=$('dimPCS').value.trim();instalacionGas.perfil.densidadRelativa=$('dimDensidad').value.trim();instalacionGas.perfil.fuenteGas=$('dimFuenteGas').value.trim();instalacionGas.perfil.condicionesCombustiblePendientes=false;guardarDatos();sincronizarPerfilTecnicoGas();
+ instalacionGas.perfil.poderCalorifico=$('dimPCS').value.trim();instalacionGas.perfil.densidadRelativa=$('dimDensidad').value.trim();instalacionGas.perfil.fuenteGas=$('dimFuenteGas').value.trim();instalacionGas.perfil.condicionesCombustiblePendientes=false;guardarDatos();sincronizarPerfilTecnicoGas();refrescarResultadosCombustibleGas();
 }
 function catalogoParaGas(inst){return CATALOGOS_GAS_VERIFICADOS.find(c=>c.material===inst.perfil.material&&c.sistema===inst.perfil.sistema&&c.gas===inst.perfil.gas)||null;}
 function imprimirResultadoMotor(r,id){
@@ -19151,7 +19165,7 @@ function mostrarVista(v){
  if(['revisionCroquis','redGas','dimensionGas'].includes(v) && modulo!=='gas')return;
  $('redGas').classList.toggle('oculto',v!=='redGas');
  $('dimensionGas').classList.toggle('oculto',v!=='dimensionGas');
- if(v==='dimensionGas'){mostrarPreparacionDiametrosGas();for(const [id,k]of [['dimPCS','poderCalorifico'],['dimDensidad','densidadRelativa'],['dimFuenteGas','fuenteGas']])$(id).value=instalacionGas.perfil[k]||'';}
+ if(v==='dimensionGas'){mostrarPreparacionDiametrosGas();for(const [id,k]of [['dimPCS','poderCalorifico'],['dimDensidad','densidadRelativa'],['dimFuenteGas','fuenteGas']])$(id).value=perfilTecnicoActualGas()[k]||'';}
  if(v==='redGas')renderRedGas();
  $('revisionCroquis').classList.toggle('oculto',v!=='revisionCroquis');
  if(v==='revisionCroquis')renderRevisionCroquis();

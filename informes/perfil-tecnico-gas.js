@@ -15,11 +15,25 @@ function seleccionarCombustibleGas(gas){
  if(modulo!=='gas')return false;if(!['GN','GLP','propano-gaseoso'].includes(gas)){sincronizarPerfilTecnicoGas();return false;}
  const p=instalacionGas.perfil;
  if(p.gas!==gas||combustibleTecnicoGas().conflicto){
-  p.condicionesAnterioresCombustible=[...(Array.isArray(p.condicionesAnterioresCombustible)?p.condicionesAnterioresCombustible:[]),{gas:p.gas,poderCalorifico:p.poderCalorifico??null,densidadRelativa:p.densidadRelativa??null,fuenteGas:p.fuenteGas??null,tipoGas:proyectoGasActual().tipoGas??null}];
-  p.condicionesCombustiblePendientes=true;
+  const campos=['poderCalorifico','densidadRelativa','fuenteGas','presionDisponible','presionMinima','perdidaMaxima','unidadPresion','fuentePresiones'];
+  const historial=Array.isArray(p.condicionesAnterioresCombustible)?p.condicionesAnterioresCombustible:[];
+  const previa={gas:p.gas,tipoGas:proyectoGasActual().tipoGas??null,vinculadaAlCombustible:true,pendientes:p.condicionesCombustiblePendientes===true||combustibleTecnicoGas().conflicto};
+  for(const k of campos)previa[k]=p[k]??null;
+  p.condicionesAnterioresCombustible=[...historial,previa];
+  // Solo recuperar datos documentados de ESTE combustible. Los registros legados ambiguos no se reactivan.
+  const propia=historial.slice().reverse().find(h=>h?.gas===gas&&h.vinculadaAlCombustible===true&&h.pendientes===false&&Number(h.poderCalorifico)>0&&typeof h.fuenteGas==='string'&&h.fuenteGas.trim());
+  for(const k of campos)p[k]=propia?.[k]??'';
+  p.condicionesCombustiblePendientes=!propia;
  }
  p.gas=gas;$('gt').value=gas==='GN'?'9300':'22300';proyectoGasActual().tipoGas=$('gt').value;
- invalidarConsumos();guardarDatos();sincronizarSistemaPrincipalGas();renderResumenPrincipalGas();return true;
+ const activo=perfilTecnicoActualGas();
+ for(const [k,id]of [['poderCalorifico','dimPCS'],['densidadRelativa','dimDensidad'],['fuenteGas','dimFuenteGas'],['presionDisponible','redPresion'],['presionMinima','redMinima'],['perdidaMaxima','redPerdida'],['unidadPresion','redUnidad'],['fuentePresiones','redFuente']])$(id).value=String(activo[k]??'');
+ invalidarConsumos();guardarDatos();sincronizarSistemaPrincipalGas();refrescarResultadosCombustibleGas();return true;
+}
+function refrescarResultadosCombustibleGas(){
+ renderTramos();
+ try{mostrarPreparacionDiametrosGas();}catch(e){$('estadoCombustibleGas').textContent+=' Diagnóstico técnico pendiente: '+e.message;}
+ renderResumenPrincipalGas();
 }
 function estadoLargoComercialGas(fuente='proyecto'){
  const p=proyectoGasActual(),id=CatalogosSistemasGas.identificar(instalacionGas.perfil),documento=CatalogosSistemasGas.largoDocumentado(id),documentado=documento?.metros||null,o=p.planCompra?.opciones||{};
