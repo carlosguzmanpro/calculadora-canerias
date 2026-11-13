@@ -234,6 +234,8 @@
      const clave=(a.tramosDiametro||[]).map(id=>vector[id]).join('/'),id=a.productos?.[clave];
      const diametros=[...new Set(ubicaciones.map(id=>vector[id]))];
      if(p.necesidadTerminal&&a.atributos&&diametros.length===1){
+      const confirmacion=a.atributos.confirmacionConexion;
+      if(confirmacion?.confirmada){const seleccionada=d.tablas[3].filas.find(f=>f.id===confirmacion.productoId),atributos=seleccionada&&atributosTerminal(seleccionada);if(!seleccionada||seleccionada.diametroExteriorM*1000!==diametros[0]||['geometria','sexo','rosca','variante'].some(k=>atributos?.[k]!==a.atributos[k])){pendiente({...p,tramos:ubicaciones},'Conexión confirmada incompatible con el diámetro o los atributos de esta etapa: revisar y confirmar nuevamente; no se sustituye la pieza ni su pérdida.');continue;}}
       const solucion=resolverConexion(d,a.atributos,diametros[0]);solucionesTerminales.push({piezaId:p.id,necesidad:p.necesidadTerminal,diametro:diametros[0],...solucion});
       if(solucion.estado!=='directa'&&a.atributos.codoBase){
        // El conjunto es ayuda de compra. Solo el codo existente explícitamente identificado aporta pérdidas reales.
