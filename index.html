@@ -714,9 +714,14 @@ function validarBorradorProyectoGas(p){
   const grupos=new Map(c.canos.map(g=>[g.diametro,[['Caño',metros(g.metros),'m']]]));
   for(const m of e.materiales){if(m.tipo==='cupla')continue;const a=aportes.get(m.material+'|'+m.tipo),diametro=Number.isFinite(a?.diametroExteriorMm)?a.diametroExteriorMm+' mm':'Diámetro pendiente';if(!grupos.has(diametro))grupos.set(diametro,[]);const nombre=m.tipo==='tee'?m.material.replace(/, flujo.*$/,''):m.material;grupos.get(diametro).push([(a?.conjuntoTee?'Componente del conjunto: ':'')+nombre,Number.isFinite(m.cantidad)?numero(m.cantidad):'Pendiente',m.unidad==='unidad'?'un.':m.unidad]);}
   html+='<section class="materiales-diametro"><h3>'+ (e.instalacionPrueba?'Materiales del escenario por diámetro · no confirmados':'Materiales calculados por diámetro')+'</h3><p>Cantidades del escenario, sin sumar nuevamente las piezas compartidas.</p>'+[...grupos].map(([d,filas])=>'<h4>'+esc(d)+'</h4>'+tabla(['Material','Cant.','Ud.'],filas)).join('')+'</section>';
-  html+='<section class="compra-estimada"><h3>PRESUPUESTADO · materiales para compra</h3><p class="ejercicio-estimado">'+numero(totales.tiras)+' tiras de '+metros(c.largoComercial)+' m · '+numero(cuplas)+' cuplas · '+metros(totales.sobrante)+' m de sobrante.</p>'+tabla(['Diámetro','Tiras','Metros comerciales','Cuplas estimadas','Sobrante (m)'],c.canos.map(g=>[g.diametro,g.tiras,metros(g.metrosComerciales),numero(e.uniones?.base==='pendiente'?null:c.estimacionCuplas.porDiametro.find(x=>x.diametro===g.diametro)?.cantidad),metros(g.sobrante)]))+'<p>Cuplas ajustables según cortes y accesorios. No bloquean los demás resultados. Estas tiras reemplazan el metraje para compra; no se suman como caños adicionales.</p>';
-  html+=detalle('Cortes orientativos por tramo',tabla(['Tramo','Longitud (m)','Tiras','Cuplas presupuestadas','Distribución'],c.tramos.map(t=>[nombres.get(t.id)||'Tramo pendiente',metros(t.metros),c.cortesCompartidos?'Compartidas; ver barras':t.tiras,'Cuplas presupuestadas: '+(e.cuplas.find(x=>x.tramoId===t.id)?.cantidad??'Pendiente')+'. Cantidad ajustable según cortes y accesorios.',t.distribucionVigente?'Distribución registrada conservada':e.cortesOrientativos.find(x=>x.tramoId===t.id)?.piezas.map(x=>metros(x)+' m').join(' + ')||'Pendiente']))+'<p>'+esc(c.estimacionCuplas.criterio)+'</p>')+'</section>';
-  if(c.ensayoCortes)html+=detalle('Cortes por barra del ensayo',c.ensayoCortes.compra.map(g=>'<h4>'+esc(g.diametro)+'</h4>'+tabla(['Barra','Cortes netos (m)','Sobrante (m)'],g.barras.map(b=>[b.id,b.cortes.map(x=>metros(x.metros)+' ('+(nombres.get(x.tramo)||'Tramo')+')').join(' + '),metros(b.sobrante)]))).join('')+'<p>Tiras compartidas entre tramos del mismo diámetro y sistema. No se asigna una tira completa a cada tramo ni se suman reservas al cálculo hidráulico.</p>');
+  html+='<section class="compra-estimada"><h3>PRESUPUESTADO · materiales para compra</h3><p class="ejercicio-estimado">'+numero(totales.tiras)+' tiras de '+metros(c.largoComercial)+' m · '+numero(cuplas)+' cuplas · '+metros(totales.sobrante)+' m de sobrante.</p>'+tabla(['Diámetro','Metros reales','Tiras','Metros comerciales','Cuplas estimadas','Sobrante (m)'],c.canos.map(g=>[g.diametro,metros(g.metros),g.tiras,metros(g.metrosComerciales),numero(e.uniones?.base==='pendiente'?null:c.estimacionCuplas.porDiametro.find(x=>x.diametro===g.diametro)?.cantidad),metros(g.sobrante)]))+'<p>Cuplas ajustables según cortes y accesorios. '+(c.ensayoCortes?'La cantidad corresponde a los cortes ficticios del ensayo; no confirma las cuplas reales. ':'')+'No bloquean los demás resultados. Estas tiras reemplazan el metraje para compra; no se suman como caños adicionales.</p>';
+  html+=detalle('Cortes orientativos por tramo',tabla(['Tramo','Longitud (m)','Tiras','Cuplas presupuestadas','Distribución'],c.tramos.map(t=>[nombres.get(t.id)||'Tramo pendiente',metros(t.metros),c.cortesCompartidos?'Compartidas; ver barras':t.tiras,'Cuplas presupuestadas: '+(e.cuplas.find(x=>x.tramoId===t.id)?.cantidad??'Pendiente')+'. Cantidad ajustable según cortes y accesorios.',t.distribucionVigente?'Distribución registrada conservada':e.cortesOrientativos.find(x=>x.tramoId===t.id)?.piezas.map(x=>metros(x)+' m').join(' + ')||'Pendiente']))+'<p>'+esc(c.estimacionCuplas.criterio)+'</p>');
+  if(c.ensayoCortes){
+   const cortes=c.ensayoCortes,corte=v=>Number.isFinite(v)?v.toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:6}):'Pendiente',empalmes=cortes.compra.flatMap(g=>(g.segmentos||[]).filter(s=>s.cuplas>0).map(s=>[g.diametro,nombres.get(s.tramo)||'Tramo',s.indiceSegmento+1,corte(s.metros),s.piezas.map(p=>corte(p.metros)+' m ('+p.barra+')').join(' + '),s.cuplas]));
+   const plan=detalle('Cortes por barra del ensayo','<p>'+numero(cortes.tramos.reduce((n,t)=>n+t.segmentos.length,0))+' separaciones netas ficticias · tiras configuradas de '+metros(c.largoComercial)+' m · merma cero. Verificar ajustes reales y disponibilidad del producto antes de comprar.</p>'+cortes.compra.map(g=>'<h4>'+esc(g.diametro)+' · '+g.tiras+' tiras · '+metros(g.metros)+' m netos</h4>'+tabla(['Tira','Cortes netos (m)','Remanente (m)'],g.barras.map(b=>[b.id.replace(/^barra-/,''),b.cortes.map(x=>corte(x.metros)+' ('+(nombres.get(x.tramo)||'Tramo')+', recta '+(x.indiceSegmento+1)+')').join(' + '),corte(b.sobrante)]))+'<p>'+g.cuplas+' cuplas adicionales en este ensayo · '+metros(g.sobrante)+' m de remanentes sin destino asignado. No se garantiza que sirvan para un corte futuro.</p>').join('')+(empalmes.length?'<h4>Empalmes dentro de una recta: requieren cupla</h4>'+tabla(['Diámetro','Tramo','Recta','Longitud (m)','Piezas','Cuplas'],empalmes):'<p>Cada recta del ensayo cabe en una pieza: 0 cuplas adicionales. Las uniones caño–codo, caño–tee, caño–llave o caño–transición no se cuentan como cuplas.</p>')+'<p>Reserva de compra separada: '+numero(cortes.reservaCuplas)+'. Las cuplas reales quedan por verificar si cambian los cortes o faltan datos de la instalación. Tiras compartidas solo entre tramos del mismo diámetro, material y sistema; no se unen remanentes para fabricar una pieza sin contabilizar su empalme.</p>');
+   html+=plan;
+  }
+  html+='</section>';
   const rutas=tabla(['Artefacto','Recorrido','Real (m)','Equivalente (m)','Total (m)'],r.recorridos.map(t=>[t.artefacto,t.tramos.map(id=>nombres.get(id)||'Tramo pendiente').join(' → '),metros(t.longitudReal),metros(t.equivalenteConocidoM),metros(t.longitudConsultaM)]));
   const memoria=tabla(['Tramo','Real (m)','Recorrido real (m)','Consumo (m³/h)','Diámetro inicial (mm)','Equivalente del recorrido (m)','Total de cálculo (m)','Diámetro del escenario (mm)'],e.memoria.map(f=>[f.tramo,metros(f.longitudRealM),metros(f.longitudCalculoRealM),numero(f.caudalM3h),f.diametroProvisorioMm,metros(f.equivalenteRecorridoConocidoM),metros(f.longitudTotalConsultaM),f.diametroVerificadoMm??'Pendiente']));
   const desglose=r.recorridos.map(t=>'<h4>'+esc(t.artefacto)+'</h4>'+tabla(['Accesorio','Cantidad','Diámetro (mm)','LE unitaria (m)','LE total (m)','Fuente'],t.aportes.map(a=>[a.nombre,a.cantidad,a.diametroExteriorMm,numero(a.equivalenteUnitarioM),numero(a.equivalenteTotalM),'Tabla 3 · p.'+a.pagina]))).join('');
@@ -1250,14 +1255,14 @@ function organizarResultadoCompletoGas(out){
    if(!Array.isArray(t.segmentos)||!t.segmentos.length)throw Error('Faltan longitudes netas entre accesorios.');
    const key=JSON.stringify([t.diametro,t.material,t.sistema]);
    if(!grupos.has(key))grupos.set(key,{diametro:t.diametro,material:t.material,sistema:t.sistema,segmentos:[]});
-   const ss=t.segmentos.map((m,i)=>({id:JSON.stringify([t.id,i]),metros:entero(m),ubicacion:t.id}));grupos.get(key).segmentos.push(...ss);
+   const ss=t.segmentos.map((m,i)=>({id:JSON.stringify([t.id,i]),metros:entero(m),ubicacion:t.id,indiceSegmento:i}));grupos.get(key).segmentos.push(...ss);
    filas.push({id:t.id,nombre:t.nombre||t.id,diametro:t.diametro,metros:ss.reduce((n,s)=>n+s.metros,0)/U,segmentos:t.segmentos.slice(),cuplas:ss.reduce((n,s)=>n+Math.max(0,Math.ceil(s.metros/L)-1),0)});
   }
   const compra=[...grupos.values()].map(g=>{
    const p=planificarCortes(g.segmentos,{largoComercial:L,reutilizar:true,minimoSobrante:0});
-   return {diametro:g.diametro,material:g.material,sistema:g.sistema,metros:p.metros/U,tiras:p.compraEstimada,metrosComerciales:p.compraEstimada*largoComercial,sobrante:(p.compraEstimada*L-p.metros)/U,cuplas:p.cuplasPropuestas,minimoTeorico:p.minimoTeorico,garantiaOptimo:p.compraEstimada===p.minimoTeorico,barras:p.barras.map(b=>({id:b.id,sobrante:b.sobrante/U,cortes:b.cortes.map(c=>({tramo:g.segmentos.find(s=>s.id===c.segmento).ubicacion,segmento:c.segmento,metros:c.metros/U}))}))};
+   return {diametro:g.diametro,material:g.material,sistema:g.sistema,metros:p.metros/U,tiras:p.compraEstimada,metrosComerciales:p.compraEstimada*largoComercial,sobrante:(p.compraEstimada*L-p.metros)/U,cuplas:p.cuplasPropuestas,minimoTeorico:p.minimoTeorico,garantiaOptimo:p.compraEstimada===p.minimoTeorico,barras:p.barras.map(b=>({id:b.id,sobrante:b.sobrante/U,cortes:b.cortes.map(c=>({tramo:g.segmentos.find(s=>s.id===c.segmento).ubicacion,segmento:c.segmento,metros:c.metros/U,indiceSegmento:g.segmentos.find(s=>s.id===c.segmento).indiceSegmento}))})),segmentos:g.segmentos.map(s=>({id:s.id,tramo:s.ubicacion,indiceSegmento:s.indiceSegmento,metros:s.metros/U,cuplas:p.porSegmento[s.id].cuplas,piezas:p.porSegmento[s.id].piezas.map(x=>({barra:x.barra,metros:x.metros/U}))})),sobranteSinDestinoM:(p.compraEstimada*L-p.metros)/U};
   });
-  return {ensayo:true,confirmado:false,largoComercial,perdidaPorCorte:0,tramos:filas,compra,metros:compra.reduce((n,g)=>n+g.metros,0),tiras:compra.reduce((n,g)=>n+g.tiras,0),cuplasNecesarias:compra.reduce((n,g)=>n+g.cuplas,0),reservaCuplas,criterio:'Cortes netos ficticios; una pieza por segmento siempre que alcance el largo comercial. Reutilización entre tramos solo del mismo diámetro, material y sistema, sin unir sobrantes para fabricar un corte. FFD; mínimo demostrado solo si coincide con la cota por metraje. Reserva separada, sin incorporar accesorios ni pérdidas hidráulicas.'};
+  return {ensayo:true,confirmado:false,estadoCuplas:'calculadas-en-ensayo; instalación real por verificar',limitesEntreSegmentos:filas.reduce((n,t)=>n+t.segmentos.length-1,0),largoComercial,perdidaPorCorte:0,tramos:filas,compra,metros:compra.reduce((n,g)=>n+g.metros,0),tiras:compra.reduce((n,g)=>n+g.tiras,0),cuplasNecesarias:compra.reduce((n,g)=>n+g.cuplas,0),reservaCuplas,criterio:'Cortes netos ficticios; una pieza por segmento siempre que alcance el largo comercial. Reutilización entre tramos solo del mismo diámetro, material y sistema, sin unir sobrantes para fabricar un corte. FFD; mínimo demostrado solo si coincide con la cota por metraje. Reserva separada, sin incorporar accesorios ni pérdidas hidráulicas.'};
  }
  const api={planificarEnsayoIdeal,planificarCortes,planificarMateriales,prepararCompra,estimarCuplasCompra,continuidadCuplas,firmaCortesCompra,validarDistribucionCompra,agruparPendientesCompra};if(typeof module==='object'&&module.exports)module.exports=api;else root.MaterialesGas=api;
 })(globalThis);
@@ -1310,7 +1315,7 @@ function guardarOpcionesMaterialesGas(){
  const largo=numeroDecimalGas($('matLargo').value),sobrante=numeroDecimalGas($('matSobrante').value);
  if(!Number.isFinite(largo)||largo<=0||!Number.isFinite(sobrante)||sobrante<0){$('matMensaje').textContent='Completá un largo comercial positivo y un sobrante válido. No se cambiaron las opciones.';return;}
  Object.assign(datosPlanGas().opciones,{largoComercial:largo,reutilizar:$('matReusar').checked,minimoSobrante:sobrante,hipotesisSinPosiciones:$('matHipotesis').checked});
- invalidarMaterialesGas();guardarDatos();actualizarTextoLargoGas();
+ invalidarMaterialesGas();guardarDatos();actualizarTextoLargoGas();renderResumenPrincipalGas();
 }
 function renderUnionesMaterialesGas(){
  const out=$('matUniones');out.replaceChildren();const e=entradaMaterialesGas(fuenteMaterialesGas);
@@ -2089,6 +2094,10 @@ function datosEnsayoCortesIdealGas(){
  }
  return {version:1,largoComercial:4,reservaCuplas:0,segmentosPorTramo};
 }
+function datosCortesCompraEnsayoGas(){
+ const datos=datosEnsayoCortesIdealGas();if(!datos)return null;
+ return {...datos,largoComercial:estadoLargoComercialGas('proyecto').configurado,fuenteLargo:'Largo comercial configurado del proyecto; no se sobrescribe el ensayo independiente'};
+}
 function calcularEnsayoCortesIdealGas(datos=datosEnsayoCortesIdealGas(),modelo=resultadoPreliminarSigasGas()){
  if(!datos||!modelo||!esInstalacionPruebaSigasGas())throw Error('Ensayo disponible únicamente para la instalación de prueba SIGAS.');
  if(tramos.length!==5||Object.keys(datos.segmentosPorTramo||{}).length!==5)throw Error('Cambió la red: revisar los cinco tramos del ensayo sin inventar segmentos.');
@@ -2108,6 +2117,7 @@ function renderEnsayoCortesIdealGas(out,modelo){
  const caja=document.createElement('details'),sum=document.createElement('summary');caja.className='ensayo-cortes-ideal-gas';sum.textContent='Ensayo ficticio de cortes y cuplas';caja.append(sum);
  const texto=(s,cont=caja)=>{const p=document.createElement('p');p.textContent=s;cont.append(p);};
  texto('ENSAYO IDEAL · longitudes netas ficticias, merma cero y reutilización entre tramos del mismo diámetro y sistema. No modifica metros, accesorios, orientaciones ni pérdidas SIGAS. No representa una instalación verificada.');
+ texto('Control independiente: su largo no sustituye al largo de compra del proyecto ('+fmt(estadoLargoComercialGas().configurado)+' m). El presupuesto y el PDF usan el largo configurado en Opciones de compra y revisión avanzada.');
  const campo=(nombre,valor)=>{const l=document.createElement('label'),i=document.createElement('input');l.textContent=nombre;i.type='text';i.inputMode='decimal';i.ariaLabel=nombre;i.value=valor;l.append(i);caja.append(l);return i;};
  const largo=campo('Largo comercial del ensayo (m)',datos.largoComercial),reserva=campo('Reserva opcional de cuplas para compra',datos.reservaCuplas),campos=new Map();
  // Es una lista de decimales, no un único campo decimal: validar cada corte por separado.
@@ -10654,12 +10664,12 @@ function margenInformativoSigasGas(caudal,capacidad){
 }
 function unionesDelEnsayoSigasGas(){
  if(!esInstalacionPruebaSigasGas())return null;
- const datos=datosEnsayoCortesIdealGas();if(!datos)return {error:'Faltan los cortes netos del ensayo; no se deducen uniones reales.'};
+ const datos=datosCortesCompraEnsayoGas();if(!datos)return {error:'Faltan los cortes netos del ensayo; no se deducen uniones reales.'};
  const filas=[];
  try{
   for(const t of tramos){const ms=datos.segmentosPorTramo?.[t.id];
    if(!Array.isArray(ms)||ms.length!==conteoRapidoDelTramoGas(t).codo90+1||ms.some(m=>!Number.isFinite(m)||m<=0)||Math.abs(ms.reduce((n,m)=>n+m,0)-t.metros)>1e-8)throw Error(t.desde+'–'+t.hasta+': los cortes ficticios no coinciden con los metros o cantidades del proyecto. Revisar el ensayo; no se reemplazan datos reales.');
-   const p=MaterialesGas.planificarCortes(ms.map((metros,i)=>({id:String(i),metros})),{largoComercial:datos.largoComercial});
+   const p=MaterialesGas.planificarCortes(ms.map((metros,i)=>({id:String(i),metros:Math.round(metros*1e6)})),{largoComercial:Math.round(datos.largoComercial*1e6)});
    filas.push({id:t.id,cantidad:p.cuplasPropuestas,orientativo:true});
   }
   return {filas,datos,reserva:datos.reservaCuplas||0,origen:'Cortes netos ficticios: adicionales calculadas para el ensayo, no inventario real'};
@@ -10667,7 +10677,7 @@ function unionesDelEnsayoSigasGas(){
 }
 function construirResultadoEjercicioSigasGas(cualquierProyecto=false){
  const reg=registroAccesoriosSigasGas();if(!reg||!cualquierProyecto&&!proyectoGasActual().referenciaSigas19||reg.entradaTecnica.perfil.gas!=='GN'||!revisionMaterialesGas)return null;
- const firmaEnsayo=esInstalacionPruebaSigasGas()?JSON.stringify(datosEnsayoCortesIdealGas()):null;
+ const firmaEnsayo=esInstalacionPruebaSigasGas()?JSON.stringify(datosCortesCompraEnsayoGas()):null;
  if(cacheResultadoEjercicioSigasGas?.registro===reg&&cacheResultadoEjercicioSigasGas.firmaEnsayo===firmaEnsayo)return cacheResultadoEjercicioSigasGas.modelo;
  const entrada=JSON.parse(JSON.stringify(reg.entradaTecnica)),compraBase=prepararCompraActualGas(revisionMaterialesGas.plan),estimacion=JSON.parse(JSON.stringify(compraBase.estimacionCuplas)),unionesEnsayo=unionesDelEnsayoSigasGas();
  if(unionesEnsayo&&!unionesEnsayo.error){estimacion.tramos=unionesEnsayo.filas;estimacion.total=estimacion.tramos.reduce((n,t)=>n+t.cantidad,0);}

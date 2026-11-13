@@ -44,7 +44,7 @@ function guardarOpcionesMaterialesGas(){
  const largo=numeroDecimalGas($('matLargo').value),sobrante=numeroDecimalGas($('matSobrante').value);
  if(!Number.isFinite(largo)||largo<=0||!Number.isFinite(sobrante)||sobrante<0){$('matMensaje').textContent='Completá un largo comercial positivo y un sobrante válido. No se cambiaron las opciones.';return;}
  Object.assign(datosPlanGas().opciones,{largoComercial:largo,reutilizar:$('matReusar').checked,minimoSobrante:sobrante,hipotesisSinPosiciones:$('matHipotesis').checked});
- invalidarMaterialesGas();guardarDatos();actualizarTextoLargoGas();
+ invalidarMaterialesGas();guardarDatos();actualizarTextoLargoGas();renderResumenPrincipalGas();
 }
 function renderUnionesMaterialesGas(){
  const out=$('matUniones');out.replaceChildren();const e=entradaMaterialesGas(fuenteMaterialesGas);
@@ -823,6 +823,10 @@ function datosEnsayoCortesIdealGas(){
  }
  return {version:1,largoComercial:4,reservaCuplas:0,segmentosPorTramo};
 }
+function datosCortesCompraEnsayoGas(){
+ const datos=datosEnsayoCortesIdealGas();if(!datos)return null;
+ return {...datos,largoComercial:estadoLargoComercialGas('proyecto').configurado,fuenteLargo:'Largo comercial configurado del proyecto; no se sobrescribe el ensayo independiente'};
+}
 function calcularEnsayoCortesIdealGas(datos=datosEnsayoCortesIdealGas(),modelo=resultadoPreliminarSigasGas()){
  if(!datos||!modelo||!esInstalacionPruebaSigasGas())throw Error('Ensayo disponible únicamente para la instalación de prueba SIGAS.');
  if(tramos.length!==5||Object.keys(datos.segmentosPorTramo||{}).length!==5)throw Error('Cambió la red: revisar los cinco tramos del ensayo sin inventar segmentos.');
@@ -842,6 +846,7 @@ function renderEnsayoCortesIdealGas(out,modelo){
  const caja=document.createElement('details'),sum=document.createElement('summary');caja.className='ensayo-cortes-ideal-gas';sum.textContent='Ensayo ficticio de cortes y cuplas';caja.append(sum);
  const texto=(s,cont=caja)=>{const p=document.createElement('p');p.textContent=s;cont.append(p);};
  texto('ENSAYO IDEAL · longitudes netas ficticias, merma cero y reutilización entre tramos del mismo diámetro y sistema. No modifica metros, accesorios, orientaciones ni pérdidas SIGAS. No representa una instalación verificada.');
+ texto('Control independiente: su largo no sustituye al largo de compra del proyecto ('+fmt(estadoLargoComercialGas().configurado)+' m). El presupuesto y el PDF usan el largo configurado en Opciones de compra y revisión avanzada.');
  const campo=(nombre,valor)=>{const l=document.createElement('label'),i=document.createElement('input');l.textContent=nombre;i.type='text';i.inputMode='decimal';i.ariaLabel=nombre;i.value=valor;l.append(i);caja.append(l);return i;};
  const largo=campo('Largo comercial del ensayo (m)',datos.largoComercial),reserva=campo('Reserva opcional de cuplas para compra',datos.reservaCuplas),campos=new Map();
  // Es una lista de decimales, no un único campo decimal: validar cada corte por separado.

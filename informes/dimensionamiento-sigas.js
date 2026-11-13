@@ -893,12 +893,12 @@ function margenInformativoSigasGas(caudal,capacidad){
 }
 function unionesDelEnsayoSigasGas(){
  if(!esInstalacionPruebaSigasGas())return null;
- const datos=datosEnsayoCortesIdealGas();if(!datos)return {error:'Faltan los cortes netos del ensayo; no se deducen uniones reales.'};
+ const datos=datosCortesCompraEnsayoGas();if(!datos)return {error:'Faltan los cortes netos del ensayo; no se deducen uniones reales.'};
  const filas=[];
  try{
   for(const t of tramos){const ms=datos.segmentosPorTramo?.[t.id];
    if(!Array.isArray(ms)||ms.length!==conteoRapidoDelTramoGas(t).codo90+1||ms.some(m=>!Number.isFinite(m)||m<=0)||Math.abs(ms.reduce((n,m)=>n+m,0)-t.metros)>1e-8)throw Error(t.desde+'–'+t.hasta+': los cortes ficticios no coinciden con los metros o cantidades del proyecto. Revisar el ensayo; no se reemplazan datos reales.');
-   const p=MaterialesGas.planificarCortes(ms.map((metros,i)=>({id:String(i),metros})),{largoComercial:datos.largoComercial});
+   const p=MaterialesGas.planificarCortes(ms.map((metros,i)=>({id:String(i),metros:Math.round(metros*1e6)})),{largoComercial:Math.round(datos.largoComercial*1e6)});
    filas.push({id:t.id,cantidad:p.cuplasPropuestas,orientativo:true});
   }
   return {filas,datos,reserva:datos.reservaCuplas||0,origen:'Cortes netos ficticios: adicionales calculadas para el ensayo, no inventario real'};
@@ -906,7 +906,7 @@ function unionesDelEnsayoSigasGas(){
 }
 function construirResultadoEjercicioSigasGas(cualquierProyecto=false){
  const reg=registroAccesoriosSigasGas();if(!reg||!cualquierProyecto&&!proyectoGasActual().referenciaSigas19||reg.entradaTecnica.perfil.gas!=='GN'||!revisionMaterialesGas)return null;
- const firmaEnsayo=esInstalacionPruebaSigasGas()?JSON.stringify(datosEnsayoCortesIdealGas()):null;
+ const firmaEnsayo=esInstalacionPruebaSigasGas()?JSON.stringify(datosCortesCompraEnsayoGas()):null;
  if(cacheResultadoEjercicioSigasGas?.registro===reg&&cacheResultadoEjercicioSigasGas.firmaEnsayo===firmaEnsayo)return cacheResultadoEjercicioSigasGas.modelo;
  const entrada=JSON.parse(JSON.stringify(reg.entradaTecnica)),compraBase=prepararCompraActualGas(revisionMaterialesGas.plan),estimacion=JSON.parse(JSON.stringify(compraBase.estimacionCuplas)),unionesEnsayo=unionesDelEnsayoSigasGas();
  if(unionesEnsayo&&!unionesEnsayo.error){estimacion.tramos=unionesEnsayo.filas;estimacion.total=estimacion.tramos.reduce((n,t)=>n+t.cantidad,0);}
