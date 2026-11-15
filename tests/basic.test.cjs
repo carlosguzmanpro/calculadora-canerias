@@ -668,8 +668,8 @@ test('aislamiento: una lectura de foto demorada no escribe en el espacio recién
  a.ctx.evento={target:{files:[{type:'image/png',size:10}]}};a.run("cargarFoto(evento);seleccionarAmbitoGas('demostracion')");lector.result='data:image/png;base64,TARDÍA';lector.onload();assert.equal(a.run('proyectos.gas.demostracion.foto'),undefined);assert.equal(a.run('proyectos.gas.foto'),'data:image/png;base64,TARDÍA');
 });
 
-test('Android: index autónomo contiene exactamente las diecisiete fuentes locales, sin solicitudes de scripts',()=>{
- const bloques=[...html.matchAll(/<script data-local="([^"]+)">\n([\s\S]*?)\n<\/script>/g)];assert.equal(bloques.length,22);assert.doesNotMatch(html,/<script\s+src=/i);
+test('Android: index autónomo contiene exactamente las veintitrés fuentes locales, sin solicitudes de scripts',()=>{
+ const bloques=[...html.matchAll(/<script data-local="([^"]+)">\n([\s\S]*?)\n<\/script>/g)];assert.equal(bloques.length,23);assert.doesNotMatch(html,/<script\s+src=/i);
  for(const [,ruta,codigo]of bloques)assert.equal(codigo,fs.readFileSync(ruta,'utf8'),ruta);
 });
 test('Android: ejecuta los scripts incorporados y navega todas las especialidades sin archivos vecinos',()=>{

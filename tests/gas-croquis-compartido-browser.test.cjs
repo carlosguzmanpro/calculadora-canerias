@@ -1,7 +1,8 @@
+const abrirGasAnterior=require('./helpers/entrada-anterior.cjs');
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),os=require('node:os'),path=require('node:path'),{chromium}=require('playwright');
 const png=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jXioAAAAASUVORK5CYII=','base64');
 const opciones={executablePath:'/usr/bin/chromium',args:['--no-sandbox'],viewport:{width:390,height:844},isMobile:true,hasTouch:true};
-async function gas(p,modo='rapido'){p.on('dialog',d=>d.accept());await p.getByRole('button',{name:'🔥 Gas',exact:true}).tap();await p.getByRole('button',{name:modo==='rapido'?'Cálculo rápido de diámetros':'Cálculo completo y materiales',exact:true}).tap();}
+async function gas(p,modo='rapido'){p.on('dialog',d=>d.accept());await abrirGasAnterior(p);await p.getByRole('button',{name:modo==='rapido'?'Cálculo rápido de diámetros':'Cálculo completo y materiales',exact:true}).tap();}
 async function abrirCroquis(p){if(!await p.locator('#referenciaOpcionalGas').evaluate(e=>e.open))await p.getByText('Croquis de referencia (opcional)',{exact:true}).tap();}
 async function adjuntar(p,boton,buffer){await abrirCroquis(p);const espera=p.waitForEvent('filechooser');await p.getByRole('button',{name:boton,exact:true}).tap();await (await espera).setFiles({name:'croquis-prueba.png',mimeType:'image/png',buffer});}
 const fijo=p=>p.evaluate(()=>JSON.stringify({tramos,artefactos,conteos:proyectoGasActual().conteosRapidosGas,tees:proyectoGasActual().calculoSigas.tees,roscas:proyectoGasActual().calculoSigas.terminales,filas:resultadoPreliminarSigasGas().resultado.filas,recorridos:resultadoPreliminarSigasGas().resultado.recorridos}));
