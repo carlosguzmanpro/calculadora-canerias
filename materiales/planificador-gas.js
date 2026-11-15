@@ -165,7 +165,7 @@
    if(ss?.length&&(ss.some(s=>!valido(s.metros))||Math.abs(ss.reduce((n,s)=>n+s.metros,0)-t.metros)>1e-8))throw Error('Segmentos incompatibles con '+t.id);
    const partes=grupos?grupos.map((g,i)=>({metros:g.reduce((n,m)=>n+m,0),diametro:ss?.[i]?.diametro,cortes:g})):ss?.length?ss:parciales.length?[...parciales,...(auto.metrosPendientes>0?[{metros:auto.metrosPendientes,continuidadPendiente:true,diametroPendiente:!!auto.diametroVariable}]:[])]:[{metros:t.metros,continuidadPendiente:true}];
    const aportaciones=new Map();
-   const fila={id:t.id,metros:t.metros,diametros:[],tiras:0,metrosComerciales:0,sobrante:0,cuplas:continuidad?0:null,cuplasConocidas:0,cuplasRegistradasContadas:0,cuplasRegistradasUbicadas:auto?.completa?auto.cuplasUbicadas||0:0,cuplasPendientes:!continuidad,cuplasMinimas:continuidad?0:null,continuidad,distribucionVigente:!!grupos,distribucionGuardada:guardado||null,segmentos:[],provisional:true,estado:'estimado'};
+   const fila={id:t.id,metros:t.metros,diametros:[],tiras:0,metrosComerciales:0,sobrante:0,cuplas:continuidad?0:null,cuplasConocidas:0,cuplasRegistradasContadas:0,cuplasRegistradasUbicadas:auto?.completa?auto.cuplasUbicadas||0:0,cuplasPendientes:!continuidad,cuplasMinimas:continuidad?0:null,continuidad,distribucionVigente:!!grupos,distribucionGuardada:guardado||null,segmentos:[],provisional:true,estado:'estimado',baseDistancias:t.baseDistancias||'geometrica'};
    for(const [i,p]of partes.entries()){
     const d=diametro(t,p);if(!fila.diametros.some(x=>x.valor===d.valor&&x.estado===d.estado))fila.diametros.push(d);
     let cortes=(continuidad||parciales.length&&!p.continuidadPendiente)?planificarCortes([{id:t.id+':'+i,metros:p.metros}],{largoComercial:largo}).porSegmento[t.id+':'+i].piezas.map(p=>p.metros):null;
@@ -184,6 +184,18 @@
    if(!continuidad){for(const g of bolsas.values())if(g.tramos.includes(t.id))g.cuplasPendientes=true;r.pendientes.push('Cuplas en '+t.id+': faltan segmentos continuos y posiciones de accesorios.');for(const s of auto?.pendientes||[])r.pendientes.push(t.id+': '+s);}
   }
   r.canos=[...bolsas.values()].map(g=>({...g,minimoTeorico:Math.ceil(g.metros/largo),metrosComerciales:g.tiras*largo,sobrante:g.tiras*largo-g.metros,provisional:true}));
+  // Propuesta global: reutiliza el planificador existente, solo con cortes y productos compatibles.
+  if(opciones.reutilizar)r.supuestos[0]='Reutilización por diámetro, material y sistema solo con todos los cortes definidos del grupo. Propuesta FFD; no incluye inserción, merma ni reserva sin documentar.';
+  for(const g of r.canos){
+   const filas=r.tramos.filter(t=>g.tramos.includes(t.id));
+   if(g.estadoDiametro==='pendiente'||!g.material||!g.sistema||filas.some(t=>!t.continuidad||t.segmentos.some(s=>s.diametro===g.diametro&&!s.cortes)))continue;
+   const piezas=[];for(const t of filas)for(const [i,s]of t.segmentos.entries())if(s.diametro===g.diametro)for(const [j,m]of s.cortes.entries())piezas.push({id:t.id+':'+i+':'+j,metros:m,tramo:t.id,segmento:i});
+   if(!piezas.length)continue;
+   const p=planificarCortes(piezas,{largoComercial:largo,reutilizar:!!opciones.reutilizar,minimoSobrante:opciones.minimoSobrante??.5});
+   g.planCortes={...p,cuplasPropuestas:g.cuplas,barras:p.barras.map(b=>({...b,cortes:b.cortes.map(c=>({...c,tramo:piezas.find(x=>x.id===c.segmento).tramo,indiceSegmento:piezas.find(x=>x.id===c.segmento).segmento}))}))};
+   g.tiras=p.compraEstimada;g.metrosComerciales=g.tiras*largo;g.sobrante=g.metrosComerciales-g.metros;
+   if(opciones.reutilizar&&p.barras.some(b=>new Set(b.cortes.map(c=>piezas.find(x=>x.id===c.segmento).tramo)).size>1)){r.cortesCompartidos=true;for(const t of filas)t.barrasCompartidas=true;}
+  }
   for(const f of plan.filas||[]){
    if(['cano','cupla-plan'].includes(f.tipo)||f.origen==='manual-cero')continue;
    const key=f.id;if(key&&vistas.has(key))continue;if(key)vistas.add(key);
