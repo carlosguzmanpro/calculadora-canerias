@@ -33,7 +33,7 @@
    if(!p.id||!Number.isSafeInteger(p.cantidad)||p.cantidad<=0){pendientes.push('Cantidad o identidad pendiente de una pieza; no se convierte a cero.');continue;}
    if(fisicas.has(p.id)){const anterior=fisicas.get(p.id);anterior.tramos=[...new Set([...anterior.tramos,...ubicar(p)])];if(anterior.tipo!==p.tipo||anterior.cantidad!==p.cantidad){anterior.conflicto=true;pendientes.push('Identidad física contradictoria: '+p.id+'.');}continue;}
    const tramos=ubicar(p);
-   const pieza={id:p.id,tipo:p.tipo,cantidad:p.cantidad,nodo:p.nodoOriginal||null,tramos,confirmada:p.confirmado===true,conflicto:!!p.conflicto,reductor:!!p.reductor,equivalenteM:null};
+   const pieza={id:p.id,tipo:p.tipo,cantidad:p.cantidad,nodo:p.nodoOriginal||null,tramos,confirmada:p.confirmado===true||p.deducido===true&&!p.conflicto,origenCantidad:p.deducido?'deducida':'registrada',cantidadRegistrada:p.confirmado===true,conflicto:!!p.conflicto,reductor:!!p.reductor,equivalenteM:null};
    fisicas.set(p.id,pieza);
    if(p.conflicto)pendientes.push('Datos contradictorios de una pieza física: '+p.id+'.');
    if(p.tipo==='tee')pendientes.push(p.nodoOriginal?'Tee en '+p.nodoOriginal+': identificar vía directa/giro y configuración reductora.':'Tee informada sin punto confirmado; no se la ubica por suposición.');

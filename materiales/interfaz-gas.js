@@ -18,7 +18,7 @@ function entradaMaterialesGas(fuente='proyecto',sinSugerencias=false,sinConcilia
    if(Number.isFinite(a.metrosAntes)&&posicionConocida)posicion+=a.metrosAntes;else posicionConocida=false;
    const nodo=a.tipo==='tee'?nodos.find(n=>n.nombre.trim().toLowerCase()===(a.nodo||'').trim().toLowerCase())?.id||('nombre:'+String(a.nodo||'sin-identificar-'+j).trim().toLowerCase()):posicionConocida&&posicion===0?t.red?.desde:posicionConocida&&posicion===t.metros?t.red?.hasta:null;
    const entrada=a.entrada||entradaActual;entradaActual=a.salida||null;
-   return {idFisico:a.idFisico||undefined,tipo:a.tipo,cantidad:1,nodo,medidas:[entrada,a.salida,...(a.tipo==='tee'?[a.ramal]:[])],confirmado:d?.estado==='completo',evidencia:'Registrado manualmente o incorporado después de revisión del croquis',ubicacion:(t.id||'tramo-'+i)+' · accesorio '+(j+1)};
+   return {idFisico:a.idFisico||undefined,tipo:a.tipo,cantidad:1,nodo,deducido:a.deducido===true,medidas:[entrada,a.salida,...(a.tipo==='tee'?[a.ramal]:[])],confirmado:d?.estado==='completo'&&!a.deducido,evidencia:'Registrado manualmente o incorporado después de revisión del croquis',ubicacion:(t.id||'tramo-'+i)+' · accesorio '+(j+1)};
   });
   if(t.llave&&!acc.some(a=>a.tipo==='llave'))acc.push({tipo:'llave',cantidad:1,medidas:[t.diametro],confirmado:true,evidencia:'Llave del tramo; no duplica la llave detallada'});
   return {id:t.id||'tramo-'+i,metros:t.metros,diametro:t.diametro,diametroFinal:r.segmentos?.at(-1)?.diametro==='Diámetro pendiente'?null:r.segmentos?.at(-1)?.diametro,red:t.red,segmentos:geometria&&!(t.llave&&!acc.some(a=>a.tipo==='llave'&&a.ubicacion))?r.segmentos.map(s=>({metros:s.metros,diametro:s.diametro==='Diámetro pendiente'?null:s.diametro})):null,accesorios:acc};
@@ -260,7 +260,7 @@ function piezasConciliacionGas(entrada){
   const id=a.tipo==='tee'&&nodo?'tee:'+nodo:a.idFisico||JSON.stringify([tramo?'detalle':'manual',tramo?.id||'',indice]);
   const reductor=['tee','codo90','codo45'].includes(a.tipo)&&a.medidas?.filter(Boolean).length>1&&a.medidas.some(m=>m&&m!==a.medidas[0]);
   const ubicaciones=[tramo?.id,a.tramo,a.ubicacion].filter(Boolean);
-  const pieza={id,nodoOriginal:a.nodo,tipo:a.tipo,cantidad:a.cantidad,nodo,medidas:a.medidas||[],ubicaciones,confirmado:!!a.confirmado,reductor,conflicto:false};
+  const pieza={id,nodoOriginal:a.nodo,tipo:a.tipo,cantidad:a.cantidad,nodo,medidas:a.medidas||[],ubicaciones,confirmado:!!a.confirmado,reductor,deducido:!!a.deducido,conflicto:!!a.conflicto};
   if(piezas.has(id)){const p=piezas.get(id);p.conflicto||=p.nodoOriginal!==pieza.nodoOriginal||p.tipo!==pieza.tipo||p.cantidad!==pieza.cantidad||JSON.stringify(p.medidas)!==JSON.stringify(pieza.medidas);p.ubicaciones.push(...ubicaciones);return;}
   piezas.set(id,pieza);
  }
@@ -538,12 +538,12 @@ function entradaManualMaterialesGas(sinSugerencias=false,sinRegistroTecnico=fals
  }
  // Mantener detalle no sustituido y extras identificados. Los identificadores físicos deduplican tees compartidas.
  for(const t of entrada.tramos)t.accesorios=[];
- entrada.extras=[...registros.filter(r=>!omitidos.has(r.id)).map(r=>({...r.a,idFisico:r.id,confirmado:true})),...nuevos].map(a=>({...a,nodo:a.tipo==='tee'&&a.nodo?nodoConciliacionGas(a.nodo).replace(/^n:/,''):a.nodo}));
+ entrada.extras=[...registros.filter(r=>!omitidos.has(r.id)).map(r=>({...r.a,idFisico:r.id,confirmado:r.a.deducido?false:true})),...nuevos].map(a=>({...a,nodo:a.tipo==='tee'&&a.nodo?nodoConciliacionGas(a.nodo).replace(/^n:/,''):a.nodo}));
  if(typeof transicionesRectasDeclaradasSigasGas==='function')for(const a of transicionesRectasDeclaradasSigasGas())if(!entrada.extras.some(e=>e.idFisico===a.idFisico))entrada.extras.push(a);
  entrada.manualDirecto={avisos,ceros,pendientes};
  const posicionesCuplas=tramos.filter(t=>t.detalle&&(Number.isFinite(t.detalle.metrosFinal)||t.detalle.accesorios?.some(a=>Number.isFinite(a.metrosAntes)))).map(t=>({id:t.id,estado:t.detalle.estado,metrosFinal:t.detalle.metrosFinal??null,accesorios:(t.detalle.accesorios||[]).map(a=>({tipo:a.tipo,metrosAntes:a.metrosAntes??null,salida:a.salida??null}))}));
  if(posicionesCuplas.length)entrada.manualDirecto.posicionesCuplas=posicionesCuplas;
- filtrarRedManualMaterialesGas(entrada);completarContinuidadCompraGas(entrada);if(!sinRegistroTecnico&&CatalogosSistemasGas.identificar(instalacionGas.perfil)==='sigas'&&typeof proyectarRegistroSigasEnMaterialesGas==='function'){
+ integrarTeesDeducidasGas(entrada);filtrarRedManualMaterialesGas(entrada);completarContinuidadCompraGas(entrada);if(!sinRegistroTecnico&&CatalogosSistemasGas.identificar(instalacionGas.perfil)==='sigas'&&typeof proyectarRegistroSigasEnMaterialesGas==='function'){
   // El inventario manual existe antes del cálculo técnico. Una falla del catálogo no lo modifica.
   try{return proyectarRegistroSigasEnMaterialesGas(JSON.parse(JSON.stringify(entrada)));}
   catch(e){entrada.manualDirecto.avisos.push('Cantidades registradas conservadas. Diámetros, productos y pérdidas pendientes: '+e.message+'. No se asignaron pérdidas cero ni se confirmaron medidas.');}
@@ -984,4 +984,32 @@ function renderEstadoRedManualGas(out){
  for(const s of [...r.errores,...r.avisos,...r.faltantes])texto(s);
  texto(r.total===null?'Consumo conectado total: Pendiente.':'Consumo conectado total: '+fmt(r.total)+' kcal/h.');
  for(const t of tramos)texto(t.desde+'–'+t.hasta+': '+(Number.isFinite(r.porTramo[t.id])?fmt(r.porTramo[t.id])+' kcal/h acumulados':'Consumo pendiente'));
+}
+
+// Deducción física por el detector existente: no confirma productos ni orientaciones.
+function integrarTeesDeducidasGas(entrada){
+ if(!proyectoGasActual().recorridoGuiadoGas)return entrada;
+ const red=redFisicaManualGas();if(red.errores.length)return entrada;
+ // El vinculador ya resuelve tees registradas por eliminación de nodos ocupados, sin usar tablas.
+ const conocidos=CatalogosSistemasGas.prepararAccesorios(piezasConciliacionGas(entrada),red,entrada.tramos);
+ if(typeof deducirTeesPreliminaresSigasGas==='function')deducirTeesPreliminaresSigasGas({inventario:conocidos},red,[],false);
+ const paraDetector={...entrada,extras:entrada.extras.map(a=>{const p=a.tipo==='tee'&&!a.nodo&&a.cantidad===1?conocidos.fisicas.find(p=>p.id===a.idFisico):null;return p?.nodo?{...a,nodo:p.nodo}:a;})};
+ const orientados=tramos.map(t=>{const o=red.orientacion[t.id];return o?{...t,desde:red.puntos.find(n=>n.id===o.desde)?.nombre||t.desde,hasta:red.puntos.find(n=>n.id===o.hasta)?.nombre||t.hasta,red:undefined}:t;});
+ const propuesta=DetectorGas.detectar({tramos:orientados,artefactos,nodos:instalacionGas.nodos,inventario:paraDetector,opciones:opcionesMaterialesGas()});
+ entrada.manualDirecto.pendientes.push(...propuesta.avisos.filter(s=>/más de tres conexiones|Circuito cerrado|conexión pendiente|contradice/.test(s)));
+ for(const p of propuesta.propuestas.filter(p=>p.tipo==='tee'&&p.flujoDefinido)){
+  if(p.bloqueo){entrada.manualDirecto.pendientes.push('Tee en '+p.ubicacion+': '+p.bloqueo);continue;}
+  const entradaId=Object.entries(red.orientacion).find(([,o])=>o.hasta===p.nodo||red.puntos.find(n=>n.id===o.hasta)?.nombre.toLowerCase()===p.ubicacion.toLowerCase())?.[0];if(!entradaId)continue;
+  const t=tramos.find(t=>t.id===entradaId),conteo=conteoRapidoDelTramoGas(t);
+  if(conteo.tee===0){entrada.manualDirecto.pendientes.push('Derivación '+p.ubicacion+': tres conexiones requieren revisar una tee, pero figura cero confirmado. Se conserva el cero; no se añadió otra pieza.');continue;}
+  if(entrada.extras.some(a=>a.tipo==='tee'&&(a.nodo===p.nodo||a.idFisico==='tee:'+p.nodo)))continue;
+  if(Number.isSafeInteger(conteo.tee)&&conteo.tee>0)entrada.manualDirecto.pendientes.push('Derivación '+p.ubicacion+': la tee registrada no está vinculada a este nodo. Se conserva y se propone otra tee deducida; revisar ubicación y cantidades.');
+  entrada.manualDirecto.pendientes=entrada.manualDirecto.pendientes.filter(s=>s!==t.desde+'–'+t.hasta+': Tees');
+  entrada.extras.push({tipo:'tee',cantidad:1,nodo:p.nodo,idFisico:'tee:'+p.nodo,tramo:entradaId,ubicacion:entradaId,medidas:p.medidas||[],confirmado:false,deducido:true,evidencia:'Deducida por una entrada y dos salidas registradas. Producto y vías pendientes; no es confirmación de instalación.'});
+ }
+ for(const a of entrada.extras.filter(a=>a.tipo==='tee'&&a.deducido)){
+  const nodo=red.puntos.find(n=>n.id===a.nodo||'nombre:'+nombrePuntoManualGas(n.nombre)===a.nodo),conexiones=nodo?Object.values(red.orientacion).filter(o=>o.desde===nodo.id||o.hasta===nodo.id):[];
+  if(conexiones.length!==3){a.conflicto=true;entrada.manualDirecto.pendientes.push('Tee deducida: cambiaron sus conexiones; revisar ubicación sin borrar la pieza conservada.');}
+ }
+ return entrada;
 }
