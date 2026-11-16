@@ -157,7 +157,7 @@ function organizarResultadoCompletoGas(out){
    const confirmados=out.querySelector('.gas-calculo-preliminar');
    if(confirmados){
     const parcial=registroAccesoriosSigasGas()?.calculo.filas.some(f=>f.verificacionConsulta?.parcial!==false);
-    confirmados.querySelector('summary').textContent='Comparar con piezas identificadas · '+(parcial?'cálculo parcial':'cálculo independiente');
+    confirmados.querySelector('summary').textContent='Registros y revisión anterior · '+(parcial?'comparación parcial':'comparación independiente');
     const nota=confirmados.querySelector('p');if(nota)nota.textContent='Esta consulta utiliza solo las piezas identificadas; cuando hay pérdidas pendientes, sus resultados son parciales. No es el escenario principal: este también utiliza propuestas documentadas, sin confirmar piezas reales. Un diámetro menor aquí no sustituye al resultado principal.';
     const tablaParcial=confirmados.querySelector('.sigas-diametros');if(tablaParcial){const caption=document.createElement('caption');caption.textContent='Datos identificados · comparación independiente, no resultado del escenario principal';tablaParcial.prepend(caption);}
     tecnicos.append(confirmados);

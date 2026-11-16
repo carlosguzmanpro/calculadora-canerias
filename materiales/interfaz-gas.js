@@ -121,7 +121,8 @@ function renderPlanGas(){
  }
  out.append(resumenCompacto);out.append(detalles);
  const lista=document.createElement('div');lista.className='gas-materiales-tarjetas';
- const grupos=organizarEdicionMaterialesGas(r,fuenteMaterialesGas==='proyecto'?tramos:[]),prefijo=ambitoGas+':'+fuenteMaterialesGas+':';
+ if(revisionMaterialesGas.planResultado)texto('Registros originales de revisión: pueden diferir del inventario vigente. No se suman otra vez a la compra.',lista);
+ const grupos=organizarEdicionMaterialesGas(revisionMaterialesGas.plan,fuenteMaterialesGas==='proyecto'?tramos:[]),prefijo=ambitoGas+':'+fuenteMaterialesGas+':';
  const preparar=(el,clave,defecto=false)=>{el.claveVistaGas=prefijo+clave;el.open=abiertos.has(el.claveVistaGas)?abiertos.get(el.claveVistaGas):defecto;};
  for(const g of grupos){
   const grupo=document.createElement('details');grupo.className='gas-materiales-grupo';preparar(grupo,'grupo:'+g.clave);
@@ -943,7 +944,7 @@ function renderListaManualSimpleGas(out,plan,modelo){
  renderResultadoFusiogasGas(out);
  if(ejercicio){
   const preliminar=document.createElement('details'),titulo=document.createElement('summary'),nota=document.createElement('p');
-  preliminar.className='gas-calculo-preliminar';preliminar.ambitoPreliminar=ambitoGas;preliminar.open=out.preliminarGas?.ambito===ambitoGas&&out.preliminarGas.abierto===true;titulo.textContent=ejercicio.esEjercicio===false?'Datos registrados y verificación técnica':'Cálculo preliminar';nota.textContent='Utiliza los datos registrados e identificaciones confirmadas del proyecto. No incorpora automáticamente las hipótesis hidráulicas del escenario; por eso puede mostrar diámetros o pérdidas pendientes. Podés consultar y editar todas las funciones anteriores aquí.';
+  preliminar.className='gas-calculo-preliminar';preliminar.ambitoPreliminar=ambitoGas;preliminar.open=out.preliminarGas?.ambito===ambitoGas&&out.preliminarGas.abierto===true;titulo.textContent=ejercicio.esEjercicio===false?'Registros y revisión anterior · comparación parcial':'Cálculo preliminar';nota.textContent='Utiliza los datos registrados e identificaciones confirmadas del proyecto. No incorpora automáticamente las hipótesis hidráulicas del escenario; por eso puede mostrar diámetros o pérdidas pendientes. Podés consultar y editar todas las funciones anteriores aquí.';
   preliminar.append(titulo,nota);out.append(preliminar);out=preliminar;
  }
  const texto=(padre,s)=>{const p=document.createElement('p');p.textContent=textoMaterialPantallaGas(s);padre.append(p);};
@@ -951,7 +952,7 @@ function renderListaManualSimpleGas(out,plan,modelo){
  let compra=null;try{compra=prepararCompraActualGas(plan);}catch(e){/* El detalle de compra muestra el error; el inventario se conserva. */}
  if(ejercicio?.planMaterialesEscenario){plan=ejercicio.planMaterialesEscenario;compra=ejercicio.compra;}
  const filasResumen=resumenMaterialesInstalacionGas(plan,compra);
- const encabezado=document.createElement('h3');encabezado.textContent='MATERIALES DE LA INSTALACIÓN';materiales.append(encabezado);
+ const encabezado=document.createElement('h3');encabezado.textContent=ejercicio?'Registro de materiales para revisión · no sumar al vigente':'MATERIALES DE LA INSTALACIÓN';materiales.append(encabezado);
  texto(materiales,ambitoGas==='demostracion'?'DEMOSTRACIÓN · lista de materiales':ambitoGas==='proyecto'&&!proyectos.gas.nombreProyecto?'MI PROYECTO · lista de materiales':nombreProyectoGas()+' · lista de materiales');
  const tecnicos=document.createElement('details'),st=document.createElement('summary');tecnicos.className='gas-detalles';tecnicos.id='detallesTecnicosResultadoGas';st.textContent='VER DETALLES TÉCNICOS';tecnicos.append(st);
  texto(tecnicos,'Diámetros definitivos bloqueados. Cantidades y medidas tienen verificaciones independientes. Tiras y cuplas orientativas disponibles sin posiciones; cantidades exactas requieren continuidad definida. Se respeta el largo comercial configurado del proyecto.');
@@ -1018,9 +1019,10 @@ function integrarTeesDeducidasGas(entrada){
 // Proyección de resultados: no altera proyectos, cantidades ni el inventario físico declarado.
 function unificarMaterialesEscenarioGas(modelo,plan){
  const piezas=new Map(modelo.inventarioEscenario.map(p=>[p.id,p]));
- const ajustes=plan.filas.filter(f=>f.editado&&f.cantidad!==f.cantidadCalculada);if(ajustes.length){const aviso='Hay ajustes manuales de la lista de revisión diferentes del inventario físico. Conciliar las cantidades del tramo antes de cerrar la compra o la verificación.';modelo.compra.pendientes.push(aviso);modelo.bloqueos=[...new Set([...modelo.bloqueos,aviso])];modelo.completo=false;}
- const proyectar=f=>{
-  const p=piezas.get(f.registroSigas?.id||f.idFisico);if(!p||!Number.isFinite(p.diametroExteriorMm)||f.editado||f.tipo==='cano')return {...f};
+ const ajustes=plan.filas.filter(f=>f.editado&&f.cantidad!==f.cantidadCalculada);modelo.avisosRevision=ajustes.length?['Se conservan '+ajustes.length+' ajustes de revisión con cantidades diferentes. No sustituyen al inventario vigente; para cambiar la instalación, editá el tramo.']:[];
+ modelo.revisionesMateriales=ajustes.map(f=>({...f}));
+ const proyectar=original=>{
+  const p=piezas.get(original.registroSigas?.id||original.idFisico);let f={...original};if(f.editado&&f.tipo!=='cano'){f.cantidadRevision=f.cantidad;f.cantidad=p?.cantidad??(Object.hasOwn(f,'cantidadCalculada')?f.cantidadCalculada:null);f.editado=false;}if(!p||!Number.isFinite(p.diametroExteriorMm)||f.tipo==='cano')return f;
   const real=f.estado==='confirmado'||!!f.registroSigas?.productoConfirmado;
   if(real){const mm=String(f.diametro||'').match(/(\d+(?:[.,]\d+)?)\s*mm/);if(mm&&Number(mm[1].replace(',','.'))!==p.diametroExteriorMm)modelo.compra.pendientes.push('Medida registrada de '+f.material+' ('+f.diametro+') diferente del diámetro de cálculo '+p.diametroExteriorMm+' mm; verificar compatibilidad sin reemplazar la pieza.');return {...f,diametroCalculo:p.diametroExteriorMm+' mm',evidencia:(f.evidencia||'')+' Medida registrada conservada; cálculo del tramo '+p.diametroExteriorMm+' mm.'};}
   return {...f,material:p.nombre||({codo90:'Codo de 90° · producto pendiente',codo45:'Codo de 45° · producto pendiente',llave:'Llave de paso · tipo pendiente',tee:'Tee · producto pendiente',reduccion:'Reducción · producto pendiente'}[f.tipo]||f.material),medidasRegistradas:f.medidas,medidas:p.medidas||[p.diametroExteriorMm+' mm candidato'],diametro:p.diametroExteriorMm+' mm candidato',registroSigas:{...f.registroSigas,candidatoMm:p.diametroExteriorMm},estado:'estimado',evidencia:(f.evidencia||'')+' Diámetro del escenario de resultado, sin confirmar producto instalado.'};
