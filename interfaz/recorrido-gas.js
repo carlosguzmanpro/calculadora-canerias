@@ -47,7 +47,7 @@ function activarRecorridoGuiadoGas(){
  moverCampoGuiadoGas('catalogoSistemaGas',$('guiadoPaso1'));moverCampoGuiadoGas('combustibleSistemaGas',$('guiadoPaso2'));
  for(const id of ['dimPCS','dimDensidad','dimFuenteGas']){moverCampoGuiadoGas(id,$('guiadoPropiedades'));$(id).value=perfilTecnicoActualGas()[({dimPCS:'poderCalorifico',dimDensidad:'densidadRelativa',dimFuenteGas:'fuenteGas'})[id]]??'';}
  moverControlGuiadoGas('guiadoModo',$('guiadoPaso1'));moverCampoGuiadoGas('presentacionGas',$('guiadoModo'));
- moverCampoGuiadoGas('modoCargaGas',$('guiadoPaso1'));moverControlGuiadoGas('ayudaModoCargaGas',$('guiadoPaso1'));moverControlGuiadoGas('referenciaOpcionalGas',$('guiadoPaso1'));$('referenciaOpcionalGas').open=false;
+ moverControlGuiadoGas('referenciaOpcionalGas',$('guiadoPaso1'));$('referenciaOpcionalGas').open=false;
  for(const id of ['herramientasGasOpcionales','ejerciciosGasSeparados','respaldosConfiguracionGas','dimensionGas','redGas','revisionCroquis','consumos'])moverControlGuiadoGas(id,$('guiadoControlesAvanzados'));
  moverControlGuiadoGas('cargarEjemploTeesGas',$('ejerciciosGasSeparados'));
  organizarHerramientasPasoGuiadoGas();

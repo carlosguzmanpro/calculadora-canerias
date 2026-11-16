@@ -219,12 +219,9 @@ body.gas-guiado #guiadoPaso7 .pdf-completo-gas{display:none!important}body.gas-g
 <h2>Tu proyecto de cañerías</h2>
 <button id="nuevoProyectoInicio" onclick="mostrarNuevaEspecialidadGas()">Nuevo proyecto</button>
 <button id="misProyectosInicio" class="alt" onclick="mostrarMisProyectosGuiadoGas()">Mis proyectos</button>
-<details id="accesosAnterioresInicio"><summary>Accesos por especialidad · herramientas anteriores</summary>
-<h3>¿Qué instalación querés trabajar?</h3>
-<button onclick="mostrarEntradaGas()">🔥 Gas</button>
-<button onclick="abrir('agua')">💧 Agua</button>
-<button onclick="abrir('cloacas')">🚽 Cloacas</button>
-<p class="nota">Cada especialidad conserva sus herramientas. El nuevo recorrido guiado está disponible para GAS.</p></details>
+<details id="accesosAnterioresInicio"><summary>Herramientas anteriores</summary>
+<button onclick="mostrarEntradaGas()">Abrir herramientas anteriores</button>
+<p class="nota">Acceso técnico a la vista anterior de GAS. Para comenzar una instalación de GAS, AGUA o CLOACAS, usá Nuevo proyecto.</p></details>
 </section>
 
 <section id="especialidadProyectoGuiado" class="oculto"><button class="alt" onclick="volverInicioGuiadoGas()">Atrás</button><h2>Elegí la instalación</h2><button onclick="elegirEspecialidadGuiadaGas('gas')">GAS</button><button class="alt" onclick="elegirEspecialidadGuiadaGas('agua')">AGUA</button><button class="alt" onclick="elegirEspecialidadGuiadaGas('cloacas')">CLOACAS</button><p>GAS tiene un recorrido guiado. AGUA y CLOACAS conservan su funcionamiento actual.</p></section>
@@ -250,7 +247,7 @@ body.gas-guiado #guiadoPaso7 .pdf-completo-gas{display:none!important}body.gas-g
 <div class="guiado-pie"><button id="guiadoAtras" class="alt" onclick="retrocederGuiadoGas()">Atrás</button><button id="guiadoContinuar" onclick="continuarGuiadoGas()">Continuar</button></div>
 </section>
 <div id="menuGas" class="oculto">
-<label for="presentacionGas">Modo de trabajo</label><select id="presentacionGas" onchange="elegirPresentacionGas(this.value)"><option value="rapido">Cálculo rápido de diámetros</option><option value="completo">Cálculo completo y materiales</option></select>
+<label for="presentacionGas">¿Qué querés calcular?</label><select id="presentacionGas" onchange="elegirPresentacionGas(this.value)"><option value="rapido">Solo diámetros</option><option value="completo">Diámetros y materiales</option></select>
 <button id="opcionesEntradaGas" class="alt" onclick="mostrarEntradaGas()">Opciones de GAS</button>
 <p class="gas-paso-titulo">1 · Proyecto</p><button id="cargarEjemploTeesGas" class="alt" onclick="abrirEjemploTeesRapidasGas()">Cargar instalación de prueba</button><div class="gas-selector-proyectos"><label>Proyecto de GAS <select id="ambitoGas" onchange="seleccionarAmbitoGas(this.value)"><option value="proyecto">Mi proyecto</option><option value="demostracion">Demostración separada</option></select></label><button class="alt" onclick="mostrarEditorProyectoGas('crear')">Nuevo proyecto</button></div>
 <div id="editorProyectosGas" class="detalle oculto"><label for="nombreProyectoGas">Nombre del proyecto</label><input id="nombreProyectoGas" type="text" maxlength="80" placeholder="Ej.: Casa de Ana"><button id="guardarNombreProyectoGas" onclick="guardarNombreProyectoGas()">Crear proyecto vacío</button><button class="alt" onclick="cancelarEditorProyectoGas()">Cancelar</button></div><p id="mensajeProyectosGas" role="status" aria-live="polite"></p><p id="estadoAmbitoGas"></p>
@@ -18662,7 +18659,7 @@ function activarRecorridoGuiadoGas(){
  moverCampoGuiadoGas('catalogoSistemaGas',$('guiadoPaso1'));moverCampoGuiadoGas('combustibleSistemaGas',$('guiadoPaso2'));
  for(const id of ['dimPCS','dimDensidad','dimFuenteGas']){moverCampoGuiadoGas(id,$('guiadoPropiedades'));$(id).value=perfilTecnicoActualGas()[({dimPCS:'poderCalorifico',dimDensidad:'densidadRelativa',dimFuenteGas:'fuenteGas'})[id]]??'';}
  moverControlGuiadoGas('guiadoModo',$('guiadoPaso1'));moverCampoGuiadoGas('presentacionGas',$('guiadoModo'));
- moverCampoGuiadoGas('modoCargaGas',$('guiadoPaso1'));moverControlGuiadoGas('ayudaModoCargaGas',$('guiadoPaso1'));moverControlGuiadoGas('referenciaOpcionalGas',$('guiadoPaso1'));$('referenciaOpcionalGas').open=false;
+ moverControlGuiadoGas('referenciaOpcionalGas',$('guiadoPaso1'));$('referenciaOpcionalGas').open=false;
  for(const id of ['herramientasGasOpcionales','ejerciciosGasSeparados','respaldosConfiguracionGas','dimensionGas','redGas','revisionCroquis','consumos'])moverControlGuiadoGas(id,$('guiadoControlesAvanzados'));
  moverControlGuiadoGas('cargarEjemploTeesGas',$('ejerciciosGasSeparados'));
  organizarHerramientasPasoGuiadoGas();
