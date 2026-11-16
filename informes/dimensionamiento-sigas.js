@@ -907,7 +907,8 @@ function unionesDelEnsayoSigasGas(){
 function construirResultadoEjercicioSigasGas(cualquierProyecto=false){
  const reg=registroAccesoriosSigasGas();if(!reg||!cualquierProyecto&&!proyectoGasActual().referenciaSigas19||reg.entradaTecnica.perfil.gas!=='GN'||!revisionMaterialesGas)return null;
  const firmaEnsayo=esInstalacionPruebaSigasGas()?JSON.stringify(datosCortesCompraEnsayoGas()):null;
- if(cacheResultadoEjercicioSigasGas?.registro===reg&&cacheResultadoEjercicioSigasGas.firmaEnsayo===firmaEnsayo)return cacheResultadoEjercicioSigasGas.modelo;
+ const firmaCompra=JSON.stringify({opciones:opcionesMaterialesGas(),geometria:tramos.map(t=>[t.id,t.metros,t.diametro,t.detalle]),revisiones:revisionMaterialesGas.plan.filas.map(f=>[f.id,f.cantidad,f.editado,f.diametro]),cortes:datosPlanGas().cortesCompra});
+ if(cacheResultadoEjercicioSigasGas?.registro===reg&&cacheResultadoEjercicioSigasGas.firmaEnsayo===firmaEnsayo&&cacheResultadoEjercicioSigasGas.firmaCompra===firmaCompra){revisionMaterialesGas.planResultado=cacheResultadoEjercicioSigasGas.modelo.planMaterialesEscenario;return cacheResultadoEjercicioSigasGas.modelo;}
  const entrada=JSON.parse(JSON.stringify(reg.entradaTecnica)),compraBase=prepararCompraActualGas(revisionMaterialesGas.plan),estimacion=JSON.parse(JSON.stringify(compraBase.estimacionCuplas)),unionesEnsayo=unionesDelEnsayoSigasGas();
  if(unionesEnsayo&&!unionesEnsayo.error){estimacion.tramos=unionesEnsayo.filas;estimacion.total=estimacion.tramos.reduce((n,t)=>n+t.cantidad,0);}
  else if(unionesEnsayo){estimacion.tramos=tramos.map(t=>({id:t.id,cantidad:0,orientativo:true}));estimacion.total=0;}
@@ -970,7 +971,7 @@ function construirResultadoEjercicioSigasGas(cualquierProyecto=false){
  const limpiar=s=>{const etiquetas=new Map([...entrada.inventario.fisicas.map(p=>[p.id,nombrePieza(p.id)]),...porTramo]),escapar=x=>Array.from(x,c=>/[a-zA-Z0-9_-]/.test(c)?c:String.fromCharCode(92)+c).join(''),rx=new RegExp('(^|[^A-Za-z0-9_-])('+[...etiquetas.keys()].sort((a,b)=>b.length-a.length).map(escapar).join('|')+')(?=$|[^A-Za-z0-9_-])','g');return String(s).replace(rx,(_,sep,id)=>sep+etiquetas.get(id)).replace(/presionDisponible/g,'presión disponible').replace(/presionMinima/g,'presión mínima').replace(/perdidaMaxima/g,'pérdida admisible').replace(/tee:nombre:/g,'tee ');};
  const materiales=new Map(),fisicas=new Map();
  for(const ruta of r.recorridos)for(const a of ruta.aportes)if(!fisicas.has(a.piezaId))fisicas.set(a.piezaId,a);
- for(const a of fisicas.values()){const nombre=a.tipo==='tee'?a.nombre.replace(/, flujo.*$/,''):a.nombre,clave=a.tipo+'|'+nombre,previa=materiales.get(clave)||{tipo:a.tipo,material:nombre,cantidad:0,unidad:'unidad',estado:reg.piezas.some(p=>p.id===a.piezaId&&p.productoConfirmado?.id===a.id)?'Conexión confirmada; diámetro candidato, sin aprobación normativa':a.tipo==='cupla'?'Uniones del escenario; origen en el resumen':'Pieza del escenario; medidas por verificar'};previa.cantidad+=a.cantidad;materiales.set(clave,previa);}
+ for(const a of fisicas.values()){const nombre=a.tipo==='tee'?a.nombre.replace(/, flujo.*$/,''):a.nombre,clave=JSON.stringify([a.tipo,nombre,a.diametroExteriorMm,a.medidas||[]]),previa=materiales.get(clave)||{tipo:a.tipo,material:nombre,diametroExteriorMm:a.diametroExteriorMm,medidas:a.medidas||[],piezaIds:[],cantidad:0,unidad:'unidad',estado:reg.piezas.some(p=>p.id===a.piezaId&&p.productoConfirmado?.id===a.id)?'Conexión confirmada; diámetro candidato, sin aprobación normativa':a.tipo==='cupla'?'Uniones del escenario; origen en el resumen':'Pieza del escenario; medidas por verificar'};previa.cantidad+=a.cantidad;previa.piezaIds.push(a.piezaId);materiales.set(clave,previa);}
  for(const p of registroPreliminar.piezas)if(!fisicas.has(p.id)&&!p.funcion?.startsWith('reduccion-confirmada'))materiales.set('pendiente:'+p.id,{tipo:p.tipo,material:nombrePieza(p.id)+' · producto pendiente',cantidad:p.cantidad,unidad:'unidad',estado:'Cantidad registrada; equivalencia sin resolver'});
  const entradaCompra=entradaManualMaterialesGas(false,true);completarContinuidadCompraGas(entradaCompra);
  const compra=MaterialesGas.prepararCompra(entradaCompra,revisionMaterialesGas.plan,{...opcionesMaterialesGas('proyecto'),cortesCompra:datosPlanGas().cortesCompra||{}},r);compra.estimacionCuplas=MaterialesGas.estimarCuplasCompra(compra);
@@ -1007,7 +1008,10 @@ function construirResultadoEjercicioSigasGas(cualquierProyecto=false){
   const real=reg.entradaTecnica.config.tees?.[p.id]?.conjunto;
   if(op&&!(real?.confirmado&&real.opcionId===op.id&&real.firma===op.firma))modelo.propuestasAccesorios.push({material:'Tee '+(p.nodo?.split(':').at(-1)||'sin nodo')+': '+op.nombre,cantidad:1,codigo:op.codigoTee,confirmada:false,motivo:'Conjunto documentado propuesto para el escenario; no incorporado al inventario real.',componentes:op.reducciones.map(x=>({material:x.nombre,codigo:x.codigo,equivalenteM:x.equivalenteM}))});
  }
- cacheResultadoEjercicioSigasGas={registro:reg,modelo,firmaEnsayo};return modelo;
+ modelo.inventarioEscenario=[...fisicas.values()].map(a=>({id:a.piezaId,tipo:a.tipo,nombre:a.nombre,medidas:a.medidas,cantidad:a.cantidad,diametroExteriorMm:a.diametroExteriorMm,productoId:a.id,tramo:a.tramoId,estado:'escenario; producto real por verificar'}));
+ for(const p of registroPreliminar.piezas)if(!fisicas.has(p.id))modelo.inventarioEscenario.push({id:p.id,tipo:p.tipo,cantidad:p.cantidad,diametroExteriorMm:p.tramos.length===1?vectorFinal[p.tramos[0]]:null,estado:'producto pendiente'});
+ unificarMaterialesEscenarioGas(modelo,revisionMaterialesGas.plan);
+ cacheResultadoEjercicioSigasGas={registro:reg,modelo,firmaEnsayo,firmaCompra};return modelo;
 }
 // Campos mínimos del proyecto; comparten perfil y registro terminal con la edición avanzada.
 function guardarPCSPreliminarSigasGas(valor,fuente){

@@ -51,6 +51,7 @@ function modeloInformeActual(){
  if(gas){
   d.dimensionamientoFusiogas=dimensionamientoFusiogasActualGas();
   d.ejercicioSigas=resultadoPreliminarSigasGas();
+  if(d.ejercicioSigas?.planMaterialesEscenario){const plan=d.ejercicioSigas.planMaterialesEscenario;d.filas=plan.filas.map(f=>({...f,ubicacion:ubicacionLegibleGas(f.ubicacion)}));d.materialesAgrupados=resumenListaManualGas(plan).map(f=>({...f,cantidad:f.pendiente?null:f.cantidad,estado:f.pendiente?'pendiente':'estimado',ubicaciones:['Resultado por tramo']}));d.preparacionCompra=d.ejercicioSigas.compra;}
   const reg=registroAccesoriosSigasGas();
   if(d.ejercicioSigas&&reg){
    d.conexionesRosca=(reg.entradaTecnica.inventario.necesidadesTerminales||[]).map(n=>({nombre:n.nombre,rosca:proyectoGasActual().calculoSigas?.terminales?.[n.id]?.rosca||null}));
