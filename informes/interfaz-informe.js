@@ -49,6 +49,7 @@ function modeloInformeActual(){
   }catch(e){d.resumen.push('Materiales: Pendiente de corregir los datos actuales. '+e.message+'. El respaldo anterior no es una lista de compra vigente.');}
  }
  if(gas){
+  if(typeof recorridoGasUI!=='undefined'&&recorridoGasUI)d.estadoProyectoGas=estadoProyectoGuiadoGas(true);
   d.dimensionamientoFusiogas=dimensionamientoFusiogasActualGas();
   d.ejercicioSigas=resultadoPreliminarSigasGas();
   if(d.ejercicioSigas?.planMaterialesEscenario){const plan=d.ejercicioSigas.planMaterialesEscenario;d.filas=plan.filas.map(f=>({...f,ubicacion:ubicacionLegibleGas(f.ubicacion)}));d.materialesAgrupados=resumenListaManualGas(plan).map(f=>({...f,cantidad:f.pendiente?null:f.cantidad,estado:f.pendiente?'pendiente':'estimado',ubicaciones:['Resultado por tramo']}));d.preparacionCompra=d.ejercicioSigas.compra;}
