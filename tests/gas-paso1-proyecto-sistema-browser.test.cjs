@@ -9,8 +9,8 @@ test('Paso 1 móvil: modos persistentes y controles originales reubicados sin du
  await p.screenshot({path:'/tmp/gas-paso1-selector-unico.png',fullPage:true});await p.locator('#guiadoContinuar').tap();assert.equal(await p.evaluate(()=>modoCargaGas),'profesional');await p.locator('#guiadoAtras').tap();assert.equal(await p.evaluate(()=>modoCargaGas),'profesional');
  await p.reload();await p.getByRole('button',{name:'Mis proyectos',exact:true}).tap();await p.getByRole('button',{name:'Proyecto pantalla uno',exact:true}).tap();assert.equal(await p.evaluate(()=>modoCargaGas),'profesional');
  for(let i=0;i<3;i++)await p.locator('#guiadoContinuar').tap();
- assert.equal(await p.locator('#entradaCasilleroGas').evaluate(n=>n.closest('#agregarAccesoriosGas')!==null),true);
- await p.locator('#entradaCasilleroGas').evaluate(n=>n.closest('details').open=true);await p.locator('#entradaCasilleroGas').selectOption('lateral');assert.equal(await p.evaluate(()=>tramos.length),0);assert.equal(await p.locator('#codoCasilleroGas').inputValue(),'pendiente');
+ assert.equal(await p.locator('#entradaCasilleroGas').evaluate(n=>n.closest('#formularioGas')!==null),true);
+ await p.locator('#desde').fill('M');await p.locator('#entradaCasilleroGas').evaluate(n=>n.closest('details').open=true);await p.locator('#entradaCasilleroGas').selectOption('lateral');assert.equal(await p.evaluate(()=>tramos.length),0);assert.equal(await p.locator('#codoCasilleroGas').inputValue(),'pendiente');
  await p.locator('#guiadoAtras').tap();assert.equal(await p.locator('#consumos').isVisible(),true);
  assert.equal(await p.locator('#deteccionOpcionalGas').evaluate(n=>n.closest('#guiadoPaso4')!==null),true);assert.equal(await p.locator('#dimensionGas').evaluate(n=>n.closest('#guiadoHerramientasTecnicas')!==null),true);assert.equal(await p.locator('#exportarListaGas').evaluate(n=>n.closest('#guiadoPaso8')!==null),true);
  await p.locator('#guiadoAvanzadas > summary').tap();assert.equal(await p.locator('#respaldosConfiguracionGas > summary').isVisible(),true);assert.equal(await p.locator('#planoOpcionalGas > summary').isVisible(),true);
