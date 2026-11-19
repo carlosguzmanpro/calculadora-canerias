@@ -18668,7 +18668,7 @@ function firmaEstadoProyectoGuiadoGas(){
  const {recorridoGuiadoGas,borradorFormularioGas,...datos}=proyectoGasActual();
  return JSON.stringify({tramos,artefactos,instalacionGas,datos});
 }
-function firmaFormularioTramoGuiadoGas(){return JSON.stringify({valores:['desde','hasta','metros','consumoTramo','diametro','otroDiametro','destinoArtefacto',...tiposRapidosGas.map(([tipo])=>'manualGas_'+tipo)].map(id=>$(id)?.value??''),distancias:estadoRecorridoProyectoGas().distanciasBorrador?.[tramos[editandoTramo]?.id]||null});}
+function firmaFormularioTramoGuiadoGas(){return JSON.stringify({valores:['desde','hasta','metros','consumoTramo','diametro','otroDiametro','destinoArtefacto',...tiposRapidosGas.map(([tipo])=>'manualGas_'+tipo)].map(id=>$(id)?.value??''),artefactoId:$('destinoArtefacto').selectedOptions[0]?.dataset.artefactoId||null,distancias:estadoRecorridoProyectoGas().distanciasBorrador?.[tramos[editandoTramo]?.id]||null});}
 function formularioTramoSinCambiosGuiadoGas(){const inicial=recorridoGasUI?.formularioInicial;return !!(inicial&&tramos[editandoTramo]?.id===inicial.id&&firmaFormularioTramoGuiadoGas()===inicial.firma);}
 function hayCambiosSinGuardarGuiadoGas(){return (formularioTramoSinCambiosGuiadoGas()?!!String($('gp')?.value||'').trim():['desde','hasta','metros','consumoTramo','gp',...tiposRapidosGas.map(([tipo])=>'manualGas_'+tipo)].some(id=>String($(id)?.value||'').trim()))||editandoAccesorios>=0||!!estadoRecorridoProyectoGas().edicionArtefacto;}
 function estadoProyectoGuiadoGas(verificar=false){
@@ -18728,7 +18728,7 @@ function organizarHerramientasPasoGuiadoGas(){
  const carga=grupo('guiadoConsultaConsumos','Artefactos y consumos',$('guiadoPaso5'));carga.open=true;
  const revision=grupo('guiadoRevisionHerramientas','Detección y sugerencias de accesorios · opcional',$('guiadoPaso4'));
  const revisar=grupo('guiadoRevisionInstalacion','Revisar tramos y vías de tees',$('guiadoPaso4'));moverControlGuiadoGas('guiadoConsumos',revisar);
- grupo('guiadoDecisionesAccesorios','Productos y conexiones · completar solo lo pendiente',$('guiadoPaso4'));
+ grupo('guiadoDecisionesAccesorios','Piezas y conexiones · completar solo lo pendiente',$('guiadoPaso7'));
  grupo('guiadoSuministro','Condiciones documentadas e inventario real · opcional',$('guiadoDatosCalculo'));
  const ayuda=grupo('guiadoAyudaHerramientas','Ayuda y demostraciones',$('guiadoControlesAvanzados'));
  if(!ayuda.querySelector('.guiado-guia')){const p=document.createElement('p');p.className='guiado-guia';p.textContent='Seguí los seis pasos. Podés guardar borradores, volver y editar una sección. Fotos y distancias son opcionales. Las propuestas no confirman piezas reales.';ayuda.append(p);}
@@ -18737,7 +18737,7 @@ function organizarHerramientasPasoGuiadoGas(){
  moverControlGuiadoGas('consumos',carga);
  moverControlGuiadoGas('deteccionOpcionalGas',revision);
  moverControlGuiadoGas('conciliacionRapidaGas',revision);moverControlGuiadoGas('matUniones',grupo('guiadoUnionesRevision','Uniones y cambios de diámetro · revisión anterior',$('guiadoPaso4')));
- moverControlGuiadoGas($('matExtraNombre').closest('details'),$('guiadoPaso4'));
+ moverControlGuiadoGas($('matExtraNombre').closest('details'),tecnicas);
  for(const id of ['planoOpcionalGas','respaldosConfiguracionGas'])moverControlGuiadoGas(id,$('guiadoControlesAvanzados'));
  for(const id of ['ejerciciosGasSeparados','modalidadIaFuturaGas'])moverControlGuiadoGas(id,ayuda);
  for(const id of ['dimensionGas','redGas','revisionCroquis','herramientasGasOpcionales'])moverControlGuiadoGas(id,tecnicas);
@@ -18751,11 +18751,14 @@ function organizarHerramientasPasoGuiadoGas(){
  if(!$('guiadoResumenDiametros')){const n=document.createElement('div');n.id='guiadoResumenDiametros';$('guiadoResumenFinal').after(n);}
  moverControlGuiadoGas('calcularCaneriaGas',$('guiadoPaso7'));$('guiadoPaso7').prepend($('calcularCaneriaGas'));
  moverControlGuiadoGas('guiadoAvanzadas',document.querySelector('.guiado-cabecera'));
+ for(const id of ['guiadoRevisionInstalacion','guiadoRevisionHerramientas','guiadoUnionesRevision'])moverControlGuiadoGas(id,tecnicas);
+ for(const id of ['guiadoConexiones','guiadoDecisionesAccesorios'])moverControlGuiadoGas(id,$('guiadoPaso7'));
+ $('guiadoPaso7').prepend($('calcularCaneriaGas'));
  organizarFormularioPrincipalGuiadoGas();
 }
 function desmontarRecorridoGuiadoGas(){
  if(!recorridoGasUI)return;
- restaurarPanelesResultadoGuiadoGas();$('consumoTramo').readOnly=false;$('consumoTramo').hidden=false;document.querySelector('label[for="consumoTramo"]').hidden=false;$('consumos').querySelector('button[onclick="agregarArtefacto()"]').textContent='Agregar artefacto';document.querySelectorAll('.guiado-acceso-redundante').forEach(n=>n.classList.remove('guiado-acceso-redundante'));$('matLargo').removeAttribute('list');
+ restaurarPanelesResultadoGuiadoGas();$('guiadoArtefactosDisponibles')?.remove();for(const o of $('destinoArtefacto').querySelectorAll('[data-oculta-guiado]')){o.hidden=false;delete o.dataset.ocultaGuiado;}$('consumoTramo').readOnly=false;$('consumoTramo').hidden=false;document.querySelector('label[for="consumoTramo"]').hidden=false;$('consumos').querySelector('button[onclick="agregarArtefacto()"]').textContent='Agregar artefacto';document.querySelectorAll('.guiado-acceso-redundante').forEach(n=>n.classList.remove('guiado-acceso-redundante'));$('matLargo').removeAttribute('list');
  for(const {n,marca,abierto}of recorridoGasUI.nodos.slice().reverse()){if(marca.parentNode){marca.before(n);marca.remove();}if(typeof abierto==='boolean')n.open=abierto;}
  for(const n of document.querySelectorAll('.guiado-editar-artefacto,#guiadoArtefactosEnTramos,#guiadoCancelarArtefacto,#guiadoNotaConsumoTramo,#guiadoTotalConsumo'))n.remove();
  if($('guiadoConversionConsumos')&&!$('guiadoConversionConsumos').querySelector('input,select,button'))$('guiadoConversionConsumos').remove();
@@ -18794,8 +18797,8 @@ function aplicarPasoGuiadoGas(desplazar=false){
  $('editarTramosGas').open=true;if(p===4){$('agregarAccesoriosGas').open=true;renderDistanciasIntegralGas();}$('tramosRegistradosGas').open=p!==6;$('guardarTramo').textContent=p===6?'Guardar accesorios':'Guardar tramo';
  for(const b of $('listaTramos').querySelectorAll('button'))if(b.textContent==='Revisar accesorios')b.dataset.guiadoAccion='accesorios';
  if(p===1)$('editorProyectosGas').classList.remove('oculto');
- if(p===4){$('guiadoPaso4').append($('guiadoConexiones'));renderConexionesGuiadoGas();}
- if(p===4){renderRevisionIntegralGas();renderEdicionAccesoriosGuiadoGas();sincronizarConsumoTramoGuiadoGas();organizarFormularioPrincipalGuiadoGas();}
+ if(p===7){$('guiadoPaso7').prepend($('calcularCaneriaGas'));renderConexionesGuiadoGas();renderEdicionAccesoriosGuiadoGas();}
+ if(p===4){renderSelectorArtefactosGuiadoGas(true);renderRevisionIntegralGas();sincronizarConsumoTramoGuiadoGas();organizarFormularioPrincipalGuiadoGas();}
  if(p===5)renderArtefactosGuiadoGas();
  if(p===6){$('guiadoPaso6').append($('guiadoConexiones'));const sel=$('guiadoTramoAccesorios'),anterior=sel.value;sel.replaceChildren();for(const t of tramos){const o=document.createElement('option');o.value=t.id;o.textContent=t.desde+'–'+t.hasta;sel.append(o);}const elegido=tramos[editandoAccesorios>=0?editandoAccesorios:editandoTramo]?.id||anterior;sel.value=tramos.some(t=>t.id===elegido)?elegido:tramos[0]?.id||'';if(editandoTramo<0&&editandoAccesorios<0&&sel.value)seleccionarAccesoriosGuiadoGas(sel.value);calcularMaterialesManualGas();renderConexionesGuiadoGas();}
  if(p===7||p===8){calcularMaterialesManualGas();moverControlGuiadoGas('resumenPrincipalMaterialesGas',$('guiadoPaso7'));organizarPanelesResultadoGuiadoGas();}
@@ -18836,8 +18839,8 @@ function guardarTodosConsumosGuiadoGas(){
  for(const div of $('guiadoConsumos').querySelectorAll('[data-tramo]')){const input=div.querySelector('input'),sel=div.querySelector('select');if(!guardarConsumoFilaGuiadoGas(div.dataset.tramo,input.value,sel.value))return errorGuiadoGas('Indicá artefacto y consumo válido para '+div.querySelector('h3').textContent+'.',input);}return true;
 }
 function renderConexionesGuiadoGas(){
- if(!recorridoGasUI||recorridoGasUI.conexiones||recorridoGasUI.paso!==4)return;recorridoGasUI.conexiones=true;
- try{const out=$('guiadoConexiones'),abiertos=Array.from(out.querySelectorAll('details[open]')).map(d=>d.querySelector('summary')?.textContent),y=window.scrollY,enConexion=out.contains(document.activeElement);out.replaceChildren();const reg=registroAccesoriosSigasGas(),modelo=resultadoPreliminarSigasGas();if(!reg)return;const titulo=document.createElement('h3');titulo.textContent='Conexiones SIGAS · decisiones pendientes';out.append(titulo);for(const n of reg.entradaTecnica.inventario.necesidadesTerminales){if(n.id!=='terminal-medidor'&&!n.tramos.some(id=>{const t=tramos.find(t=>t.id===id);return t&&(t.artefacto||tipoArtefactoGuiadoGas(t));}))continue;if(recorridoGasUI.paso===4&&recorridoGasUI.tramoConexiones&&!n.tramos.includes(recorridoGasUI.tramoConexiones))continue;if(!reg.entradaTecnica.config.terminales?.[n.id]?.rosca){const l=document.createElement('label'),sel=document.createElement('select');l.textContent=n.nombre+' · rosca';sel.ariaLabel=l.textContent;const valores=['',...new Set(SIGAS_ED15_2025.tablas[3].filas.map(f=>DimensionamientoSigas.atributosTerminal(f)?.rosca).filter(Boolean))];for(const v of valores){const o=document.createElement('option');o.value=v;o.textContent=v?v+'″':'Pendiente';sel.append(o);}sel.onchange=()=>guardarDatoTerminalSigasGas(n.id,'rosca',sel.value);l.append(sel);out.append(l);}else renderConfirmacionConexionTerminalSigasGas(out,n.id,modelo);}if(!out.querySelector('label,details'))out.replaceChildren();for(const d of out.querySelectorAll('details'))if(abiertos.includes(d.querySelector('summary')?.textContent))d.open=true;if(enConexion)window.scrollTo({top:y,behavior:'instant'});}
+ if(!recorridoGasUI||recorridoGasUI.conexiones||recorridoGasUI.paso!==7)return;recorridoGasUI.conexiones=true;
+ try{const out=$('guiadoConexiones'),abiertos=Array.from(out.querySelectorAll('details[open]')).map(d=>d.querySelector('summary')?.textContent),y=window.scrollY,enConexion=out.contains(document.activeElement);out.replaceChildren();const reg=registroAccesoriosSigasGas(),modelo=resultadoPreliminarSigasGas();if(!reg)return;const titulo=document.createElement('h3');titulo.textContent='Conexiones SIGAS · decisiones pendientes';out.append(titulo);for(const n of reg.entradaTecnica.inventario.necesidadesTerminales){if(n.id!=='terminal-medidor'&&!n.tramos.some(id=>{const t=tramos.find(t=>t.id===id);return t&&(t.artefacto||tipoArtefactoGuiadoGas(t));}))continue;if(!reg.entradaTecnica.config.terminales?.[n.id]?.rosca){const l=document.createElement('label'),sel=document.createElement('select');l.textContent=n.nombre+' · rosca';sel.ariaLabel=l.textContent;const valores=['',...new Set(SIGAS_ED15_2025.tablas[3].filas.map(f=>DimensionamientoSigas.atributosTerminal(f)?.rosca).filter(Boolean))];for(const v of valores){const o=document.createElement('option');o.value=v;o.textContent=v?v+'″':'Pendiente';sel.append(o);}sel.onchange=()=>guardarDatoTerminalSigasGas(n.id,'rosca',sel.value);l.append(sel);out.append(l);}else renderConfirmacionConexionTerminalSigasGas(out,n.id,modelo);}if(!out.querySelector('label,details'))out.replaceChildren();for(const d of out.querySelectorAll('details'))if(abiertos.includes(d.querySelector('summary')?.textContent))d.open=true;if(enConexion)window.scrollTo({top:y,behavior:'instant'});}
  finally{recorridoGasUI.conexiones=false;}
 }
 function instalarRecorridoGuiadoGas(){
@@ -18929,7 +18932,7 @@ function instalarCargaIntegralGas(){
   const t=id?tramos.find(t=>t.id===id):tramos.at(-1);if(!t)return result;
   const leer=v=>String(v??'').trim()===''?'':numeroDecimalGas(v);
   if(detalleIngresado)t.detalle={...t.detalle,baseDistancias:d.base||'geometrica',finalOrigen:d.finalOrigen,finalAnterior:d.finalAnterior,estado:r.completa?(d.filas.length?'completo':'ninguno'):'pendiente',accesorios:d.filas.filter(a=>a.tipo!=='tee'||String(a.nodo||'').trim()).map(a=>({...a,metrosAntes:leer(a.metrosAntes)})),distribucionPendiente:d.filas.some(a=>a.tipo==='tee'&&!String(a.nodo||'').trim())?d.filas:undefined,metrosFinal:leer(d.final)};
-  delete estadoRecorridoProyectoGas().distanciasBorrador[clave];if(!detalleIngresado)estadoRecorridoProyectoGas().distanciasBorrador[t.id]=d;if(estadoRecorridoProyectoGas().consumosBorrador)delete estadoRecorridoProyectoGas().consumosBorrador[t.id];recorridoGasUI.tramoConexiones=t.id;if(r.completa&&datosPlanGas().opciones.reutilizar==null){datosPlanGas().opciones.reutilizar=true;$('matReusar').checked=true;}guardarDatos();renderTramos();renderDistanciasIntegralGas();$('guiadoPaso4').append($('guiadoConexiones'));renderConexionesGuiadoGas();if(!r.completa)$('guiadoEstado').textContent+=' Compra estimada: distancias opcionales sin completar.';return result;
+  delete estadoRecorridoProyectoGas().distanciasBorrador[clave];if(!detalleIngresado)estadoRecorridoProyectoGas().distanciasBorrador[t.id]=d;if(estadoRecorridoProyectoGas().consumosBorrador)delete estadoRecorridoProyectoGas().consumosBorrador[t.id];recorridoGasUI.tramoConexiones=t.id;if(r.completa&&datosPlanGas().opciones.reutilizar==null){datosPlanGas().opciones.reutilizar=true;$('matReusar').checked=true;}guardarDatos();renderTramos();renderDistanciasIntegralGas();renderConexionesGuiadoGas();if(!r.completa)$('guiadoEstado').textContent+=' Compra estimada: distancias opcionales sin completar.';return result;
  };
  const render=window.renderConfiguracionTeeRapidaGas;window.renderConfiguracionTeeRapidaGas=function(...args){const r=render.apply(this,args);if(!recorridoGasUI)return r;const box=$('viasTeeRapidaGas');if(!box)return r;const etiquetas=[...box.querySelectorAll('label')];if(etiquetas.some(l=>/Salida [12]/.test(l.textContent))){box.replaceChildren();$('estadoTeeRapidaGas').textContent='Tee registrada. Al terminar los tramos se mostrarán sus salidas reales para indicar la circulación.';}return r;};
  const vias=window.guardarConfiguracionTeeSigasGas;window.guardarConfiguracionTeeSigasGas=function(id,c){if(recorridoGasUI&&Object.values(c.viasPorTramo||{}).filter(v=>v==='directo').length>1)return errorGuiadoGas('Una tee no puede tener dos salidas a través desde una misma entrada.');const r=vias.apply(this,arguments);if(recorridoGasUI?.paso===4)renderRevisionIntegralGas();return r;};
@@ -18964,7 +18967,7 @@ function presentarRestanteEnDestinoGas(d,metros,destino){
 
 // Etapa 2: organización de controles compartidos. Ningún modelo técnico se copia ni se recalcula aquí.
 let renderizadoresOrganizacionGas=null,edicionArtefactoGuiadoGas=null;
-function enlaceCorreccionGuiadoGas(padre,texto,paso){const b=document.createElement('button');b.type='button';b.className='alt';b.textContent=texto;b.onclick=()=>{editarPasoGuiadoGas(paso);if(paso===1)$('guiadoDatosCalculo').open=true;if(paso===4)$('guiadoDecisionesAccesorios').open=true;};padre.append(b);return b;}
+function enlaceCorreccionGuiadoGas(padre,texto,paso){const b=document.createElement('button');b.type='button';b.className='alt';b.textContent=texto;b.onclick=()=>{editarPasoGuiadoGas(paso);if(paso===1)$('guiadoDatosCalculo').open=true;if(paso===7)$('guiadoDecisionesAccesorios').open=true;};padre.append(b);return b;}
 function restaurarPanelesResultadoGuiadoGas(){
  if(!recorridoGasUI)return;for(const {n,marca,abierto,internos}of (recorridoGasUI.panelesResultado||[]).slice().reverse()){if(marca.parentNode){marca.before(n);marca.remove();}if(typeof abierto==='boolean')n.open=abierto;for(const [d,v]of internos||[])d.open=v;}recorridoGasUI.panelesResultado=[];
 }
@@ -18993,18 +18996,18 @@ function organizarPanelesResultadoGuiadoGas(){
 }
 function renderEdicionAccesoriosGuiadoGas(){
  if(!recorridoGasUI||!renderizadoresOrganizacionGas)return;const out=$('guiadoDecisionesAccesorios'),abierto=out.open;out.querySelectorAll(':scope > :not(summary)').forEach(n=>n.remove());
- const sistema=CatalogosSistemasGas.identificar(instalacionGas.perfil);
+ const sistema=CatalogosSistemasGas.identificar(instalacionGas.perfil);if($('guiadoOtrasPiezasSigas'))$('guiadoOtrasPiezasSigas').hidden=sistema!=='sigas';
  if(sistema==='sigas'){
   renderizadoresOrganizacionGas.pendientes(out);
   const reg=registroAccesoriosSigasGas(),terminales=new Set(reg?.piezas.filter(p=>p.necesidadTerminal).map(p=>'pendiente:'+p.id));for(const n of out.querySelectorAll('.sigas-decision-pendiente'))if(terminales.has(n.claveTerminalSigas))n.remove();
   const pendiente=out.querySelector('.sigas-pendientes-compactos');if(pendiente)pendiente.querySelector('summary').textContent='Otras piezas pendientes · '+pendiente.querySelectorAll('.sigas-decision-pendiente').length+' decisiones';
-  const avanzadas=grupoOrganizacionGuiadoGas('guiadoOtrasPiezasSigas','Corregir otras piezas registradas · avanzado',out);avanzadas.querySelectorAll(':scope > :not(summary)').forEach(n=>n.remove());if(reg)renderizadoresOrganizacionGas.vinculos(avanzadas,reg.calculo);
+  const avanzadas=grupoOrganizacionGuiadoGas('guiadoOtrasPiezasSigas','Corregir otras piezas registradas · avanzado',out);avanzadas.querySelectorAll(':scope > :not(summary)').forEach(n=>n.remove());if(reg)renderizadoresOrganizacionGas.vinculos(avanzadas,reg.calculo);$('guiadoHerramientasTecnicas').append(avanzadas);avanzadas.hidden=false;
  }else if(sistema==='fusiogas')renderizadoresOrganizacionGas.fusiogas(out);
  else{const p=document.createElement('p');p.textContent='Conexiones y accesorios del sistema seleccionado: conservá los datos físicos. Las variantes y equivalencias no documentadas permanecen pendientes.';out.append(p);}
  out.open=abierto;
 }
 function refrescarEdicionAccesoriosGuiadoGas(){
- if(recorridoGasUI?.paso!==4||recorridoGasUI.refrescandoAccesorios)return;recorridoGasUI.refrescandoAccesorios=true;
+ if(recorridoGasUI?.paso!==7||recorridoGasUI.refrescandoAccesorios)return;recorridoGasUI.refrescandoAccesorios=true;
  try{const out=$('guiadoDecisionesAccesorios'),y=window.scrollY,activo=out.contains(document.activeElement)?document.activeElement:null,clave=n=>n.claveTerminalSigas||n.claveTeeSigas||n.querySelector('summary')?.textContent,abiertos=[...out.querySelectorAll('details[open]')].map(clave),etiqueta=activo?.getAttribute('aria-label');renderEdicionAccesoriosGuiadoGas();for(const n of out.querySelectorAll('details'))if(abiertos.includes(clave(n)))n.open=true;if(etiqueta)[...out.querySelectorAll('[aria-label]')].find(n=>n.getAttribute('aria-label')===etiqueta)?.focus({preventScroll:true});window.scrollTo({top:y,behavior:'instant'});}finally{recorridoGasUI.refrescandoAccesorios=false;}
 }
 function renderSuministroGuiadoGas(){
@@ -19013,12 +19016,45 @@ function renderSuministroGuiadoGas(){
  for(const nombre of ['sigasPCS','sigasDensidad','sigasFuenteGas']){const i=form.querySelector('[name="'+nombre+'"]');if(i)i.closest('label').hidden=true;}
  out.append(form);const nota=document.createElement('p');nota.textContent='PCS, densidad y fuente se toman de los campos anteriores. Estas condiciones no bloquean la consulta tabular cuando corresponden a verificaciones posteriores.';out.prepend(nota);
 }
+function nombreDestinoFisicoGuiadoGas(t){
+ const red=redFisicaManualGas(),original=tramos.find(x=>x.id===t.id&&parFisicoManualGas(x)===parFisicoManualGas(t)),o=original&&red.orientacion[t.id],destino=red.puntos.find(n=>n.id===o?.hasta);if(destino)return destino.nombre;
+ const hastaMedidor=nombrePuntoManualGas(t.hasta)==='m'||instalacionGas.nodos.some(n=>n.tipo==='medidor'&&nombrePuntoManualGas(n.nombre)===nombrePuntoManualGas(t.hasta));return hastaMedidor?t.desde:t.hasta;
+}
+function nodoDestinoFormularioGuiadoGas(){const nombre=nombreDestinoFisicoGuiadoGas({id:tramos[editandoTramo]?.id,desde:$('desde').value,hasta:$('hasta').value}),ns=instalacionGas.nodos.filter(n=>nombrePuntoManualGas(n.nombre)===nombrePuntoManualGas(nombre));return ns.length===1?ns[0]:null;}
+function artefactoSeleccionadoTramoGuiadoGas(){
+ const n=nodoDestinoFormularioGuiadoGas(),op=$('destinoArtefacto').selectedOptions[0];
+ const vinculado=artefactos.find(a=>a.id===n?.artefactoId);const id=op?.dataset.artefactoId||(n?.tipo==='artefacto'&&(!destinoArtefactoManualGas||vinculado?.nombre===$('destinoArtefacto').value)?n.artefactoId:null);if(id)return artefactos.find(a=>a.id===id)||null;
+ const tipo=$('destinoArtefacto').value||reconocerDestinoArtefactoGas($('hasta').value).tipo;
+ const opciones=artefactos.filter(a=>nombrePuntoManualGas(a.nombre)===nombrePuntoManualGas(tipo)||nombrePuntoManualGas(a.nombre)===nombrePuntoManualGas($('hasta').value));return opciones.length===1?opciones[0]:null;
+}
+function renderSelectorArtefactosGuiadoGas(preferirGuardado=false){
+ if(!recorridoGasUI)return;const sel=$('destinoArtefacto'),valor=sel.value,id=sel.selectedOptions[0]?.dataset.artefactoId,nodo=nodoDestinoFormularioGuiadoGas(),b=estadoRecorridoProyectoGas().seleccionArtefactoTramo;
+ const firma=JSON.stringify(artefactos.map(a=>[a.id,a.nombre,a.consumo]));let grupo=$('guiadoArtefactosDisponibles');
+ if(!grupo||grupo.dataset.firma!==firma){if(grupo)grupo.remove();grupo=document.createElement('optgroup');grupo.id='guiadoArtefactosDisponibles';grupo.label='Artefactos registrados';grupo.dataset.firma=firma;
+  artefactos.forEach((a,i)=>{const o=document.createElement('option'),duplicado=artefactos.filter(x=>nombrePuntoManualGas(x.nombre)===nombrePuntoManualGas(a.nombre)).length>1;o.value=a.nombre;o.dataset.artefactoId=a.id;o.textContent=a.nombre+(duplicado?' · '+(i+1):'')+' · '+(Number.isFinite(a.consumo)?fmt(a.consumo)+' kcal/h':'consumo pendiente');grupo.append(o);});sel.options[0].after(grupo);
+  for(const o of [...sel.options].filter(o=>!o.dataset.artefactoId&&o.value)){o.hidden=artefactos.some(a=>a.nombre===o.value);if(o.hidden)o.dataset.ocultaGuiado='1';}
+ }
+ const vinculo=nodo?.artefactoId||(b?.tramo===(tramos[editandoTramo]?.id||'nuevo')&&b.hasta===$('hasta').value?b.id:null),guardado=preferirGuardado?(vinculo||id):(id||(artefactos.find(a=>a.id===nodo?.artefactoId)?.nombre===valor?nodo?.artefactoId:null)||vinculo);
+ const elegido=[...sel.options].find(o=>o.dataset.artefactoId===guardado);if(elegido)sel.selectedIndex=elegido.index;else if(preferirGuardado&&vinculo)sel.value='';else if([...sel.options].some(o=>o.value===valor))sel.value=valor;
+ if(!destinoArtefactoManualGas&&!nodo?.artefactoId&&artefactos.filter(a=>a.nombre===sel.value).length>1)sel.value='';
+}
+function registrarSeleccionArtefactoTramoGuiadoGas(){
+ if(!recorridoGasUI)return;const op=$('destinoArtefacto').selectedOptions[0],e=estadoRecorridoProyectoGas();
+ if(op?.dataset.artefactoId)e.seleccionArtefactoTramo={id:op.dataset.artefactoId,tramo:tramos[editandoTramo]?.id||'nuevo',hasta:$('hasta').value};else delete e.seleccionArtefactoTramo;
+}
+function vincularArtefactoTramoGuiadoGas(t,a){
+ const destino=nombreDestinoFisicoGuiadoGas(t),ns=instalacionGas.nodos.filter(n=>nombrePuntoManualGas(n.nombre)===nombrePuntoManualGas(destino));
+ const nombreCompatible=reconocerDestinoArtefactoGas(destino).tipo===a.nombre||nombrePuntoManualGas(destino)===nombrePuntoManualGas(a.nombre),unico=artefactos.filter(x=>x.nombre===a.nombre).length===1;
+ if(!ns.length&&nombreCompatible&&unico)return; // El motor ya resuelve este caso por nombre/alias.
+ const n=ns[0]||{id:idGas('nodo'),nombre:destino,tipo:'artefacto'};n.artefactoId=a.id;if(!ns.length)instalacionGas.nodos.push(n);
+}
 function sincronizarConsumoTramoGuiadoGas(){
  if(!recorridoGasUI)return;const destino=reconocerDestinoArtefactoGas($('hasta').value),tipo=$('destinoArtefacto').value||destino.tipo;
- const coincidencias=artefactos.filter(a=>nombrePuntoManualGas(a.nombre)===nombrePuntoManualGas($('hasta').value)||nombrePuntoManualGas(a.nombre)===nombrePuntoManualGas(tipo));
- let nota=$('guiadoNotaConsumoTramo');if(!nota){nota=document.createElement('p');nota.id='guiadoNotaConsumoTramo';$('consumoTramo').after(nota);}const ligado=coincidencias.length===1;
+ const elegido=artefactoSeleccionadoTramoGuiadoGas(),coincidencias=elegido?[elegido]:artefactos.filter(a=>nombrePuntoManualGas(a.nombre)===nombrePuntoManualGas($('hasta').value)||nombrePuntoManualGas(a.nombre)===nombrePuntoManualGas(tipo));
+ let nota=$('guiadoNotaConsumoTramo');if(!nota){nota=document.createElement('p');nota.id='guiadoNotaConsumoTramo';$('consumoTramo').after(nota);}const ligado=!!elegido;
  $('consumoTramo').hidden=ligado;document.querySelector('label[for="consumoTramo"]').hidden=ligado;$('consumoTramo').readOnly=ligado;$('consumoTramo').placeholder=ligado?'Se reutiliza el consumo del artefacto':'Pendiente si corresponde a un artefacto';
- nota.textContent=ligado?'Consumo individual de '+coincidencias[0].nombre+': '+fmt(coincidencias[0].consumo)+' kcal/h, ya registrado. El consumo acumulado del tramo se calcula por sus recorridos.':coincidencias.length>1?'Hay artefactos con el mismo nombre: falta vincular inequívocamente el destino. No se duplicaron consumos.':'Consumo propio: solo para artefactos. El consumo acumulado se calcula por los recorridos.';
+ nota.textContent=ligado?'Consumo individual de '+coincidencias[0].nombre+': '+(Number.isFinite(coincidencias[0].consumo)?fmt(coincidencias[0].consumo)+' kcal/h':'pendiente')+', ya registrado. El consumo acumulado del tramo se calcula por sus recorridos.':coincidencias.length>1?'Hay artefactos con el mismo nombre: falta vincular inequívocamente el destino. No se duplicaron consumos.':'Consumo propio: solo para artefactos. El consumo acumulado se calcula por los recorridos.';
+ if(nodoDestinoFormularioGuiadoGas()?.artefactoId&&!artefactos.some(a=>a.id===nodoDestinoFormularioGuiadoGas().artefactoId)&&!elegido)nota.textContent='El artefacto vinculado ya no está registrado. Elegí un artefacto disponible o corregilo en Artefactos y consumos; no se inventó su consumo.';
  const anterior=tramos[editandoTramo];if(ligado&&Number.isFinite(anterior?.consumo)&&anterior.consumo!==coincidencias[0].consumo)nota.textContent='Consumos distintos: este tramo registra '+fmt(anterior.consumo)+' kcal/h y '+coincidencias[0].nombre+' registra '+fmt(coincidencias[0].consumo)+' kcal/h. Se conservaron ambos datos. Editá el artefacto para unificar el consumo de sus tramos vinculados.';
  if(ligado)enlaceCorreccionGuiadoGas(nota,'Editar artefacto y consumo',5);
 }
@@ -19053,13 +19089,13 @@ function organizarFormularioPrincipalGuiadoGas(){
  const paso=$('guiadoPaso4');
  const profesional=grupoOrganizacionGuiadoGas('guiadoEditorAnterior','Editor detallado anterior · opcional',paso);moverControlGuiadoGas($('guiadoTramoAccesorios').closest('label'),profesional);
  const selector=$('guiadoTramoAccesorios'),ids=tramos.map(t=>t.id);if(JSON.stringify([...selector.options].map(o=>o.value))!==JSON.stringify(ids)){const previo=selector.value;selector.replaceChildren();for(const t of tramos){const o=document.createElement('option');o.value=t.id;o.textContent=t.desde+'–'+t.hasta;selector.append(o);}if(ids.includes(previo))selector.value=previo;}
- if(!$('guiadoAbrirDetalle')){const b=document.createElement('button');b.id='guiadoAbrirDetalle';b.className='alt';b.textContent='Abrir editor detallado anterior';b.onclick=()=>{const i=tramos.findIndex(t=>t.id===selector.value);if(i>=0)abrirAccesorios(i);else errorGuiadoGas('Primero guardá un tramo.');};profesional.append(b);}moverControlGuiadoGas('editorAccesorios',profesional);const extra=$('matExtraNombre').closest('details');moverControlGuiadoGas(extra,paso);ordenarControlesGuiadoGas(paso,['editarTramosGas','tramosRegistradosGas','guiadoRevisionInstalacion','guiadoConexiones','guiadoDecisionesAccesorios','guiadoRevisionHerramientas','guiadoUnionesRevision'].map($).concat(profesional,extra));
+ if(!$('guiadoAbrirDetalle')){const b=document.createElement('button');b.id='guiadoAbrirDetalle';b.className='alt';b.textContent='Abrir editor detallado anterior';b.onclick=()=>{const i=tramos.findIndex(t=>t.id===selector.value);if(i>=0)abrirAccesorios(i);else errorGuiadoGas('Primero guardá un tramo.');};profesional.append(b);}moverControlGuiadoGas('editorAccesorios',profesional);const extra=$('matExtraNombre').closest('details');moverControlGuiadoGas(profesional,$('guiadoHerramientasTecnicas'));moverControlGuiadoGas(extra,$('guiadoHerramientasTecnicas'));ordenarControlesGuiadoGas(paso,['editarTramosGas','tramosRegistradosGas'].map($));
  const conversion=grupoOrganizacionGuiadoGas('guiadoConversionConsumos','Conversión orientativa · no cambia el suministro',$('consumos'));
  for(const id of ['gt','resultadoGas']){if(id==='gt')moverCampoGuiadoGas(id,conversion);else moverControlGuiadoGas(id,conversion);}
  $('consumos').querySelector('button[onclick="calcularConsumos()"]').classList.add('guiado-acceso-redundante');
 }
 function renderArtefactosGuiadoGas(){
- if(!recorridoGasUI)return;edicionArtefactoGuiadoGas=estadoRecorridoProyectoGas().edicionArtefacto||null;if(edicionArtefactoGuiadoGas){const r=edicionArtefactoGuiadoGas,existe=(r.tipo==='artefacto'?artefactos:tramos).some((a,i)=>r.id!=null?a.id===r.id:i===r.indice);if(!existe){edicionArtefactoGuiadoGas=null;delete estadoRecorridoProyectoGas().edicionArtefacto;}}for(const [i,fila]of [...$('listaGas').children].entries())if(artefactos[i]&&!fila.querySelector('.guiado-editar-artefacto')){const b=document.createElement('button');b.className='peq alt guiado-editar-artefacto';b.textContent='Editar';b.onclick=()=>editarArtefactoGuiadoGas({tipo:'artefacto',id:artefactos[i].id,indice:i});fila.append(b);}
+ if(!recorridoGasUI)return;edicionArtefactoGuiadoGas=estadoRecorridoProyectoGas().edicionArtefacto||null;if(edicionArtefactoGuiadoGas){const r=edicionArtefactoGuiadoGas,existe=(r.tipo==='artefacto'?artefactos:tramos).some((a,i)=>r.id!=null?a.id===r.id:i===r.indice);if(!existe){edicionArtefactoGuiadoGas=null;delete estadoRecorridoProyectoGas().edicionArtefacto;}}for(const [i,fila]of [...$('listaGas').children].entries())if(artefactos[i]&&!fila.querySelector('.guiado-editar-artefacto')){if(artefactos.filter(a=>a.nombre===artefactos[i].nombre).length>1)fila.querySelector('span').textContent=fila.querySelector('span').textContent.replace(artefactos[i].nombre+':',artefactos[i].nombre+' · '+(i+1)+':');const b=document.createElement('button');b.className='peq alt guiado-editar-artefacto';b.textContent='Editar';b.onclick=()=>editarArtefactoGuiadoGas({tipo:'artefacto',id:artefactos[i].id,indice:i});fila.append(b);}
  let lista=$('guiadoArtefactosEnTramos');if(!lista){lista=document.createElement('div');lista.id='guiadoArtefactosEnTramos';$('listaGas').after(lista);}lista.replaceChildren();
  for(const t of destinosConsumosGuiadoGas()){
   const tipo=tipoArtefactoGuiadoGas(t);if(artefactos.some(a=>nombrePuntoManualGas(a.nombre)===nombrePuntoManualGas(tipo)||nombrePuntoManualGas(a.nombre)===nombrePuntoManualGas(t.hasta)))continue;
@@ -19086,26 +19122,32 @@ function instalarOrganizacionEtapa2Gas(){
  renderizadoresOrganizacionGas={pendientes:window.renderAccesoriosPendientesCompactosSigasGas,vinculos:window.renderVinculosSigasGas,verificacion:window.renderVerificacionTabularSigasGas,fusiogas:window.renderConexionesFusiogasGas};
  const envolver=(nombre,fn)=>{const original=window[nombre];window[nombre]=function(...args){return fn.call(this,original,args)};};
  envolver('renderResumenPrincipalGas',function(original,args){if(recorridoGasUI)restaurarPanelesResultadoGuiadoGas();const r=original.apply(this,args);if(recorridoGasUI)organizarPanelesResultadoGuiadoGas();return r;});
- envolver('renderDatosMinimosPreliminarSigasGas',function(original,args){if(!recorridoGasUI)return original.apply(this,args);const d=document.createElement('div');enlaceCorreccionGuiadoGas(d,'Corregir PCS y condiciones del proyecto',1);enlaceCorreccionGuiadoGas(d,'Completar accesorios y conexiones',4);return d;});
- for(const [nombre,texto,paso]of [['renderAccesoriosPendientesCompactosSigasGas','Completar accesorios pendientes',4],['renderVinculosSigasGas','Corregir productos y variantes',4],['renderConexionesFusiogasGas','Corregir conexiones FUSIOGAS',4]])envolver(nombre,function(original,args){if(!recorridoGasUI)return original.apply(this,args);enlaceCorreccionGuiadoGas(args[0],texto,paso);});
+ envolver('renderDatosMinimosPreliminarSigasGas',function(original,args){if(!recorridoGasUI)return original.apply(this,args);const d=document.createElement('div');enlaceCorreccionGuiadoGas(d,'Corregir PCS y condiciones del proyecto',1);enlaceCorreccionGuiadoGas(d,'Completar accesorios y conexiones',7);return d;});
+ for(const [nombre,texto,paso]of [['renderAccesoriosPendientesCompactosSigasGas','Completar accesorios pendientes',7],['renderVinculosSigasGas','Corregir productos y variantes',7],['renderConexionesFusiogasGas','Corregir conexiones FUSIOGAS',7]])envolver(nombre,function(original,args){if(!recorridoGasUI)return original.apply(this,args);enlaceCorreccionGuiadoGas(args[0],texto,paso);});
  envolver('renderVerificacionTabularSigasGas',function(original,args){const r=original.apply(this,args);if(recorridoGasUI){const form=args[0].querySelector('[name="sigasPCS"]')?.closest('details');if(form){for(const nombre of ['sigasPCS','sigasDensidad','sigasFuenteGas'])form.querySelector('[name="'+nombre+'"]').closest('label').hidden=true;$('guiadoSuministro').querySelectorAll(':scope > :not(summary)').forEach(n=>n.remove());$('guiadoSuministro').append(form);enlaceCorreccionGuiadoGas(args[0],'Completar condiciones documentadas del suministro',1);}}return r;});
  envolver('guardarVerificacionSigasGas',function(original,args){if(recorridoGasUI){const perfil=perfilTecnicoActualGas();for(const [n,k]of [['sigasPCS','poderCalorifico'],['sigasDensidad','densidadRelativa'],['sigasFuenteGas','fuenteGas']])args[0].querySelector('[name="'+n+'"]').value=perfil[k]??'';}return original.apply(this,args);});
  envolver('renderPosicionesPendientesCuplasGas',function(original,args){if(!recorridoGasUI)return original.apply(this,args);const d=document.createElement('div');d.className='guiado-edicion-cortes';args[0].append(d);const r=original.call(this,d,args[1]);const resumen=d.querySelector(':scope > details > summary');if(resumen)resumen.textContent='Precisar cuplas y continuidad reales · opcional';return r;});
  envolver('desplazarResultadoMaterialesGas',function(original,args){if(recorridoGasUI?.paso===8&&(!args[0]||args[0]==='resumenPrincipalMaterialesGas'))args[0]='guiadoMaterialesInforme';return original.apply(this,args);});
  envolver('renderTramos',function(original,args){const r=original.apply(this,args);if(recorridoGasUI){for(const n of $('listaTramos').querySelectorAll('.tee-manual-salidas'))n.classList.add('guiado-acceso-redundante');for(const b of $('listaTramos').querySelectorAll('button'))if(b.textContent==='Revisar accesorios')b.classList.add('guiado-acceso-redundante');}if(recorridoGasUI?.paso===4&&!recorridoGasUI.revisandoRed){recorridoGasUI.revisandoRed=true;try{renderRevisionIntegralGas();}finally{recorridoGasUI.revisandoRed=false;}}return r;});
- envolver('abrirAccesorios',function(original,args){if(recorridoGasUI&&recorridoGasUI.paso!==4)editarPasoGuiadoGas(4);const r=original.apply(this,args);if(recorridoGasUI)$('guiadoEditorAnterior').open=true;return r;});
+ envolver('abrirAccesorios',function(original,args){if(recorridoGasUI&&recorridoGasUI.paso!==4)editarPasoGuiadoGas(4);const r=original.apply(this,args);if(recorridoGasUI){$('guiadoAvanzadas').open=true;$('guiadoHerramientasTecnicas').open=true;$('guiadoEditorAnterior').open=true;}return r;});
+ envolver('agregarTramo',function(original,args){
+  if(!recorridoGasUI)return original.apply(this,args);const a=artefactoSeleccionadoTramoGuiadoGas(),n=nodoDestinoFormularioGuiadoGas(),id=tramos[editandoTramo]?.id,cantidad=tramos.length,desvincular=destinoArtefactoManualGas&&!a&&n?.artefactoId;
+  if(a&&n&&n.tipo!=='artefacto'){return errorGuiadoGas('El punto '+n.nombre+' es '+n.tipo+'. Elegí un destino de artefacto sin cambiar este nodo.');}
+  if(a&&instalacionGas.nodos.filter(n=>nombrePuntoManualGas(n.nombre)===nombrePuntoManualGas($('hasta').value)).length>1)return errorGuiadoGas('Hay más de un punto llamado '+$('hasta').value+'. Corregí esa ambigüedad antes de vincular el artefacto.');
+  const r=original.apply(this,args);if((a||desvincular)&&!$('desde').value&&(id||tramos.length>cantidad)){const t=id?tramos.find(t=>t.id===id):tramos.at(-1);if(t){if(a)vincularArtefactoTramoGuiadoGas(t,a);else n.artefactoId='';guardarDatos();renderTramos();}}return r;
+ });
  envolver('renderGas',function(original,args){const r=original.apply(this,args);if(recorridoGasUI)renderArtefactosGuiadoGas();return r;});
  envolver('agregarArtefacto',function(original,args){if(!recorridoGasUI||!edicionArtefactoGuiadoGas)return original.apply(this,args);const valor=numeroDecimalGas($('gp').value);if(!(valor>0)){alert('Ingresá un consumo mayor a cero. Vacío sigue pendiente.');return;}const ref=edicionArtefactoGuiadoGas;
   if(ref.tipo==='artefacto'){const a=buscarArtefactoGuiadoGas(ref);if(!a)return;const anterior=a.nombre,red=redFisicaManualGas(),unico=artefactos.filter(x=>nombrePuntoManualGas(x.nombre)===nombrePuntoManualGas(anterior)).length===1,relacionados=destinosConsumosGuiadoGas().filter(t=>{const n=red.puntos.find(n=>n.id===red.orientacion[t.id]?.hasta);return (a.id!=null&&n?.artefactoId===a.id)||unico&&[t.artefacto,t.hasta].some(v=>nombrePuntoManualGas(v)===nombrePuntoManualGas(anterior));});a.nombre=$('ga').value;a.consumo=valor;for(const t of relacionados){t.artefacto=a.nombre;if(t.consumo!=null)t.consumo=valor;}}else if(!guardarConsumoFilaGuiadoGas(ref.id,String(valor),$('ga').value))return;
   edicionArtefactoGuiadoGas=null;delete estadoRecorridoProyectoGas().edicionArtefacto;$('gp').value='';renderGas();guardarDatos();
  });
- envolver('activarRecorridoGuiadoGas',function(original,args){const r=original.apply(this,args);edicionArtefactoGuiadoGas=estadoRecorridoProyectoGas().edicionArtefacto||null;renderArtefactosGuiadoGas();renderSuministroGuiadoGas();return r;});
- envolver('editarTramo',function(original,args){const r=original.apply(this,args);if(recorridoGasUI){sincronizarConsumoTramoGuiadoGas();organizarFormularioPrincipalGuiadoGas();recorridoGasUI.formularioInicial={id:tramos[editandoTramo]?.id,firma:firmaFormularioTramoGuiadoGas()};}return r;});
- envolver('cancelarEdicionTramo',function(original,args){const r=original.apply(this,args);if(recorridoGasUI)recorridoGasUI.formularioInicial=null;$('consumoTramo').readOnly=false;if($('guiadoNotaConsumoTramo'))$('guiadoNotaConsumoTramo').textContent='';if(recorridoGasUI)organizarFormularioPrincipalGuiadoGas();return r;});
+ envolver('activarRecorridoGuiadoGas',function(original,args){const r=original.apply(this,args);edicionArtefactoGuiadoGas=estadoRecorridoProyectoGas().edicionArtefacto||null;renderSelectorArtefactosGuiadoGas(true);renderArtefactosGuiadoGas();renderSuministroGuiadoGas();return r;});
+ envolver('editarTramo',function(original,args){const r=original.apply(this,args);if(recorridoGasUI){renderSelectorArtefactosGuiadoGas(true);sincronizarConsumoTramoGuiadoGas();organizarFormularioPrincipalGuiadoGas();recorridoGasUI.formularioInicial={id:tramos[editandoTramo]?.id,firma:firmaFormularioTramoGuiadoGas()};}return r;});
+ envolver('cancelarEdicionTramo',function(original,args){const r=original.apply(this,args);if(recorridoGasUI){recorridoGasUI.formularioInicial=null;delete estadoRecorridoProyectoGas().seleccionArtefactoTramo;}$('consumoTramo').readOnly=false;if($('guiadoNotaConsumoTramo'))$('guiadoNotaConsumoTramo').textContent='';if(recorridoGasUI)organizarFormularioPrincipalGuiadoGas();return r;});
  envolver('renderConfiguracionTeeRapidaGas',function(original,args){if(recorridoGasUI&&CatalogosSistemasGas.identificar(instalacionGas.perfil)!=='sigas')return renderOrientacionesOtrosSistemasGuiadoGas();return original.apply(this,args);});
  for(const nombre of ['confirmarVarianteSigasGas','confirmarConjuntoTeeGas','confirmarConexionTerminalSigasGas','guardarDatoTerminalSigasGas','guardarConfiguracionTeeSigasGas','guardarConexionFisicaFusiogasGas'])envolver(nombre,function(original,args){const r=original.apply(this,args);refrescarEdicionAccesoriosGuiadoGas();return r;});
- document.addEventListener('input',e=>{if(recorridoGasUI&&['desde','hasta','destinoArtefacto'].includes(e.target.id)){sincronizarConsumoTramoGuiadoGas();actualizarVisibilidadCasilleroGuiadoGas();}});
- document.addEventListener('change',e=>{if(recorridoGasUI&&['desde','hasta','destinoArtefacto'].includes(e.target.id)){sincronizarConsumoTramoGuiadoGas();actualizarVisibilidadCasilleroGuiadoGas();}});
+ document.addEventListener('input',e=>{if(recorridoGasUI&&['desde','hasta','destinoArtefacto'].includes(e.target.id)){if(e.target.id==='destinoArtefacto')destinoArtefactoManualGas=true;if(e.target.id==='destinoArtefacto'||e.target.id==='hasta'&&destinoArtefactoManualGas)registrarSeleccionArtefactoTramoGuiadoGas();renderSelectorArtefactosGuiadoGas();sincronizarConsumoTramoGuiadoGas();actualizarVisibilidadCasilleroGuiadoGas();if(e.type==='change')guardarEstadoGuiadoGas();}});
+ document.addEventListener('change',e=>{if(recorridoGasUI&&['desde','hasta','destinoArtefacto'].includes(e.target.id)){if(e.target.id==='destinoArtefacto')destinoArtefactoManualGas=true;if(e.target.id==='destinoArtefacto'||e.target.id==='hasta'&&destinoArtefactoManualGas)registrarSeleccionArtefactoTramoGuiadoGas();renderSelectorArtefactosGuiadoGas();sincronizarConsumoTramoGuiadoGas();actualizarVisibilidadCasilleroGuiadoGas();if(e.type==='change')guardarEstadoGuiadoGas();}});
 }
 
 </script>
