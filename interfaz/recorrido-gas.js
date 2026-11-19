@@ -532,6 +532,7 @@ function instalarOrganizacionEtapa2Gas(){
 function organizarSeisPantallasGuiadoGas(){
  if(!recorridoGasUI)return;
  moverControlGuiadoGas('guiadoModo',$('guiadoHerramientasTecnicas'));
+ moverControlGuiadoGas('guiadoEditarLabel',$('guiadoControlesAvanzados'));
  moverControlGuiadoGas('panelTeeRapidaGas',$('guiadoHerramientasTecnicas'));
  if(recorridoGasUI.paso===1&&!(Number(perfilTecnicoActualGas().poderCalorifico)>0)){$('guiadoDatosCalculo').open=true;$('guiadoPropiedades').open=true;}
  const f=$('formularioGas'),avanzado=grupoOrganizacionGuiadoGas('guiadoCargaDetallada','Carga detallada y conexiones avanzadas (opcional)',f);

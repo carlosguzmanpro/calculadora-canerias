@@ -461,7 +461,7 @@ Estimación de compra: tiras de <span id="largoComercialAdvertenciaGas">largo co
 </details>
 <details id="editarTramosGas" class="gas-detalles"><summary>Cargar o editar tramos y accesorios</summary><div id="formularioGas">
 <h3>Tramos y accesorios de GAS</h3>
-<p class="nota">Ingresá puntos, metros, consumo del artefacto y cantidades. El diámetro manual es opcional; los automáticos siguen sujetos a verificación técnica.</p>
+<p class="nota">Ingresá los datos del tramo. Los consumos se reutilizan de los artefactos registrados; los resultados pendientes conservan su condición.</p>
 <label for="desde">Desde</label>
 <input id="desde" placeholder="Ej.: M" maxlength="35">
 <label for="hasta">Hasta</label>
@@ -19159,6 +19159,7 @@ function instalarOrganizacionEtapa2Gas(){
 function organizarSeisPantallasGuiadoGas(){
  if(!recorridoGasUI)return;
  moverControlGuiadoGas('guiadoModo',$('guiadoHerramientasTecnicas'));
+ moverControlGuiadoGas('guiadoEditarLabel',$('guiadoControlesAvanzados'));
  moverControlGuiadoGas('panelTeeRapidaGas',$('guiadoHerramientasTecnicas'));
  if(recorridoGasUI.paso===1&&!(Number(perfilTecnicoActualGas().poderCalorifico)>0)){$('guiadoDatosCalculo').open=true;$('guiadoPropiedades').open=true;}
  const f=$('formularioGas'),avanzado=grupoOrganizacionGuiadoGas('guiadoCargaDetallada','Carga detallada y conexiones avanzadas (opcional)',f);
