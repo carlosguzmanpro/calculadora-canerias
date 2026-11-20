@@ -1,6 +1,7 @@
 /* Formato de entrega: presentación de datos, sin dimensionar ni dibujar recorridos supuestos. */
 (function(root){
  const esc=v=>String(v??'PENDIENTE').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ const nombreMaterialGas=v=>String(v??'Pendiente').replace(/\bcodo90\b/g,'Codo de 90°').replace(/\bcodo45\b/g,'Codo de 45°').replace(/\bllave\b(?! de paso)/g,'Llave de paso').replace(/producto pendiente/g,'modelo por confirmar en paso 5');
  const metros=v=>Number.isFinite(v)?v.toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2}):'Pendiente';
  const numero=v=>Number.isFinite(v)?v.toLocaleString('es-AR',{maximumFractionDigits:3}):'Pendiente';
  function cortesCompraDetallados(c,nombres,tabla){
@@ -51,7 +52,7 @@
   if(e.margenes?.length)html+='<div class="margen-informativo">'+e.margenes.map(m=>'<p>'+esc(m.tramo)+': capacidad consultada suficiente; margen reducido de '+numero(m.margenM3h)+' m³/h ('+numero(m.porcentaje)+'% de la demanda). Observación informativa; no aumenta el diámetro ni aprueba la instalación.</p>').join('')+detalle('Criterio de margen informativo','<p>Se muestra una vez por tramo si capacidad ≥ caudal y (capacidad − caudal) / caudal ≤ 10%. Umbral editorial de interfaz, no exigencia SIGAS ni coeficiente de seguridad. Se calcula con precisión interna; no modifica la selección de diámetros. Si faltan pérdidas, corresponde solo a la consulta parcial.</p>')+'</div>';
   const aportes=new Map();for(const ruta of r.recorridos)for(const a of ruta.aportes)if(!aportes.has((a.tipo==='tee'?a.nombre.replace(/, flujo.*$/,''):a.nombre)+'|'+a.tipo))aportes.set((a.tipo==='tee'?a.nombre.replace(/, flujo.*$/,''):a.nombre)+'|'+a.tipo,a);
   const grupos=new Map(c.canos.map(g=>[g.diametro,[['Caño',metros(g.metros),'m']]]));
-  for(const m of e.materiales){if(m.tipo==='cupla')continue;const a=aportes.get(m.material+'|'+m.tipo),diametro=Number.isFinite(m.diametroExteriorMm)?m.diametroExteriorMm+' mm':Number.isFinite(a?.diametroExteriorMm)?a.diametroExteriorMm+' mm':'Diámetro pendiente';if(!grupos.has(diametro))grupos.set(diametro,[]);const ubicaciones=m.tipo==='llave'?(m.piezaIds||[]).map(id=>e.inventarioEscenario?.find(p=>p.id===id)?.tramo).filter(Boolean).map(id=>nombres.get(id)||id):[];const nombre=(m.tipo==='tee'?m.material.replace(/, flujo.*$/,''):m.material)+(ubicaciones.length?' · '+[...new Set(ubicaciones)].join(' / '):'');grupos.get(diametro).push([(a?.conjuntoTee?'Componente del conjunto: ':'')+nombre,Number.isFinite(m.cantidad)?numero(m.cantidad):'Pendiente',m.unidad==='unidad'?'un.':m.unidad]);}
+  for(const m of e.materiales){if(m.tipo==='cupla')continue;const a=aportes.get(m.material+'|'+m.tipo),diametro=Number.isFinite(m.diametroExteriorMm)?m.diametroExteriorMm+' mm':Number.isFinite(a?.diametroExteriorMm)?a.diametroExteriorMm+' mm':'Diámetro pendiente';if(!grupos.has(diametro))grupos.set(diametro,[]);const ubicaciones=m.tipo==='llave'?(m.piezaIds||[]).map(id=>e.inventarioEscenario?.find(p=>p.id===id)?.tramo).filter(Boolean).map(id=>nombres.get(id)||id):[];const nombre=(m.tipo==='tee'?m.material.replace(/, flujo.*$/,''):m.material)+(ubicaciones.length?' · '+[...new Set(ubicaciones)].join(' / '):'');grupos.get(diametro).push([(a?.conjuntoTee?'Componente del conjunto: ':'')+nombreMaterialGas(nombre),Number.isFinite(m.cantidad)?numero(m.cantidad):'Pendiente',m.unidad==='unidad'?'un.':m.unidad]);}
   html+=(e.avisosRevision||[]).map(t=>'<p class="nota revision-anterior">'+esc(t)+'</p>').join('');
   html+=(e.llavesPorTramo||[]).filter(a=>a.estado!=='registrada').map(a=>'<p class="aviso llave-pendiente">'+esc(a.mensaje)+'</p>').join('');
   html+='<section class="materiales-diametro"><h3>'+ (e.instalacionPrueba?'Materiales del escenario por diámetro · no confirmados':'Materiales calculados por diámetro')+'</h3><p>Cantidades del escenario, sin sumar nuevamente las piezas compartidas.</p>'+[...grupos].map(([d,filas])=>'<h4>'+esc(d)+'</h4>'+tabla(['Material','Cant.','Ud.'],filas)).join('')+'</section>';
@@ -127,7 +128,7 @@
   const etiqueta=v=>{
    if(!gas||typeof v!=='string')return v;
    let texto=String(v);if(rx)texto=texto.replace(rx,(_,sep,id)=>sep+nombres.get(id));
-   return texto.replace(/\btramo-[a-z0-9]+-\d+\b/gi,'Tramo (ubicación pendiente)');
+   return nombreMaterialGas(texto.replace(/\btramo-[a-z0-9]+-\d+\b/gi,'Tramo (ubicación pendiente)'));
   };
   const celda=v=>esc(etiqueta(v));
   const tabla=(titulo,cab,filas,clase='')=>!filas.length?'':'<h2>'+esc(titulo)+'</h2><table'+(clase?' class="'+clase+'"':'')+'><thead><tr>'+cab.map(x=>'<th>'+esc(x)+'</th>').join('')+'</tr></thead><tbody>'+filas.map(f=>'<tr>'+f.map((v,i)=>'<td>'+celda(clase&&i===5&&typeof v==='string'?v.replace(/; /g,';\n'):v)+'</td>').join('')+'</tr>').join('')+'</tbody></table>';
@@ -152,5 +153,5 @@
    (d.observaciones?'<h2>Observaciones</h2><p>'+celda(d.observaciones)+'</p>':'')+
    '<p>'+celda(d.advertencia)+'</p>'+(d.ejercicioSigas?'</details>':'');
  }
- root.InformeProyecto={documento,agruparMateriales,planilla,ejercicioSigas,fusiogas};if(typeof module!=='undefined')module.exports=root.InformeProyecto;
+ root.InformeProyecto={documento,agruparMateriales,planilla,ejercicioSigas,fusiogas,nombreMaterialGas};if(typeof module!=='undefined')module.exports=root.InformeProyecto;
 })(typeof globalThis!=='undefined'?globalThis:this);
