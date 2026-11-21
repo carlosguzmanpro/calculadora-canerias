@@ -14,7 +14,7 @@ function entradaMaterialesGas(fuente='proyecto',sinSugerencias=false,sinConcilia
   const r=evaluarTramo(t,tramos),d=t.detalle,geometria=d&&['completo','ninguno'].includes(d.estado)&&(!r.pendiente||r.soloMedidasPendientes);
   let posicion=0,posicionConocida=true,entradaActual=t.diametro;
   const registrados=geometria?r.accesorios:Array.isArray(d?.accesorios)?d.accesorios.filter(a=>a&&typeof a.tipo==='string'):[];
-  const acc=registrados.map((a,j)=>{
+  const acc=registrados.map((a,j)=>({...a,idFisico:a.idFisico||JSON.stringify(['detalle',t.id||'tramo-'+i,j])})).filter(a=>!a.soloDistribucionGas).map((a,j)=>{
    if(Number.isFinite(a.metrosAntes)&&posicionConocida)posicion+=a.metrosAntes;else posicionConocida=false;
    const nodo=a.tipo==='tee'?nodos.find(n=>n.nombre.trim().toLowerCase()===(a.nodo||'').trim().toLowerCase())?.id||('nombre:'+String(a.nodo||'sin-identificar-'+j).trim().toLowerCase()):posicionConocida&&posicion===0?t.red?.desde:posicionConocida&&posicion===t.metros?t.red?.hasta:null;
    const entrada=a.entrada||entradaActual;entradaActual=a.salida||null;
@@ -30,7 +30,7 @@ function entradaMaterialesGas(fuente='proyecto',sinSugerencias=false,sinConcilia
  }
  return entrada;
 }
-function opcionesMaterialesGas(fuente=fuenteMaterialesGas){const o=datosPlanGas().opciones;return {largoComercial:estadoLargoComercialGas(fuente).configurado,reutilizar:o.reutilizacionExplicitada===true?!!o.reutilizar:true,minimoSobrante:o.minimoSobrante??.5,hipotesisSinPosiciones:!!o.hipotesisSinPosiciones,uniones:{...(fuente==='proyecto'?unionesDeteccionConfirmadasGas():{}),...(o[fuente==='ejemplo'?'unionesEjemplo':'uniones']||{})}};}
+function opcionesMaterialesGas(fuente=fuenteMaterialesGas){const o=datosPlanGas().opciones;return {largoComercial:estadoLargoComercialGas(fuente).configurado,reutilizar:o.reutilizar===true,minimoSobrante:o.minimoSobrante??.5,hipotesisSinPosiciones:!!o.hipotesisSinPosiciones,uniones:{...(fuente==='proyecto'?unionesDeteccionConfirmadasGas():{}),...(o[fuente==='ejemplo'?'unionesEjemplo':'uniones']||{})}};}
 function firmaMaterialesGas(){return JSON.stringify({fuente:fuenteMaterialesGas,entrada:entradaMaterialesGas(fuenteMaterialesGas),opciones:opcionesMaterialesGas()});}
 function invalidarMaterialesGas(){if(modulo==='gas'&&revisionMaterialesGas)sincronizarMaterialesGas(fuenteMaterialesGas);}
 function abrirPlanGas(){
@@ -874,11 +874,26 @@ function renderEnsayoCortesIdealGas(out,modelo){
  for(const i of [largo,reserva,...campos.values()])i.onchange=()=>conservarVistaCambioTeeGas(()=>{actualizar(true);if(!estado.textContent.startsWith('Revisá')){const mensaje=estado.textContent;renderResumenPrincipalGas();const nueva=$('resumenPrincipalMaterialesGas').querySelector?.('.ensayo-cortes-ideal-gas');if(nueva){nueva.open=true;const aviso=nueva.querySelector('[role=status]');if(aviso)aviso.textContent=mensaje;}}},i);
  actualizar();out.append(caja);
 }
+// Metadatos compartidos por pantalla y PDF; no cambian el planificador ni el motor.
+function anotarMedidasCompraGas(compra){
+ const o=datosPlanGas().opciones;compra.reutilizacion=o.reutilizar===true;compra.origenReutilizacion=typeof o.reutilizar==='boolean'?'eleccion-guardada':'sin-eleccion';
+ compra.medidasPendientes=[];
+ for(const t of tramos){
+  const nombre=t.desde+'–'+t.hasta,d=t.detalle,conteos=conteoRapidoDelTramoGas(t),filas=d?.distribucionPendiente||d?.accesorios||[];
+  if(tiposRapidosGas.every(([tipo])=>conteos?.[tipo]===0)&&!filas.length)continue;
+  const pendientes=[];for(const [tipo,n]of Object.entries(conteos||{})){if(n===null||n===undefined||n==='')continue;if(Number(n)>filas.filter(a=>a.tipo===tipo).length)pendientes.push('posición/distancias de '+(Object.fromEntries(tiposRapidosGas)[tipo]||tipo));}
+  filas.forEach((a,i)=>{if(String(a.metrosAntes??'').trim()===''||!Number.isFinite(numeroDecimalGas(a.metrosAntes)))pendientes.push('distancia hasta accesorio '+(i+1));});
+  if(!d&&(!filas.length))pendientes.push('distribución entre inicio, accesorios y destino');
+  else if(String(d?.metrosFinal??'').trim()===''||!Number.isFinite(numeroDecimalGas(d.metrosFinal)))pendientes.push('distancia final (se deduce al completar las anteriores)');
+  if(pendientes.length)compra.medidasPendientes.push(nombre+': '+[...new Set(pendientes)].join('; ')+'.');
+ }
+ return compra;
+}
 function prepararCompraActualGas(plan){
  const entrada=entradaManualMaterialesGas(false,true),opciones=opcionesMaterialesGas('proyecto');
  completarContinuidadCompraGas(entrada);
  let tecnico={};try{tecnico=calcularPreseleccionSigasGas()||{};}catch(e){/* El inventario sigue disponible sin catálogo. */}
- const compra=MaterialesGas.prepararCompra(entrada,plan,{...opciones,cortesCompra:datosPlanGas().cortesCompra||{}},tecnico);compra.estimacionCuplas=MaterialesGas.estimarCuplasCompra(compra);return compra;
+ const compra=MaterialesGas.prepararCompra(entrada,plan,{...opciones,cortesCompra:datosPlanGas().cortesCompra||{}},tecnico);compra.estimacionCuplas=MaterialesGas.estimarCuplasCompra(compra);return anotarMedidasCompraGas(compra);
 }
 function renderPendientesAgrupadosCompraGas(out,mensajes){
  for(const g of MaterialesGas.agruparPendientesCompra(mensajes)){
@@ -904,7 +919,7 @@ function renderPreparacionCompraGas(out,plan,preparada=null){
  const texto=(padre,s)=>{const p=document.createElement('p');p.textContent=textoMaterialPantallaGas(s);padre.append(p);};
  const medida=g=>g.diametro+(g.estadoDiametro==='candidato'?' candidato':g.estadoDiametro==='manual-sin-verificar'?' manual, sin verificar':'');
  const largo=estadoLargoComercialGas();texto(caja,'Estimación provisional · tiras de '+compra.largoComercial+' m. '+(largo.pendiente?'El manual indica '+largo.documentado+' m; se conservó el valor guardado. Revisalo antes de comprar.':opcionesMaterialesGas().reutilizar?'Reutilización habilitada solo para cortes compatibles y definidos; ver distribución de barras.':'Sin reutilización entre tramos habilitada.'));
- const canos=document.createElement('div');canos.className='gas-compra-canos';
+ if(compra.medidasPendientes?.length){texto(caja,'Para precisar cortes y cuplas, completá en Tramos y accesorios:');for(const falta of compra.medidasPendientes)texto(caja,falta);}const canos=document.createElement('div');canos.className='gas-compra-canos';
  for(const g of compra.canos){const card=document.createElement('article');card.className='gas-compra-cano';const nombre=document.createElement('strong');nombre.textContent=medida(g);card.append(nombre);const accesorios=plan.filas.filter(f=>['codo90','codo45','llave'].includes(f.tipo)&&Number.isFinite(f.cantidad)&&(f.diametro===g.diametro||/pendiente|candidato/i.test(f.diametro||'')&&f.registroSigas?.candidatoMm&&g.diametro===f.registroSigas.candidatoMm+' mm'));const cantidades=[['codo90','Codos 90°'],['codo45','Codos 45°'],['llave','Llaves']].map(([tipo,n])=>[n,accesorios.filter(f=>f.tipo===tipo).reduce((s,f)=>s+f.cantidad,0)]).filter(([,n])=>n>0);if(cantidades.length)texto(card,cantidades.map(([n,c])=>n+': '+c).join(' · ')+' (medidas provisionales)');texto(card,fmt(g.metros)+' m reales · '+g.tiras+' tiras estimadas (mínimo teórico: '+g.minimoTeorico+')');texto(card,fmt(g.metrosComerciales)+' m comerciales · '+fmt(g.sobrante)+' m de sobrante estimado');const estimada=compra.estimacionCuplas?.porDiametro.find(e=>e.diametro===g.diametro&&JSON.stringify(e.tramos)===JSON.stringify(g.tramos));texto(card,'Cuplas: '+(estimada?estimada.cantidad+(estimada.orientativo?' estimadas · orientativas':' calculadas por segmentos (estimadas para compra)'):g.cuplasPendientes?(g.cuplas?g.cuplas+' calculadas en segmentos conocidos; resto pendiente':'Pendiente'):g.cuplas+' calculadas por segmentos (estimadas para compra)'));canos.append(card);}caja.append(canos);for(const g of compra.canos){if(!g.planCortes)continue;const d=document.createElement('details'),s=document.createElement('summary');s.textContent='Distribución propuesta de tiras · '+g.diametro;d.append(s);for(const b of g.planCortes.barras)texto(d,b.id+': '+b.cortes.map(c=>fmt(c.metros)+' m para '+ubicacionLegibleGas(c.tramo)+' (segmento '+(c.indiceSegmento+1)+')').join(' + ')+' · remanente final '+fmt(b.sobrante)+' m.');texto(d,'Cada corte posterior en la misma tira aprovecha su sobrante. No se empalman remanentes para fabricar una pieza. Inserciones y merma sin documentar: pendientes; distribución orientativa.');caja.append(d);}
  const estimacion=compra.estimacionCuplas;
  texto(caja,estimacion?'Cuplas: '+estimacion.total+(estimacion.orientativo?' estimadas · orientativas. No hace falta cargar posiciones para esta estimación.':' calculadas por segmentos; cantidades provisionales para compra.'):'Cuplas: revisar datos de compra.');
@@ -1027,7 +1042,7 @@ function unificarMaterialesEscenarioGas(modelo,plan){
   if(real){const mm=String(f.diametro||'').match(/(\d+(?:[.,]\d+)?)\s*mm/);if(mm&&Number(mm[1].replace(',','.'))!==p.diametroExteriorMm)modelo.compra.pendientes.push('Medida registrada de '+f.material+' ('+f.diametro+') diferente del diámetro de cálculo '+p.diametroExteriorMm+' mm; verificar compatibilidad sin reemplazar la pieza.');return {...f,diametroCalculo:p.diametroExteriorMm+' mm',evidencia:(f.evidencia||'')+' Medida registrada conservada; cálculo del tramo '+p.diametroExteriorMm+' mm.'};}
   return {...f,material:p.nombre||({codo90:'Codo de 90° · producto pendiente',codo45:'Codo de 45° · producto pendiente',llave:'Llave de paso · tipo pendiente',tee:'Tee · producto pendiente',reduccion:'Reducción · producto pendiente'}[f.tipo]||f.material),medidasRegistradas:f.medidas,medidas:p.medidas||[p.diametroExteriorMm+' mm candidato'],diametro:p.diametroExteriorMm+' mm candidato',registroSigas:{...f.registroSigas,candidatoMm:p.diametroExteriorMm},estado:'estimado',evidencia:(f.evidencia||'')+' Diámetro del escenario de resultado, sin confirmar producto instalado.'};
  };
- modelo.compra.criterio=opcionesMaterialesGas().reutilizar?'aprovechamiento-compatible':'sin-reutilizacion-explicita';
+ anotarMedidasCompraGas(modelo.compra);modelo.compra.criterio=opcionesMaterialesGas().reutilizar?'aprovechamiento-compatible':'sin-reutilizacion-explicita';
  const copia={...plan,filas:plan.filas.map(proyectar),planes:modelo.compra.canos.map(g=>({...g,minimoTeorico:g.minimoTeorico,compraEstimada:g.tiras,cuplasPropuestas:g.cuplas,plan:g.planCortes,hipotesis:false}))};
  modelo.compra.registrados=modelo.compra.registrados.map(proyectar);
  modelo.compra.confirmados=modelo.compra.registrados.filter(f=>f.estado==='confirmado'&&!f.editado);modelo.compra.estimados=modelo.compra.registrados.filter(f=>f.estado!=='confirmado'||f.editado);
