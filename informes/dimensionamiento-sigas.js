@@ -48,11 +48,15 @@ function entradaPreseleccionSigasGas(){
    if(!geometria||geometria==='recta')continue;
    const vinculadas=inventario.fisicas.filter(p=>p.necesidadTerminal===n.id||config.vinculos?.[p.id]?.necesidadTerminal===n.id);
    if(vinculadas.length)continue;
-   const grupos=inventario.fisicas.filter(p=>p.tipo===geometria&&p.confirmada===true&&!p.conflicto&&p.tramos.length===1&&n.tramos.includes(p.tramos[0])&&p.id!=='referencia-codo19'&&(!atributos?.origenCodoId||p.id===atributos.origenCodoId||p.origenId===atributos.origenCodoId)&&!p.necesidadTerminal&&!config.vinculos?.[p.id]?.necesidadTerminal&&!config.desgloses?.[p.id]);
+   const identidad=atributos?.confirmacionConexion?.identidadFisica;
+   const indiceEnGrupo=p=>{const prefijo=(p.origenId||p.id)+'::pieza:',valor=identidad?.startsWith(prefijo)?Number(identidad.slice(prefijo.length)):NaN;return Number.isSafeInteger(valor)&&valor>=(p.indiceOrigen||0)&&valor<(p.indiceOrigen||0)+p.cantidad?valor:null;};
+   const grupos=inventario.fisicas.filter(p=>p.tipo===geometria&&p.confirmada===true&&!p.conflicto&&p.tramos.length===1&&n.tramos.includes(p.tramos[0])&&p.id!=='referencia-codo19'&&(!atributos?.origenCodoId||p.id===atributos.origenCodoId||p.origenId===atributos.origenCodoId)&&(!identidad||indiceEnGrupo(p)!==null)&&!p.necesidadTerminal&&!config.vinculos?.[p.id]?.necesidadTerminal&&!config.desgloses?.[p.id]);
    if(grupos.length!==1)continue;
-   const grupo=grupos[0];inventario.fisicas=inventario.fisicas.flatMap(p=>p.id!==grupo.id?[p]:[
-    {...p,id:p.cantidad===1?p.id:p.id+'::terminal',cantidad:1,necesidadTerminal:n.id,geometria,automatico:'Conexión terminal de '+n.nombre.replace('Conexión fusión–rosca de ',''),origenId:p.id,cantidadOriginal:p.cantidad,indiceOrigen:0},
-    ...(p.cantidad>1?[{...p,cantidad:p.cantidad-1,origenId:p.id,cantidadOriginal:p.cantidad,indiceOrigen:1}]:[])
+   const grupo=grupos[0],inicio=grupo.indiceOrigen||0,indice=indiceEnGrupo(grupo)??inicio,antes=indice-inicio,despues=grupo.cantidad-antes-1,base={origenId:grupo.origenId||grupo.id,cantidadOriginal:grupo.cantidadOriginal??grupo.cantidad};
+   inventario.fisicas=inventario.fisicas.flatMap(p=>p.id!==grupo.id?[p]:[
+    ...(antes?[{...p,...base,cantidad:antes,indiceOrigen:inicio}]:[]),
+    {...p,...base,id:p.cantidad===1?p.id:p.id+'::terminal'+(indice?':'+indice:''),cantidad:1,necesidadTerminal:n.id,geometria,automatico:'Conexión terminal de '+n.nombre.replace('Conexión fusión–rosca de ',''),indiceOrigen:indice},
+    ...(despues?[{...p,...base,id:antes?p.id+'::resto:'+(indice+1):p.id,cantidad:despues,indiceOrigen:indice+1}]:[])
    ]);
   }
  }
@@ -135,8 +139,8 @@ function registroAccesoriosSigasGas(){
   const candidato=p.tramos.length===1?calculo.filas.find(f=>f.id===p.tramos[0])?.candidato?.exteriorMm:null,rosca=p.necesidadTerminal?entrada.config.terminales?.[p.necesidadTerminal]?.rosca:null;
   const datosFaltantes=[];
   if(p.necesidadTerminal&&pendientes.length){const a=entrada.config.vinculos?.[p.id]?.producto?.atributos||{},atributos=DimensionamientoSigas.deducirTerminal(SIGAS_ED15_2025,{...a,geometria:Object.hasOwn(a,'geometria')?a.geometria:p.geometria},candidato);for(const [k,nombre]of [['geometria','forma de la conexión'],['sexo','sexo de la rosca'],['rosca','medida de rosca']])if(!atributos[k])datosFaltantes.push(nombre);if(!datosFaltantes.length){const opciones=DimensionamientoSigas.opcionesTerminal(SIGAS_ED15_2025,atributos,candidato);if(opciones.length>1)datosFaltantes.push('variante del producto');if(opciones.length===0){const solucion=DimensionamientoSigas.resolverConexion(SIGAS_ED15_2025,atributos,candidato);datosFaltantes.push(...solucion.pendientes);if(solucion.estado==='conjunto')datosFaltantes.push('propuesta de compra sin confirmar: verificar ubicación y pérdidas de las piezas reales');}}}
-  const confirmacion=p.necesidadTerminal&&entrada.config.terminales?.[p.necesidadTerminal]?.confirmacionConexion,filaConfirmada=confirmacion?.confirmada&&SIGAS_ED15_2025.tablas[3].filas.find(f=>f.id===confirmacion.productoId),atributosConfirmados=filaConfirmada&&DimensionamientoSigas.atributosTerminal(filaConfirmada),vigente=filaConfirmada&&['geometria','sexo','rosca','variante'].every(k=>atributosConfirmados?.[k]===entrada.config.terminales[p.necesidadTerminal][k]);
-  return {...p,datosFaltantes,productoConfirmado:vigente?filaConfirmada:null,diametroProductoMm:vigente?filaConfirmada.diametroExteriorM*1000:null,candidatoMm:candidato,roscaRequerida:rosca,usos,pendientes,productoIdentificado:usos.length>0&&pendientes.length===0,nombreCompra:vigente?filaConfirmada.nombreOriginal:productos.length===1?productos[0]:p.necesidadTerminal?(p.geometria==='recta'?'Transición recta fusión–rosca':'Codo 90° terminal fusión–rosca')+(rosca?' · rosca '+rosca+'″':'')+' · producto pendiente':null};
+  const confirmacion=p.necesidadTerminal&&entrada.config.terminales?.[p.necesidadTerminal]?.confirmacionConexion,filaConfirmada=confirmacion?.confirmada&&SIGAS_ED15_2025.tablas[3].filas.find(f=>f.id===confirmacion.productoId),vigente=confirmacionTerminalVigenteSigasGas(entrada.config.terminales?.[p.necesidadTerminal],candidato,filaConfirmada,p);
+  return {...p,datosFaltantes,productoConfirmado:vigente?filaConfirmada:null,diametroProductoMm:vigente?filaConfirmada.diametroExteriorM*1000:null,candidatoMm:candidato,roscaRequerida:rosca,usos,pendientes,productoIdentificado:usos.length>0&&pendientes.length===0,nombreCompraSinConfirmar:productos.length===1?productos[0]:null,nombreCompra:vigente?filaConfirmada.nombreOriginal:productos.length===1?productos[0]:p.necesidadTerminal?(p.geometria==='recta'?'Transición recta fusión–rosca':'Codo 90° terminal fusión–rosca')+(rosca?' · rosca '+rosca+'″':'')+' · producto pendiente':null};
  });
  for(const a of calculo.recorridos.flatMap(r=>r.aportes).filter(a=>a.conjuntoTee))if(!piezas.some(p=>p.id===a.piezaId))piezas.push({id:a.piezaId,origenId:a.piezaId,tipo:'reduccion',cantidad:1,confirmada:true,tramos:[a.tramoId],identidadesFisicas:[a.piezaId],funcion:'reduccion-confirmada-en-tee',productoIdentificado:true,nombreCompra:a.nombre,candidatoMm:a.medidas[1],medidas:a.medidas,codigoCatalogo:a.codigoCatalogo,usos:[a],pendientes:[],datosFaltantes:[]});
  const propuestasCompra=[],vistas=new Set();
@@ -149,6 +153,8 @@ function registroAccesoriosSigasGas(){
 }
 function proyectarRegistroSigasEnMaterialesGas(entrada){
  const registro=registroAccesoriosSigasGas();if(!registro)return entrada;
+ // El escenario ya existente aporta su diámetro; no se vuelve a dimensionar con reglas distintas.
+ const modelo=resultadoPreliminarSigasGas();actualizarConfirmacionesTerminalesSigasGas(registro,modelo?.resultado?.filas||registro.calculo.filas);
  const porOrigen=new Map();for(const p of registro.piezas){if(!porOrigen.has(p.origenId))porOrigen.set(p.origenId,[]);porOrigen.get(p.origenId).push(p);}
  entrada.extras=entrada.extras.flatMap(a=>{
   const ps=porOrigen.get(a.idFisico);if(!ps||ps.reduce((n,p)=>n+p.cantidad,0)!==a.cantidad)return [a];
@@ -969,6 +975,7 @@ function construirResultadoEjercicioSigasGas(cualquierProyecto=false){
  if(r.recorridos.some(t=>!t.equivalenteCompleto)&&!bloqueos.length)bloqueos.push('Inventario del escenario incompleto o inconsistente: revisar cantidades e identidades de accesorios antes de cerrar las pérdidas.');
  if(!pcsValido||!fuentePCS)bloqueos.splice(0,bloqueos.length,...r.errores,pcsValido?'Falta la fuente del poder calorífico ya ingresado; no hay que volver a cargar su valor.':'Falta el poder calorífico para convertir kcal/h a m³/h; ingresarlo una vez con su fuente en los datos técnicos del proyecto.');
  const limpiar=s=>{const etiquetas=new Map([...entrada.inventario.fisicas.map(p=>[p.id,nombrePieza(p.id)]),...porTramo]),escapar=x=>Array.from(x,c=>/[a-zA-Z0-9_-]/.test(c)?c:String.fromCharCode(92)+c).join(''),rx=new RegExp('(^|[^A-Za-z0-9_-])('+[...etiquetas.keys()].sort((a,b)=>b.length-a.length).map(escapar).join('|')+')(?=$|[^A-Za-z0-9_-])','g');return String(s).replace(rx,(_,sep,id)=>sep+etiquetas.get(id)).replace(/presionDisponible/g,'presión disponible').replace(/presionMinima/g,'presión mínima').replace(/perdidaMaxima/g,'pérdida admisible').replace(/tee:nombre:/g,'tee ');};
+ actualizarConfirmacionesTerminalesSigasGas(reg,r.filas);
  const materiales=new Map(),fisicas=new Map();
  for(const ruta of r.recorridos)for(const a of ruta.aportes)if(!fisicas.has(a.piezaId))fisicas.set(a.piezaId,a);
  for(const a of fisicas.values()){const nombre=a.tipo==='tee'?a.nombre.replace(/, flujo.*$/,''):a.nombre,clave=JSON.stringify([a.tipo,nombre,a.diametroExteriorMm,a.medidas||[]]),previa=materiales.get(clave)||{tipo:a.tipo,material:nombre,diametroExteriorMm:a.diametroExteriorMm,medidas:a.medidas||[],piezaIds:[],cantidad:0,unidad:'unidad',estado:reg.piezas.some(p=>p.id===a.piezaId&&p.productoConfirmado?.id===a.id)?'Conexión confirmada; diámetro candidato, sin aprobación normativa':a.tipo==='cupla'?'Uniones del escenario; origen en el resumen':'Pieza del escenario; medidas por verificar'};previa.cantidad+=a.cantidad;previa.piezaIds.push(a.piezaId);materiales.set(clave,previa);}
@@ -1092,28 +1099,43 @@ function renderResultadoEjercicioSigasGas(out){
  const caja=document.createElement('section');caja.className='ejercicio-sigas';caja.innerHTML=InformeProyecto.ejercicioSigas(modelo);const minimos=renderDatosMinimosPreliminarSigasGas(modelo);if(!compactarVistaResultadoSigasGas(caja,minimos,modelo,out.vistaSigasGas)&&minimos){if(caja.insertBefore)caja.insertBefore(minimos,caja.firstChild);else caja.append(minimos);}if(modelo.instalacionPrueba)renderEnsayoCortesIdealGas(caja.querySelector?.('.compra-estimada')||caja,modelo);out.append(caja);
 }
 
+function claveUnidadTerminalSigasGas(p){return p.grupoOriginal?p.id:p.origenId||p.id;}
+function confirmacionTerminalVigenteSigasGas(actual,D,fila,pieza){
+ const c=actual?.confirmacionConexion,a=fila&&DimensionamientoSigas.atributosTerminal(fila);
+ return !!(c?.confirmada&&fila&&c.productoId===fila.id&&Number.isFinite(D)&&c.diametroMm===D&&Math.abs(fila.diametroExteriorM*1000-D)<1e-8&&pieza?.cantidad===1&&pieza.geometria===actual.geometria&&(!c.identidadFisica||pieza.identidadesFisicas?.includes(c.identidadFisica))&&['geometria','sexo','rosca','variante'].every(k=>actual[k]===a?.[k]));
+}
+function actualizarConfirmacionesTerminalesSigasGas(reg,filas){
+ for(const p of reg.piezas.filter(p=>p.necesidadTerminal)){
+  const actual=reg.entradaTecnica.config.terminales?.[p.necesidadTerminal],c=actual?.confirmacionConexion,D=filas.find(f=>p.tramos.includes(f.id))?.candidato?.exteriorMm,fila=c&&SIGAS_ED15_2025.tablas[3].filas.find(f=>f.id===c.productoId),vigente=reg.piezas.filter(q=>q.necesidadTerminal===p.necesidadTerminal).length===1&&confirmacionTerminalVigenteSigasGas(actual,D,fila,p);
+  p.productoConfirmado=vigente?fila:null;p.diametroProductoMm=vigente?D:null;
+  p.nombreCompra=vigente?fila.nombreOriginal:p.nombreCompraSinConfirmar||(p.geometria==='recta'?'Transición recta fusión–rosca':'Codo 90° terminal fusión–rosca')+(p.roscaRequerida?' · rosca '+p.roscaRequerida+'″':'')+' · producto pendiente';
+ }
+}
 // Confirmación atómica sobre el registro terminal existente; no crea otra lista de accesorios.
 function opcionesConexionTerminalSigasGas(necesidad,modelo=resultadoPreliminarSigasGas()){
  const reg=registroAccesoriosSigasGas(),n=reg?.entradaTecnica.inventario.necesidadesTerminales.find(n=>n.id===necesidad);if(!n)return null;
  const actual=proyectoGasActual().calculoSigas?.terminales?.[necesidad]||{},D=modelo?.resultado?.filas.find(f=>n.tramos.includes(f.id))?.candidato?.exteriorMm||reg.calculo.filas.find(f=>n.tramos.includes(f.id))?.candidato?.exteriorMm;
  const opciones=D&&actual.rosca?DimensionamientoSigas.opcionesTerminal(SIGAS_ED15_2025,{rosca:actual.rosca},D):[];
- const reutilizables=[...new Map(reg.entradaTecnica.inventario.fisicas.filter(p=>p.tipo==='codo90'&&p.cantidad>=1&&!p.conflicto&&p.tramos.length===1&&n.tramos.includes(p.tramos[0])&&(!p.necesidadTerminal||p.necesidadTerminal===necesidad)).map(p=>[p.origenId||p.id,p])).values()];
+ const grupos=new Map();for(const p of reg.entradaTecnica.inventario.fisicas.filter(p=>p.tipo==='codo90'&&p.cantidad>=1&&!p.conflicto&&p.tramos.length===1&&n.tramos.includes(p.tramos[0])&&(!p.necesidadTerminal||p.necesidadTerminal===necesidad))){const clave=claveUnidadTerminalSigasGas(p),previa=grupos.get(clave);if(!previa||p.necesidadTerminal===necesidad)grupos.set(clave,p);}const reutilizables=[...grupos.values()];
  const confirmada=actual.confirmacionConexion,seleccionada=opciones.find(f=>f.id===confirmada?.productoId),guardada=JSON.stringify(proyectoGuardadoGas()?.calculoSigas?.terminales?.[necesidad])===JSON.stringify(actual);
- const vigente=!!(seleccionada&&confirmada?.confirmada===true&&confirmada.diametroMm===D&&['geometria','sexo','rosca','variante'].every(k=>actual[k]===DimensionamientoSigas.atributosTerminal(seleccionada)[k]));
+ const vinculadas=reg.entradaTecnica.inventario.fisicas.filter(p=>p.necesidadTerminal===necesidad),vigente=vinculadas.length===1&&confirmacionTerminalVigenteSigasGas(actual,D,seleccionada,vinculadas[0]);
  const estado=vigente?(guardada?'guardada':'solo-sesion'):confirmada?'requiere-confirmacion':'propuesta';
  const sugerida=opciones.find(f=>{const a=DimensionamientoSigas.atributosTerminal(f);return a.geometria===(actual.geometria||'codo90')&&a.sexo===(actual.sexo||'hembra')&&a.variante===(actual.variante||'estandar');})||opciones[0]||null;
  return {n,actual,D,opciones,reutilizables,seleccionada,sugerida,estado,vigente};
 }
 function confirmarConexionTerminalSigasGas(necesidad,productoId,origenCodoId=null){
  const info=opcionesConexionTerminalSigasGas(necesidad),fila=info?.opciones.find(f=>f.id===productoId);if(!fila)return false;
- const atributos=DimensionamientoSigas.atributosTerminal(fila);let origen=null;
+ const atributos=DimensionamientoSigas.atributosTerminal(fila);let origen=null,unidad=null;
  if(atributos.geometria==='codo90'){
-  const compatibles=info.reutilizables.filter(p=>!origenCodoId||p.id===origenCodoId||p.origenId===origenCodoId);
-  if(compatibles.length!==1)return false;origen=compatibles[0].origenId||compatibles[0].id;
+  const referencia=origenCodoId||info.actual.unidadCodoId||info.reutilizables.find(p=>p.necesidadTerminal===necesidad)?.id||info.actual.origenCodoId,exactas=info.reutilizables.filter(p=>p.id===referencia||claveUnidadTerminalSigasGas(p)===referencia),compatibles=exactas.length?exactas:info.reutilizables.filter(p=>!referencia||p.origenId===referencia);
+  if(compatibles.length!==1)return false;unidad=compatibles[0];origen=unidad.origenId||unidad.id;
  }
  const c=proyectoGasActual().calculoSigas||={version:1,vinculos:{}};c.terminales||={};
  const previo=c.terminales[necesidad]||{};c.historialTerminales||=[];c.historialTerminales.push({necesidad,atributos:JSON.parse(JSON.stringify(previo))});
- c.terminales[necesidad]={...previo,...atributos,origenCodoId:origen,confirmacionConexion:{version:1,confirmada:true,productoId,diametroMm:info.D}};
+ // Reutilizar el vínculo individual existente; retirar solo la asociación anterior de esta terminal.
+ c.vinculos||={};for(const v of Object.values(c.vinculos))if(v.necesidadTerminal===necesidad)v.necesidadTerminal=null;
+ if(unidad?.grupoOriginal)c.vinculos[unidad.id]={...c.vinculos[unidad.id],necesidadTerminal:necesidad};
+ c.terminales[necesidad]={...previo,...atributos,origenCodoId:origen,unidadCodoId:unidad?.grupoOriginal?unidad.id:null,confirmacionConexion:{version:2,confirmada:true,productoId,diametroMm:info.D,identidadFisica:unidad?.identidadesFisicas?.[0]||null}};
  const scroll=window.scrollY;const abiertos=Array.from(document.querySelectorAll?.('#resumenPrincipalMaterialesGas details[open]')||[]).map(d=>d.querySelector('summary')?.textContent);
  guardarDatos();calcularMaterialesManualGas();for(const d of document.querySelectorAll?.('#resumenPrincipalMaterialesGas details')||[])if(abiertos.includes(d.querySelector('summary')?.textContent))d.open=true;if(Number.isFinite(scroll))window.scrollTo({top:scroll,behavior:'instant'});
  return true;
@@ -1128,7 +1150,7 @@ function renderConfirmacionConexionTerminalSigasGas(caja,necesidad,modelo){
  for(const f of info.opciones){const o=document.createElement('option');o.value=f.id;o.textContent=f.nombreOriginal+' · LE '+f.longitudEquivalenteM+' m · Tabla 3 p.'+f.pagina;sel.append(o);}
  sel.value=(info.seleccionada||info.sugerida).id;l.append(sel);d.append(l);
  const grupos=info.reutilizables,origen=document.createElement('select');origen.ariaLabel='Codo existente de '+info.n.nombre;
- for(const p of grupos){const o=document.createElement('option');o.value=p.origenId||p.id;o.textContent=(p.cantidad===1?'Una pieza registrada':p.cantidad+' codos registrados')+' · reutilizar uno';origen.append(o);}if(info.actual.origenCodoId)origen.value=info.actual.origenCodoId;
+ for(const p of grupos){const o=document.createElement('option');o.value=claveUnidadTerminalSigasGas(p);o.textContent=(p.numeroUnidad?'Unidad '+p.numeroUnidad+' registrada':p.cantidad===1?'Una pieza registrada':p.cantidad+' codos registrados')+' · reutilizar uno';origen.append(o);}if(info.actual.unidadCodoId||info.actual.origenCodoId)origen.value=info.actual.unidadCodoId||info.actual.origenCodoId;
  if(grupos.length>1){const label=document.createElement('label');label.textContent='Accesorio existente que cumple la conexión';label.append(origen);d.append(label);}
  const fichaSeleccion=document.createElement('p'),nota=document.createElement('p'),b=document.createElement('button');b.type='button';b.textContent='Confirmar conexión registrada';
  const estadoRegistrado=estado.textContent;const actualizar=()=>{estado.textContent=info.seleccionada?.id===sel.value?estadoRegistrado:(info.estado==='requiere-confirmacion'?'Requiere nueva confirmación. ':'')+'Selección provisional; confirmar para actualizar la conexión registrada.';const elegida=info.opciones.find(f=>f.id===sel.value),a=DimensionamientoSigas.atributosTerminal(elegida);fichaSeleccion.textContent=elegida.nombreOriginal+' · LE '+elegida.longitudEquivalenteM+' m · Tabla 3, p.'+elegida.pagina+'.';nota.textContent=a.geometria==='codo90'?'Reutiliza UNO de los codos registrados de este tramo; no agrega codos.':'Transición recta independiente: conserva todos los codos declarados. Si sustituye una transición existente, se mantiene la misma identidad terminal.';b.disabled=a.geometria==='codo90'&&!grupos.length;};sel.onchange=actualizar;actualizar();d.append(fichaSeleccion,nota,b);
