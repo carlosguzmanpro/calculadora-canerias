@@ -1,5 +1,9 @@
 /* Puente de solo lectura: las cantidades se reutilizan; el resultado técnico no cambia materiales. */
-function roscasConfirmadasEjercicioSigasGas(){return proyectoGasActual().referenciaSigas19===true?{'terminal-medidor':'3/4','terminal-Termo':'1/2','terminal-Calefactor':'1/2','terminal-Cocina':'1/2'}:{};}
+function roscasConfirmadasEjercicioSigasGas(){
+ const p=proyectoGasActual(),valores=p.referenciaSigas19===true?{'terminal-medidor':'3/4','terminal-Termo':'1/2','terminal-Calefactor':'1/2','terminal-Cocina':'1/2'}:{};
+ // Se conservan las referencias anteriores salvo una corrección expresa de la rosca física.
+ for(const id of Object.keys(valores)){const a=p.calculoSigas?.terminales?.[id];if(a?.roscaEditadaPorUsuario===true&&typeof a.rosca==='string')valores[id]=a.rosca;}return valores;
+}
 function transicionesRectasDeclaradasSigasGas(){
  if(modulo!=='gas'||CatalogosSistemasGas.identificar(instalacionGas.perfil)!=='sigas')return [];
  const red=redFisicaManualGas(),preparacion=PreparacionDiametrosGas.prepararRed(red,tramos,perfilTecnicoActualGas()),entradas=new Set(Object.values(red.orientacion).map(o=>o.hasta)),raices=[...new Set(Object.values(red.orientacion).map(o=>o.desde))].filter(id=>!entradas.has(id)),mapa=new Map(preparacion.recorridos.map(r=>['terminal-'+r.artefacto,[r.tramos.at(-1)]]));
@@ -17,7 +21,7 @@ function entradaPreseleccionSigasGas(){
  const raices=[...new Set(Object.values(red.orientacion).map(o=>o.desde))].filter(id=>!entradas.has(id));
  inventario.necesidadesTerminales=[];
  if(raices.length===1){const ids=Object.entries(red.orientacion).filter(([,o])=>o.desde===raices[0]).map(([id])=>id);inventario.necesidadesTerminales.push({id:'terminal-medidor',nombre:'Salida roscada del medidor',tramos:ids,recorridos:preparacion.recorridos.map(r=>r.artefacto)});}
- for(const ruta of preparacion.recorridos)inventario.necesidadesTerminales.push({id:'terminal-'+ruta.artefacto,nombre:'Conexión fusión–rosca de '+ruta.artefacto,tramos:ruta.tramos.slice(-1),recorridos:[ruta.artefacto]});
+ for(const ruta of preparacion.recorridos)if(destinosRectasSalidaGas().some(n=>n.id==='terminal-'+ruta.artefacto&&n.tramo===ruta.tramos.at(-1))||tramos.find(t=>t.id===ruta.tramos.at(-1))?.artefacto)inventario.necesidadesTerminales.push({id:'terminal-'+ruta.artefacto,nombre:'Conexión fusión–rosca de '+ruta.artefacto,tramos:ruta.tramos.slice(-1),recorridos:[ruta.artefacto]});
  // El codo autorizado del casillero se mantiene en inventario; no se supone de qué lado del medidor está.
  const entrada=entradaManualMaterialesGas(false,true),casillero=estadoCodoCasilleroGas(entrada);
  if(casillero.adicional===1&&!inventario.fisicas.some(p=>p.id==='casillero-medidor:codo90'))inventario.fisicas.push({id:'casillero-medidor:codo90',tipo:'codo90',cantidad:1,confirmada:true,tramos:[],equivalenteM:null});
@@ -465,7 +469,7 @@ function guardarDatoTerminalSigasGas(necesidad,campo,valor){
  const e=entradaPreseleccionSigasGas(),n=e?.inventario.necesidadesTerminales.find(n=>n.id===necesidad);if(!n||!['geometria','sexo','rosca','variante','codoBase'].includes(campo)||typeof valor!=='string')return false;
  if(valor&&!(campo==='codoBase'?['HH','MH'].includes(valor):SIGAS_ED15_2025.tablas[3].filas.some(f=>DimensionamientoSigas.atributosTerminal(f)?.[campo]===valor)))return false;
  const abiertos=Array.from(document.querySelectorAll?.('#resumenPrincipalMaterialesGas details[open]')||[]).map(d=>d.claveTerminalSigas||d.querySelector('summary')?.textContent),scrollAnterior=window.scrollY;
- const c=proyectoGasActual().calculoSigas||={version:1,vinculos:{}};c.terminales||={};const a=c.terminales[necesidad]||={};const confirmada=roscasConfirmadasEjercicioSigasGas()[necesidad];if(campo==='rosca'&&confirmada&&valor!==confirmada)return false;if(confirmada){if(a.rosca&&a.rosca!==confirmada){c.historialTerminales||=[];c.historialTerminales.push({necesidad,atributos:{...a}});}a.rosca=confirmada;}if(campo==='geometria'&&a.geometria!==valor){c.historialTerminales||=[];c.historialTerminales.push({necesidad,atributos:{...a}});delete a.variante;}a[campo]=valor;guardarDatos();calcularMaterialesManualGas();for(const d of document.querySelectorAll?.('#resumenPrincipalMaterialesGas details')||[])if(abiertos.includes(d.claveTerminalSigas||d.querySelector('summary')?.textContent))d.open=true;if(Number.isFinite(scrollAnterior))window.scrollTo({top:scrollAnterior,behavior:'instant'});return true;
+ const c=proyectoGasActual().calculoSigas||={version:1,vinculos:{}};c.terminales||={};const a=c.terminales[necesidad]||={};const confirmada=roscasConfirmadasEjercicioSigasGas()[necesidad];if(campo==='rosca'&&proyectoGasActual().referenciaSigas19===true)a.roscaEditadaPorUsuario=true;if(confirmada){if(a.rosca&&a.rosca!==confirmada){c.historialTerminales||=[];c.historialTerminales.push({necesidad,atributos:{...a}});}a.rosca=confirmada;}if(campo==='geometria'&&a.geometria!==valor){c.historialTerminales||=[];c.historialTerminales.push({necesidad,atributos:{...a}});delete a.variante;}a[campo]=valor;guardarDatos();calcularMaterialesManualGas();for(const d of document.querySelectorAll?.('#resumenPrincipalMaterialesGas details')||[])if(abiertos.includes(d.claveTerminalSigas||d.querySelector('summary')?.textContent))d.open=true;if(Number.isFinite(scrollAnterior))window.scrollTo({top:scrollAnterior,behavior:'instant'});return true;
 }
 function renderDatosTerminalesSigasGas(caja,p,entrada,vector,avanzado=false){
  if(!avanzado&&renderVarianteCompactaSigasGas(caja,p)){const d=document.createElement('details'),s=document.createElement('summary');s.textContent='Corregir datos de conexión (opcional)';d.append(s);renderDatosTerminalesSigasGas(d,p,entrada,vector,true);caja.append(d);return;}
@@ -1149,7 +1153,7 @@ function renderConfirmacionConexionTerminalSigasGas(caja,necesidad,modelo){
  const d=document.createElement('details'),s=document.createElement('summary');d.className='sigas-confirmacion-terminal';d.claveTerminalSigas=necesidad;d.open=info.estado!=='guardada';d.dataset&&(d.dataset.estado=info.estado);
  s.textContent=necesidad==='terminal-medidor'?'Conexión del medidor':'Conexión de '+info.n.nombre.replace('Conexión fusión–rosca de ','');d.append(s);
  const estado=document.createElement('p');estado.setAttribute?.('role','status');estado.textContent=info.estado==='guardada'?'Conexión confirmada y guardada.':info.estado==='solo-sesion'?'Confirmada solo en esta sesión; no pudo guardarse.':info.estado==='requiere-confirmacion'?'Requiere nueva confirmación: revisar medidas, forma o variante.':'Pieza sugerida provisional; no confirma la conexión real.';d.append(estado);
- if(!info.opciones.length){const p=document.createElement('p');p.textContent='Falta diámetro/rosca o no hay pieza directa documentada. Se conservan las propuestas de adaptación y pérdidas pendientes.';d.append(p);renderAdaptacionMedidorSigasGas(d,info);caja.append(d);return;}
+ if(!info.opciones.length){const p=document.createElement('p');p.textContent=pendientesConexionSalidaGas(necesidad,info.D).join(' ');d.append(p);renderAdaptacionMedidorSigasGas(d,info);caja.append(d);return;}
  const l=document.createElement('label'),sel=document.createElement('select');l.textContent='Pieza SIGAS para '+info.n.nombre;sel.ariaLabel=l.textContent;
  for(const [geometria,nombre]of [['codo90','Codo roscado'],['recta','Conexión recta roscada']]){
   const grupo=document.createElement('optgroup');grupo.label=nombre;const filas=info.opciones.filter(f=>DimensionamientoSigas.atributosTerminal(f).geometria===geometria);
