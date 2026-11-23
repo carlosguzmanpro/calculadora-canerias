@@ -541,6 +541,7 @@ function entradaManualMaterialesGas(sinSugerencias=false,sinRegistroTecnico=fals
  for(const t of entrada.tramos)t.accesorios=[];
  entrada.extras=[...registros.filter(r=>!omitidos.has(r.id)).map(r=>({...r.a,idFisico:r.id,confirmado:r.a.deducido?false:true})),...nuevos].map(a=>({...a,nodo:a.tipo==='tee'&&a.nodo?nodoConciliacionGas(a.nodo).replace(/^n:/,''):a.nodo}));
  if(typeof transicionesRectasDeclaradasSigasGas==='function')for(const a of transicionesRectasDeclaradasSigasGas())if(!entrada.extras.some(e=>e.idFisico===a.idFisico))entrada.extras.push(a);
+ const adaptacion=typeof componentesAdaptacionMedidorSigasGas==='function'?componentesAdaptacionMedidorSigasGas():[];if(adaptacion.length){const ids=new Set(adaptacion.map(a=>a.idFisico));entrada.extras=entrada.extras.filter(a=>!ids.has(a.idFisico));entrada.extras.push(...adaptacion);}
  entrada.manualDirecto={avisos,ceros,pendientes};
  const posicionesCuplas=tramos.filter(t=>t.detalle&&(Number.isFinite(t.detalle.metrosFinal)||t.detalle.accesorios?.some(a=>Number.isFinite(a.metrosAntes)))).map(t=>({id:t.id,estado:t.detalle.estado,metrosFinal:t.detalle.metrosFinal??null,accesorios:(t.detalle.accesorios||[]).map(a=>({tipo:a.tipo,metrosAntes:a.metrosAntes??null,salida:a.salida??null}))}));
  if(posicionesCuplas.length)entrada.manualDirecto.posicionesCuplas=posicionesCuplas;

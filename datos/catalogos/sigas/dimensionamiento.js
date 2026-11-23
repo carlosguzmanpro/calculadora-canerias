@@ -206,6 +206,7 @@
      if(!enRuta){if(!ubicaciones.length&&!vinculo?.recorridos)pendiente({...p,tramos:ubicaciones},'ubicación respecto del recorrido/medidor pendiente.');continue;}
      if(p.tipo==='reduccion'&&Object.values(config.tees||{}).some(t=>t.conjunto?.confirmado&&Object.values(t.conjunto.reutilizadas||{}).includes(p.id)))continue;
      if(aplicadas.has(p.id))continue;aplicadas.add(p.id);
+     if(p.tipo==='reduccion-roscada-terminal'){pendiente(p,p.motivoPendiente||'Reducción roscada apta para gas por verificar; equivalencia no documentada, nunca cero.');continue;}
      if(p.conflicto||p.confirmada!==true){pendiente({...p,tramos:ubicaciones},'identidad/cantidad por verificar.');continue;}
      let a=vinculo?.porRecorrido?.[r.artefacto]||vinculo?.producto;
      if(p.tipo==='tee'&&config.tees?.[p.id]){
@@ -267,6 +268,7 @@
     }
     // Son necesidades, no piezas adicionales: sin vínculo físico inequívoco no atribuirles cero.
     for(const terminal of inventario.necesidadesTerminales||[])if(terminal.recorridos?.includes(r.artefacto)){
+     if(terminal.componentesCompuestos?.length===2&&new Set(terminal.componentesCompuestos).size===2&&terminal.componentesCompuestos.some(id=>piezas.get(id)?.tipo==='transicion')&&terminal.componentesCompuestos.some(id=>piezas.get(id)?.tipo==='reduccion-roscada-terminal')&&terminal.componentesCompuestos.every(id=>piezas.get(id)?.tramos.some(t=>terminal.tramos.includes(t))))continue;
      const vinculadas=[...piezas.values()].filter(p=>p.necesidadTerminal===terminal.id&&p.cantidad===1);
      if(vinculadas.length===1&&aportes.some(a=>a.piezaId===vinculadas[0].id)&&!perdidasPendientes.some(p=>p.piezaId===vinculadas[0].id))continue;
      pendiente({id:terminal.id,tipo:'conexion-terminal',cantidad:null,tramos:terminal.tramos},vinculadas.length===1&&config.terminales?.[terminal.id]?.rosca?terminal.nombre+': producto o variante pendiente del accesorio ya contabilizado; rosca '+config.terminales[terminal.id].rosca+'″ registrada. No se añade otra pieza ni se supone pérdida cero.':terminal.nombre+': identificar producto, medidas y si está incluido en los accesorios declarados; no se añade un codo ni se supone pérdida cero.');
