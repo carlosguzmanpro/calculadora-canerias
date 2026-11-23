@@ -891,7 +891,7 @@ function prepararTerminalesPreliminaresSigasGas(reg,entrada,hipotesis){
  return {...reg,piezas,entradaTecnica:entrada};
 }
 function resultadoPreliminarSigasGas(){
- try{return construirResultadoEjercicioSigasGas(true);}catch(e){return modulo==='gas'&&CatalogosSistemasGas.identificar(instalacionGas.perfil)==='sigas'?{error:true,bloqueos:['No se pudo ejecutar la comprobación SIGAS; se conservan los materiales y datos registrados. Revisar catálogo y condiciones del proyecto.']}:null;}
+ try{const m=construirResultadoEjercicioSigasGas(true);return typeof alcanceRectasSalidaSigasGas==='function'?alcanceRectasSalidaSigasGas(m):m;}catch(e){return modulo==='gas'&&CatalogosSistemasGas.identificar(instalacionGas.perfil)==='sigas'?{error:true,bloqueos:['No se pudo ejecutar la comprobación SIGAS; se conservan los materiales y datos registrados. Revisar catálogo y condiciones del proyecto.']}:null;}
 }
 // Política informativa de interfaz, no coeficiente de seguridad ni regla normativa.
 function margenInformativoSigasGas(caudal,capacidad){

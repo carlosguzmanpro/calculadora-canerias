@@ -60,6 +60,10 @@ function modeloInformeActual(){
    d.comparacionIdentificada=reg.calculo.filas.map(f=>({tramo:f.tramo,diametro:f.candidato?.exteriorMm??null,longitud:f.longitudConsultaM,capacidad:f.candidato?.capacidadM3h??null,pendientes:f.perdidasPendientesTramo.length}));
   }
  }
+ if(gas){d.conexionesRectasSalida=informeRectasSalidaGas(d.ejercicioSigas);d.dimensionamientoFusiogas=alcanceRectasSalidaFusiogasGas(d.dimensionamientoFusiogas,d.conexionesRectasSalida);if(d.conexionesRectasSalida.pendientes.length){
+  d.resumen=d.resumen.map(s=>s.replace('capacidad tabular a 10 mmca, densidad de referencia 0,65: comprobada.','capacidad tabular del conjunto anterior: parcial; conexiones rectas declaradas pendientes.'));
+  for(const f of d.planilla||[])f.diametro=String(f.diametro).replace('calculado y comprobado por tabla SIGAS','candidato del cálculo previo; conexión recta pendiente');
+ }}
  return d;
 }
 function prepararInformeActual(){
