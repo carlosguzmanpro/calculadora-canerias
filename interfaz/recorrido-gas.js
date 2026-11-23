@@ -630,7 +630,7 @@ let proyectoRectasFormularioGas=null;
 function renderRectasSalidaGuiadoGas(){
  if(!recorridoGasUI||modulo!=='gas')return;
  let etiqueta=$('campoRectasSalidaGas');if(!etiqueta){etiqueta=document.createElement('label');etiqueta.id='campoRectasSalidaGas';etiqueta.textContent='Conexiones rectas de salida';const n=document.createElement('input');n.id='conexionesRectasSalida';n.type='number';n.min='0';n.max='200';n.step='1';n.inputMode='numeric';n.ariaLabel='Conexiones rectas de salida';etiqueta.append(n);n.addEventListener('input',()=>{estadoRecorridoProyectoGas().rectasBorrador=n.value;guardarDatos();});}
- $('agregarAccesoriosGas').querySelector('.gas-campos-manuales').append(etiqueta);
+ etiqueta.hidden=false;etiqueta.classList.remove('oculto');$('agregarAccesoriosGas').querySelector('.gas-campos-manuales').append(etiqueta);
  if(proyectoRectasFormularioGas!==proyectoGasActual()){proyectoRectasFormularioGas=proyectoGasActual();$('conexionesRectasSalida').value=estadoRecorridoProyectoGas().rectasBorrador||'';}
  let panel=$('rectasSalidaConexionesGas');if(!panel){panel=document.createElement('section');panel.id='rectasSalidaConexionesGas';$('guiadoPaso7').insertBefore(panel,$('calcularCaneriaGas'));}
  if(recorridoGasUI.paso===7){
@@ -653,10 +653,11 @@ function instalarConexionesRectasSalidaGas(){
  const envolver=(nombre,fn)=>{const original=window[nombre];if(typeof original==='function')window[nombre]=function(...args){return fn.call(this,original,args);};};
  envolver('organizarSeisPantallasGuiadoGas',function(o,args){const r=o.apply(this,args);renderRectasSalidaGuiadoGas();return r;});
  envolver('renderConexionesGuiadoGas',function(o,args){const r=o.apply(this,args);renderRectasSalidaGuiadoGas();return r;});
- envolver('editarTramo',function(o,args){const r=o.apply(this,args);renderRectasSalidaGuiadoGas();$('conexionesRectasSalida').value=registroRectasSalidaGas(tramos[editandoTramo].id)?.cantidad??'';if(recorridoGasUI)recorridoGasUI.formularioInicial={id:tramos[editandoTramo].id,firma:firmaFormularioTramoGuiadoGas()};return r;});
- envolver('cancelarEdicionTramo',function(o,args){const r=o.apply(this,args);if($('conexionesRectasSalida'))$('conexionesRectasSalida').value='';return r;});
- envolver('agregarTramo',function(o,args){if(modulo!=='gas')return o.apply(this,args);const valor=$('conexionesRectasSalida').value,previo=editandoTramo>=0?tramos[editandoTramo]:null,anteriores=new Set(tramos.map(t=>t.id));if(valor&&!/^\d+$/.test(valor)||Number(valor)>200){$('mensajeCargaManualGas').textContent='Conexiones rectas de salida: ingresá un entero entre 0 y 200.';return;}
+ envolver('editarTramo',function(o,args){const r=o.apply(this,args);if(modulo!=='gas'||!recorridoGasUI)return r;renderRectasSalidaGuiadoGas();$('conexionesRectasSalida').value=registroRectasSalidaGas(tramos[editandoTramo].id)?.cantidad??'';if(recorridoGasUI)recorridoGasUI.formularioInicial={id:tramos[editandoTramo].id,firma:firmaFormularioTramoGuiadoGas()};return r;});
+ envolver('cancelarEdicionTramo',function(o,args){const r=o.apply(this,args);if(modulo==='gas'&&recorridoGasUI&&$('conexionesRectasSalida'))$('conexionesRectasSalida').value='';return r;});
+ envolver('agregarTramo',function(o,args){if(modulo!=='gas'||!recorridoGasUI||!$('conexionesRectasSalida'))return o.apply(this,args);const valor=$('conexionesRectasSalida').value,previo=editandoTramo>=0?tramos[editandoTramo]:null,anteriores=new Set(tramos.map(t=>t.id));if(valor&&!/^\d+$/.test(valor)||Number(valor)>200){$('mensajeCargaManualGas').textContent='Conexiones rectas de salida: ingresá un entero entre 0 y 200.';return;}
   const r=o.apply(this,args),t=previo?tramos.find(t=>t.id===previo.id):tramos.find(t=>!anteriores.has(t.id));if(t&&t!==previo&&!$('hasta').value){if(!previo||valor!==''||registroRectasSalidaGas(t.id).explicito)guardarCantidadRectasSalidaGas(t.id,valor);estadoRecorridoProyectoGas().rectasBorrador='';$('conexionesRectasSalida').value='';guardarDatos();}return r;
  });
+ envolver('desmontarRecorridoGuiadoGas',function(o,args){const r=o.apply(this,args);if($('campoRectasSalidaGas')){$('campoRectasSalidaGas').hidden=true;$('campoRectasSalidaGas').classList.add('oculto');}return r;});
  renderRectasSalidaGuiadoGas();if($('conexionesRectasSalida'))$('conexionesRectasSalida').value=estadoRecorridoProyectoGas().rectasBorrador||'';
 }
